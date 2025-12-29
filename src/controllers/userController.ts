@@ -160,6 +160,7 @@ export const signupWithOTP = async (
       .json({ message: "OTP sent successfully" });
     return;
   } catch (err: any) {
+    console.log(err);
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", err });
