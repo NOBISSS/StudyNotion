@@ -2,7 +2,7 @@ import { type NextFunction,type Request,type Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import { StatusCode } from "../types.js";
-export const verifyJWT = async (
+export const userMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction

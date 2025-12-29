@@ -1,11 +1,14 @@
 import bcrypt from "bcrypt";
 import { type CookieOptions, type Request, type Response } from "express";
+import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
 import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
+import { Profile } from "../models/ProfileModel.js";
 import User from "../models/UserModel.js";
 import { type Handler, StatusCode } from "../types.js";
-import jwt from "jsonwebtoken";
+import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
+import type { UploadApiResponse } from "cloudinary";
 
 const userInputSchema = z.object({
   firstName: z
@@ -274,6 +277,7 @@ export const signupOTPVerification: Handler = async (
         },
       }
     );
+    await Profile.create({ userId: createdUser._id });
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       secure: true,
@@ -523,7 +527,7 @@ export const forgetWithOTP: Handler = async (req, res): Promise<void> => {
     });
     const newOtp = await OTP.create({
       email,
-      otp:Number(otp),
+      otp: Number(otp),
       subject: "OTP for forget password",
       type: "forget",
       firstName: user.firstName,
@@ -620,16 +624,14 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
     if (!updateProfileInput.success) {
       res.status(StatusCode.InputError).json({
         message:
-          updateProfileInput.error?.issues[0]?.message || "Invalid profile data",
+          updateProfileInput.error?.issues[0]?.message ||
+          "Invalid profile data",
       });
       return;
     }
-    const {firstName, lastName} = updateProfileInput.data;
+    const { firstName, lastName } = updateProfileInput.data;
     try {
-      await User.updateOne(
-        { _id: userId },
-        { $set: { firstName, lastName } }
-      );
+      await User.updateOne({ _id: userId }, { $set: { firstName, lastName } });
       const updatedUser = await User.findById(userId).select(
         "-password -refreshToken"
       );
@@ -676,13 +678,55 @@ export const banUser: Handler = async (req, res): Promise<void> => {
     if (!user) {
       res.status(StatusCode.NotFound).json({ message: "User not found" });
       return;
-    }   
+    }
     await user.updateOne({ isBanned: !user.isBanned });
     res
       .status(StatusCode.Success)
-      .json({ message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully` });
+      .json({
+        message: `Account ${
+          user.isBanned ? "unbanned" : "banned"
+        } successfully`,
+      });
     return;
   } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};
+export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
+  let avatar:UploadApiResponse | null = null;
+  try {
+    const profilePicture = req.file;
+    if (!profilePicture) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Profile picture is required" });
+      return;
+    }
+    avatar = await uploadToCloudinary(
+      Buffer.from(profilePicture.buffer)
+    );
+    if (!avatar) {
+      res
+        .status(StatusCode.ServerError)
+        .json({ message: "Failed to upload avatar" });
+      return;
+    }
+    const profile = await Profile.findOneAndUpdate(
+      { userId: req.userId! },
+      { profilePicture: avatar.secure_url },
+      { new: true }
+    );
+
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Profile photo updated successfully" });
+    return;
+  } catch (err) {
+    if(avatar)
+    await deleteFromCloudinary(avatar.public_id);
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", error: err });
