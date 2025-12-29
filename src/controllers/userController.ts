@@ -176,10 +176,10 @@ export const resenedOTP: Handler = async (req, res): Promise<void> => {
       return;
     }
     const isUserExists = await User.findOne({ email: otpData.email });
-    if (isUserExists) {
+    if (!isUserExists) {
       res
         .status(StatusCode.DocumentExists)
-        .json({ message: "User already exists with this email" });
+        .json({ message: "User does not exist" });
       return;
     }
     const isOTPExists = await OTP.findOne({
