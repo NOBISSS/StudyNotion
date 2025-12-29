@@ -14,23 +14,6 @@ const userInputSchema = z.object({
   lastName: z
     .string()
     .min(3, { message: "Last name must be atleast 3 characters" }),
-  accountType: z.string(),
-  email: z.email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .regex(/[A-Z]/, {
-      message: "Pasword should include atlist 1 uppercasecharacter",
-    })
-    .regex(/[a-z]/, {
-      message: "Pasword should include atlist 1 lowercasecharacter",
-    })
-    .regex(/[0-9]/, {
-      message: "Pasword should include atlist 1 number character",
-    })
-    .regex(/[^A-Za-z0-9]/, {
-      message: "Pasword should include atlist 1 special character",
-    })
-    .min(8, { message: "Password length shouldn't be less than 8" }),
 });
 const forgetInputSchema = z.object({
   otp: z.number(),
@@ -627,6 +610,43 @@ export const forgetOTPVerification: Handler = async (
       message: err.message || "Something went wrong from our side",
       err,
     });
+    return;
+  }
+};
+export const updateProfile: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const updateProfileInput = userInputSchema.safeParse(req.body);
+    if (!updateProfileInput.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+          updateProfileInput.error?.issues[0]?.message || "Invalid profile data",
+      });
+      return;
+    }
+    const {firstName, lastName} = updateProfileInput.data;
+    try {
+      await User.updateOne(
+        { _id: userId },
+        { $set: { firstName, lastName } }
+      );
+      const updatedUser = await User.findById(userId).select(
+        "-password -refreshToken"
+      );
+      res
+        .status(StatusCode.Success)
+        .json({ message: "Profile updated successfully", user: updatedUser });
+      return;
+    } catch (error) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "Username already taken" });
+      return;
+    }
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
     return;
   }
 };
