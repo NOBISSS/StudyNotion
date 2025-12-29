@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
-    changePassword,
-    getUser,
-    refreshTokens,
+  changePassword,
+  forgetOTPVerification,
+  forgetWithOTP,
+  getUser,
+  refreshTokens,
   resenedOTP,
   signin,
   signout,
@@ -14,6 +16,8 @@ export const userRouter = Router();
 
 userRouter.route("/signup").post(signupWithOTP);
 userRouter.route("/signup/verify").post(signupOTPVerification);
+userRouter.route("/forgotpassword").post(forgetWithOTP);
+userRouter.route("/forgotpassword/verify").post(forgetOTPVerification);
 userRouter.route("/resendotp").post(resenedOTP);
 userRouter.route("/login").post(signin);
 

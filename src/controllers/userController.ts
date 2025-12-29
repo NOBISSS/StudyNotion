@@ -503,3 +503,130 @@ export const changePassword: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
+export const forgetWithOTP: Handler = async (req, res): Promise<void> => {
+  try {
+    const userEmail = z.email({ message: "Invalid email address" });
+    const userInput = userEmail.safeParse(req.body.email);
+    if (!userInput.success) {
+      res.status(StatusCode.InputError).json({
+        message: userInput.error?.issues[0]?.message || "Invalid email address",
+      });
+      return;
+    }
+    const email = userInput.data;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "User not found with this email" });
+      return;
+    }
+    const isOTPExists = await OTP.findOne({ email, type: "forget" })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (isOTPExists) {
+      const otpCreatedTime = new Date(isOTPExists.createdAt);
+      if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
+        res
+          .status(StatusCode.DocumentExists)
+          .json({ message: "Wait for 2 minutes before sending new OTP" });
+        return;
+      }
+    }
+    const otp = otpGenerator.generate(6, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+    const newOtp = await OTP.create({
+      email,
+      otp:Number(otp),
+      subject: "OTP for forget password",
+      type: "forget",
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+    if (!newOtp) {
+      res.status(500).json({ message: "OTP not generated" });
+      return;
+    }
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 10 * 60000, // 10 minutes
+    };
+    res
+      .cookie(
+        "otp_data",
+        { email: newOtp.email, type: "forget" },
+        cookieOptions
+      )
+      .status(200)
+      .json({ message: "OTP sent successfully" });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const forgetOTPVerification: Handler = async (
+  req,
+  res
+): Promise<void> => {
+  try {
+    const parsedInput = forgetInputSchema.safeParse(req.body);
+    if (!parsedInput.success) {
+      res.status(StatusCode.NotFound).json({
+        message:
+          parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+      });
+      return;
+    }
+    const { otp, password } = parsedInput.data;
+    const { email } = req.cookies.otp_data;
+    const IsOtpExists = await OTP.find({ email: email, type: "forget" })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (IsOtpExists.length === 0 || otp !== IsOtpExists[0]?.otp) {
+      res.status(StatusCode.NotFound).json({
+        message: "Invalid OTP",
+      });
+      return;
+    }
+    await OTP.deleteMany({ email, type: "forget" });
+    await User.updateOne(
+      { email },
+      {
+        $set: {
+          password: bcrypt.hashSync(password, 10),
+        },
+      }
+    );
+    // const cookieOptions: CookieOptions = {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   path: "/",
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // };
+    res
+      .status(StatusCode.Success)
+      // .cookie("accessToken", accessToken, cookieOptions)
+      // .cookie("refreshToken", refreshToken, cookieOptions)
+      .json({
+        message: "password changed successfully",
+        // user,
+      });
+    return;
+  } catch (err: any) {
+    res.status(StatusCode.ServerError).json({
+      message: err.message || "Something went wrong from our side",
+      err,
+    });
+    return;
+  }
+};
