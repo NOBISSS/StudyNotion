@@ -1,84 +1,94 @@
 import bcrypt from "bcrypt";
-import { type CookieOptions } from "express";
+import { type CookieOptions, type Request, type Response } from "express";
 import otpGenerator from "otp-generator";
+import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
-
 import User from "../models/UserModel.js";
 import { type Handler, StatusCode } from "../types.js";
 
-// const userInputSchema = z.object({
-//   username: z
-//     .string()
-//     .min(3, { message: "Username must be atleast 3 characters" }),
-//   password: z
-//     .string()
-//     .regex(/[A-Z]/, {
-//       message: "Pasword should include atlist 1 uppercasecharacter",
-//     })
-//     .regex(/[a-z]/, {
-//       message: "Pasword should include atlist 1 lowercasecharacter",
-//     })
-//     .regex(/[0-9]/, {
-//       message: "Pasword should include atlist 1 number character",
-//     })
-//     .regex(/[^A-Za-z0-9]/, {
-//       message: "Pasword should include atlist 1 special character",
-//     })
-//     .min(8, { message: "Password length shouldn't be less than 8" }),
-// });
-// const forgetInputSchema = z.object({
-//   otp: z.number(),
-//   password: z
-//     .string()
-//     .regex(/[A-Z]/, {
-//       message: "Pasword should include atlist 1 uppercasecharacter",
-//     })
-//     .regex(/[a-z]/, {
-//       message: "Pasword should include atlist 1 lowercasecharacter",
-//     })
-//     .regex(/[0-9]/, {
-//       message: "Pasword should include atlist 1 number character",
-//     })
-//     .regex(/[^A-Za-z0-9]/, {
-//       message: "Pasword should include atlist 1 special character",
-//     })
-//     .min(8, { message: "Password length shouldn't be less than 8" }),
-// });
-// const signupInputSchema = z.object({
-//   username: z
-//     .string()
-//     .min(3, { message: "Username must be atleast 3 characters" }),
-//   email: z.string().email({ message: "Invalid email address" }),
-//   password: z
-//     .string()
-//     .regex(/[A-Z]/, {
-//       message: "Pasword should include atlist 1 uppercasecharacter",
-//     })
-//     .regex(/[a-z]/, {
-//       message: "Pasword should include atlist 1 lowercasecharacter",
-//     })
-//     .regex(/[0-9]/, {
-//       message: "Pasword should include atlist 1 number character",
-//     })
-//     .regex(/[^A-Za-z0-9]/, {
-//       message: "Pasword should include atlist 1 special character",
-//     })
-//     .min(8, { message: "Password length shouldn't be less than 8" }),
-// });
-export const signupWithOTP: Handler = async (req, res): Promise<void> => {
+const userInputSchema = z.object({
+  firstName: z
+    .string()
+    .min(3, { message: "First name must be atleast 3 characters" }),
+  lastName: z
+    .string()
+    .min(3, { message: "Last name must be atleast 3 characters" }),
+  accountType: z.string(),
+  email: z.email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .regex(/[A-Z]/, {
+      message: "Pasword should include atlist 1 uppercasecharacter",
+    })
+    .regex(/[a-z]/, {
+      message: "Pasword should include atlist 1 lowercasecharacter",
+    })
+    .regex(/[0-9]/, {
+      message: "Pasword should include atlist 1 number character",
+    })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Pasword should include atlist 1 special character",
+    })
+    .min(8, { message: "Password length shouldn't be less than 8" }),
+});
+const forgetInputSchema = z.object({
+  otp: z.number(),
+  password: z
+    .string()
+    .regex(/[A-Z]/, {
+      message: "Pasword should include atlist 1 uppercasecharacter",
+    })
+    .regex(/[a-z]/, {
+      message: "Pasword should include atlist 1 lowercasecharacter",
+    })
+    .regex(/[0-9]/, {
+      message: "Pasword should include atlist 1 number character",
+    })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Pasword should include atlist 1 special character",
+    })
+    .min(8, { message: "Password length shouldn't be less than 8" }),
+});
+const signupInputSchema = z.object({
+  firstName: z
+    .string()
+    .min(3, { message: "First name must be atleast 3 characters" }),
+  lastName: z
+    .string()
+    .min(3, { message: "Last name must be atleast 3 characters" }),
+  accountType: z.string(),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .regex(/[A-Z]/, {
+      message: "Pasword should include atlist 1 uppercasecharacter",
+    })
+    .regex(/[a-z]/, {
+      message: "Pasword should include atlist 1 lowercasecharacter",
+    })
+    .regex(/[0-9]/, {
+      message: "Pasword should include atlist 1 number character",
+    })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Pasword should include atlist 1 special character",
+    })
+    .min(8, { message: "Password length shouldn't be less than 8" }),
+});
+export const signupWithOTP = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const userInput = signupInputSchema.safeParse(req.body);
     if (!userInput.success) {
       res.status(StatusCode.InputError).json({
-        message:
-          userInput.error.errors[0].message || "Username/Password required",
+        message: userInput.error.issues?.[0]?.message || "Signup data required",
       });
       return;
     }
-    const { email, password, username } = userInput.data;
-    const isUsernameAvailable = await User.findOne({
-      $or: [{ username }, { email }],
-    });
+    const { email, password, firstName, lastName, accountType } =
+      userInput.data;
+    const isUsernameAvailable = await User.findOne({ email });
     if (isUsernameAvailable) {
       res
         .status(StatusCode.DocumentExists)
@@ -104,7 +114,9 @@ export const signupWithOTP: Handler = async (req, res): Promise<void> => {
           otp: isOTPExists.otp,
           subject: "OTP for user signup",
           password: bcrypt.hashSync(password, 10),
-          username,
+          firstName,
+          lastName,
+          accountType,
           type: "signup",
         });
         res
@@ -125,10 +137,12 @@ export const signupWithOTP: Handler = async (req, res): Promise<void> => {
     });
     const newOtp = await OTP.create({
       email,
-      otp,
+      otp: Number(otp),
       subject: "OTP for user signup",
       password: bcrypt.hashSync(password, 10),
-      username,
+      firstName,
+      lastName,
+      accountType,
       type: "signup",
     });
     if (!newOtp) {
@@ -192,10 +206,12 @@ export const resenedOTP: Handler = async (req, res): Promise<void> => {
     });
     const newOtp = await OTP.create({
       email: otpData.email,
-      otp,
+      otp: Number(otp),
       subject: `OTP for user ${otpData.type}`,
       password: isOTPExists?.password || "",
-      username: isOTPExists?.username || "",
+      firstName: isOTPExists?.firstName || "",
+      lastName: isOTPExists?.lastName || "",
+      accountType: isOTPExists?.accountType || "",
       type: otpData.type,
       createdAt: new Date(),
     });
@@ -247,10 +263,11 @@ export const signupOTPVerification: Handler = async (
       return;
     }
     const newUser = await User.create({
-      username: IsOtpExists[0].username,
+      firstName: IsOtpExists[0].firstName || "",
+      lastName: IsOtpExists[0].lastName || "",
+      accountType: IsOtpExists[0].accountType || "",
       email,
-      password: IsOtpExists[0].password,
-      method: "normal",
+      password: IsOtpExists[0].password || "",
     });
     const createdUser = await User.findById(newUser._id).select(
       "-password -refreshToken"
