@@ -1,6 +1,14 @@
-const router=require("express").Router();
-const upload=require("../middlewares/upload");
-router.post("/signup",upload.single("photo"));
-router.post("/login");
-router.post("/password");
-router.post("/logout");
+import { Router } from "express";
+import {
+  resenedOTP,
+  signupOTPVerification,
+  signupWithOTP,
+} from "../controllers/userController.js";
+export const userRouter = Router();
+
+userRouter.route("/signup").post(signupWithOTP);
+userRouter.route("/signup/verify").post(signupOTPVerification);
+userRouter.route("/resendotp").post(resenedOTP);
+userRouter.post("/login");
+userRouter.post("/password");
+userRouter.post("/logout");
