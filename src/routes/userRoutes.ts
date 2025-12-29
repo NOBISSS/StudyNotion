@@ -1,6 +1,6 @@
 const router=require("express").Router();
-
-router.post("/signup");
+const upload=require("../middlewares/upload");
+router.post("/signup",upload.single("photo"));
 router.post("/login");
 router.post("/password");
 router.post("/logout");
