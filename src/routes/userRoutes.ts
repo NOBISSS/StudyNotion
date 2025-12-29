@@ -20,6 +20,6 @@ userRouter.route("/login").post(signin);
 userRouter.use(verifyJWT);
 
 userRouter.route("/logout").post(signout);
-userRouter.route("/password").post(changePassword);
+userRouter.route("/password").put(changePassword);
 userRouter.route("/refreshtoken").post(refreshTokens);
 userRouter.route("/getuser").get(getUser);
