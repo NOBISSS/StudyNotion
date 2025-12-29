@@ -1,4 +1,5 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 import cookieParser from "cookie-parser";
 import express from "express";
 import { userRouter } from "./routes/userRoutes.js";
