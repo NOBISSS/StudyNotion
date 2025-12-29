@@ -650,3 +650,25 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
+export const deleteAccount: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    await Content.deleteMany({ userId });
+    await Link.deleteMany({ userId });
+    await Embedding.deleteMany({ userId });
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Account deleted successfully" });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};

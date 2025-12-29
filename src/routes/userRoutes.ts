@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   changePassword,
+  deleteAccount,
   forgetOTPVerification,
   forgetWithOTP,
   getUser,
@@ -29,3 +30,4 @@ userRouter.route("/password").put(changePassword);
 userRouter.route("/updateprofile").put(updateProfile);
 userRouter.route("/refreshtoken").post(refreshTokens);
 userRouter.route("/getuser").get(getUser);
+userRouter.route("/deleteaccount").delete(deleteAccount);
