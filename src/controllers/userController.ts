@@ -5,6 +5,7 @@ import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
 import User from "../models/UserModel.js";
 import { type Handler, StatusCode } from "../types.js";
+import jwt from "jsonwebtoken";
 
 const userInputSchema = z.object({
   firstName: z
@@ -311,6 +312,194 @@ export const signupOTPVerification: Handler = async (
       message: err.message || "Something went wrong from our side",
       err,
     });
+    return;
+  }
+};
+export const signin: Handler = async (req, res): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+    if (email === "") {
+      res.status(StatusCode.InputError).json({
+        message: "Email is required",
+      });
+      return;
+    }
+    const user = await User.findOne({
+      email: email,
+    });
+    if (!user) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "User doesn't exist" });
+      return;
+    }
+    if (password === "") {
+      res.status(StatusCode.InputError).json({
+        message: "Password is required",
+      });
+      return;
+    }
+    const isPasswordCorrect = user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      res.status(StatusCode.InputError).json({ message: "Invalid password" });
+      return;
+    }
+    const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: <"none">"none",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    };
+    res
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .status(StatusCode.Success)
+      .json({ message: "signin successfull", user });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside" });
+  }
+};
+export const getUser: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId).select("-password -refreshToken");
+    res
+      .status(StatusCode.Success)
+      .json({ message: "user data fetched success", user });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: err.message || "Something went wrong from ourside" });
+  }
+};
+export const refreshTokens: Handler = async (req, res): Promise<void> => {
+  try {
+    const IRefreshToken = req.cookies?.refreshToken;
+    if (!IRefreshToken) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "Refresh token is empty" });
+      return;
+    }
+    const decodedToken = jwt.verify(
+      IRefreshToken,
+      <string>process.env.JWT_REFRESH_TOKEN_SECRET
+    );
+    if (!decodedToken) {
+      res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });
+      return;
+    }
+    //@ts-ignore
+    const user = await User.findById(decodedToken._id);
+    if (!user) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "Invalid refresh Token" });
+      return;
+    }
+    const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: <"none">"none",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    };
+    res
+      .cookie("accessToken", accessToken, cookieOptions)
+      .status(StatusCode.Success)
+      .json({ message: "Access token refreshed" });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.Unauthorized)
+      .json({ message: err.message || "Something went wrong from ourside" });
+  }
+};
+export const signout: Handler = async (req, res): Promise<void> => {
+  try {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: <"none">"none",
+      path: "/",
+      maxAge: 0, // 1 day
+    };
+    res
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
+      .status(StatusCode.Success)
+      .json({ message: "user signout success" });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: err.message || "Something went wrong from ourside" });
+  }
+};
+const changePasswordInputSchema = z.object({
+  oldPassword: z.string({ error: "Old password is required" }),
+  newPassword: z
+    .string()
+    .min(8, { message: "New Password length shouldn't be less than 8" })
+    .regex(/[A-Z]/, {
+      message: "New Pasword should include atlist 1 uppercasecharacter",
+    })
+    .regex(/[a-z]/, {
+      message: "New Pasword should include atlist 1 lowercasecharacter",
+    })
+    .regex(/[0-9]/, {
+      message: "New Pasword should include atlist 1 number character",
+    })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "New Pasword should include atlist 1 special character",
+    }),
+});
+export const changePassword: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const parsedPasswords = changePasswordInputSchema.safeParse(req.body);
+    if (!parsedPasswords.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+          parsedPasswords.error?.issues[0]?.message || "Username is required",
+      });
+      return;
+    }
+    const { oldPassword, newPassword } = parsedPasswords.data;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    const isOldPasswordCorrect = user.comparePassword(oldPassword);
+    if (!isOldPasswordCorrect) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Old password is incorrect" });
+      return;
+    }
+    await User.updateOne(
+      { _id: userId },
+      { $set: { password: bcrypt.hashSync(newPassword, 10) } }
+    );
+    const updatedUser = await User.findById(userId).select(
+      "-password -refreshToken"
+    );
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Profile updated successfully", user: updatedUser });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
     return;
   }
 };
