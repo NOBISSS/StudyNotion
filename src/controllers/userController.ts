@@ -1,11 +1,18 @@
 import bcrypt from "bcrypt";
+import type { UploadApiResponse } from "cloudinary";
 import { type CookieOptions, type Request, type Response } from "express";
+import jwt from "jsonwebtoken";
+import type { Types } from "mongoose";
 import otpGenerator from "otp-generator";
 import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
+import { Profile } from "../models/ProfileModel.js";
 import User from "../models/UserModel.js";
 import { type Handler, StatusCode } from "../types.js";
-import jwt from "jsonwebtoken";
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinaryUpload.js";
 
 const userInputSchema = z.object({
   firstName: z
@@ -14,23 +21,6 @@ const userInputSchema = z.object({
   lastName: z
     .string()
     .min(3, { message: "Last name must be atleast 3 characters" }),
-  accountType: z.string(),
-  email: z.email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .regex(/[A-Z]/, {
-      message: "Pasword should include atlist 1 uppercasecharacter",
-    })
-    .regex(/[a-z]/, {
-      message: "Pasword should include atlist 1 lowercasecharacter",
-    })
-    .regex(/[0-9]/, {
-      message: "Pasword should include atlist 1 number character",
-    })
-    .regex(/[^A-Za-z0-9]/, {
-      message: "Pasword should include atlist 1 special character",
-    })
-    .min(8, { message: "Password length shouldn't be less than 8" }),
 });
 const forgetInputSchema = z.object({
   otp: z.number(),
@@ -74,6 +64,10 @@ const signupInputSchema = z.object({
       message: "Pasword should include atlist 1 special character",
     })
     .min(8, { message: "Password length shouldn't be less than 8" }),
+});
+const signinInputSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string(),
 });
 export const signupWithOTP = async (
   req: Request,
@@ -177,10 +171,10 @@ export const resenedOTP: Handler = async (req, res): Promise<void> => {
       return;
     }
     const isUserExists = await User.findOne({ email: otpData.email });
-    if (!isUserExists) {
+    if (isUserExists) {
       res
         .status(StatusCode.DocumentExists)
-        .json({ message: "User does not exist" });
+        .json({ message: "User already exists with this email" });
       return;
     }
     const isOTPExists = await OTP.findOne({
@@ -292,6 +286,7 @@ export const signupOTPVerification: Handler = async (
         },
       }
     );
+    await Profile.create({ userId: createdUser._id });
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       secure: true,
@@ -318,26 +313,25 @@ export const signupOTPVerification: Handler = async (
 };
 export const signin: Handler = async (req, res): Promise<void> => {
   try {
-    const { email, password } = req.body;
-    if (email === "") {
+    const userInput = signinInputSchema.safeParse(req.body);
+    if (!userInput.success) {
       res.status(StatusCode.InputError).json({
-        message: "Email is required",
+        message: userInput.error.issues?.[0]?.message || "Signin data required",
       });
       return;
     }
-    const user = await User.findOne({
-      email: email,
-    });
+    const { email, password } = userInput.data;
+    const user = await User.findOne({ email });
     if (!user) {
       res
         .status(StatusCode.DocumentExists)
         .json({ message: "User doesn't exist" });
       return;
     }
-    if (password === "") {
-      res.status(StatusCode.InputError).json({
-        message: "Password is required",
-      });
+    if (user.isBanned) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "User is banned, Contact support" });
       return;
     }
     const isPasswordCorrect = user.comparePassword(password);
@@ -369,9 +363,16 @@ export const getUser: Handler = async (req, res): Promise<void> => {
   try {
     const userId = req.userId;
     const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    const userProfile = await Profile.findOne({
+      userId: userId as Types.ObjectId,
+    });
     res
       .status(StatusCode.Success)
-      .json({ message: "user data fetched success", user });
+      .json({ message: "user data fetched success", user, userProfile });
     return;
   } catch (err: any) {
     res
@@ -495,9 +496,245 @@ export const changePassword: Handler = async (req, res): Promise<void> => {
     );
     res
       .status(StatusCode.Success)
-      .json({ message: "Profile updated successfully", user: updatedUser });
+      .json({ message: "Password updated successfully", user: updatedUser });
     return;
   } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};
+export const forgetWithOTP: Handler = async (req, res): Promise<void> => {
+  try {
+    const userEmail = z.email({ message: "Invalid email address" });
+    const userInput = userEmail.safeParse(req.body.email);
+    if (!userInput.success) {
+      res.status(StatusCode.InputError).json({
+        message: userInput.error?.issues[0]?.message || "Invalid email address",
+      });
+      return;
+    }
+    const email = userInput.data;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "User not found with this email" });
+      return;
+    }
+    const isOTPExists = await OTP.findOne({ email, type: "forget" })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (isOTPExists) {
+      const otpCreatedTime = new Date(isOTPExists.createdAt);
+      if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
+        res
+          .status(StatusCode.DocumentExists)
+          .json({ message: "Wait for 2 minutes before sending new OTP" });
+        return;
+      }
+    }
+    const otp = otpGenerator.generate(6, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+    const newOtp = await OTP.create({
+      email,
+      otp: Number(otp),
+      subject: "OTP for forget password",
+      type: "forget",
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+    if (!newOtp) {
+      res.status(500).json({ message: "OTP not generated" });
+      return;
+    }
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 10 * 60000, // 10 minutes
+    };
+    res
+      .cookie(
+        "otp_data",
+        { email: newOtp.email, type: "forget" },
+        cookieOptions
+      )
+      .status(200)
+      .json({ message: "OTP sent successfully" });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const forgetOTPVerification: Handler = async (
+  req,
+  res
+): Promise<void> => {
+  try {
+    const parsedInput = forgetInputSchema.safeParse(req.body);
+    if (!parsedInput.success) {
+      res.status(StatusCode.NotFound).json({
+        message:
+          parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+      });
+      return;
+    }
+    const { otp, password } = parsedInput.data;
+    const { email } = req.cookies.otp_data;
+    const IsOtpExists = await OTP.find({ email: email, type: "forget" })
+      .sort({ createdAt: -1 })
+      .limit(1);
+    if (IsOtpExists.length === 0 || otp !== IsOtpExists[0]?.otp) {
+      res.status(StatusCode.NotFound).json({
+        message: "Invalid OTP",
+      });
+      return;
+    }
+    await OTP.deleteMany({ email, type: "forget" });
+    await User.updateOne(
+      { email },
+      {
+        $set: {
+          password: bcrypt.hashSync(password, 10),
+        },
+      }
+    );
+    // const cookieOptions: CookieOptions = {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   path: "/",
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // };
+    res
+      .status(StatusCode.Success)
+      // .cookie("accessToken", accessToken, cookieOptions)
+      // .cookie("refreshToken", refreshToken, cookieOptions)
+      .json({
+        message: "password changed successfully",
+        // user,
+      });
+    return;
+  } catch (err: any) {
+    res.status(StatusCode.ServerError).json({
+      message: err.message || "Something went wrong from our side",
+      err,
+    });
+    return;
+  }
+};
+export const updateProfile: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const updateProfileInput = userInputSchema.safeParse(req.body);
+    if (!updateProfileInput.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+          updateProfileInput.error?.issues[0]?.message ||
+          "Invalid profile data",
+      });
+      return;
+    }
+    const { firstName, lastName } = updateProfileInput.data;
+    try {
+      await User.updateOne({ _id: userId }, { $set: { firstName, lastName } });
+      const updatedUser = await User.findById(userId).select(
+        "-password -refreshToken"
+      );
+      res
+        .status(StatusCode.Success)
+        .json({ message: "Profile updated successfully", user: updatedUser });
+      return;
+    } catch (error) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "Username already taken" });
+      return;
+    }
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};
+export const deleteAccount: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Account deleted successfully" });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};
+export const banUser: Handler = async (req, res): Promise<void> => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    await user.updateOne({ isBanned: !user.isBanned });
+    res.status(StatusCode.Success).json({
+      message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully`,
+    });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+};
+export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
+  let avatar: UploadApiResponse | null = null;
+  try {
+    const profilePicture = req.file;
+    if (!profilePicture) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Profile picture is required" });
+      return;
+    }
+    avatar = await uploadToCloudinary(Buffer.from(profilePicture.buffer));
+    if (!avatar) {
+      res
+        .status(StatusCode.ServerError)
+        .json({ message: "Failed to upload avatar" });
+      return;
+    }
+    const profile = await Profile.findOneAndUpdate(
+      { userId: req.userId! },
+      { profilePicture: avatar.secure_url },
+      { new: true }
+    );
+
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Profile photo updated successfully" });
+    return;
+  } catch (err) {
+    if (avatar) await deleteFromCloudinary(avatar.public_id);
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", error: err });

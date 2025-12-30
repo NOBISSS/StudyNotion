@@ -2,8 +2,8 @@ import { model, Schema } from "mongoose";
 import { sendMail } from "../utils/mailer.js";
 
 const OTPSchema = new Schema({
-  firstName: { type: String, required: true, trim: true },
-  lastName: { type: String, required: true, trim: true },
+  firstName: { type: String, trim: true },
+  lastName: { type: String, trim: true },
   password: { type: String },
   accountType: {
     type: String,
