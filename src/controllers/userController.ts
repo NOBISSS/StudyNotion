@@ -17,10 +17,18 @@ import {
 const userInputSchema = z.object({
   firstName: z
     .string()
-    .min(3, { message: "First name must be atleast 3 characters" }),
+    .min(3, { message: "First name must be atleast 3 characters" })
+    .optional(),
   lastName: z
     .string()
-    .min(3, { message: "Last name must be atleast 3 characters" }),
+    .min(3, { message: "Last name must be atleast 3 characters" })
+    .optional(),
+  about: z.string().optional(),
+  contactNumber: z.number().optional(),
+  gender: z.enum(["male", "female", "other"]).optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  birthdate: z.date().optional(),
 });
 const forgetInputSchema = z.object({
   otp: z.number(),
@@ -644,15 +652,41 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
       });
       return;
     }
-    const { firstName, lastName } = updateProfileInput.data;
+    const {
+      firstName,
+      lastName,
+      contactNumber,
+      gender,
+      city,
+      country,
+      birthdate,
+      about,
+    } = updateProfileInput.data;
     try {
       await User.updateOne({ _id: userId }, { $set: { firstName, lastName } });
+      const updatedProfile = await Profile.updateOne(
+        { userId: userId as Types.ObjectId },
+        {
+          $set: {
+            about,
+            contactNumber,
+            gender,
+            city,
+            country,
+            birthdate,
+          },
+        }
+      );
       const updatedUser = await User.findById(userId).select(
         "-password -refreshToken"
       );
       res
         .status(StatusCode.Success)
-        .json({ message: "Profile updated successfully", user: updatedUser });
+        .json({
+          message: "Profile updated successfully",
+          user: updatedUser,
+          profile: updatedProfile,
+        });
       return;
     } catch (error) {
       res
