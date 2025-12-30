@@ -1,14 +1,18 @@
 import bcrypt from "bcrypt";
+import type { UploadApiResponse } from "cloudinary";
 import { type CookieOptions, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
+import type { Types } from "mongoose";
 import otpGenerator from "otp-generator";
 import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
 import { Profile } from "../models/ProfileModel.js";
 import User from "../models/UserModel.js";
 import { type Handler, StatusCode } from "../types.js";
-import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-import type { UploadApiResponse } from "cloudinary";
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary,
+} from "../utils/cloudinaryUpload.js";
 
 const userInputSchema = z.object({
   firstName: z
@@ -60,6 +64,10 @@ const signupInputSchema = z.object({
       message: "Pasword should include atlist 1 special character",
     })
     .min(8, { message: "Password length shouldn't be less than 8" }),
+});
+const signinInputSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string(),
 });
 export const signupWithOTP = async (
   req: Request,
@@ -304,26 +312,25 @@ export const signupOTPVerification: Handler = async (
 };
 export const signin: Handler = async (req, res): Promise<void> => {
   try {
-    const { email, password } = req.body;
-    if (email === "") {
+    const userInput = signinInputSchema.safeParse(req.body);
+    if (!userInput.success) {
       res.status(StatusCode.InputError).json({
-        message: "Email is required",
+        message: userInput.error.issues?.[0]?.message || "Signin data required",
       });
       return;
     }
-    const user = await User.findOne({
-      email: email,
-    });
+    const { email, password } = userInput.data;
+    const user = await User.findOne({ email });
     if (!user) {
       res
         .status(StatusCode.DocumentExists)
         .json({ message: "User doesn't exist" });
       return;
     }
-    if (password === "") {
-      res.status(StatusCode.InputError).json({
-        message: "Password is required",
-      });
+    if (user.isBanned) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "User is banned, Contact support" });
       return;
     }
     const isPasswordCorrect = user.comparePassword(password);
@@ -355,9 +362,16 @@ export const getUser: Handler = async (req, res): Promise<void> => {
   try {
     const userId = req.userId;
     const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      res.status(StatusCode.NotFound).json({ message: "User not found" });
+      return;
+    }
+    const userProfile = await Profile.findOne({
+      userId: userId as Types.ObjectId,
+    });
     res
       .status(StatusCode.Success)
-      .json({ message: "user data fetched success", user });
+      .json({ message: "user data fetched success", user, userProfile });
     return;
   } catch (err: any) {
     res
@@ -481,7 +495,7 @@ export const changePassword: Handler = async (req, res): Promise<void> => {
     );
     res
       .status(StatusCode.Success)
-      .json({ message: "Profile updated successfully", user: updatedUser });
+      .json({ message: "Password updated successfully", user: updatedUser });
     return;
   } catch (err) {
     res
@@ -680,13 +694,9 @@ export const banUser: Handler = async (req, res): Promise<void> => {
       return;
     }
     await user.updateOne({ isBanned: !user.isBanned });
-    res
-      .status(StatusCode.Success)
-      .json({
-        message: `Account ${
-          user.isBanned ? "unbanned" : "banned"
-        } successfully`,
-      });
+    res.status(StatusCode.Success).json({
+      message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully`,
+    });
     return;
   } catch (err) {
     res
@@ -696,7 +706,7 @@ export const banUser: Handler = async (req, res): Promise<void> => {
   }
 };
 export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
-  let avatar:UploadApiResponse | null = null;
+  let avatar: UploadApiResponse | null = null;
   try {
     const profilePicture = req.file;
     if (!profilePicture) {
@@ -705,9 +715,7 @@ export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
         .json({ message: "Profile picture is required" });
       return;
     }
-    avatar = await uploadToCloudinary(
-      Buffer.from(profilePicture.buffer)
-    );
+    avatar = await uploadToCloudinary(Buffer.from(profilePicture.buffer));
     if (!avatar) {
       res
         .status(StatusCode.ServerError)
@@ -725,8 +733,7 @@ export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
       .json({ message: "Profile photo updated successfully" });
     return;
   } catch (err) {
-    if(avatar)
-    await deleteFromCloudinary(avatar.public_id);
+    if (avatar) await deleteFromCloudinary(avatar.public_id);
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", error: err });
