@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose, { Schema } from "mongoose";  
 
-const userSchema = new Schema(
+export const userSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },

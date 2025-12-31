@@ -82,19 +82,15 @@ export const createCourse: Handler = async (req, res) => {
       tag,
     } = parsedCourseData.data;
     const course = await Course.create({
-      courseName: courseName as string,
-      description: description as string,
+      courseName,
+      description,
       instructorId: userId as Types.ObjectId,
       instructorName: `${instructor?.firstName} ${instructor?.lastName}`,
-      categoryId: new Types.ObjectId(categoryId),
-      typeOfCourse: typeOfCourse as "Free" | "Paid",
+      categoryId,
+      typeOfCourse,
       coursePlan: coursePlan ? new Types.ObjectId(coursePlan) : null,
       originalPrice: price || 0,
-      level: level as
-        | "Beginner"
-        | "Intermediate"
-        | "Advance"
-        | "Beginner-to-Advance",
+      level,
       tag: tag || [],
       thumbnailUrl: thumbnailImage.secure_url,
     });

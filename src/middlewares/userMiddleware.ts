@@ -1,4 +1,4 @@
-import { type NextFunction,type Request,type Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import { StatusCode } from "../types.js";
@@ -24,6 +24,7 @@ export const userMiddleware = async (
       return;
     }
     req.userId = user._id;
+    req.user = user;
     next();
   } catch (err: any) {
     res
@@ -33,58 +34,62 @@ export const userMiddleware = async (
   }
 };
 
-exports.isStudent=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
-        if(req.user.accountType!=="Student"){
-            return res.status(401).json({
-                success:false,
-                message:"THIS IS PROTECTED ROUTE"
-            })
-        }
-        next();
-    }catch(error){
-         console.log(error)
-        return res.status(401).json({
-                success:false,
-                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
-            })
+export const isStudent = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (req.user.accountType !== "student") {
+      return res.status(StatusCode.Unauthorized).json({
+        success: false,
+        message: "Only students are allowed to access this route",
+      });
     }
-}
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(StatusCode.Unauthorized).json({
+      success: false,
+      message: "Something went wrong from our side",
+    });
+  }
+};
 
 //INSTRUCTOR
-exports.isInstructor=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
-        if(req.user.accountType!=="Instructor"){
-            return res.status(401).json({
-                success:false,
-                message:"THIS IS PROTECTED ROUTE"
-            })
-        }
-        next();
-    }catch(error){
-        console.log(error)
-        return res.status(401).json({
-                success:false,
-                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
-            })
+export const isInstructor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (req.user.accountType !== "instructor") {
+      return res.status(StatusCode.Unauthorized).json({
+        success: false,
+        message: "Only instructors are allowed to access this route",
+      });
     }
-}
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(StatusCode.Unauthorized).json({
+      success: false,
+      message: "Something went wrong from our side",
+    });
+  }
+};
 
 //ADMIN
-exports.isAdmin=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
-        if(req.user.accountType!=="Admin"){
-            return res.status(401).json({
-                success:false,
-                message:"THIS IS PROTECTED ROUTE"
-            })
-        }
-        next();
-    }catch(error){
-        console.log(error)
-        return res.status(401).json({
-                success:false,
-                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
-            })
+export const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (req.user.accountType !== "admin") {
+      return res.status(StatusCode.Unauthorized).json({
+        success: false,
+        message: "Only admins are allowed to access this route",
+      });
     }
-}
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(StatusCode.Unauthorized).json({
+      success: false,
+      message: "Something went wrong from our side",
+    });
+  }
+};
