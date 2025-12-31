@@ -13,6 +13,7 @@ import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinaryUpload.js";
+import { emailQueue } from "../queue/emailQueue.js";
 
 const userInputSchema = z.object({
   firstName: z
@@ -152,6 +153,9 @@ export const signupWithOTP = async (
       res.status(500).json({ message: "OTP not generated" });
       return;
     }
+
+    //await emailQueue.add("send-otp-email", { email, otp })
+
     res
       .cookie(
         "otp_data",
@@ -162,6 +166,7 @@ export const signupWithOTP = async (
       .json({ message: "OTP sent successfully" });
     return;
   } catch (err: any) {
+    console.log(err);
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", err });
@@ -229,6 +234,9 @@ export const resenedOTP: Handler = async (req, res): Promise<void> => {
       path: "/",
       maxAge: 20 * 60000, // 20 minutes
     };
+
+    //await emailQueue.add("send-otp-email", { email:otpData.email, otp })
+
     res
       .cookie(
         "otp_data",
