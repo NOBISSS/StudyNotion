@@ -32,3 +32,59 @@ export const userMiddleware = async (
     return;
   }
 };
+
+exports.isStudent=async(req,res,next)=>{
+    try{
+        if(req.user.accountType!=="Student"){
+            return res.status(401).json({
+                success:false,
+                message:"THIS IS PROTECTED ROUTE"
+            })
+        }
+        next();
+    }catch(error){
+         console.log(error)
+        return res.status(401).json({
+                success:false,
+                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
+            })
+    }
+}
+
+//INSTRUCTOR
+exports.isInstructor=async(req,res,next)=>{
+    try{
+        if(req.user.accountType!=="Instructor"){
+            return res.status(401).json({
+                success:false,
+                message:"THIS IS PROTECTED ROUTE"
+            })
+        }
+        next();
+    }catch(error){
+        console.log(error)
+        return res.status(401).json({
+                success:false,
+                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
+            })
+    }
+}
+
+//ADMIN
+exports.isAdmin=async(req,res,next)=>{
+    try{
+        if(req.user.accountType!=="Admin"){
+            return res.status(401).json({
+                success:false,
+                message:"THIS IS PROTECTED ROUTE"
+            })
+        }
+        next();
+    }catch(error){
+        console.log(error)
+        return res.status(401).json({
+                success:false,
+                message:"SOMETHING WENT WRONG WHILE VALIDATING THE TOKEN"
+            })
+    }
+}
