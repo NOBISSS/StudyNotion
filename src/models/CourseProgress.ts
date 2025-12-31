@@ -1,17 +1,34 @@
-const mongoose=require("mongoose");
-const {Schema,Model}=mongoose;
+import { model, Schema, Types } from "mongoose";
 
-const courseProgressSchema=new Schema({
-    courseID:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Course"
+const courseProgressSchema = new Schema(
+  {
+    userId: {
+      type: Types.ObjectId,
+      ref: "User",
     },
-    completedVideos:[
-        {
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"SubSection"
-        }
-    ]
-});
+    progress: {
+      type: Number,
+      default: 0,
+    },
+    completed: {
+      type: Boolean,
+      default: false,
+    },
+    completionDate: {
+      type: Date,
+    },
+    courseId: {
+      type: Types.ObjectId,
+      ref: "Course",
+    },
+    completedVideos: [
+      {
+        type: Types.ObjectId,
+        ref: "SubSection",
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-module.exports=mongoose.model("CourseProgress",courseProgressSchema)
+const CourseProgress = model("CourseProgress", courseProgressSchema);
