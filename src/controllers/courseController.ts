@@ -59,6 +59,18 @@ export const createCourse: Handler = async (req, res) => {
       Buffer.from(thumbnail.buffer)
     );
     const instructor = await User.findById(userId);
+    if (!instructor) {
+      res
+        .status(StatusCode.NotFound)
+        .json({ message: "Instructor not found" });
+      return;
+    }
+    if (instructor.accountType !== "instructor") {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "User is not authorized to create a course" });
+      return;
+    }
     const {
       categoryId,
       courseName,
