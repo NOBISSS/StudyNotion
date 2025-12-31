@@ -1,7 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 const coursePlanSchema = new Schema(
   {
-    coursePlanId: { type: String, required: true, unique: true },
     categoryId: { type: Types.ObjectId, ref: "Category", required: true },
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
     instructorId: { type: Types.ObjectId, ref: "User", required: true },

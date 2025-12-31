@@ -3,6 +3,7 @@ dotenv.config();
 import cookieParser from "cookie-parser";
 import express from "express";
 import { userRouter } from "./routes/userRoutes.js";
+import { courseRouter } from "./routes/courseRoutes.js";
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users",userRouter)
+app.use("/api/courses",courseRouter)
 
 export default app;
