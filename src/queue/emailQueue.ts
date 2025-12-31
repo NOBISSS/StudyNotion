@@ -18,7 +18,7 @@ new Worker(
     async(job)=>{
         const {email,otp}=job.data;
         const html=OtpTemp(otp);
-        await sendMail(email,"Your Brainly OTP Code",html);
+        await sendMail(email,"Your StudyNotion OTP Code",html);
         console.log(`OTP email sent to ${email}`);
     },
     {
