@@ -51,3 +51,25 @@ export const EnrollInCourse: Handler = async (req, res) => {
     return;
   }
 };
+export const getAllEnrollments: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const user = req.user;
+
+    const courseEnrollments = await CourseEnrollment.find({
+      userId: new Types.ObjectId(userId),
+    })
+      .populate("courseId")
+      .sort({ createdAt: -1 });
+    res.status(StatusCode.Success).json({
+      message: "Course enrollment created successfully",
+      courseEnrollments,
+    });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};

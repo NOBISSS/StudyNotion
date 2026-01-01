@@ -4,6 +4,7 @@ import express from "express";
 import { categoryRouter } from "./routes/categoryRoutes.js";
 import { courseRouter } from "./routes/courseRoutes.js";
 import { userRouter } from "./routes/userRoutes.js";
+import { courseEnrollmentRouter } from "./routes/courseEnrollmentRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -19,5 +20,6 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);
+app.use("/api/enrollments", courseEnrollmentRouter);
 
 export default app;

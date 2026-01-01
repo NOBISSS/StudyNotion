@@ -13,7 +13,7 @@ import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinaryUpload.js";
-import { emailQueue } from "../queue/emailQueue.js";
+// import { emailQueue } from "../queue/emailQueue.js";
 
 const userInputSchema = z.object({
   firstName: z
