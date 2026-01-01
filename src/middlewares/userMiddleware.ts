@@ -34,7 +34,7 @@ export const userMiddleware = async (
   }
 };
 
-export const isStudent = async (
+export const isStudent = async (  
   req: Request,
   res: Response,
   next: NextFunction

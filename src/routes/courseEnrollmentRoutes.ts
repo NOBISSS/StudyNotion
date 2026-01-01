@@ -1,11 +1,9 @@
 import { Router } from "express";
 import {
-  categoryPageDetails,
-  createCategory,
-  getAllCategory,
-} from "../controllers/categoryController.js";
-import { isAdmin, userMiddleware } from "../middlewares/userMiddleware.js";
-import { EnrollInCourse, getAllEnrollments } from "../controllers/courseEnrollmentController.js";
+  EnrollInCourse,
+  getAllEnrollments,
+} from "../controllers/courseEnrollmentController.js";
+import { userMiddleware } from "../middlewares/userMiddleware.js";
 
 const courseEnrollmentRouter = Router();
 
