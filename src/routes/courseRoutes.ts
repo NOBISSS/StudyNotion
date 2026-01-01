@@ -8,9 +8,9 @@ const courseRouter = Router();
 courseRouter.use(userMiddleware);
 
 courseRouter.route("/create").post(upload.single("thumbnail"),createCourse);
-courseRouter.route("/delete/:id").delete();
-courseRouter.route("/getcourse/:id").get();
-courseRouter.route("/update/:id").post();
+// courseRouter.route("/delete/:id").delete();
+// courseRouter.route("/getcourse/:id").get();
+// courseRouter.route("/update/:id").post();
 
 
 export { courseRouter };

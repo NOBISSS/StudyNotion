@@ -33,7 +33,7 @@ export const userMiddleware = async (
   }
 };
 
-exports.isStudent=async(req:Request,res:Response,next:NextFunction)=>{
+export const isStudent=async(req:Request,res:Response,next:NextFunction)=>{
     try{
         if(req.user.accountType!=="Student"){
             return res.status(401).json({
@@ -52,7 +52,7 @@ exports.isStudent=async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 //INSTRUCTOR
-exports.isInstructor=async(req:Request,res:Response,next:NextFunction)=>{
+export const isInstructor=async(req:Request,res:Response,next:NextFunction)=>{
     try{
         if(req.user.accountType!=="Instructor"){
             return res.status(401).json({
@@ -71,7 +71,7 @@ exports.isInstructor=async(req:Request,res:Response,next:NextFunction)=>{
 }
 
 //ADMIN
-exports.isAdmin=async(req:Request,res:Response,next:NextFunction)=>{
+export const isAdmin=async(req:Request,res:Response,next:NextFunction)=>{
     try{
         if(req.user.accountType!=="Admin"){
             return res.status(401).json({

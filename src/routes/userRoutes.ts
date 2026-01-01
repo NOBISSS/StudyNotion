@@ -6,7 +6,7 @@ import {
   forgetWithOTP,
   getUser,
   refreshTokens,
-  resenedOTP,
+  resendOTP,
   signin,
   signout,
   signupOTPVerification,
@@ -16,13 +16,18 @@ import {
 } from "../controllers/userController.js";
 import { upload } from "../middlewares/upload.js";
 import { userMiddleware } from "../middlewares/userMiddleware.js";
+import { verifyOtpSession } from "../middlewares/verifyOtpSession.js";
 export const userRouter = Router();
+// export const router=Router();
+// router.post("/signup",signupWithOTP);
+// router.post("/signup/verify",verifyOtpSession,signupOTPVerification);
+// router.post("/resendotp",verifyOtpSession,resendOTP); 
 
-userRouter.route("/signup").post(signupWithOTP);
-userRouter.route("/signup/verify").post(signupOTPVerification);
+// userRouter.route("/signup").post(signupWithOTP);
+// userRouter.route("/signup/verify").post(signupOTPVerification);
 userRouter.route("/forgotpassword").post(forgetWithOTP);
 userRouter.route("/forgotpassword/verify").post(forgetOTPVerification);
-userRouter.route("/resendotp").post(resenedOTP);
+//userRouter.route("/resendotp").post(resendOTP);
 userRouter.route("/login").post(signin);
 
 userRouter.use(userMiddleware);

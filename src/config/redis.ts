@@ -4,7 +4,8 @@ const redis=new Redis({
     host:"localhost",
     port:6379,
     maxRetriesPerRequest:null,
-    lazyConnect:true
+    lazyConnect:true,
+    retryStrategy:(times)=>Math.min(times*50,2000)
 });
 
 export default redis
