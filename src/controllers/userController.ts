@@ -349,6 +349,12 @@ export const signin: Handler = async (req, res): Promise<void> => {
         .json({ message: "User is banned, Contact support" });
       return;
     }
+    if (user.isDeleted) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "User is deleted, Contact support" });
+      return;
+    }
     const isPasswordCorrect = user.comparePassword(password);
     if (!isPasswordCorrect) {
       res.status(StatusCode.InputError).json({ message: "Invalid password" });
@@ -687,13 +693,11 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
       const updatedUser = await User.findById(userId).select(
         "-password -refreshToken"
       );
-      res
-        .status(StatusCode.Success)
-        .json({
-          message: "Profile updated successfully",
-          user: updatedUser,
-          profile: updatedProfile,
-        });
+      res.status(StatusCode.Success).json({
+        message: "Profile updated successfully",
+        user: updatedUser,
+        profile: updatedProfile,
+      });
       return;
     } catch (error) {
       res
@@ -711,7 +715,9 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
 export const deleteAccount: Handler = async (req, res): Promise<void> => {
   try {
     const userId = req.userId;
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findByIdAndUpdate(userId, {
+      $set: { isDeleted: true },
+    });
     if (!user) {
       res.status(StatusCode.NotFound).json({ message: "User not found" });
       return;

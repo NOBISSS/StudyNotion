@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
+import { OtpTemp } from "../mail/templates/OTPTemplate.js";
 import { sendMail } from "../utils/mailer.js";
-import { string } from "zod";
 
 const OTPSchema = new Schema({
   firstName: { type: String, trim: true },
@@ -21,14 +21,10 @@ const OTPSchema = new Schema({
   createdAt: { type: Date, default: Date.now() },
 });
 
-// OTPSchema.pre("save", async function () {
-//   if (this.isNew) {
-//     await sendMail(
-//       this.email,
-//       this.subject,
-//       this.otp
-//     );
-//   }
-// });
+OTPSchema.pre("save", async function () {
+  if (this.isNew) {
+    await sendMail(this.email, this.subject, OtpTemp(this.otp));
+  }
+});
 
 export const OTP = model("OTP", OTPSchema);

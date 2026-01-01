@@ -1,6 +1,9 @@
+import type { UploadApiResponse } from "cloudinary";
 import { Types } from "mongoose";
 import z from "zod";
+import { Category } from "../models/CategoryModel.js";
 import { Course } from "../models/CourseModel.js";
+import { Section } from "../models/SectionModel.js";
 import User from "../models/UserModel.js";
 import { StatusCode, type Handler } from "../types.js";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
@@ -14,7 +17,6 @@ const courseInputSchema = z.object({
     .string({ error: "Description is required" })
     .min(10, { error: "Description must be at least 10 characters long" })
     .max(1000, { error: "Description must be at most 1000 characters long" }),
-  instructorId: z.string({ error: "Instructor ID is required" }),
   categoryId: z.string({ error: "Category ID is required" }),
   typeOfCourse: z.enum(["Free", "Paid"], {
     error: "Type of course must be either Free or Paid",
@@ -55,22 +57,35 @@ export const createCourse: Handler = async (req, res) => {
         .json({ message: "Thumbnail image is required" });
       return;
     }
-    const thumbnailImage = await uploadToCloudinary(
-      Buffer.from(thumbnail.buffer)
-    );
-    const instructor = await User.findById(userId);
-    if (!instructor) {
+    console.log("Thubnail found");
+    let thumbnailImage:UploadApiResponse;
+    try {
+      thumbnailImage = await uploadToCloudinary(
+        Buffer.from(thumbnail.buffer)
+      );
+    } catch (err) {
       res
-        .status(StatusCode.NotFound)
-        .json({ message: "Instructor not found" });
+        .status(StatusCode.ServerError)
+        .json({ message: "Something went wrong from our side while uploading the thumbnail image", error: err });
       return;
     }
-    if (instructor.accountType !== "instructor") {
+    console.log("Thumbnail Image uploaded");
+    const instructor = await User.findById(userId);
+    if (!instructor) {
+      res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
+      return;
+    }
+    console.log("Instructor found");
+    if (
+      instructor.accountType !== "instructor" &&
+      instructor.accountType !== "admin"
+    ) {
       res
         .status(StatusCode.Unauthorized)
         .json({ message: "User is not authorized to create a course" });
       return;
     }
+    console.log("Authorization complete");
     const {
       categoryId,
       courseName,
@@ -81,6 +96,7 @@ export const createCourse: Handler = async (req, res) => {
       level,
       tag,
     } = parsedCourseData.data;
+    console.log("Course Data:", parsedCourseData.data);
     const course = await Course.create({
       courseName,
       description,
@@ -94,10 +110,51 @@ export const createCourse: Handler = async (req, res) => {
       tag: tag || [],
       thumbnailUrl: thumbnailImage.secure_url,
     });
-
+    console.log("Course created");
+    await Category.findByIdAndUpdate(categoryId, {
+      $push: { courses: course._id },
+    });
+    console.log("Category created");
+    await Section.create({
+      name: "Introduction",
+      courseId: course._id,
+      order: 1,
+      subSectionIds: [],
+    });
+    console.log("Reached End");
     res
       .status(StatusCode.Success)
       .json({ message: "Course created successfully", course });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const getAllCourse: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const courses = await Course.find();
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Courses retrieved successfully", courses });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const getAllCourseByEnrollmentsAndRatings: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const courses = await Course.find();
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Courses retrieved successfully", courses });
     return;
   } catch (err) {
     res

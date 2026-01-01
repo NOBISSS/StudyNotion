@@ -34,8 +34,16 @@ export const userMiddleware = async (
   }
 };
 
-export const isStudent = async (req: Request, res: Response, next: NextFunction) => {
+export const isStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    if (req.user.accountType == "admin") {
+      next();
+      return;
+    }
     if (req.user.accountType !== "student") {
       return res.status(StatusCode.Unauthorized).json({
         success: false,
@@ -59,13 +67,19 @@ export const isInstructor = async (
   next: NextFunction
 ) => {
   try {
+    if (req.user.accountType == "admin") {
+      next();
+      return;
+    }
     if (req.user.accountType !== "instructor") {
-      return res.status(StatusCode.Unauthorized).json({
+      res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "Only instructors are allowed to access this route",
       });
+      return;
     }
     next();
+    return;
   } catch (error) {
     console.log(error);
     return res.status(StatusCode.Unauthorized).json({
@@ -76,7 +90,11 @@ export const isInstructor = async (
 };
 
 //ADMIN
-export const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+export const isAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     if (req.user.accountType !== "admin") {
       return res.status(StatusCode.Unauthorized).json({

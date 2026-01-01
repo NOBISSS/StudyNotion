@@ -10,7 +10,7 @@ const CategorySchema = new Schema({
     type: String,
     trim: true,
   },
-  course: [
+  courses: [
     {
       type: Schema.Types.ObjectId,
       ref: "Course",

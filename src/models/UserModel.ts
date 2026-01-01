@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import mongoose, { Schema } from "mongoose";  
+import mongoose, { Schema } from "mongoose";
 
 export const userSchema = new Schema(
   {
@@ -18,6 +18,7 @@ export const userSchema = new Schema(
     email: { type: String },
     refreshToken: { type: String },
     isBanned: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     methods: {
