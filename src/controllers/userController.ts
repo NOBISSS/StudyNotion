@@ -410,7 +410,6 @@ export const resendOTP= async (req, res): Promise<void> => {
     await saveOTP({
       email,
       otp,
-      data:{}
     });
 
     await emailQueue.add("send-otp",{email,otp});
@@ -432,7 +431,7 @@ export const signupOTPVerification = async (req,res)=> {
     }
 
     const otpData=await verifyOTP(email,otp);
-
+    console.log(otpData);
     if(!otpData){
       return res.status(400).json({message:"Invalid or Expired OTP"});
     }

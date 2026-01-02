@@ -15,13 +15,14 @@ export const generateOTP= ()=> {
 export const saveOTP=async({
     email,
     otp,
-    data,
-}: {email:string;otp:string;data:Record<string,any>})=>{
+    data={},
+}: {email:string;otp:string;data?:Record<string,any>})=>{
+    const existing=(await getOTPData(email)) || {};
     const hashedOtp=await bcrypt.hash(otp,10);
-
     const payload={
+        ...existing,
+        ...data,//for temporary variables like flag or something
         otp:hashedOtp,
-        ...data
     };
 
     await redis.set(`otp:${email}`,JSON.stringify(payload),"EX",OTP_TTL);
