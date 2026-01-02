@@ -20,9 +20,9 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/users",userRedisRouter)
+app.use("/api/users",userRouter)
 app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/enrollments", courseEnrollmentRouter);
 
-//app.use("/api/users",userRouter)
 export default app;

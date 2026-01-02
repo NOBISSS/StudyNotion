@@ -363,6 +363,7 @@ export const signupWithOTP: Handler = async (req, res): Promise<void> => {
         firstName,
         lastName,
         accountType,
+        otpType:"registration",
       },
     });
 
@@ -418,11 +419,23 @@ export const resendOTP: Handler = async (req, res): Promise<void> => {
         firstName: otpData.firstName,
         lastName: otpData.lastName,
         accountType: otpData.accountType,
+        otpType: otpData.otpType,
       },
     });
 
     await emailQueue.add("send-otp", { email, otp });
-    res.status(StatusCode.Success).json({ message: "OTP Reset Successfully" });
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 10 * 60000, // 10 minutes
+    };
+    res.cookie(
+        "otp_data",
+        { email: email, type: otpData.otpType === "registration" ? "signup" : "forget" },
+        cookieOptions
+      ).status(StatusCode.Success).json({ message: "OTP Reset Successfully" });
   } catch (err: any) {
     res
       .status(StatusCode.ServerError)
@@ -441,9 +454,9 @@ export const signupOTPVerification: Handler = async (req, res) => {
         .json({ message: "Invalid Request" });
     }
 
-    const otpData = await verifyOTP(email, otp);
+    const otpData = await verifyOTP(email, otp, "registration");
 
-    if (!otpData) {
+    if (!otpData || otpData.otpType !== "registration") {
       return res
         .status(StatusCode.NotFound)
         .json({ message: "Invalid or Expired OTP" });
@@ -742,6 +755,57 @@ export const forgetWithOTP: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
+export const forgetWithOTPRedis: Handler = async (req, res): Promise<void> => {
+  try {
+    const userEmail = z.email({ message: "Invalid email address" });
+    const userInput = userEmail.safeParse(req.body.email);
+    if (!userInput.success) {
+      res.status(StatusCode.InputError).json({
+        message: userInput.error?.issues[0]?.message || "Invalid email address",
+      });
+      return;
+    }
+    const email = userInput.data;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "User not found with this email" });
+      return;
+    }
+    const otp = generateOTP();
+    await saveOTP({
+      email,
+      otp,
+      data: {
+        otpType: "forget",
+      },
+    });
+
+    await emailQueue.add("send-otp", { email, otp });
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 10 * 60000, // 10 minutes
+    };
+    res
+      .cookie(
+        "otp_data",
+        { email: email, type: "forget" },
+        cookieOptions
+      )
+      .status(200)
+      .json({ message: "OTP sent successfully" });
+    return;
+  } catch (err: any) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
 export const forgetOTPVerification: Handler = async (
   req,
   res
@@ -767,6 +831,62 @@ export const forgetOTPVerification: Handler = async (
       return;
     }
     await OTP.deleteMany({ email, type: "forget" });
+    await User.updateOne(
+      { email },
+      {
+        $set: {
+          password: bcrypt.hashSync(password, 10),
+        },
+      }
+    );
+    // const cookieOptions: CookieOptions = {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   path: "/",
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // };
+    res
+      .status(StatusCode.Success)
+      // .cookie("accessToken", accessToken, cookieOptions)
+      // .cookie("refreshToken", refreshToken, cookieOptions)
+      .json({
+        message: "password changed successfully",
+        // user,
+      });
+    return;
+  } catch (err: any) {
+    res.status(StatusCode.ServerError).json({
+      message: err.message || "Something went wrong from our side",
+      err,
+    });
+    return;
+  }
+};
+export const forgetOTPVerificationRedis: Handler = async (
+  req,
+  res
+): Promise<void> => {
+  try {
+    const parsedInput = forgetInputSchema.safeParse(req.body);
+    if (!parsedInput.success) {
+      res.status(StatusCode.NotFound).json({
+        message:
+          parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+      });
+      return;
+    }
+    const { otp, password } = parsedInput.data;
+    const { email } = req.cookies.otp_data;
+    const otpData = await verifyOTP(email, otp.toString(),"forget");
+
+    if (!otpData || otpData.otpType !== "forget") {
+      res
+        .status(StatusCode.NotFound)
+        .json({ message: "Invalid OTP" });
+      return;
+    }
+
     await User.updateOne(
       { email },
       {
