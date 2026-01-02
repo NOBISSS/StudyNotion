@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import type { UploadApiResponse } from "cloudinary";
-import { type CookieOptions, type Request, type Response } from "express";
+import { type CookieOptions } from "express";
 import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
 import otpGenerator from "otp-generator";
@@ -8,12 +8,19 @@ import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
 import { Profile } from "../models/ProfileModel.js";
 import User from "../models/UserModel.js";
+import { emailQueue } from "../queue/emailQueue.js";
 import { type Handler, StatusCode } from "../types.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinaryUpload.js";
-// import { emailQueue } from "../queue/emailQueue.js";
+import {
+  canResendOTP,
+  generateOTP,
+  getOTPData,
+  saveOTP,
+  verifyOTP,
+} from "../utils/otp.service.js";
 
 const userInputSchema = z.object({
   firstName: z
@@ -56,7 +63,7 @@ const signupInputSchema = z.object({
   lastName: z
     .string()
     .min(3, { message: "Last name must be atleast 3 characters" }),
-  accountType: z.string(),
+  accountType: z.enum(["admin", "instructor", "student"]),
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
@@ -78,10 +85,257 @@ const signinInputSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string(),
 });
-export const signupWithOTP = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// export const signupWithOTP = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const userInput = signupInputSchema.safeParse(req.body);
+//     if (!userInput.success) {
+//       res.status(StatusCode.InputError).json({
+//         message: userInput.error.issues?.[0]?.message || "Signup data required",
+//       });
+//       return;
+//     }
+//     const { email, password, firstName, lastName, accountType } =
+//       userInput.data;
+//     const isUsernameAvailable = await User.findOne({ email });
+//     if (isUsernameAvailable) {
+//       res
+//         .status(StatusCode.DocumentExists)
+//         .json({ message: "User already exists with this username or email" });
+//       return;
+//     }
+//     const isOTPExists = await OTP.findOne({ email, type: "signup" })
+//       .sort({ createdAt: -1 })
+//       .limit(1);
+//     const cookieOptions: CookieOptions = {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: "none",
+//       path: "/",
+//       maxAge: 20 * 60000, // 20 minutes
+//     };
+//     if (isOTPExists) {
+//       const otpCreatedTime = new Date(isOTPExists.createdAt);
+//       if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
+//         await OTP.deleteMany({ email, type: "signup" });
+//         const newOtp = await OTP.create({
+//           email,
+//           otp: isOTPExists.otp,
+//           subject: "OTP for user signup",
+//           password: bcrypt.hashSync(password, 10),
+//           firstName,
+//           lastName,
+//           accountType,
+//           type: "signup",
+//         });
+//         res
+//           .cookie(
+//             "otp_data",
+//             { email: newOtp.email, type: "signup" },
+//             cookieOptions
+//           )
+//           .status(200)
+//           .json({ message: "OTP sent successfully" });
+//         return;
+//       }
+//     }
+//     const otp = otpGenerator.generate(6, {
+//       lowerCaseAlphabets: false,
+//       upperCaseAlphabets: false,
+//       specialChars: false,
+//     });
+//     const newOtp = await OTP.create({
+//       email,
+//       otp: Number(otp),
+//       subject: "OTP for user signup",
+//       password: bcrypt.hashSync(password, 10),
+//       firstName,
+//       lastName,
+//       accountType,
+//       type: "signup",
+//     });
+//     if (!newOtp) {
+//       res.status(500).json({ message: "OTP not generated" });
+//       return;
+//     }
+
+//     //await emailQueue.add("send-otp-email", { email, otp })
+
+//     res
+//       .cookie(
+//         "otp_data",
+//         { email: newOtp.email, type: "signup" },
+//         cookieOptions
+//       )
+//       .status(200)
+//       .json({ message: "OTP sent successfully" });
+//     return;
+//   } catch (err: any) {
+//     console.log(err);
+//     res
+//       .status(StatusCode.ServerError)
+//       .json({ message: "Something went wrong from ourside", err });
+//     return;
+//   }
+// };
+// export const resenedOTP: Handler = async (req, res): Promise<void> => {
+//   try {
+//     const otpData = req.cookies.otp_data;
+//     if (!otpData || !otpData.email || !otpData.type) {
+//       res.status(StatusCode.InputError).json({
+//         message: "Invalid email address",
+//       });
+//       return;
+//     }
+//     const isUserExists = await User.findOne({ email: otpData.email });
+//     if (isUserExists) {
+//       res
+//         .status(StatusCode.DocumentExists)
+//         .json({ message: "User already exists with this email" });
+//       return;
+//     }
+//     const isOTPExists = await OTP.findOne({
+//       email: otpData.email,
+//       type: otpData.type,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(1);
+//     if (
+//       isOTPExists &&
+//       new Date().getTime() - new Date(isOTPExists.createdAt).getTime() <= 600000
+//     ) {
+//       const otpCreatedTime = new Date(isOTPExists.createdAt);
+//       if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
+//         res
+//           .status(StatusCode.DocumentExists)
+//           .json({ message: "Wait for 2 minutes before sending new OTP" });
+//         return;
+//       }
+//     }
+//     const otp = otpGenerator.generate(6, {
+//       lowerCaseAlphabets: false,
+//       upperCaseAlphabets: false,
+//       specialChars: false,
+//     });
+//     const newOtp = await OTP.create({
+//       email: otpData.email,
+//       otp: Number(otp),
+//       subject: `OTP for user ${otpData.type}`,
+//       password: isOTPExists?.password || "",
+//       firstName: isOTPExists?.firstName || "",
+//       lastName: isOTPExists?.lastName || "",
+//       accountType: isOTPExists?.accountType || "",
+//       type: otpData.type,
+//       createdAt: new Date(),
+//     });
+//     if (!newOtp) {
+//       res.status(500).json({ message: "OTP not generated" });
+//       return;
+//     }
+//     const cookieOptions: CookieOptions = {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: "none",
+//       path: "/",
+//       maxAge: 20 * 60000, // 20 minutes
+//     };
+
+//     //await emailQueue.add("send-otp-email", { email:otpData.email, otp })
+
+//     res
+//       .cookie(
+//         "otp_data",
+//         { email: newOtp.email, type: newOtp.type },
+//         cookieOptions
+//       )
+//       .status(200)
+//       .json({ message: "OTP sent successfully" });
+//     return;
+//   } catch (err: any) {
+//     res
+//       .status(StatusCode.ServerError)
+//       .json({ message: "Something went wrong from ourside", err });
+//     return;
+//   }
+// };
+// export const signupOTPVerification: Handler = async (
+//   req,
+//   res
+// ): Promise<void> => {
+//   try {
+//     const parsedOTP = Number(req.body.otp);
+//     if (!parsedOTP) {
+//       res.status(StatusCode.NotFound).json({ message: "OTP not found" });
+//       return;
+//     }
+//     const { email } = req.cookies.otp_data;
+//     const IsOtpExists = await OTP.find({ email: email, type: "signup" })
+//       .sort({ createdAt: -1 })
+//       .limit(1);
+//     if (IsOtpExists.length === 0 || parsedOTP !== IsOtpExists[0]?.otp) {
+//       res.status(StatusCode.NotFound).json({
+//         message: "Invalid OTP",
+//       });
+//       return;
+//     }
+//     const newUser = await User.create({
+//       firstName: IsOtpExists[0].firstName || "",
+//       lastName: IsOtpExists[0].lastName || "",
+//       accountType: IsOtpExists[0].accountType || "",
+//       email,
+//       password: IsOtpExists[0].password || "",
+//     });
+//     const createdUser = await User.findById(newUser._id).select(
+//       "-password -refreshToken"
+//     );
+
+//     if (!createdUser) {
+//       res
+//         .status(StatusCode.ServerError)
+//         .json({ message: "Something went wrong from our side." });
+//       return;
+//     }
+//     await OTP.deleteMany({ email, type: "signup" });
+//     const { accessToken, refreshToken } =
+//       createdUser.generateAccessAndRefreshToken();
+//     await createdUser.updateOne(
+//       { email },
+//       {
+//         $set: {
+//           refreshToken,
+//         },
+//       }
+//     );
+//     await Profile.create({ userId: createdUser._id });
+//     const cookieOptions: CookieOptions = {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: "none",
+//       path: "/",
+//       maxAge: 24 * 60 * 60 * 1000, // 1 day
+//     };
+//     res
+//       .status(StatusCode.Success)
+//       .cookie("accessToken", accessToken, cookieOptions)
+//       .cookie("refreshToken", refreshToken, cookieOptions)
+//       .json({
+//         message: "User signup successfull",
+//         user: createdUser,
+//       });
+//     return;
+//   } catch (err: any) {
+//     res.status(StatusCode.ServerError).json({
+//       message: err.message || "Something went wrong from our side",
+//       err,
+//     });
+//     return;
+//   }
+// };
+
+//controllers have been updated with redis
+export const signupWithOTP: Handler = async (req, res): Promise<void> => {
   try {
     const userInput = signupInputSchema.safeParse(req.body);
     if (!userInput.success) {
@@ -92,77 +346,38 @@ export const signupWithOTP = async (
     }
     const { email, password, firstName, lastName, accountType } =
       userInput.data;
-    const isUsernameAvailable = await User.findOne({ email });
-    if (isUsernameAvailable) {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       res
         .status(StatusCode.DocumentExists)
         .json({ message: "User already exists with this username or email" });
       return;
     }
-    const isOTPExists = await OTP.findOne({ email, type: "signup" })
-      .sort({ createdAt: -1 })
-      .limit(1);
+
+    const otp = await generateOTP();
+    await saveOTP({
+      email,
+      otp,
+      data: {
+        password: await bcrypt.hash(password, 10),
+        firstName,
+        lastName,
+        accountType,
+      },
+    });
+
+    await emailQueue.add("send-otp", { email, otp });
+
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       path: "/",
-      maxAge: 20 * 60000, // 20 minutes
+      maxAge: 20 * 60 * 1000, // 20 minutes
     };
-    if (isOTPExists) {
-      const otpCreatedTime = new Date(isOTPExists.createdAt);
-      if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
-        await OTP.deleteMany({ email, type: "signup" });
-        const newOtp = await OTP.create({
-          email,
-          otp: isOTPExists.otp,
-          subject: "OTP for user signup",
-          password: bcrypt.hashSync(password, 10),
-          firstName,
-          lastName,
-          accountType,
-          type: "signup",
-        });
-        res
-          .cookie(
-            "otp_data",
-            { email: newOtp.email, type: "signup" },
-            cookieOptions
-          )
-          .status(200)
-          .json({ message: "OTP sent successfully" });
-        return;
-      }
-    }
-    const otp = otpGenerator.generate(6, {
-      lowerCaseAlphabets: false,
-      upperCaseAlphabets: false,
-      specialChars: false,
-    });
-    const newOtp = await OTP.create({
-      email,
-      otp: Number(otp),
-      subject: "OTP for user signup",
-      password: bcrypt.hashSync(password, 10),
-      firstName,
-      lastName,
-      accountType,
-      type: "signup",
-    });
-    if (!newOtp) {
-      res.status(500).json({ message: "OTP not generated" });
-      return;
-    }
-
-    //await emailQueue.add("send-otp-email", { email, otp })
-
     res
-      .cookie(
-        "otp_data",
-        { email: newOtp.email, type: "signup" },
-        cookieOptions
-      )
-      .status(200)
+      .cookie("otp_data", { email, type: "signup" }, cookieOptions)
+      .status(StatusCode.Success)
       .json({ message: "OTP sent successfully" });
     return;
   } catch (err: any) {
@@ -173,79 +388,41 @@ export const signupWithOTP = async (
     return;
   }
 };
-export const resenedOTP: Handler = async (req, res): Promise<void> => {
+export const resendOTP: Handler = async (req, res): Promise<void> => {
   try {
-    const otpData = req.cookies.otp_data;
-    if (!otpData || !otpData.email || !otpData.type) {
-      res.status(StatusCode.InputError).json({
-        message: "Invalid email address",
-      });
+    const { email } = req.cookies.otp_data;
+    if (!email) {
+      res.status(StatusCode.InputError).json({ message: "Invalid Request" });
       return;
     }
-    const isUserExists = await User.findOne({ email: otpData.email });
-    if (isUserExists) {
+
+    const canResend = await canResendOTP(email);
+    if (!canResend) {
       res
         .status(StatusCode.DocumentExists)
-        .json({ message: "User already exists with this email" });
+        .json({ message: "Wait 2 minutes before sending OTP" });
       return;
     }
-    const isOTPExists = await OTP.findOne({
-      email: otpData.email,
-      type: otpData.type,
-    })
-      .sort({ createdAt: -1 })
-      .limit(1);
-    if (
-      isOTPExists &&
-      new Date().getTime() - new Date(isOTPExists.createdAt).getTime() <= 600000
-    ) {
-      const otpCreatedTime = new Date(isOTPExists.createdAt);
-      if (new Date().getTime() - otpCreatedTime.getTime() <= 120000) {
-        res
-          .status(StatusCode.DocumentExists)
-          .json({ message: "Wait for 2 minutes before sending new OTP" });
-        return;
-      }
-    }
-    const otp = otpGenerator.generate(6, {
-      lowerCaseAlphabets: false,
-      upperCaseAlphabets: false,
-      specialChars: false,
-    });
-    const newOtp = await OTP.create({
-      email: otpData.email,
-      otp: Number(otp),
-      subject: `OTP for user ${otpData.type}`,
-      password: isOTPExists?.password || "",
-      firstName: isOTPExists?.firstName || "",
-      lastName: isOTPExists?.lastName || "",
-      accountType: isOTPExists?.accountType || "",
-      type: otpData.type,
-      createdAt: new Date(),
-    });
-    if (!newOtp) {
-      res.status(500).json({ message: "OTP not generated" });
+
+    const otp = generateOTP();
+    const otpData = await getOTPData(email);
+    if (!otpData) {
+      res.status(StatusCode.NotFound).json({ message: "Invalid OTP request" });
       return;
     }
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 20 * 60000, // 20 minutes
-    };
+    await saveOTP({
+      email,
+      otp,
+      data: {
+        password: await bcrypt.hash(otpData.password || "", 10),
+        firstName: otpData.firstName,
+        lastName: otpData.lastName,
+        accountType: otpData.accountType,
+      },
+    });
 
-    //await emailQueue.add("send-otp-email", { email:otpData.email, otp })
-
-    res
-      .cookie(
-        "otp_data",
-        { email: newOtp.email, type: newOtp.type },
-        cookieOptions
-      )
-      .status(200)
-      .json({ message: "OTP sent successfully" });
-    return;
+    await emailQueue.add("send-otp", { email, otp });
+    res.status(StatusCode.Success).json({ message: "OTP Reset Successfully" });
   } catch (err: any) {
     res
       .status(StatusCode.ServerError)
@@ -253,71 +430,40 @@ export const resenedOTP: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
-export const signupOTPVerification: Handler = async (
-  req,
-  res
-): Promise<void> => {
+export const signupOTPVerification: Handler = async (req, res) => {
   try {
-    const parsedOTP = Number(req.body.otp);
-    if (!parsedOTP) {
-      res.status(StatusCode.NotFound).json({ message: "OTP not found" });
-      return;
-    }
+    const { otp } = req.body;
     const { email } = req.cookies.otp_data;
-    const IsOtpExists = await OTP.find({ email: email, type: "signup" })
-      .sort({ createdAt: -1 })
-      .limit(1);
-    if (IsOtpExists.length === 0 || parsedOTP !== IsOtpExists[0]?.otp) {
-      res.status(StatusCode.NotFound).json({
-        message: "Invalid OTP",
-      });
-      return;
-    }
-    const newUser = await User.create({
-      firstName: IsOtpExists[0].firstName || "",
-      lastName: IsOtpExists[0].lastName || "",
-      accountType: IsOtpExists[0].accountType || "",
-      email,
-      password: IsOtpExists[0].password || "",
-    });
-    const createdUser = await User.findById(newUser._id).select(
-      "-password -refreshToken"
-    );
 
-    if (!createdUser) {
-      res
-        .status(StatusCode.ServerError)
-        .json({ message: "Something went wrong from our side." });
-      return;
+    if (!otp || !email) {
+      return res
+        .status(StatusCode.InputError)
+        .json({ message: "Invalid Request" });
     }
-    await OTP.deleteMany({ email, type: "signup" });
-    const { accessToken, refreshToken } =
-      createdUser.generateAccessAndRefreshToken();
-    await createdUser.updateOne(
-      { email },
-      {
-        $set: {
-          refreshToken,
-        },
-      }
-    );
-    await Profile.create({ userId: createdUser._id });
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    };
+
+    const otpData = await verifyOTP(email, otp);
+
+    if (!otpData) {
+      return res
+        .status(StatusCode.NotFound)
+        .json({ message: "Invalid or Expired OTP" });
+    }
+
+    const user = await User.create({
+      email,
+      password: otpData.password as string,
+      firstName: otpData.firstName as string,
+      lastName: otpData.lastName as string,
+      accountType: otpData.accountType as "admin" | "instructor" | "student",
+    });
+
+    const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+    await user.updateOne({ refreshToken });
+
     res
-      .status(StatusCode.Success)
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({
-        message: "User signup successfull",
-        user: createdUser,
-      });
-    return;
+      .cookie("accessToken", accessToken, { httpOnly: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true })
+      .json({ message: "Signup successful", user });
   } catch (err: any) {
     res.status(StatusCode.ServerError).json({
       message: err.message || "Something went wrong from our side",
