@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import z from "zod";
+import { CourseEnrollment } from "../models/CourseEnrollment.js";
 import { Course } from "../models/CourseModel.js";
 import { RatingAndReview } from "../models/RatingAndReview.js";
 import { StatusCode, type Handler } from "../types.js";
@@ -41,6 +42,19 @@ export const rateAndReviewCourse: Handler = async (req, res) => {
         .json({ message: "Instructor cannot review their own course" });
       return;
     }
+
+    const isEnrolledInCourse = await CourseEnrollment.findOne({
+      courseId: new Types.ObjectId(courseId),
+      userId: new Types.ObjectId(userId),
+    });
+
+    if (!isEnrolledInCourse) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "You need to enroll in course to review" });
+      return;
+    }
+
     const ratingAndReview = await RatingAndReview.create({
       userId: new Types.ObjectId(userId),
       courseId: new Types.ObjectId(courseId),
@@ -120,20 +134,58 @@ export const updateReview: Handler = async (req, res) => {
         .json({ message: "Instructor cannot review their own course" });
       return;
     }
-    const existingReview = await RatingAndReview.findByIdAndUpdate(reviewId, {
-      $set: {
-        rating,
-        review,
+    const existingReview = await RatingAndReview.findOneAndUpdate(
+      {
+        userId: new Types.ObjectId(userId),
+        _id: new Types.ObjectId(reviewId),
       },
-    });
-    if (existingReview) {
+      {
+        $set: {
+          rating,
+          review,
+        },
+      }
+    );
+    if (!existingReview) {
       res
         .status(StatusCode.DocumentExists)
-        .json({ message: "User has already reviewed this course" });
+        .json({ message: "Review not found or user not authorized" });
       return;
     }
     res.status(StatusCode.Success).json({
-      message: "Course review created successfully",
+      message: "Course review updated successfully",
+      ratingAndReview: existingReview,
+    });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const deleteReview: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const reviewId = req.params.reviewId;
+    if (!reviewId) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Review ID is required" });
+      return;
+    }
+    const existingReview = await RatingAndReview.findOneAndDelete({
+      userId: new Types.ObjectId(userId),
+      _id: new Types.ObjectId(reviewId),
+    });
+    if (!existingReview) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "Review not found or user not authorized" });
+      return;
+    }
+    res.status(StatusCode.Success).json({
+      message: "Course review deleted successfully",
       ratingAndReview: existingReview,
     });
     return;
