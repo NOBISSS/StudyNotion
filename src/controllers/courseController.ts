@@ -187,13 +187,64 @@ export const getAllCourseByEnrollmentsAndRatings: Handler = async (
       }
       return b.enrollmentsCount - a.enrollmentsCount;
     });
+    res.status(StatusCode.Success).json({
+      message: "Courses retrieved successfully",
+      courses,
+      sortedCourses,
+    });
+    return;
+  } catch (err) {
     res
-      .status(StatusCode.Success)
-      .json({
-        message: "Courses retrieved successfully",
-        courses,
-        sortedCourses,
-      });
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
+export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
+  req,
+  res
+) => {
+  try {
+    const userId = req.userId;
+    const categoryId = req.params.categoryId;
+    const courses = await Course.find({
+      categoryId: new Types.ObjectId(categoryId),
+    });
+    const coursesWithEnrollmentCount = await Promise.all(
+      courses.map(async (c) => ({
+        ...c.toObject(),
+        enrollmentsCount: await CourseEnrollment.countDocuments({
+          courseId: c._id,
+        }),
+        ratingsAverage: await RatingAndReview.aggregate([
+          { $match: { courseId: c._id } },
+          {
+            $group: {
+              _id: null,
+              averageRating: { $avg: "$rating" },
+            },
+          },
+          { $project: { _id: 0, averageRating: 1 } },
+        ]).then((result) => Number(result[0]?.averageRating) || 0),
+        isEnrolled: (await CourseEnrollment.exists({
+          courseId: c._id,
+          userId: new Types.ObjectId(userId),
+        }))
+          ? true
+          : false,
+      }))
+    );
+    const sortedCourses = coursesWithEnrollmentCount.slice().sort((a, b) => {
+      if (b.enrollmentsCount === a.enrollmentsCount) {
+        return b.ratingsAverage - a.ratingsAverage;
+      }
+      return b.enrollmentsCount - a.enrollmentsCount;
+    });
+    res.status(StatusCode.Success).json({
+      message: "Courses retrieved successfully",
+      courses,
+      sortedCourses,
+    });
     return;
   } catch (err) {
     res
