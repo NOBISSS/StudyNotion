@@ -67,6 +67,36 @@ export const updateCategory: Handler = async (req, res) => {
     });
   }
 };
+export const deleteCategory: Handler = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    if (!categoryId) {
+      return res.status(StatusCode.InputError).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const categoryDetails = await Category.findByIdAndDelete(categoryId);
+    if (!categoryDetails) {
+      return res.status(StatusCode.NotFound).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(StatusCode.Success).json({
+      success: true,
+      message: "Category deleted successfully",
+      category: categoryDetails,
+    });
+  } catch (error) {
+    return res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "something went wrong while creating category",
+      error,
+    });
+  }
+};
 export const getAllCategory: Handler = async (req, res) => {
   try {
     const getCategory = await Category.find(
