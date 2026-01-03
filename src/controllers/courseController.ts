@@ -2,7 +2,9 @@ import type { UploadApiResponse } from "cloudinary";
 import { Types } from "mongoose";
 import z from "zod";
 import { Category } from "../models/CategoryModel.js";
+import { CourseEnrollment } from "../models/CourseEnrollment.js";
 import { Course } from "../models/CourseModel.js";
+import { RatingAndReview } from "../models/RatingAndReview.js";
 import { Section } from "../models/SectionModel.js";
 import User from "../models/UserModel.js";
 import { StatusCode, type Handler } from "../types.js";
@@ -58,15 +60,15 @@ export const createCourse: Handler = async (req, res) => {
       return;
     }
     console.log("Thubnail found");
-    let thumbnailImage:UploadApiResponse;
+    let thumbnailImage: UploadApiResponse;
     try {
-      thumbnailImage = await uploadToCloudinary(
-        Buffer.from(thumbnail.buffer)
-      );
+      thumbnailImage = await uploadToCloudinary(Buffer.from(thumbnail.buffer));
     } catch (err) {
-      res
-        .status(StatusCode.ServerError)
-        .json({ message: "Something went wrong from our side while uploading the thumbnail image", error: err });
+      res.status(StatusCode.ServerError).json({
+        message:
+          "Something went wrong from our side while uploading the thumbnail image",
+        error: err,
+      });
       return;
     }
     console.log("Thumbnail Image uploaded");
@@ -148,13 +150,50 @@ export const getAllCourse: Handler = async (req, res) => {
     return;
   }
 };
-export const getAllCourseByEnrollmentsAndRatings: Handler = async (req, res) => {
+export const getAllCourseByEnrollmentsAndRatings: Handler = async (
+  req,
+  res
+) => {
   try {
     const userId = req.userId;
     const courses = await Course.find();
+    const coursesWithEnrollmentCount = await Promise.all(
+      courses.map(async (c) => ({
+        ...c.toObject(),
+        enrollmentsCount: await CourseEnrollment.countDocuments({
+          courseId: c._id,
+        }),
+        ratingsAverage: await RatingAndReview.aggregate([
+          { $match: { courseId: c._id } },
+          {
+            $group: {
+              _id: null,
+              averageRating: { $avg: "$rating" },
+            },
+          },
+          { $project: { _id: 0, averageRating: 1 } },
+        ]).then((result) => Number(result[0]?.averageRating) || 0),
+        isEnrolled: (await CourseEnrollment.exists({
+          courseId: c._id,
+          userId: new Types.ObjectId(userId),
+        }))
+          ? true
+          : false,
+      }))
+    );
+    const sortedCourses = coursesWithEnrollmentCount.slice().sort((a, b) => {
+      if (b.enrollmentsCount === a.enrollmentsCount) {
+        return b.ratingsAverage - a.ratingsAverage;
+      }
+      return b.enrollmentsCount - a.enrollmentsCount;
+    });
     res
       .status(StatusCode.Success)
-      .json({ message: "Courses retrieved successfully", courses });
+      .json({
+        message: "Courses retrieved successfully",
+        courses,
+        sortedCourses,
+      });
     return;
   } catch (err) {
     res
