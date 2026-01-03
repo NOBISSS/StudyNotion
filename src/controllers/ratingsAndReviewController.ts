@@ -92,3 +92,55 @@ export const getAllReviews: Handler = async (req, res) => {
     return;
   }
 };
+export const updateReview: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const user = req.user;
+    const reviewId = req.params.reviewId;
+    const parsedCourseData = CourseRatingAndReviewSchema.safeParse(req.body);
+    if (!parsedCourseData.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+          parsedCourseData.error.issues[0]?.message || "Invalid course Id",
+      });
+      return;
+    }
+    if (!reviewId) {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Review ID is required" });
+      return;
+    }
+    const { courseId, rating, review } = parsedCourseData.data;
+    const course = await Course.findById(new Types.ObjectId(courseId));
+
+    if (course?.instructorId == userId && user?.accountType !== "admin") {
+      res
+        .status(StatusCode.InputError)
+        .json({ message: "Instructor cannot review their own course" });
+      return;
+    }
+    const existingReview = await RatingAndReview.findByIdAndUpdate(reviewId, {
+      $set: {
+        rating,
+        review,
+      },
+    });
+    if (existingReview) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "User has already reviewed this course" });
+      return;
+    }
+    res.status(StatusCode.Success).json({
+      message: "Course review created successfully",
+      ratingAndReview: existingReview,
+    });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};
