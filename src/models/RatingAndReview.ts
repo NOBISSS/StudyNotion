@@ -1,28 +1,29 @@
-const mongoose=require("mongoose");
-const {Schema}=mongoose;
+import { model, Schema, Types } from "mongoose";
 
+const RatingAndReviewSchema = new Schema(
+  {
+    userId: {
+      type: Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    rating: {
+      type: Number,
+      required: true,
+    },
+    review: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    courseId: {
+      type: Types.ObjectId,
+      required: true,
+      ref: "Course",
+      index: true,
+    },
+  },
+  { timestamps: true }
+);
 
-const RatingAndReviewSchema=new Schema({
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"User"
-    },
-    rating:{
-        type:Number,
-        required:true,
-    },
-    review:{
-        type:String,
-        trim:true,
-        required:true,
-    },
-    course:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true,
-        ref:"Course",
-        index:true
-    }
-});
-
-module.exports=mongoose.model("RatingAndReview",RatingAndReviewSchema)
+export const RatingAndReview = model("RatingAndReview", RatingAndReviewSchema);

@@ -1,4 +1,5 @@
 import { Schema, model, Types } from "mongoose";
+
 const coursePlanSchema = new Schema(
   {
     categoryId: { type: Types.ObjectId, ref: "Category", required: true },

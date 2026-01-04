@@ -1,13 +1,3 @@
-// section [icon: home] {
-//     sectionId objectId
-//     name String
-//     courseId string objectId fk
-//   //   sectionContent string array
-//     order number
-//     subSectionIds [objectId] fk
-//     createdAt Date
-//     updatedAt Date
-//   }
 import { model, Schema, Types } from "mongoose";
 
 const sectionSchema = new Schema(

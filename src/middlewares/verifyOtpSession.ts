@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { StatusCode } from "../types.js";
 
 export const verifyOtpSession = (
   req: Request,
@@ -8,7 +9,7 @@ export const verifyOtpSession = (
   const otpData = req.cookies?.otp_data;
 
   if (!otpData || !otpData.email || !otpData.type) {
-    return res.status(401).json({
+    return res.status(StatusCode.Unauthorized).json({
       message: "OTP session expired or invalid",
     });
   }

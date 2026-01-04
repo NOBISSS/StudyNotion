@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import type { UploadApiResponse } from "cloudinary";
-import { type CookieOptions, type Request, type Response } from "express";
+import { type CookieOptions } from "express";
 import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
 import otpGenerator from "otp-generator";
@@ -8,13 +8,19 @@ import { z } from "zod";
 import { OTP } from "../models/OTPModel.js";
 import { Profile } from "../models/ProfileModel.js";
 import User from "../models/UserModel.js";
+import { emailQueue } from "../queue/emailQueue.js";
 import { type Handler, StatusCode } from "../types.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../utils/cloudinaryUpload.js";
-import { emailQueue } from "../queue/emailQueue.js";
-import { canResendOTP, generateOTP, saveOTP, verifyOTP } from "../utils/otp.service.js";
+import {
+  canResendOTP,
+  generateOTP,
+  getOTPData,
+  saveOTP,
+  verifyOTP,
+} from "../utils/otp.service.js";
 
 const userInputSchema = z.object({
   firstName: z
@@ -57,7 +63,7 @@ const signupInputSchema = z.object({
   lastName: z
     .string()
     .min(3, { message: "Last name must be atleast 3 characters" }),
-  accountType: z.string(),
+  accountType: z.enum(["admin", "instructor", "student"]),
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
@@ -328,13 +334,8 @@ const signinInputSchema = z.object({
 //   }
 // };
 
-
-
 //controllers have been updated with redis
-export const signupWithOTP = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const signupWithOTP: Handler = async (req, res): Promise<void> => {
   try {
     const userInput = signupInputSchema.safeParse(req.body);
     if (!userInput.success) {
@@ -353,37 +354,33 @@ export const signupWithOTP = async (
       return;
     }
 
-
-    const otp=await generateOTP();
+    const otp = await generateOTP();
     await saveOTP({
       email,
       otp,
-      data:{
-        password:await bcrypt.hash(password,10),
+      data: {
+        password: await bcrypt.hash(password, 10),
         firstName,
         lastName,
         accountType,
       },
     });
 
-    await emailQueue.add("send-otp",{email,otp});
+    await emailQueue.add("send-otp", { email, otp });
 
     const cookieOptions: CookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       path: "/",
-      maxAge: 20 *60*1000, // 20 minutes
+      maxAge: 20 * 60 * 1000, // 20 minutes
     };
-        res.cookie(
-            "otp_data",
-            { email, type: "signup" },
-            cookieOptions
-          )
-          .status(200)
-          .json({ message: "OTP sent successfully" });
-        return;
-}catch (err: any) {
+    res
+      .cookie("otp_data", { email, type: "signup" }, cookieOptions)
+      .status(StatusCode.Success)
+      .json({ message: "OTP sent successfully" });
+    return;
+  } catch (err: any) {
     console.log(err);
     res
       .status(StatusCode.ServerError)
@@ -391,29 +388,41 @@ export const signupWithOTP = async (
     return;
   }
 };
-export const resendOTP= async (req, res): Promise<void> => {
+export const resendOTP: Handler = async (req, res): Promise<void> => {
   try {
-    const {email} = req.cookies.otp_data;
-    if(!email){
-      return res.status(400).json({message:"Invalid Request"});
+    const { email } = req.cookies.otp_data;
+    if (!email) {
+      res.status(StatusCode.InputError).json({ message: "Invalid Request" });
+      return;
     }
 
-    const canResend=await canResendOTP(email);
-    if(!canResend){
-      return res
-            .status(429)
-            .json({message:"Wait 2 minutes before sending OTP"});
+    const canResend = await canResendOTP(email);
+    if (!canResend) {
+      res
+        .status(StatusCode.DocumentExists)
+        .json({ message: "Wait 2 minutes before sending OTP" });
+      return;
     }
 
-    const otp=generateOTP();
-
+    const otp = generateOTP();
+    const otpData = await getOTPData(email);
+    if (!otpData) {
+      res.status(StatusCode.NotFound).json({ message: "Invalid OTP request" });
+      return;
+    }
     await saveOTP({
       email,
       otp,
+      data: {
+        password: await bcrypt.hash(otpData.password || "", 10),
+        firstName: otpData.firstName,
+        lastName: otpData.lastName,
+        accountType: otpData.accountType,
+      },
     });
 
-    await emailQueue.add("send-otp",{email,otp});
-    res.status(200).json({message:"OTP Reset Successfully"});
+    await emailQueue.add("send-otp", { email, otp });
+    res.status(StatusCode.Success).json({ message: "OTP Reset Successfully" });
   } catch (err: any) {
     res
       .status(StatusCode.ServerError)
@@ -421,37 +430,41 @@ export const resendOTP= async (req, res): Promise<void> => {
     return;
   }
 };
-export const signupOTPVerification = async (req,res)=> {
+export const signupOTPVerification: Handler = async (req, res) => {
   try {
-    const {otp}=req.body;
-    const {email}=req.cookies.otp_data;
+    const { otp } = req.body;
+    const { email } = req.cookies.otp_data;
 
-    if(!otp || !email){
-      return res.status(400).json({message:"Invalid Request"});
+    if (!otp || !email) {
+      return res
+        .status(StatusCode.InputError)
+        .json({ message: "Invalid Request" });
     }
 
-    const otpData=await verifyOTP(email,otp);
-    console.log(otpData);
-    if(!otpData){
-      return res.status(400).json({message:"Invalid or Expired OTP"});
+    const otpData = await verifyOTP(email, otp);
+
+    if (!otpData) {
+      return res
+        .status(StatusCode.NotFound)
+        .json({ message: "Invalid or Expired OTP" });
     }
 
-    const user=await User.create({
+    const user = await User.create({
       email,
-      password:otpData.password,
-      firstName:otpData.firstName,
-      lastName:otpData.lastName,
-      accountType:otpData.accountType
+      password: otpData.password as string,
+      firstName: otpData.firstName as string,
+      lastName: otpData.lastName as string,
+      accountType: otpData.accountType as "admin" | "instructor" | "student",
     });
 
-    const {accessToken,refreshToken}=user.generateAccessAndRefreshToken();
-    await user.updateOne({refreshToken});
+    const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+    await user.updateOne({ refreshToken });
 
-     res
-    .cookie("accessToken", accessToken, { httpOnly: true })
-    .cookie("refreshToken", refreshToken, { httpOnly: true })
-    .json({ message: "Signup successful", user });
-} catch (err: any) {
+    res
+      .cookie("accessToken", accessToken, { httpOnly: true })
+      .cookie("refreshToken", refreshToken, { httpOnly: true })
+      .json({ message: "Signup successful", user });
+  } catch (err: any) {
     res.status(StatusCode.ServerError).json({
       message: err.message || "Something went wrong from our side",
       err,
@@ -480,6 +493,12 @@ export const signin: Handler = async (req, res): Promise<void> => {
       res
         .status(StatusCode.Unauthorized)
         .json({ message: "User is banned, Contact support" });
+      return;
+    }
+    if (user.isDeleted) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "User is deleted, Contact support" });
       return;
     }
     const isPasswordCorrect = user.comparePassword(password);
@@ -820,13 +839,11 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
       const updatedUser = await User.findById(userId).select(
         "-password -refreshToken"
       );
-      res
-        .status(StatusCode.Success)
-        .json({
-          message: "Profile updated successfully",
-          user: updatedUser,
-          profile: updatedProfile,
-        });
+      res.status(StatusCode.Success).json({
+        message: "Profile updated successfully",
+        user: updatedUser,
+        profile: updatedProfile,
+      });
       return;
     } catch (error) {
       res
@@ -844,7 +861,9 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
 export const deleteAccount: Handler = async (req, res): Promise<void> => {
   try {
     const userId = req.userId;
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findByIdAndUpdate(userId, {
+      $set: { isDeleted: true },
+    });
     if (!user) {
       res.status(StatusCode.NotFound).json({ message: "User not found" });
       return;

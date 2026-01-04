@@ -1,20 +1,21 @@
-const mongoose=require("mongoose");
-const {Schema}=mongoose;
-const CategorySchema=new Schema({
-    name:{
-        type:String,
-        required:true,
-        trim:true,
+import { Schema, model } from "mongoose";
+
+const CategorySchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  courses: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Course",
     },
-    description:{
-        type:String,
-        trim:true,
-    },
-    course:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Course"
-    }
-    ]
+  ],
 });
 
-module.exports=mongoose.model("Category",CategorySchema);
+export const Category = model("Category", CategorySchema);

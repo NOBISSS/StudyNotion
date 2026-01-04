@@ -1,4 +1,5 @@
 import { type Request, type Response } from "express";
+import type { Document, Types } from "mongoose";
 
 export type Handler = (req: Request, res: Response) => any;
 
@@ -10,3 +11,17 @@ export enum StatusCode {
   NotFound = 404,
   Unauthorized = 401,
 }
+
+export interface User extends Document {
+  _id: Types.ObjectId;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  accountType: "student" | "instructor" | "admin";
+  refreshToken?: string | null;
+  isBanned: boolean;
+  isDeleted: boolean;
+  // createdAt: Date;
+  // updatedAt: Date;
+};
