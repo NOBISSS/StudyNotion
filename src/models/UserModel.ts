@@ -6,7 +6,7 @@ export const userSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
-    password: { type: String,required: true },
+    password: { type: String, required: true },
     accountType: {
       type: String,
       enum: {
@@ -15,7 +15,7 @@ export const userSchema = new Schema(
       },
       default: "student",
     },
-    email: { type: String,required: true, unique: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true },
     refreshToken: { type: String },
     isBanned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
@@ -31,12 +31,12 @@ export const userSchema = new Schema(
       },
       generateAccessAndRefreshToken() {
         const accessToken = jwt.sign(
-          { _id: this._id, email: this.email },
+          { _id: this._id, email: this.email, accountType: this.accountType },
           <string>process.env.JWT_ACCESS_TOKEN_SECRET,
-          { expiresIn: "1d" }
+          { expiresIn: "1d" } 
         );
         const refreshToken = jwt.sign(
-          { _id: this._id, email: this.email },
+          { _id: this._id, email: this.email, accountType: this.accountType },
           <string>process.env.JWT_REFRESH_TOKEN_SECRET,
           { expiresIn: "15d" }
         );
