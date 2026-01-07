@@ -6,6 +6,7 @@ const sectionSchema = new Schema(
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
     order: { type: Number, required: true },
     subSectionIds: [{ type: Types.ObjectId, ref: "SubSection", default: [] }],
+    isRemoved: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
