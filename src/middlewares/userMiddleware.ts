@@ -68,11 +68,11 @@ export const isInstructor = async (
   next: NextFunction
 ) => {
   try {
-    if (req.accountType == "admin") {
+    if (req.accountType == "admin" || req.accountType == "instructor") {
       next();
       return;
     }
-    if (req.accountType !== "instructor") {
+    if (req.accountType == "student") {
       res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "Only instructors are allowed to access this route",

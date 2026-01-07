@@ -7,6 +7,7 @@ import { userRouter } from "./routes/userRoutes.js";
 import { courseEnrollmentRouter } from "./routes/courseEnrollmentRoutes.js";
 import { categoryRouter } from "./routes/categoryRoutes.js";
 import { reviewRouter } from "./routes/reviewRoutes.js";
+import { sectionRouter } from "./routes/sectionRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -26,5 +27,6 @@ app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/enrollments", courseEnrollmentRouter);
 app.use("/api/reviews", reviewRouter);
+app.use("/api/sections", sectionRouter);
 
 export default app;
