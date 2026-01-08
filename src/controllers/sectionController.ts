@@ -109,3 +109,69 @@ export const removeSection: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
+export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
+  try {
+    const instructorId = req.userId;
+    const sectionId = req.params.sectionId;
+    const { newOrder } = req.body;
+    if (!sectionId) {
+      res.status(StatusCode.InputError).json({
+        success: false,
+        message: "Section ID is required",
+      });
+      return;
+    }
+    const existingSection = await Section.findOne({
+      _id: sectionId,
+      instructorId,
+      isRemoved: false,
+    });
+    if (!existingSection) {
+      res.status(StatusCode.DocumentExists).json({
+        success: false,
+        message: "Section with this ID does not exist",
+      });
+      return;
+    }
+    const oldOrder = existingSection.order;
+    if (newOrder === oldOrder) {
+      res.status(StatusCode.Success).json({
+        success: true,
+        message: "Section order is unchanged",
+      });
+      return;
+    }
+    await Section.updateOne({ _id: sectionId }, { order: newOrder });
+    if (newOrder > oldOrder) {
+      await Section.updateMany(
+        {
+          _id: { $ne: sectionId },
+          courseId: existingSection.courseId,
+          order: { $gt: oldOrder, $lte: newOrder },
+        },
+        { $inc: { order: -1 } }
+      );
+    } else {
+      await Section.updateMany(
+        {
+          _id: { $ne: sectionId },
+          courseId: existingSection.courseId,
+          order: { $gte: newOrder, $lt: oldOrder },
+        },
+        { $inc: { order: 1 } }
+      );
+    }
+    res.status(StatusCode.Success).json({
+      success: true,
+      message: "Section order changed successfully",
+    });
+    return;
+  } catch (error) {
+    res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "Something went wrong from our side",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+};

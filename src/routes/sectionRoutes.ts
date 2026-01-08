@@ -5,7 +5,7 @@ import {
   getAllCategory,
   updateCategory,
 } from "../controllers/categoryController.js";
-import { createSection, removeSection } from "../controllers/sectionController.js";
+import { changeSectionOrder, createSection, removeSection } from "../controllers/sectionController.js";
 import { isInstructor, userMiddleware } from "../middlewares/userMiddleware.js";
 
 const sectionRouter = Router();
@@ -17,6 +17,6 @@ sectionRouter.route("/create").post(createSection);
 sectionRouter.route("/update/:sectionId").put(updateCategory);
 sectionRouter.route("/remove/:sectionId").delete(removeSection);
 sectionRouter.route("/getall").get(getAllCategory);
-sectionRouter.route("/pagedetails/:sectionId").get(categoryPageDetails);
+sectionRouter.route("/changeorder/:sectionId").put(changeSectionOrder);
 
 export { sectionRouter };
