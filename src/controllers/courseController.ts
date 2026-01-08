@@ -59,7 +59,6 @@ export const createCourse: Handler = async (req, res) => {
         .json({ message: "Thumbnail image is required" });
       return;
     }
-    console.log("Thubnail found");
     let thumbnailImage: UploadApiResponse;
     try {
       thumbnailImage = await uploadToCloudinary(Buffer.from(thumbnail.buffer));
@@ -71,23 +70,11 @@ export const createCourse: Handler = async (req, res) => {
       });
       return;
     }
-    console.log("Thumbnail Image uploaded");
     const instructor = await User.findById(userId);
     if (!instructor) {
       res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
       return;
     }
-    console.log("Instructor found");
-    if (
-      instructor.accountType !== "instructor" &&
-      instructor.accountType !== "admin"
-    ) {
-      res
-        .status(StatusCode.Unauthorized)
-        .json({ message: "User is not authorized to create a course" });
-      return;
-    }
-    console.log("Authorization complete");
     const {
       categoryId,
       courseName,
@@ -98,7 +85,6 @@ export const createCourse: Handler = async (req, res) => {
       level,
       tag,
     } = parsedCourseData.data;
-    console.log("Course Data:", parsedCourseData.data);
     const course = await Course.create({
       courseName,
       description,
@@ -111,19 +97,21 @@ export const createCourse: Handler = async (req, res) => {
       level,
       tag: tag || [],
       thumbnailUrl: thumbnailImage.secure_url,
+      slug: courseName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
     });
-    console.log("Course created");
     await Category.findByIdAndUpdate(categoryId, {
       $push: { courses: course._id },
     });
-    console.log("Category created");
     await Section.create({
       name: "Introduction",
       courseId: course._id,
       order: 1,
       subSectionIds: [],
+      // instructorId: new Types.ObjectId(userId),
     });
-    console.log("Reached End");
     res
       .status(StatusCode.Success)
       .json({ message: "Course created successfully", course });

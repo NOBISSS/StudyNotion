@@ -12,9 +12,9 @@ const courseRouter = Router();
 
 courseRouter.use(userMiddleware);
 courseRouter.route("/getall").get(getAllCourse);
-courseRouter.route("/gettopcourses").get(getAllCourseByEnrollmentsAndRatings);
+courseRouter.route("/gettop").get(getAllCourseByEnrollmentsAndRatings);
 courseRouter
-  .route("/gettopcourses/:categoryId")
+  .route("/gettop/:categoryId")
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.use(isInstructor);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);

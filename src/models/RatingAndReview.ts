@@ -22,6 +22,10 @@ const RatingAndReviewSchema = new Schema(
       ref: "Course",
       index: true,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

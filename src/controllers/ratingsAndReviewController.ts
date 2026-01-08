@@ -75,7 +75,6 @@ export const rateAndReviewCourse: Handler = async (req, res) => {
 };
 export const getAllReviews: Handler = async (req, res) => {
   try {
-    const userId = req.userId;
     const courseId = req.params.courseId;
     if (!courseId) {
       res
@@ -85,6 +84,7 @@ export const getAllReviews: Handler = async (req, res) => {
     }
     const courseReviews = await RatingAndReview.find({
       courseId: new Types.ObjectId(courseId),
+      isActive: true,
     })
       .populate("userId")
       .sort({ createdAt: -1 });
@@ -174,10 +174,14 @@ export const deleteReview: Handler = async (req, res) => {
         .json({ message: "Review ID is required" });
       return;
     }
-    const existingReview = await RatingAndReview.findOneAndDelete({
-      userId: new Types.ObjectId(userId),
-      _id: new Types.ObjectId(reviewId),
-    });
+    const existingReview = await RatingAndReview.findOneAndUpdate(
+      {
+        userId: new Types.ObjectId(userId),
+        _id: new Types.ObjectId(reviewId),
+      },
+      { isActive: false },
+      { new: true }
+    );
     if (!existingReview) {
       res
         .status(StatusCode.DocumentExists)

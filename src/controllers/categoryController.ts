@@ -77,7 +77,11 @@ export const deleteCategory: Handler = async (req, res) => {
       });
     }
 
-    const categoryDetails = await Category.findByIdAndDelete(categoryId);
+    const categoryDetails = await Category.findByIdAndUpdate(
+      categoryId,
+      { isActive: false },
+      { new: true }
+    );
     if (!categoryDetails) {
       return res.status(StatusCode.NotFound).json({
         success: false,
@@ -100,7 +104,7 @@ export const deleteCategory: Handler = async (req, res) => {
 export const getAllCategory: Handler = async (req, res) => {
   try {
     const getCategory = await Category.find(
-      {},
+      {isActive: true},
       { name: true, description: true }
     );
     return res.status(StatusCode.Success).json({
@@ -116,7 +120,7 @@ export const getAllCategory: Handler = async (req, res) => {
     });
   }
 };
-export const categoryPageDetails: Handler = async (req, res) => { 
+export const categoryPageDetails: Handler = async (req, res) => {
   try {
     const { categoryId } = req.params;
     const selectedCategory = await Category.findById(categoryId)

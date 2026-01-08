@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-    deleteReview,
+  deleteReview,
   getAllReviews,
   rateAndReviewCourse,
   updateReview,
@@ -12,7 +12,7 @@ const reviewRouter = Router();
 reviewRouter.use(userMiddleware);
 
 reviewRouter.route("/review").post(rateAndReviewCourse);
-reviewRouter.route("/getall").get(getAllReviews);
+reviewRouter.route("/getall/:courseId").get(getAllReviews);
 reviewRouter.route("/update/:reviewId").put(updateReview);
 reviewRouter.route("/delete/:reviewId").delete(deleteReview);
 

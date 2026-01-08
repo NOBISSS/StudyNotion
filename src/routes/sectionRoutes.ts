@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { getAllCategory } from "../controllers/categoryController.js";
 import {
   changeSectionOrder,
   createSection,
