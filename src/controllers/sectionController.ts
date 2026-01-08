@@ -47,7 +47,10 @@ export const createSection: Handler = async (req, res): Promise<void> => {
       courseId,
       order,
     });
-
+    await Section.updateMany(
+      { courseId, _id: { $ne: section._id }, order: { $gte: order } },
+      { $inc: { order: 1 } }
+    );
     res.status(StatusCode.Success).json({
       success: true,
       message: "Section created successfully",
