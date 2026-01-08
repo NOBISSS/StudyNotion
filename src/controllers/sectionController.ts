@@ -1,6 +1,7 @@
 import z from "zod";
 import { Section } from "../models/SectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
+import { Types } from "mongoose";
 
 const createSectionSchema = z.object({
   name: z
@@ -216,3 +217,26 @@ export const updateSection: Handler = async (req, res): Promise<void> => {
     return;
   }
 }
+export const getAllSections: Handler = async (req, res): Promise<void> => {
+  try {
+    const instructorId = req.userId;
+    const courseId = req.params.courseId;
+    const sections = await Section.find({
+      instructorId,
+      courseId: new Types.ObjectId(courseId),
+      isRemoved: false,
+    }).sort({ order: 1 });
+    res.status(StatusCode.Success).json({
+      success: true,
+      message: "Sections retrieved successfully",
+      sections,
+    });
+  } catch (error) {
+    res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "Something went wrong from our side",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+};
