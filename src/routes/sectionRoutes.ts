@@ -5,6 +5,7 @@ import {
   getAllSections,
   getRemovedSections,
   removeSection,
+  undoLastRemovedSection,
   undoRemoveSection,
   updateSection,
 } from "../controllers/sectionController.js";
@@ -21,6 +22,7 @@ sectionRouter.route("/remove/:sectionId").delete(removeSection);
 sectionRouter.route("/getall/:courseId").get(getAllSections);
 sectionRouter.route("/changeorder/:sectionId").put(changeSectionOrder);
 sectionRouter.route("/removed/:courseId").get(getRemovedSections);
-sectionRouter.route("/undoRemove/:sectionId").put(undoRemoveSection);
+sectionRouter.route("/undoremove/:sectionId").put(undoRemoveSection);
+sectionRouter.route("/undolastremove/:courseId").put(undoLastRemovedSection);
 
 export { sectionRouter };

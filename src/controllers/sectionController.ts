@@ -289,7 +289,9 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
     const sections = await Section.find({
       courseId: new Types.ObjectId(courseId),
       isRemoved: true,
-    }).sort({ order: 1 }).populate('courseId');
+    })
+      .sort({ order: 1 })
+      .populate("courseId");
     if (sections.length === 0) {
       res.status(StatusCode.DocumentExists).json({
         success: false,
@@ -347,7 +349,43 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
       message: "Section restored successfully",
     });
     return;
-  }catch (error) {
+  } catch (error) {
+    res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "Something went wrong from our side",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+};
+export const undoLastRemovedSection: Handler = async (
+  req,
+  res
+): Promise<void> => {
+  try {
+    const instructorId = req.userId;
+    const courseId = req.params.courseId;
+    const lastRemovedSection = await Section.findOne({
+      courseId: new Types.ObjectId(courseId),
+      isRemoved: true,
+    }).sort({ order: -1 });
+    if (!lastRemovedSection) {
+      res.status(StatusCode.DocumentExists).json({
+        success: false,
+        message: "No removed sections found for this course",
+      });
+      return;
+    }
+    await Section.updateOne(
+      { _id: lastRemovedSection._id },
+      { isRemoved: false }
+    );
+    res.status(StatusCode.Success).json({
+      success: true,
+      message: "Last removed section restored successfully",
+    });
+    return;
+  } catch (error) {
     res.status(StatusCode.ServerError).json({
       success: false,
       message: "Something went wrong from our side",
