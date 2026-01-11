@@ -282,3 +282,40 @@ export const getAllSections: Handler = async (req, res): Promise<void> => {
     return;
   }
 };
+export const getRemovedSections: Handler = async (req, res): Promise<void> => {
+  try {
+    const instructorId = req.userId;
+    const courseId = req.params.courseId;
+    const sections = await Section.find({
+      courseId: new Types.ObjectId(courseId),
+      isRemoved: true,
+    }).sort({ order: 1 }).populate('courseId');
+    if (sections.length === 0) {
+      res.status(StatusCode.DocumentExists).json({
+        success: false,
+        message: "No removed sections found for this course",
+      });
+      return;
+    }
+    // @ts-ignore
+    if (sections[0]?.courseId.instructorId != instructorId) {
+      res.status(StatusCode.Unauthorized).json({
+        success: false,
+        message: "You are not authorized to view sections of this course",
+      });
+      return;
+    }
+    res.status(StatusCode.Success).json({
+      success: true,
+      message: "Removed sections retrieved successfully",
+      sections,
+    });
+  } catch (error) {
+    res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "Something went wrong from our side",
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+};

@@ -3,6 +3,7 @@ import {
   changeSectionOrder,
   createSection,
   getAllSections,
+  getRemovedSections,
   removeSection,
   updateSection,
 } from "../controllers/sectionController.js";
@@ -18,5 +19,6 @@ sectionRouter.route("/update/:sectionId").put(updateSection);
 sectionRouter.route("/remove/:sectionId").delete(removeSection);
 sectionRouter.route("/getall/:courseId").get(getAllSections);
 sectionRouter.route("/changeorder/:sectionId").put(changeSectionOrder);
+sectionRouter.route("/removed/:courseId").get(getRemovedSections);
 
 export { sectionRouter };
