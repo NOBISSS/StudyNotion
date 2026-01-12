@@ -99,7 +99,7 @@ export const removeSection: Handler = async (req, res): Promise<void> => {
     );
     const section = await Section.updateOne(
       { _id: sectionId },
-      { isRemoved: true, order: -1 }
+      { isRemoved: true, order: -1, lastOrder: existingSection.order }
     );
     res.status(StatusCode.Success).json({
       success: true,
@@ -299,8 +299,9 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
       });
       return;
     }
+    console.log(sections);
     // @ts-ignore
-    if (sections[0]?.courseId.instructorId != instructorId) {
+    if (sections[0]?.courseId.instructorId.toString() != instructorId) {
       res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "You are not authorized to view sections of this course",
@@ -343,7 +344,18 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
       });
       return;
     }
-    await Section.updateOne({ _id: sectionId }, { isRemoved: false });
+    await Section.updateOne(
+      { _id: sectionId },
+      { isRemoved: false, order: existingSection.lastOrder, lastOrder: null }
+    );
+    await Section.updateMany(
+      {
+        _id: { $ne: sectionId },
+        courseId: existingSection.courseId,
+        order: { $gte: existingSection.lastOrder || 1 },
+      },
+      { $inc: { order: 1 } }
+    );
     res.status(StatusCode.Success).json({
       success: true,
       message: "Section restored successfully",
@@ -378,7 +390,15 @@ export const undoLastRemovedSection: Handler = async (
     }
     await Section.updateOne(
       { _id: lastRemovedSection._id },
-      { isRemoved: false }
+      { isRemoved: false, order: lastRemovedSection.lastOrder, lastOrder: null }
+    );
+    await Section.updateMany(
+      {
+        _id: { $ne: lastRemovedSection._id },
+        courseId: lastRemovedSection.courseId,
+        order: { $gte: lastRemovedSection.lastOrder || 1 },
+      },
+      { $inc: { order: 1 } }
     );
     res.status(StatusCode.Success).json({
       success: true,

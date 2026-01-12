@@ -7,6 +7,7 @@ const sectionSchema = new Schema(
     order: { type: Number, required: true },
     subSectionIds: [{ type: Types.ObjectId, ref: "SubSection", default: [] }],
     isRemoved: { type: Boolean, default: false },
+    lastOrder: { type: Number, default: null },
   },
   { timestamps: true }
 );
