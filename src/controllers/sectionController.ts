@@ -322,19 +322,20 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
 };
 export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
   try {
-    const instructorId = req.userId;
     const sectionId = req.params.sectionId;
-    if (!sectionId) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: "Section ID is required",
+    const courseId = req.params.courseId;
+    let existingSection;
+    if (req.url.includes("/undoremoved")) {
+      existingSection = await Section.findOne({
+        _id: sectionId,
+        isRemoved: true,
       });
-      return;
+    }else{
+      existingSection = await Section.findOne({
+        courseId: new Types.ObjectId(courseId),
+        isRemoved: true,
+      }).sort({ order: -1 });
     }
-    const existingSection = await Section.findOne({
-      _id: sectionId,
-      isRemoved: true,
-    });
     if (!existingSection) {
       res.status(StatusCode.DocumentExists).json({
         success: false,
@@ -343,12 +344,12 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
       return;
     }
     await Section.updateOne(
-      { _id: sectionId },
+      { _id: existingSection._id },
       { isRemoved: false, order: existingSection.lastOrder, lastOrder: null }
     );
     await Section.updateMany(
       {
-        _id: { $ne: sectionId },
+        _id: { $ne: existingSection._id },
         courseId: existingSection.courseId,
         order: { $gte: existingSection.lastOrder || 1 },
       },
@@ -357,50 +358,6 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
     res.status(StatusCode.Success).json({
       success: true,
       message: "Section restored successfully",
-    });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
-  }
-};
-export const undoLastRemovedSection: Handler = async (
-  req,
-  res
-): Promise<void> => {
-  try {
-    const instructorId = req.userId;
-    const courseId = req.params.courseId;
-    const lastRemovedSection = await Section.findOne({
-      courseId: new Types.ObjectId(courseId),
-      isRemoved: true,
-    }).sort({ order: -1 });
-    if (!lastRemovedSection) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "No removed sections found for this course",
-      });
-      return;
-    }
-    await Section.updateOne(
-      { _id: lastRemovedSection._id },
-      { isRemoved: false, order: lastRemovedSection.lastOrder, lastOrder: null }
-    );
-    await Section.updateMany(
-      {
-        _id: { $ne: lastRemovedSection._id },
-        courseId: lastRemovedSection.courseId,
-        order: { $gte: lastRemovedSection.lastOrder || 1 },
-      },
-      { $inc: { order: 1 } }
-    );
-    res.status(StatusCode.Success).json({
-      success: true,
-      message: "Last removed section restored successfully",
     });
     return;
   } catch (error) {
