@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import z from "zod";
+import { Course } from "../models/CourseModel.js";
 import { Section } from "../models/SectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
 
@@ -33,10 +34,9 @@ export const createSection: Handler = async (req, res): Promise<void> => {
       });
       return;
     }
-    if (
-      // @ts-ignore
-      existingSection?.courseId.instructorId.toString() != instructorId
-    ) {
+    const existingCourse = await Course.findOne({ _id: courseId });
+
+    if (existingCourse?.instructorId.toString() != instructorId) {
       res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "You are not authorized to add sections to this course",
@@ -290,8 +290,7 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
       courseId: new Types.ObjectId(courseId),
       isRemoved: true,
     })
-      .sort({ order: 1 })
-      .populate("courseId");
+      .sort({ order: 1 });
     if (sections.length === 0) {
       res.status(StatusCode.DocumentExists).json({
         success: false,
@@ -299,9 +298,8 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
       });
       return;
     }
-    console.log(sections);
-    // @ts-ignore
-    if (sections[0]?.courseId.instructorId.toString() != instructorId) {
+    const existingCourse = await Course.findOne({ _id: courseId });
+    if (existingCourse?.instructorId.toString() != instructorId) {
       res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "You are not authorized to view sections of this course",
