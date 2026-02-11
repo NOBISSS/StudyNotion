@@ -4,12 +4,7 @@ import { CourseEnrollment } from "../models/CourseEnrollment.js";
 import { Course } from "../models/CourseModel.js";
 import { RatingAndReview } from "../models/RatingAndReview.js";
 import { StatusCode, type Handler } from "../types.js";
-
-const CourseRatingAndReviewSchema = z.object({
-  courseId: z.string(),
-  rating: z.number().min(1).max(5),
-  review: z.string().min(10).max(500),
-});
+import { CourseRatingAndReviewSchema } from "../validations/ratingValidation.js";
 
 export const rateAndReviewCourse: Handler = async (req, res) => {
   try {

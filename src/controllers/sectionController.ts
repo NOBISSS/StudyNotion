@@ -1,16 +1,8 @@
 import { Types } from "mongoose";
-import z from "zod";
 import { Course } from "../models/CourseModel.js";
 import { Section } from "../models/SectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-
-const createSectionSchema = z.object({
-  name: z
-    .string({ error: "Section name is required" })
-    .min(1, "Section name is required"),
-  courseId: z.string(),
-  order: z.number().min(0, "Order must be a non-negative number"),
-});
+import { createSectionSchema } from "../validations/sectionValidation.js";
 
 export const createSection: Handler = async (req, res): Promise<void> => {
   try {
