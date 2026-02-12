@@ -8,9 +8,10 @@ const quizSchema = new Schema(
     description: { type: String },
     questions: [
       {
+        questionId: { type: Types.ObjectId, default: new Types.ObjectId() },
         question: { type: String, required: true },
-        options: [{ type: String, required: true }],
-        correctAnswer: { type: String, required: true },
+        options: [{ optionId: { type: Types.ObjectId, default: new Types.ObjectId() }, optionText: { type: String, required: true } }],
+        correctAnswer: { type: Types.ObjectId, required: true },
         points: { type: Number, required: true },
       },
     ],

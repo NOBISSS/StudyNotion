@@ -31,12 +31,20 @@ export const createQuiz: Handler = async (req, res) => {
       });
       return;
     }
+    const questionsWithIds = questions.map((q) => ({
+      ...q,
+      questionId: new Types.ObjectId(),
+      options: q.options.map((option) => ({
+        optionId: new Types.ObjectId(),
+        optionText: option,
+      })),
+    }));
     const quiz = await Quiz.create({
       title,
       description: description || "",
       courseId,
       subSectionId,
-      questions,
+      questions: questionsWithIds,
     });
     res.status(StatusCode.Success).json({
       message: "Quiz created successfully",
