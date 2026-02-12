@@ -7,13 +7,14 @@ const subSectionSchema = new Schema({
         enum: ["video", "material", "quiz"],
         required: true,
     },
-    contentUrl: { type: String, required: true },
-    videoLength: { type: String },
-    materialType: { type: String },
+    // contentUrl: { type: String, required: true },
+    // videoLength: { type: String },
+    // materialType: { type: String },
     description: { type: String },
-    thumbnailUrl: { type: String },
+    // thumbnailUrl: { type: String },
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
-    videoAssetId: { type: Types.ObjectId, ref: "VideoAsset" },
+    sectionId: { type: Types.ObjectId, ref: "Section", required: true },
+    // videoAssetId: { type: Types.ObjectId, ref: "VideoAsset" },
 }, { timestamps: true });
 
 export const SubSection = model("SubSection", subSectionSchema);
