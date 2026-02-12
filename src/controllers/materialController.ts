@@ -1,16 +1,17 @@
 import { Types } from "mongoose";
 import { Course } from "../models/CourseModel.js";
+import { Material } from "../models/MaterialModel.js";
 import { Section } from "../models/SectionModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
 import { materialSchema } from "../validations/materialValidation.js";
-import { Material } from "../models/MaterialModel.js";
+import { generateSignedUrl } from "../utils/getSignedUrl.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
   userId: Types.ObjectId,
 ) => {
-  const course = await Course.findOne({ _id: courseId, userId });
+  const course = await Course.findOne({ _id: courseId, instructorId: userId });
   if (course) {
     return course;
   } else null;
@@ -42,11 +43,14 @@ export const addMaterial: Handler = async (req, res) => {
       materialS3Key,
       URLExpiration,
     } = parsedMaterialData.data;
-    const course = await isValidInstructor(new Types.ObjectId(courseId), userId);
+    const course = await isValidInstructor(
+      new Types.ObjectId(courseId),
+      userId,
+    );
     if (!course) {
       res.status(StatusCode.Unauthorized).json({
         message: "You are not authorized to add material to this course.",
-        });
+      });
       return;
     }
     const subsection = await SubSection.create({
@@ -56,13 +60,14 @@ export const addMaterial: Handler = async (req, res) => {
       contentType: "material",
       sectionId,
     });
+    const materialURL = await generateSignedUrl(materialS3Key);
     const material = await Material.create({
       materialName: title,
-      contentUrl,
+      contentUrl: materialURL,
       materialType,
-      materialSize: materialSize || null, 
+      materialSize: materialSize || null,
       materialS3Key,
-      URLExpiration: URLExpiration ? new Date(URLExpiration) : null,
+      URLExpiration: new Date(Date.now() + 3600000),
       subsectionId: subsection._id,
     });
     await Section.findByIdAndUpdate(sectionId, {
@@ -78,5 +83,6 @@ export const addMaterial: Handler = async (req, res) => {
       message: "An error occurred while adding material.",
       error: err instanceof Error ? err.message : "Unknown error",
     });
+    return;
   }
 };
