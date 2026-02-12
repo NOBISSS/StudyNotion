@@ -1,5 +1,6 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Types } from "mongoose";
+import { s3 } from "../config/s3Config.js";
 import { Course } from "../models/CourseModel.js";
 import { Material } from "../models/MaterialModel.js";
 import { Section } from "../models/SectionModel.js";
@@ -7,7 +8,6 @@ import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
 import { generateSignedUrl } from "../utils/getSignedUrl.js";
 import { materialSchema } from "../validations/materialValidation.js";
-import { s3 } from "../config/s3Config.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
@@ -35,7 +35,6 @@ export const addMaterial: Handler = async (req, res) => {
       });
     }
     const {
-      contentUrl,
       materialType,
       description,
       courseId,
@@ -43,7 +42,6 @@ export const addMaterial: Handler = async (req, res) => {
       sectionId,
       materialSize,
       materialS3Key,
-      URLExpiration,
     } = parsedMaterialData.data;
     const course = await isValidInstructor(
       new Types.ObjectId(courseId),
@@ -130,12 +128,10 @@ export const deleteMaterial: Handler = async (req, res) => {
       new Types.ObjectId(req.userId),
     );
     if (!course) {
-      res
-        .status(StatusCode.NotFound)
-        .json({
-          message:
-            "Course not found or you are not authorized to delete this material.",
-        });
+      res.status(StatusCode.NotFound).json({
+        message:
+          "Course not found or you are not authorized to delete this material.",
+      });
       return;
     }
 
@@ -151,10 +147,14 @@ export const deleteMaterial: Handler = async (req, res) => {
       Key: material.materialS3Key || "",
     });
     await s3.send(deleteCommand);
+    subsection.isActive = false;
+    await subsection.save();
     await Section.findByIdAndUpdate(subsection.sectionId, {
       $pull: { subSectionIds: material._id },
     });
-    res.status(StatusCode.Success).json({ message: "Material deleted successfully." });
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Material deleted successfully." });
     return;
   } catch (err) {
     res.status(StatusCode.ServerError).json({
