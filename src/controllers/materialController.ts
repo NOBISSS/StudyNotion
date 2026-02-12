@@ -4,8 +4,8 @@ import { Material } from "../models/MaterialModel.js";
 import { Section } from "../models/SectionModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-import { materialSchema } from "../validations/materialValidation.js";
 import { generateSignedUrl } from "../utils/getSignedUrl.js";
+import { materialSchema } from "../validations/materialValidation.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
@@ -82,6 +82,34 @@ export const addMaterial: Handler = async (req, res) => {
     res.status(StatusCode.ServerError).json({
       message: "An error occurred while adding material.",
       error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+};
+export const getMaterial: Handler = async (req, res) => {
+  try {
+    const materialId = req.params.id;
+    const material = await Material.findById(materialId);
+    if (!material) {
+      res.status(StatusCode.NotFound).json({ message: "Material not found" });
+      return;
+    }
+    let materialURL = material.contentUrl;
+    if (material.URLExpiration && material.URLExpiration < new Date()) {
+        materialURL = await generateSignedUrl(material.materialS3Key);
+    }
+    res.status(StatusCode.Success).json({
+      message: "Material retrieved successfully.",
+      material: {
+        ...material.toObject(),
+        contentUrl: materialURL,
+      },
+    });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "An error occurred while retrieving material.",
+        error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
