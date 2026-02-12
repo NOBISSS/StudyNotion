@@ -29,6 +29,7 @@ const courseSchema = new Schema(
         default: "Draft",
     },
     isBoosted: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
     sections: [{ type: Types.ObjectId, ref: "Section" }],
   },
   { timestamps: true }

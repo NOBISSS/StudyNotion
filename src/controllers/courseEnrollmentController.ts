@@ -54,7 +54,6 @@ export const EnrollInCourse: Handler = async (req, res) => {
 export const getAllEnrollments: Handler = async (req, res) => {
   try {
     const userId = req.userId;
-    const user = req.user;
 
     const courseEnrollments = await CourseEnrollment.find({
       userId: new Types.ObjectId(userId),
@@ -62,7 +61,7 @@ export const getAllEnrollments: Handler = async (req, res) => {
       .populate("courseId")
       .sort({ createdAt: -1 });
     res.status(StatusCode.Success).json({
-      message: "Course enrollment created successfully",
+      message: "Course enrollments retrieved successfully",
       courseEnrollments,
     });
     return;

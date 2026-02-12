@@ -210,3 +210,25 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
     return;
   }
 };
+export const deleteCourse: Handler = async (req, res) => {
+  try{
+    const courseId = req.params.courseId;
+    const course = await Course.findByIdAndUpdate(courseId, { isActive: false });
+    if (!course) {
+      res.status(StatusCode.NotFound).json({ message: "Course not found" });
+      return;
+    }
+    await RatingAndReview.updateMany(
+      { courseId: new Types.ObjectId(courseId) },
+      { isActive: false }
+    );
+    res.status(StatusCode.Success).json({ message: "Course deleted successfully" });
+
+  }
+  catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+}

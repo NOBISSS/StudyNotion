@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createCourse,
+  deleteCourse,
   getAllCourse,
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
@@ -18,7 +19,7 @@ courseRouter
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.use(isInstructor);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
-// courseRouter.route("/delete/:id").delete();
+courseRouter.route("/delete/:courseId").delete(deleteCourse);
 // courseRouter.route("/getcourse/:id").get();
 // courseRouter.route("/update/:id").post();
 
