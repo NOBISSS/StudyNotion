@@ -66,10 +66,11 @@ export const createCourse: Handler = async (req, res) => {
       level,
       tag: tag || [],
       thumbnailUrl: thumbnailImage.secure_url,
-      slug: courseName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
+      slug:
+        courseName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
     });
     await Category.findByIdAndUpdate(categoryId, {
       $push: { courses: course._id },
@@ -109,7 +110,7 @@ export const getAllCourse: Handler = async (req, res) => {
 };
 export const getAllCourseByEnrollmentsAndRatings: Handler = async (
   req,
-  res
+  res,
 ) => {
   try {
     const userId = req.userId;
@@ -136,7 +137,7 @@ export const getAllCourseByEnrollmentsAndRatings: Handler = async (
         }))
           ? true
           : false,
-      }))
+      })),
     );
     const sortedCourses = coursesWithEnrollmentCount.slice().sort((a, b) => {
       if (b.enrollmentsCount === a.enrollmentsCount) {
@@ -159,7 +160,7 @@ export const getAllCourseByEnrollmentsAndRatings: Handler = async (
 };
 export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
   req,
-  res
+  res,
 ) => {
   try {
     const userId = req.userId;
@@ -189,7 +190,7 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
         }))
           ? true
           : false,
-      }))
+      })),
     );
     const sortedCourses = coursesWithEnrollmentCount.slice().sort((a, b) => {
       if (b.enrollmentsCount === a.enrollmentsCount) {
@@ -211,24 +212,90 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
   }
 };
 export const deleteCourse: Handler = async (req, res) => {
-  try{
+  try {
     const courseId = req.params.courseId;
-    const course = await Course.findByIdAndUpdate(courseId, { isActive: false });
+    const course = await Course.findById(courseId);
     if (!course) {
       res.status(StatusCode.NotFound).json({ message: "Course not found" });
       return;
     }
+    if (course.instructorId !== req.userId) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "You are not authorized to delete this course" });
+      return;
+    }
+    course.isActive = false;
+    await course.save({validateBeforeSave: false});
     await RatingAndReview.updateMany(
       { courseId: new Types.ObjectId(courseId) },
-      { isActive: false }
+      { isActive: false },
     );
-    res.status(StatusCode.Success).json({ message: "Course deleted successfully" });
-
-  }
-  catch (err) {
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Course deleted successfully" });
+  } catch (err) {
     res
       .status(StatusCode.ServerError)
       .json({ message: "Something went wrong from ourside", err });
     return;
   }
-}
+};
+export const updateCourse: Handler = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    if (courseId && !Types.ObjectId.isValid(courseId as string)) {
+      res.status(StatusCode.InputError).json({ message: "Invalid course ID" });
+      return;
+    }
+    const parsedCourseData = courseInputSchema.safeParse(req.body);
+    if (!parsedCourseData.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+          parsedCourseData.error.issues[0]?.message || "Invalid course data",
+      });
+      return;
+    }
+    const {
+      courseName,
+      description,
+      typeOfCourse,
+      coursePlan,
+      price,
+      level,
+      tag,
+    } = parsedCourseData.data;
+    const course = await Course.findById(courseId,);
+    if (!course) {
+      res.status(StatusCode.NotFound).json({ message: "Course not found" });
+      return;
+    }
+    if (course.instructorId !== req.userId) {
+      res
+        .status(StatusCode.Unauthorized)
+        .json({ message: "You are not authorized to update this course" });
+      return;
+    }
+    const updatedCourse = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        courseName,
+        description,
+        typeOfCourse,
+        coursePlan: coursePlan ? new Types.ObjectId(coursePlan) : null,
+        originalPrice: price || 0,
+        level,
+        tag: tag || [],
+      },
+      { new: true, runValidators: true },
+    );
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Course updated successfully" });
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err });
+    return;
+  }
+};

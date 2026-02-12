@@ -5,6 +5,7 @@ import {
   getAllCourse,
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
+  updateCourse,
 } from "../controllers/courseController.js";
 import { upload } from "../middlewares/upload.js";
 import { isInstructor, userMiddleware } from "../middlewares/userMiddleware.js";
@@ -21,6 +22,6 @@ courseRouter.use(isInstructor);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
 // courseRouter.route("/getcourse/:id").get();
-// courseRouter.route("/update/:id").post();
+courseRouter.route("/update/:courseId").put(updateCourse);
 
 export { courseRouter };
