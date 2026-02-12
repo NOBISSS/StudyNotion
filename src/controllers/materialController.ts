@@ -1,3 +1,4 @@
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Types } from "mongoose";
 import { Course } from "../models/CourseModel.js";
 import { Material } from "../models/MaterialModel.js";
@@ -6,6 +7,7 @@ import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
 import { generateSignedUrl } from "../utils/getSignedUrl.js";
 import { materialSchema } from "../validations/materialValidation.js";
+import { s3 } from "../config/s3Config.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
@@ -96,7 +98,7 @@ export const getMaterial: Handler = async (req, res) => {
     }
     let materialURL = material.contentUrl;
     if (material.URLExpiration && material.URLExpiration < new Date()) {
-        materialURL = await generateSignedUrl(material.materialS3Key);
+      materialURL = await generateSignedUrl(material.materialS3Key);
     }
     res.status(StatusCode.Success).json({
       message: "Material retrieved successfully.",
@@ -109,7 +111,55 @@ export const getMaterial: Handler = async (req, res) => {
   } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "An error occurred while retrieving material.",
-        error: err instanceof Error ? err.message : "Unknown error",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+};
+export const deleteMaterial: Handler = async (req, res) => {
+  try {
+    const subsectionId = req.params.subsectionId;
+
+    const subsection = await SubSection.findById(subsectionId);
+    if (!subsection) {
+      res.status(StatusCode.NotFound).json({ message: "Subsection not found" });
+      return;
+    }
+    const course = await isValidInstructor(
+      new Types.ObjectId(subsection.courseId),
+      new Types.ObjectId(req.userId),
+    );
+    if (!course) {
+      res
+        .status(StatusCode.NotFound)
+        .json({
+          message:
+            "Course not found or you are not authorized to delete this material.",
+        });
+      return;
+    }
+
+    const material = await Material.findOneAndDelete({
+      subsectionId: new Types.ObjectId(subsectionId),
+    });
+    if (!material) {
+      res.status(StatusCode.NotFound).json({ message: "Material not found" });
+      return;
+    }
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: material.materialS3Key || "",
+    });
+    await s3.send(deleteCommand);
+    await Section.findByIdAndUpdate(subsection.sectionId, {
+      $pull: { subSectionIds: material._id },
+    });
+    res.status(StatusCode.Success).json({ message: "Material deleted successfully." });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "An error occurred while deleting material.",
+      error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
