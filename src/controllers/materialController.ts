@@ -6,7 +6,7 @@ import { Material } from "../models/MaterialModel.js";
 import { Section } from "../models/SectionModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-import { generateSignedUrl } from "../utils/getSignedUrl.js";
+import { deleteObject, generateSignedUrl } from "../utils/getSignedUrl.js";
 import { materialSchema } from "../validations/materialValidation.js";
 
 export const isValidInstructor = async (
@@ -164,3 +164,59 @@ export const deleteMaterial: Handler = async (req, res) => {
     return;
   }
 };
+export const updateMaterial: Handler = async (req, res) => {
+  try{
+    const subsectionId = req.params.subsectionId;
+    const parsedMaterialData = materialSchema.partial().safeParse(req.body);
+    if (!parsedMaterialData.success) {
+      return res.status(StatusCode.InputError).json({
+        message: parsedMaterialData.error.issues[0]?.message,
+      });
+    }
+    const { materialType, description, title, materialSize, materialS3Key } = parsedMaterialData.data;
+    const subsection = await SubSection.findById(subsectionId);
+    if (!subsection) {
+      res.status(StatusCode.NotFound).json({ message: "Subsection not found" });
+      return;
+    }
+    const course = await isValidInstructor(
+      new Types.ObjectId(subsection.courseId),
+      new Types.ObjectId(req.userId),
+    );
+    if (!course) {
+      res.status(StatusCode.NotFound).json({
+        message:
+          "Course not found or you are not authorized to update this material.",
+      });
+      return;
+    }
+    const materialURL = await generateSignedUrl(materialS3Key || "");
+    const material = await Material.findOneAndUpdate(
+      { subsectionId: new Types.ObjectId(subsectionId) },
+      {
+        materialType: materialType || undefined,
+        materialName: title || undefined,
+        materialSize: materialSize || undefined,
+        materialS3Key: materialS3Key || undefined,
+        contentUrl: materialURL || undefined,
+        description: description || undefined,
+      },
+      { new: false },
+    );
+    if (!material) {
+      res.status(StatusCode.NotFound).json({ message: "Material not found" });
+      return;
+    }
+    await deleteObject(material.materialS3Key || "");
+    res.status(StatusCode.Success).json({
+      message: "Material updated successfully.",
+      material,
+    });
+  }catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "An error occurred while updating material.",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+}

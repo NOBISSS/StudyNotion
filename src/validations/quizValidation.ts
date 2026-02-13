@@ -4,7 +4,7 @@ export const createQuizSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   courseId: z.string().min(1, "Course ID is required"),
-  subSectionId: z.string().min(1, "Subsection ID is required"),
+  sectionId: z.string().min(1, "Section ID is required"),
   questions: z
     .array(
       z.object({

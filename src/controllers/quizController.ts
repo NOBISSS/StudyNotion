@@ -20,7 +20,7 @@ export const createQuiz: Handler = async (req, res) => {
         message: parsedQuizData.error.issues[0]?.message,
       });
     }
-    const { title, description, courseId, subSectionId, questions } =
+    const { title, description, courseId, sectionId, questions } =
       parsedQuizData.data;
     const course = await isValidInstructor(
       new Types.ObjectId(courseId),
@@ -40,11 +40,18 @@ export const createQuiz: Handler = async (req, res) => {
         optionText: option,
       })),
     }));
+    const subSection = await SubSection.create({
+      title,
+      description: description || "",
+      courseId,
+      contentType: "quiz",
+      sectionId,
+    });
     const quiz = await Quiz.create({
       title,
       description: description || "",
       courseId,
-      subSectionId,
+      subSectionId: subSection._id,
       questions: questionsWithIds,
     });
     res.status(StatusCode.Success).json({
