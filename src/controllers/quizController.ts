@@ -255,3 +255,28 @@ export const attemptQuiz: Handler = async (req, res) => {
     return;
   }
 }
+export const getQuizAttemptByUser: Handler = async (req, res) => {
+  try{
+    const userId = new Types.ObjectId(req.userId);
+    const quizId = req.query.quizId;
+    if(!quizId || !userId){
+      res.status(StatusCode.InputError).json({
+        message: "Quiz ID and User ID are required.",
+      });
+      return;
+    }
+    const quizAttempt = await QuizAttempt.findOne({ userId, quizId }).populate("quizId", "title");
+    res.status(StatusCode.Success).json({
+      message: "Quiz attempts retrieved successfully.",
+      quizAttempt,
+    });
+    return;
+  }
+  catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "Something went wrong from ourside",
+        error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+}
