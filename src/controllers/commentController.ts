@@ -75,7 +75,7 @@ export const updateComment: Handler = async (req, res) => {
     const { message } = req.body;
     const comment = await Comment.findOneAndUpdate(
       { _id: new Types.ObjectId(commentId), userId },
-      { message },
+      { message, isEdited: true },
       { new: true },
     );
     if (!comment) {
@@ -87,6 +87,39 @@ export const updateComment: Handler = async (req, res) => {
     res.status(StatusCode.Success).json({
       message: "Comment updated successfully",
       comment,
+    });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "Something went wrong from ourside",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+};
+export const deleteComment: Handler = async (req, res) => {
+  try {
+    const commentId = req.params.commentId;
+    const userId = req.userId;
+    if (!userId || !commentId) {
+      res.status(StatusCode.Unauthorized).json({
+        message: "Unauthorized. User ID or Comment ID is missing.",
+      });
+      return;
+    }
+    const comment = await Comment.findOneAndUpdate(
+      { _id: new Types.ObjectId(commentId), userId },
+      { isDeleted: true },
+      { new: true },
+    );
+    if (!comment) {
+      res.status(StatusCode.NotFound).json({
+        message: "Comment not found",
+      });
+      return;
+    }
+    res.status(StatusCode.Success).json({
+      message: "Comment deleted successfully",
     });
     return;
   } catch (err) {
