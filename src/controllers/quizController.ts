@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { Quiz } from "../models/QuizModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-import { createQuizSchema } from "../validations/quizValidation.js";
+import { createQuizSchema, updateQuizSchema } from "../validations/quizValidation.js";
 import { isValidInstructor } from "./materialController.js";
 
 export const createQuiz: Handler = async (req, res) => {
@@ -129,3 +129,61 @@ export const getQuizBySubSectionId: Handler = async (req, res) => {
     return;
   }
 };
+export const updateQuiz: Handler = async (req, res) => {
+  try{
+    const parsedQuizData = updateQuizSchema.safeParse(req.body);
+    const subsectionId = req.params.subSectionId;
+    if (!subsectionId) {
+      res.status(StatusCode.InputError).json({
+        message: "Quiz/Subsection ID is required in the URL parameters.",
+      });
+      return;
+    }
+    if (!parsedQuizData.success) {
+      res.status(StatusCode.InputError).json({
+        message: parsedQuizData.error.issues[0]?.message,
+      });
+      return;
+    }
+    const { title, description, questions } = parsedQuizData.data;
+    const questionsWithIds = questions.map((q) => {
+      let questionId = q.questionId ? q.questionId : new Types.ObjectId();
+      const optionsWithIds = q.options.map((option) => {
+        let optionId = option.optionId ? option.optionId : new Types.ObjectId();
+        return {
+          optionId,
+          optionText: option.optionText,
+        };
+      });
+      return {
+        questionId,
+        question: q.question,
+        options: optionsWithIds,
+        correctAnswer: q.correctAnswer,
+        points: q.points,
+      };
+    });
+    const quiz = await Quiz.findOneAndUpdate(
+      { subSectionId: new Types.ObjectId(subsectionId) },
+      { title, description, questions: questionsWithIds },
+      { new: true }
+    );
+    if (!quiz) {
+      res.status(StatusCode.NotFound).json({
+        message: "Quiz not found for the given subsection ID.",
+      });
+      return;
+    }
+    res.status(StatusCode.Success).json({
+      message: "Quiz updated successfully.",
+      quiz,
+    });
+    return;
+  }catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "Something went wrong from ourside",
+        error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+}

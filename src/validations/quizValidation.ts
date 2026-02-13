@@ -18,3 +18,23 @@ export const createQuizSchema = z.object({
     )
     .min(1, "At least one question is required"),
 });
+export const updateQuizSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  questions: z
+    .array(
+      z.object({
+        questionId: z.string().optional(),
+        question: z.string().min(1, "Question is required"),
+        options: z
+          .array(z.object({
+            optionId: z.string().optional(),
+            optionText: z.string().min(1, "Option cannot be empty"),
+          }))
+          .min(2, "At least two options are required"),
+        correctAnswer: z.string().min(1, "Correct answer is required"),
+        points: z.number().min(1, "Points must be at least 1"),
+      }),
+    )
+    .min(1, "At least one question is required"),
+});
