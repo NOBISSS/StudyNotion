@@ -2,8 +2,9 @@ import { Types } from "mongoose";
 import { Quiz } from "../models/QuizModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-import { createQuizSchema, updateQuizSchema } from "../validations/quizValidation.js";
+import { attemptQuizSchema, createQuizSchema, updateQuizSchema } from "../validations/quizValidation.js";
 import { isValidInstructor } from "./materialController.js";
+import QuizAttempt from "../models/QuizAttemptModel.js";
 
 export const createQuiz: Handler = async (req, res) => {
   try {
@@ -116,7 +117,7 @@ export const getQuizBySubSectionId: Handler = async (req, res) => {
     const quiz = await Quiz.findOne({
       subSectionId: new Types.ObjectId(subSectionId),
       isActive: true,
-    });
+    }).select("-questions.correctAnswer");
     if (!quiz) {
       res
         .status(StatusCode.NotFound)
@@ -187,6 +188,66 @@ export const updateQuiz: Handler = async (req, res) => {
     });
     return;
   }catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "Something went wrong from ourside",
+        error: err instanceof Error ? err.message : "Unknown error",
+    });
+    return;
+  }
+}
+export const attemptQuiz: Handler = async (req, res) => {
+  try{
+    const parsedAttemptData = attemptQuizSchema.safeParse(req.body);
+    if (!parsedAttemptData.success) {
+      res.status(StatusCode.InputError).json({
+        message: parsedAttemptData.error.issues[0]?.message,
+      });
+      return;
+    }
+    const { quizId, answers } = parsedAttemptData.data;
+    const quiz = await Quiz.findById(new Types.ObjectId(quizId));
+    if (!quiz) {
+      res.status(StatusCode.NotFound).json({
+        message: "Quiz not found for the given quiz ID.",
+      });
+      return;
+    }
+    let score = 0;
+    const answersWithCorrectness = answers.map((answer) => {
+      const question = quiz.questions.find(
+        (q) => q.questionId.toString() === answer.questionId,
+      );
+      if (!question) {
+        return {
+          questionId: new Types.ObjectId(answer.questionId),
+          answer: new Types.ObjectId(answer.answer),
+          isCorrect: false,
+        };
+      }
+      const isCorrect =
+        question.correctAnswer.toString() === answer.answer;
+      if (isCorrect) {
+        score += question.points;
+      }
+      return {
+        questionId: new Types.ObjectId(answer.questionId),
+        answer: new Types.ObjectId(answer.answer),
+        isCorrect,
+      };
+    });
+    const quizAttempt = await QuizAttempt.create({
+      userId: new Types.ObjectId(req.userId),
+      quizId: new Types.ObjectId(quizId),
+      score,
+      answers: answersWithCorrectness,
+    });
+    res.status(StatusCode.Success).json({
+      message: "Quiz attempt recorded successfully.",
+      quizAttempt,
+    });
+    return;
+  }
+  catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong from ourside",
         error: err instanceof Error ? err.message : "Unknown error",

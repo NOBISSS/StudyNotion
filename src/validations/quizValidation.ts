@@ -38,3 +38,12 @@ export const updateQuizSchema = z.object({
     )
     .min(1, "At least one question is required"),
 });
+export const attemptQuizSchema = z.object({
+  quizId: z.string().min(1, "Quiz ID is required"),
+  answers: z.array(
+    z.object({
+      questionId: z.string().min(1, "Question ID is required"),
+      answer: z.string().min(1, "Answer is required"),
+    }),
+  ),
+});
