@@ -36,3 +36,26 @@ export const createComment:Handler = async (req, res) => {
         return;
     }
 }
+export const getCommentsBySubSectionId:Handler = async (req, res) => {
+    try{
+        const subsectionId = req.params.subsectionId;
+        const userId = req.userId;
+        const comments = await Comment.find({ subsectionId }).populate("userId", "name email");
+        const commentsWithOwnership = comments.map(comment => ({
+            ...comment.toObject(),
+            isOwner: comment.userId._id === userId,
+        }));
+        res.status(StatusCode.Success).json({
+            message: "Comments fetched successfully",
+            comments: commentsWithOwnership,
+        });
+        return;
+    }
+    catch(err){
+        res.status(StatusCode.ServerError).json({
+            message: "Something went wrong from ourside",
+            error: err instanceof Error ? err.message : "Unknown error",
+        });
+        return;
+    }
+}
