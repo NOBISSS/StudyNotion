@@ -7,6 +7,7 @@ declare global {
       userId?: mongoose.Types.ObjectId;
       expiry?: Date;
       user: User;
+      accountType: "student" | "instructor" | "admin";
     }
   }
 }

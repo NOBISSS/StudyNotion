@@ -1,5 +1,6 @@
 import { Category } from "../models/CategoryModel.js";
 import { StatusCode, type Handler } from "../types.js";
+
 export const createCategory: Handler = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -28,11 +29,82 @@ export const createCategory: Handler = async (req, res) => {
     });
   }
 };
+export const updateCategory: Handler = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const { name, description } = req.body;
+    if (!name || !description || !categoryId) {
+      return res.status(StatusCode.InputError).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
 
+    const categoryDetails = await Category.findByIdAndUpdate(
+      categoryId,
+      {
+        name: name,
+        description: description,
+      },
+      { new: true }
+    );
+    if (!categoryDetails) {
+      return res.status(StatusCode.NotFound).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(StatusCode.Success).json({
+      success: true,
+      message: "Category updated successfully",
+      category: categoryDetails,
+    });
+  } catch (error) {
+    return res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "something went wrong while creating category",
+      error,
+    });
+  }
+};
+export const deleteCategory: Handler = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    if (!categoryId) {
+      return res.status(StatusCode.InputError).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const categoryDetails = await Category.findByIdAndUpdate(
+      categoryId,
+      { isActive: false },
+      { new: true }
+    );
+    if (!categoryDetails) {
+      return res.status(StatusCode.NotFound).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(StatusCode.Success).json({
+      success: true,
+      message: "Category deleted successfully",
+      category: categoryDetails,
+    });
+  } catch (error) {
+    return res.status(StatusCode.ServerError).json({
+      success: false,
+      message: "something went wrong while creating category",
+      error,
+    });
+  }
+};
 export const getAllCategory: Handler = async (req, res) => {
   try {
     const getCategory = await Category.find(
-      {},
+      {isActive: true},
       { name: true, description: true }
     );
     return res.status(StatusCode.Success).json({
@@ -48,8 +120,7 @@ export const getAllCategory: Handler = async (req, res) => {
     });
   }
 };
-
-export const categoryPageDetails: Handler = async (req, res) => { 
+export const categoryPageDetails: Handler = async (req, res) => {
   try {
     const { categoryId } = req.params;
     const selectedCategory = await Category.findById(categoryId)

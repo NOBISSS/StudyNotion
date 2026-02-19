@@ -18,13 +18,14 @@ export const userMiddleware = async (
       return;
     }
     //@ts-ignore
-    const user = await User.findById(decodedToken._id);
+    const user = await User.findById(decodedToken._id).select("-password -refreshToken -__v");
     if (!user) {
       res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });
       return;
     }
     req.userId = user._id;
     req.user = user;
+    req.accountType = user.accountType;
     next();
   } catch (err: any) {
     res
@@ -40,11 +41,11 @@ export const isStudent = async (
   next: NextFunction
 ) => {
   try {
-    if (req.user.accountType == "admin") {
+    if (req.accountType == "admin") {
       next();
       return;
     }
-    if (req.user.accountType !== "student") {
+    if (req.accountType !== "student") {
       return res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "Only students are allowed to access this route",
@@ -67,11 +68,11 @@ export const isInstructor = async (
   next: NextFunction
 ) => {
   try {
-    if (req.user.accountType == "admin") {
+    if (req.accountType == "admin" || req.accountType == "instructor") {
       next();
       return;
     }
-    if (req.user.accountType !== "instructor") {
+    if (req.accountType == "student") {
       res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "Only instructors are allowed to access this route",
@@ -96,7 +97,7 @@ export const isAdmin = async (
   next: NextFunction
 ) => {
   try {
-    if (req.user.accountType !== "admin") {
+    if (req.accountType !== "admin") {
       return res.status(StatusCode.Unauthorized).json({
         success: false,
         message: "Only admins are allowed to access this route",

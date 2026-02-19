@@ -10,6 +10,10 @@ const CategorySchema = new Schema({
     type: String,
     trim: true,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   courses: [
     {
       type: Schema.Types.ObjectId,

@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import redis from "../config/redis.js";
 
 const OTP_TTL = 5 * 60; //5min
-const RESEND_BLOCK_TIME = 120; //2min
+const RESEND_BLOCK_TIME = 0; //0min
+// const RESEND_BLOCK_TIME = 120; //2min
 
 //GENERATE OTP
 export const generateOTP = () => {
@@ -15,6 +16,7 @@ export type OTPData = {
   lastName?: string | undefined;
   accountType?: "admin" | "instructor" | "student" | undefined;
   password?: string | undefined;
+  otpType?: "registration" | "forget" | undefined;
 };
 
 //SAVE OTP IN REDIS
@@ -50,13 +52,17 @@ export const canResendOTP = async (email: string) => {
 };
 
 //verifyOTP
-export const verifyOTP = async (email: string, userOtp: string) => {
+export const verifyOTP = async (
+  email: string,
+  userOtp: string,
+  otpType: "registration" | "forget"
+) => {
   const data = await getOTPData(email);
   if (!data || !data.otp) return null;
 
   const isValid = await bcrypt.compare(userOtp, data.otp as string);
   if (!isValid) return null;
-
+  if (data.otpType !== otpType) return null;
   await redis.del(`otp:${email}`);
   return data;
 };

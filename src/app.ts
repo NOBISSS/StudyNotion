@@ -6,6 +6,9 @@ import { courseRouter } from "./routes/courseRoutes.js";
 import { userRouter } from "./routes/userRoutes.js";
 import { courseEnrollmentRouter } from "./routes/courseEnrollmentRoutes.js";
 import { categoryRouter } from "./routes/categoryRoutes.js";
+import { reviewRouter } from "./routes/reviewRoutes.js";
+import { sectionRouter } from "./routes/sectionRoutes.js";
+import subsectionRouter from "./routes/subsectionRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -19,10 +22,13 @@ app.get("/", (req, res) => {
 });
 
 
-app.use("/api/users",userRedisRouter)
+app.use("/api/users",userRedisRouter);
+app.use("/api/users",userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/enrollments", courseEnrollmentRouter);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/sections", sectionRouter);
+app.use("/api/subsection", subsectionRouter); 
 
-//app.use("/api/users",userRouter)
 export default app;
