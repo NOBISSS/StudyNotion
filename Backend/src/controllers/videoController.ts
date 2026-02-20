@@ -2,6 +2,8 @@ import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
   UploadPartCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -110,11 +112,11 @@ export const completeVideoUpload: Handler = async (req, res) => {
     }
 
     const sortedParts = parts
-      .map((p) => ({
+      .map((p: { etag: any; ETag: any; eTag: any; part: any; partNumber: any; PartNumber: any; }) => ({
         ETag: p.etag ?? p.ETag ?? p.eTag,
         PartNumber: Number(p.part ?? p.partNumber ?? p.PartNumber),
       }))
-      .sort((a, b) => a.PartNumber - b.PartNumber);
+      .sort((a: { PartNumber: number; }, b: { PartNumber: number; }) => a.PartNumber - b.PartNumber);
 
     const completeCmd = new CompleteMultipartUploadCommand({
       Bucket: BUCKET,
@@ -242,6 +244,48 @@ export const abortVideoUpload: Handler = async (req, res) => {
   } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong while aborting the video upload.",
+      error: err,
+    });
+  }
+};
+export const getVideo: Handler = async (req, res) => {
+  try {
+    // const { start, end } = req.query;
+    const { videoId } = req.params;
+    // if (start === undefined || end === undefined) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "start and end query params are required" });
+    // }
+    const video = await Video.findById(videoId);
+    if (!video) {
+      return res.status(404).json({ message: "Video not found!" });
+    }
+    const headData = await s3.send(
+      new HeadObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: video.videoS3Key,
+      }),
+    );
+    const fileSize = headData.ContentLength;
+    const CHUNK_SIZE = 1024 * 1024; // 1MB
+    const start = 0;
+    const end = 1048575;
+    // const start = Number(range.re  place(/\D/g, ""));
+    // const end = Math.min(start + CHUNK_SIZE - 1, fileSize - 1);
+    const command = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Range: `bytes=${start}-${end}`,
+      Key: video.videoS3Key,
+    });
+    const commandResponse = await s3.send(command);
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
+    // video.link = signedUrl;
+    // await video.save({ validateBeforeSave: false });
+    res.json({ video, link: signedUrl });
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({
+      message: "Something went wrong while adding the video.",
       error: err,
     });
   }

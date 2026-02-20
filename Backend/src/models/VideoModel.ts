@@ -12,7 +12,7 @@
 
 //   VideoAsset {
 //     videoId ObjectId pk
-//     courseId ObjectId fk 
+//     courseId ObjectId fk
 //     instructorId ObjectId fk
 //     sourceUrl string  // original uploaded file location (S3 key)
 //     masterPlaylistUrl string   // S3/CloudFront URL for master.m3u8 (relative key)
@@ -31,8 +31,8 @@ import { Schema, model } from "mongoose";
 const VideoSchema = new Schema(
   {
     videoName: String,
-    videoS3Key: {type: String, required: true},
-    videoURL: {type: String, required: true},
+    videoS3Key: { type: String, required: true },
+    videoURL: { type: String },
     status: String,
     URLExpiration: Date,
     videoSize: Number,
