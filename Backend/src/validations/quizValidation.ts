@@ -30,8 +30,10 @@ export const updateQuizSchema = z.object({
           .array(z.object({
             optionId: z.string().optional(),
             optionText: z.string().min(1, "Option cannot be empty"),
-          }))
-          .min(2, "At least two options are required"),
+          })).optional(),
+        optionsOnly: z
+          .array(z.string().min(1, "Option cannot be empty"))
+          .min(2, "At least two options are required").optional(),
         correctAnswer: z.string().min(1, "Correct answer is required"),
         points: z.number().min(1, "Points must be at least 1"),
       }),

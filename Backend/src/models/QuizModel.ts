@@ -10,9 +10,10 @@ const quizSchema = new Schema(
       {
         questionId: { type: Types.ObjectId, default: new Types.ObjectId() },
         question: { type: String, required: true },
-        options: [{ optionId: { type: Types.ObjectId, default: new Types.ObjectId() }, optionText: { type: String, required: true } }],
+        options: [{ optionId: { type: Types.ObjectId, default: new Types.ObjectId() }, optionText: { type: String, required: true } , _id: false, default: [] }],
         correctAnswer: { type: Types.ObjectId, required: true },
         points: { type: Number, required: true },
+        _id: false,
       },
     ],
     isActive: { type: Boolean, default: true },

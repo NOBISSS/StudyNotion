@@ -120,6 +120,10 @@ export const deleteQuiz: Handler = async (req, res) => {
 export const getQuizBySubSectionId: Handler = async (req, res) => {
   try {
     const subSectionId = req.params.subSectionId;
+    // const quiz = await Quiz.findOne({
+    //   subSectionId: new Types.ObjectId(subSectionId),
+    //   isActive: true,
+    // });
     const quiz = await Quiz.findOne({
       subSectionId: new Types.ObjectId(subSectionId),
       isActive: true,
@@ -162,18 +166,23 @@ export const updateQuiz: Handler = async (req, res) => {
     const { title, description, questions } = parsedQuizData.data;
     const questionsWithIds = questions.map((q) => {
       let questionId = q.questionId ? q.questionId : new Types.ObjectId();
-      const optionsWithIds = q.options.map((option) => {
+      const optionsWithIds = q.options ? q.options.map((option) => {
         let optionId = option.optionId ? option.optionId : new Types.ObjectId();
         return {
           optionId,
           optionText: option.optionText,
         };
-      });
+      }) : q.optionsOnly ? q.optionsOnly.map((optionText) => {
+        return {
+          optionId: new Types.ObjectId(),
+          optionText,
+        };
+      }) : [];
       return {
         questionId,
         question: q.question,
         options: optionsWithIds,
-        correctAnswer: q.correctAnswer,
+        correctAnswer: optionsWithIds.find(o => o.optionText.toLowerCase() == q.correctAnswer.toLowerCase() || o.optionId.toString() == q.correctAnswer)?.optionId || null,
         points: q.points,
       };
     });
