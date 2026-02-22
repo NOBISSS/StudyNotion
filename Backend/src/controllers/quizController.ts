@@ -1,10 +1,14 @@
 import { Types } from "mongoose";
+import QuizAttempt from "../models/QuizAttemptModel.js";
 import { Quiz } from "../models/QuizModel.js";
 import { SubSection } from "../models/SubSectionModel.js";
 import { StatusCode, type Handler } from "../types.js";
-import { attemptQuizSchema, createQuizSchema, updateQuizSchema } from "../validations/quizValidation.js";
+import {
+  attemptQuizSchema,
+  createQuizSchema,
+  updateQuizSchema,
+} from "../validations/quizValidation.js";
 import { isValidInstructor } from "./materialController.js";
-import QuizAttempt from "../models/QuizAttemptModel.js";
 
 export const createQuiz: Handler = async (req, res) => {
   try {
@@ -35,16 +39,23 @@ export const createQuiz: Handler = async (req, res) => {
       return;
     }
     const questionsWithIds = questions.map((q) => {
-      const optionId = new Types.ObjectId();
       return {
         ...q,
         questionId: new Types.ObjectId(),
         options: q.options.map((option) => ({
-          optionId: optionId,
+          optionId: new Types.ObjectId(),
           optionText: option,
         })),
-        correctAnswer: optionId,
       };
+    });
+    const correctAnswerIds = questionsWithIds.map((q) => {
+      const correctOption = q.options.find(
+        (o) => o.optionText.toLowerCase() === q.correctAnswer.toLowerCase(),
+      );
+      return correctOption ? correctOption.optionId : null;
+    });
+    questionsWithIds.forEach((q, index) => {
+      q.correctAnswer = correctAnswerIds[index]?.toString() || "";
     });
     const subSection = await SubSection.create({
       title,
@@ -142,13 +153,13 @@ export const getQuizBySubSectionId: Handler = async (req, res) => {
   } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong from ourside",
-        error: err instanceof Error ? err.message : "Unknown error",
+      error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
 };
 export const updateQuiz: Handler = async (req, res) => {
-  try{
+  try {
     const parsedQuizData = updateQuizSchema.safeParse(req.body);
     const subsectionId = req.params.subSectionId;
     if (!subsectionId) {
@@ -166,30 +177,46 @@ export const updateQuiz: Handler = async (req, res) => {
     const { title, description, questions } = parsedQuizData.data;
     const questionsWithIds = questions.map((q) => {
       let questionId = q.questionId ? q.questionId : new Types.ObjectId();
-      const optionsWithIds = q.options ? q.options.map((option) => {
-        let optionId = option.optionId ? option.optionId : new Types.ObjectId();
-        return {
-          optionId,
-          optionText: option.optionText,
-        };
-      }) : q.optionsOnly ? q.optionsOnly.map((optionText) => {
-        return {
-          optionId: new Types.ObjectId(),
-          optionText,
-        };
-      }) : [];
+      const optionsWithIds = q.options
+        ? q.options.map((option) => {
+            let optionId = option.optionId
+              ? option.optionId
+              : new Types.ObjectId();
+            return {
+              optionId,
+              optionText: option.optionText,
+            };
+          })
+        : q.optionsOnly
+          ? q.optionsOnly.map((optionText) => {
+              return {
+                optionId: new Types.ObjectId(),
+                optionText,
+              };
+            })
+          : [];
       return {
         questionId,
         question: q.question,
         options: optionsWithIds,
-        correctAnswer: optionsWithIds.find(o => o.optionText.toLowerCase() == q.correctAnswer.toLowerCase() || o.optionId.toString() == q.correctAnswer)?.optionId || null,
+        correctAnswer:
+          optionsWithIds.find(
+            (o) =>
+              o.optionText.toLowerCase() == q.correctAnswer.toLowerCase() ||
+              o.optionId.toString() == q.correctAnswer,
+          )?.optionId || null,
         points: q.points,
       };
     });
+    const subsection = await SubSection.findByIdAndUpdate(
+      subsectionId,
+      { title, description },
+      { new: true },
+    );
     const quiz = await Quiz.findOneAndUpdate(
       { subSectionId: new Types.ObjectId(subsectionId) },
       { title, description, questions: questionsWithIds },
-      { new: true }
+      { new: true },
     );
     if (!quiz) {
       res.status(StatusCode.NotFound).json({
@@ -202,16 +229,16 @@ export const updateQuiz: Handler = async (req, res) => {
       quiz,
     });
     return;
-  }catch (err) {
+  } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong from ourside",
-        error: err instanceof Error ? err.message : "Unknown error",
+      error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
-}
+};
 export const attemptQuiz: Handler = async (req, res) => {
-  try{
+  try {
     const parsedAttemptData = attemptQuizSchema.safeParse(req.body);
     if (!parsedAttemptData.success) {
       res.status(StatusCode.InputError).json({
@@ -239,8 +266,7 @@ export const attemptQuiz: Handler = async (req, res) => {
           isCorrect: false,
         };
       }
-      const isCorrect =
-        question.correctAnswer.toString() === answer.answer;
+      const isCorrect = question.correctAnswer.toString() === answer.answer;
       if (isCorrect) {
         score += question.points;
       }
@@ -261,37 +287,38 @@ export const attemptQuiz: Handler = async (req, res) => {
       quizAttempt,
     });
     return;
-  }
-  catch (err) {
+  } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong from ourside",
-        error: err instanceof Error ? err.message : "Unknown error",
+      error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
-}
+};
 export const getQuizAttemptByUser: Handler = async (req, res) => {
-  try{
+  try {
     const userId = new Types.ObjectId(req.userId);
-    const quizId = req.query.quizId;
-    if(!quizId || !userId){
+    const quizId = req.params.quizId;
+    if (!quizId || !userId) {
       res.status(StatusCode.InputError).json({
         message: "Quiz ID and User ID are required.",
       });
       return;
     }
-    const quizAttempt = await QuizAttempt.findOne({ userId, quizId }).populate("quizId", "title");
+    const quizAttempts = await QuizAttempt.find({ userId, quizId }).populate(
+      "quizId",
+      "title",
+    ).sort({ createdAt: -1, score: -1 });
     res.status(StatusCode.Success).json({
       message: "Quiz attempts retrieved successfully.",
-      quizAttempt,
+      quizAttempts,
     });
     return;
-  }
-  catch (err) {
+  } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "Something went wrong from ourside",
-        error: err instanceof Error ? err.message : "Unknown error",
+      error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
-}
+};
