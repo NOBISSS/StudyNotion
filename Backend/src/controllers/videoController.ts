@@ -96,6 +96,7 @@ export const generateMultipartPresignedURL: Handler = async (req, res) => {
 export const completeVideoUpload: Handler = async (req, res) => {
   try {
     const { uploadId } = req.params;
+    console.log("Body on complete: ", req.body);
     // const { key } = req.query;
     // const { parts } = req.body;
     // if (!uploadId || !key || !parts)

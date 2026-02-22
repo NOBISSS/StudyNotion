@@ -12,7 +12,7 @@ export enum StatusCode {
   Unauthorized = 401,
 }
 
-export interface User extends Document {
+export interface IUser extends Document {
   _id: Types.ObjectId;
   firstName: string;
   lastName: string;

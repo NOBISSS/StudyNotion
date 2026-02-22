@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import { User } from "../../types.ts";
+import { IUser } from "../../types.ts";
 //Custom Request Objects:
 declare global {
   namespace Express {
     interface Request {
       userId?: mongoose.Types.ObjectId;
       expiry?: Date;
-      user: User;
+      user: IUser;
       accountType: "student" | "instructor" | "admin";
     }
   }

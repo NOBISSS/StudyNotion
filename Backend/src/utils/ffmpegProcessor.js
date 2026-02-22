@@ -33,6 +33,7 @@ async function downloadFromS3(key, dest) {
 
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { Video } from "./models/videoModel.js";
+import { SubSection } from "../models/SubSectionModel.js";
 
 export async function processVideo({ key, videoName }) {
   const tempDir = path.resolve("./temp");
@@ -76,6 +77,10 @@ export async function processVideo({ key, videoName }) {
     // 4) Optional: update DB here if needed (worker shouldn't directly import Video model to keep separation)
     try {
       await mongoose.connect(`${process.env.DATABASE_URI}`);
+      // const subsection = await SubSection.create({
+      //   title: videoName,
+      //   contentType: "video",
+      // });
       const video = await Video.updateOne(
         { fileKey: key },
         {

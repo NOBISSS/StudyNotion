@@ -2,9 +2,9 @@ import { z } from "zod";
 
 export const materialSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  contentUrl: z
-    .url("Content URL must be a valid URL")
-    .min(1, "Content URL is required"),
+  // contentUrl: z
+  //   .url("Content URL must be a valid URL")
+  //   .min(1, "Content URL is required"),
   materialType: z.string().nonempty("Material type is required"),
   description: z.string().optional(),
   materialSize: z.number().optional(),

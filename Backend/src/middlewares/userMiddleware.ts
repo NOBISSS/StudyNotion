@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
-import { StatusCode } from "../types.js";
+import { StatusCode, type IUser } from "../types.js";
 export const userMiddleware = async (
   req: Request,
   res: Response,
@@ -12,12 +12,11 @@ export const userMiddleware = async (
     const decodedToken = jwt.verify(
       accessToken,
       <string>process.env.JWT_ACCESS_TOKEN_SECRET
-    );
+    ) as IUser;
     if (!decodedToken) {
       res.status(StatusCode.Unauthorized).json({ message: "Unautorized" });
       return;
     }
-    //@ts-ignore
     const user = await User.findById(decodedToken._id).select("-password -refreshToken -__v");
     if (!user) {
       res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });

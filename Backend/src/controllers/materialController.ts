@@ -12,7 +12,12 @@ import { materialSchema } from "../validations/materialValidation.js";
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
   userId: Types.ObjectId,
+  accountType?: string,
 ) => {
+  if (accountType === "admin") {
+    const course = await Course.findById(courseId);
+    return course;
+  }
   const course = await Course.findOne({ _id: courseId, instructorId: userId });
   if (course) {
     return course;
@@ -43,9 +48,11 @@ export const addMaterial: Handler = async (req, res) => {
       materialSize,
       materialS3Key,
     } = parsedMaterialData.data;
+    console.log(userId);
     const course = await isValidInstructor(
       new Types.ObjectId(courseId),
       userId,
+      req.user?.accountType,
     );
     if (!course) {
       res.status(StatusCode.Unauthorized).json({
@@ -88,7 +95,7 @@ export const addMaterial: Handler = async (req, res) => {
 };
 export const getMaterial: Handler = async (req, res) => {
   try {
-    const materialId = req.params.id;
+    const materialId = req.params.materialId;
     const material = await Material.findById(materialId);
     if (!material) {
       res.status(StatusCode.NotFound).json({ message: "Material not found" });
@@ -126,6 +133,7 @@ export const deleteMaterial: Handler = async (req, res) => {
     const course = await isValidInstructor(
       new Types.ObjectId(subsection.courseId),
       new Types.ObjectId(req.userId),
+      req.user?.accountType,
     );
     if (!course) {
       res.status(StatusCode.NotFound).json({
@@ -165,7 +173,7 @@ export const deleteMaterial: Handler = async (req, res) => {
   }
 };
 export const updateMaterial: Handler = async (req, res) => {
-  try{
+  try {
     const subsectionId = req.params.subsectionId;
     const parsedMaterialData = materialSchema.partial().safeParse(req.body);
     if (!parsedMaterialData.success) {
@@ -173,8 +181,14 @@ export const updateMaterial: Handler = async (req, res) => {
         message: parsedMaterialData.error.issues[0]?.message,
       });
     }
-    const { materialType, description, title, materialSize, materialS3Key } = parsedMaterialData.data;
-    const subsection = await SubSection.findById(subsectionId);
+    const { materialType, description, title, materialSize, materialS3Key } =
+      parsedMaterialData.data;
+    const subsection = await SubSection.findByIdAndUpdate(subsectionId, {
+      $set: {
+        title: title || undefined,
+        description: description || undefined,
+      },
+    });
     if (!subsection) {
       res.status(StatusCode.NotFound).json({ message: "Subsection not found" });
       return;
@@ -182,6 +196,7 @@ export const updateMaterial: Handler = async (req, res) => {
     const course = await isValidInstructor(
       new Types.ObjectId(subsection.courseId),
       new Types.ObjectId(req.userId),
+      req.user?.accountType,
     );
     if (!course) {
       res.status(StatusCode.NotFound).json({
@@ -210,13 +225,16 @@ export const updateMaterial: Handler = async (req, res) => {
     await deleteObject(material.materialS3Key || "");
     res.status(StatusCode.Success).json({
       message: "Material updated successfully.",
-      material,
+      material: {
+        ...material.toObject(),
+        contentUrl: materialURL,
+      },
     });
-  }catch (err) {
+  } catch (err) {
     res.status(StatusCode.ServerError).json({
       message: "An error occurred while updating material.",
       error: err instanceof Error ? err.message : "Unknown error",
     });
     return;
   }
-}
+};

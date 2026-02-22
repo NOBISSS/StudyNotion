@@ -46,7 +46,7 @@ app.use("/api/categories", categoryRouter);
 app.use("/api/enrollments", courseEnrollmentRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/sections", sectionRouter);
-app.use("/api/subsection", subsectionRouter);
+app.use("/api/subsections", subsectionRouter);
 app.use("/s3", multipartUploadRoute);
 app.use("/api/comments", CommentRouter);
 
