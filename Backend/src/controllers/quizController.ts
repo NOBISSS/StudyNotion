@@ -26,6 +26,7 @@ export const createQuiz: Handler = async (req, res) => {
     const course = await isValidInstructor(
       new Types.ObjectId(courseId),
       userId,
+      req.user?.accountType,
     );
     if (!course) {
       res.status(StatusCode.Unauthorized).json({
@@ -33,14 +34,18 @@ export const createQuiz: Handler = async (req, res) => {
       });
       return;
     }
-    const questionsWithIds = questions.map((q) => ({
-      ...q,
-      questionId: new Types.ObjectId(),
-      options: q.options.map((option) => ({
-        optionId: new Types.ObjectId(),
-        optionText: option,
-      })),
-    }));
+    const questionsWithIds = questions.map((q) => {
+      const optionId = new Types.ObjectId();
+      return {
+        ...q,
+        questionId: new Types.ObjectId(),
+        options: q.options.map((option) => ({
+          optionId: optionId,
+          optionText: option,
+        })),
+        correctAnswer: optionId,
+      };
+    });
     const subSection = await SubSection.create({
       title,
       description: description || "",
@@ -81,6 +86,7 @@ export const deleteQuiz: Handler = async (req, res) => {
     const course = await isValidInstructor(
       new Types.ObjectId(subsection.courseId),
       new Types.ObjectId(req.userId),
+      req.user?.accountType,
     );
     if (!course) {
       res.status(StatusCode.Unauthorized).json({
