@@ -7,6 +7,7 @@ import {
   deleteAccount,
   forgetOTPVerificationRedis,
   forgetWithOTPRedis,
+  getInstructors,
   getUser,
   getUsers,
   refreshTokens,
@@ -34,6 +35,7 @@ userRouter.route("/login").post(signin);
 
 userRouter.route("/create").post(userMiddleware,isAdmin, createUser);
 userRouter.route("/getall").get(userMiddleware,isAdmin, getUsers);
+userRouter.route("/getinstructors").get(userMiddleware,isAdmin, getInstructors);
 
 userRouter.use(userMiddleware);
 

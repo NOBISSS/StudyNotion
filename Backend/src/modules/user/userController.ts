@@ -644,3 +644,13 @@ export const getUsers: Handler = async (req, res): Promise<void> => {
     return;
   }
 }
+export const getInstructors: Handler = async (req, res): Promise<void> => {
+  try {
+    const users = await User.find({ accountType: "instructor" }).select("-password -refreshToken");
+    res.status(StatusCode.Success).json({ message: "Instructors fetched successfully", users });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+}
