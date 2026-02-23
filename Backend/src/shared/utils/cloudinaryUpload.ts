@@ -9,6 +9,7 @@ export const uploadToCloudinary = (
   folder: string = "StudyNotion"
 ): Promise<UploadApiResponse> => {
   return new Promise((resolve, reject) => {
+    console.log("Uploading to Cloudinary...");
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
@@ -22,16 +23,22 @@ export const uploadToCloudinary = (
         error: UploadApiErrorResponse | undefined,
         result: UploadApiResponse | undefined
       ) => {
+        console.log("Cloudinary upload callback invoked");
         if (error) {
+          console.log("Cloudinary Upload Error:", error);
           reject(error);
         } else if (result) {
+          console.log("Cloudinary Upload Success:", result);
           resolve(result);
         } else {
+          console.log("Cloudinary Upload Error: No result returned");
           reject(new Error("Upload Failed with no results"));
         }
       }
     );
+    console.log("Piping file buffer to Cloudinary...");
     uploadStream.end(fileBuffer);
+    console.log("File buffer piped to Cloudinary, waiting for response...");
   });
 };
 

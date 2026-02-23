@@ -29,4 +29,5 @@ export const courseInputSchema = z.object({
     }
   ),
   tag: z.array(z.string()).optional(),
+  instructorId: z.string().optional(),
 });

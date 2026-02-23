@@ -43,5 +43,6 @@
     "verbatimModuleSyntax": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-  }
+  },
+  "include": ["src"]
 }

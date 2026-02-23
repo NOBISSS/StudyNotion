@@ -11,6 +11,7 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 
 export const createCourse: Handler = async (req, res) => {
+  let thumbnailImage: UploadApiResponse;
   try {
     const userId = req.userId;
     const parsedCourseData = courseInputSchema.safeParse(req.body);
@@ -28,18 +29,29 @@ export const createCourse: Handler = async (req, res) => {
         .json({ message: "Thumbnail image is required" });
       return;
     }
-    let thumbnailImage: UploadApiResponse;
+    
     try {
+      console.log("Received thumbnail file:", thumbnail.originalname, "Size:", thumbnail.size);
+      console.log("Thumbnail file buffer type:", typeof thumbnail.buffer);
       thumbnailImage = await uploadToCloudinary(Buffer.from(thumbnail.buffer));
     } catch (err) {
       res.status(StatusCode.ServerError).json({
         message:
           "Something went wrong from our side while uploading the thumbnail image",
         error: err,
+        //@ts-ignore
+        err: thumbnailImage
       });
       return;
     }
-    const instructor = await User.findById(userId);
+    const instructorId = req.accountType === "instructor" ? userId : parsedCourseData.data.instructorId;
+    if (!instructorId) {
+      res.status(StatusCode.InputError).json({
+        message: "Instructor ID is required for course creation",
+      });
+      return;
+    }
+    const instructor = await User.findById(instructorId);
     if (!instructor) {
       res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
       return;
@@ -57,7 +69,7 @@ export const createCourse: Handler = async (req, res) => {
     const course = await Course.create({
       courseName,
       description,
-      instructorId: userId as Types.ObjectId,
+      instructorId: new Types.ObjectId(instructorId),
       instructorName: `${instructor?.firstName} ${instructor?.lastName}`,
       categoryId,
       typeOfCourse,
@@ -80,7 +92,6 @@ export const createCourse: Handler = async (req, res) => {
       courseId: course._id,
       order: 1,
       subSectionIds: [],
-      // instructorId: new Types.ObjectId(userId),
     });
     res
       .status(StatusCode.Success)
@@ -89,7 +100,9 @@ export const createCourse: Handler = async (req, res) => {
   } catch (err) {
     res
       .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
+      .json({ message: "Something went wrong from ourside", err,
+        //@ts-ignore 
+        thumbnailImage });
     return;
   }
 };
