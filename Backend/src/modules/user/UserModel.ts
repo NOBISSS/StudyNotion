@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, type HydratedDocument, type InferSchemaType } from "mongoose";
 
 export const userSchema = new Schema(
   {
@@ -47,6 +47,9 @@ export const userSchema = new Schema(
     },
   }
 );
+
+export type IUser = InferSchemaType<typeof userSchema>;
+export type UserDocument = HydratedDocument<IUser>;
 
 const User = mongoose.model("User", userSchema);
 
