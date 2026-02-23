@@ -1,14 +1,14 @@
 import { Types } from "mongoose";
-import QuizAttempt from "../models/QuizAttemptModel.js";
-import { Quiz } from "../models/QuizModel.js";
-import { SubSection } from "../models/SubSectionModel.js";
-import { StatusCode, type Handler } from "../types.js";
+import { StatusCode, type Handler } from "../../../shared/types.js";
+import { isValidInstructor } from "../material/materialController.js";
+import { SubSection } from "../SubSectionModel.js";
+import QuizAttempt from "./QuizAttemptModel.js";
+import { Quiz } from "./QuizModel.js";
 import {
   attemptQuizSchema,
   createQuizSchema,
   updateQuizSchema,
-} from "../validations/quizValidation.js";
-import { isValidInstructor } from "./materialController.js";
+} from "./quizValidation.js";
 
 export const createQuiz: Handler = async (req, res) => {
   try {
@@ -305,10 +305,9 @@ export const getQuizAttemptByUser: Handler = async (req, res) => {
       });
       return;
     }
-    const quizAttempts = await QuizAttempt.find({ userId, quizId }).populate(
-      "quizId",
-      "title",
-    ).sort({ createdAt: -1, score: -1 });
+    const quizAttempts = await QuizAttempt.find({ userId, quizId })
+      .populate("quizId", "title")
+      .sort({ createdAt: -1, score: -1 });
     res.status(StatusCode.Success).json({
       message: "Quiz attempts retrieved successfully.",
       quizAttempts,

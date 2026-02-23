@@ -1,4 +1,9 @@
 import { Router } from "express";
+import { upload } from "../../shared/middlewares/upload.js";
+import {
+  isInstructor,
+  userMiddleware,
+} from "../../shared/middlewares/userMiddleware.js";
 import {
   createCourse,
   deleteCourse,
@@ -6,9 +11,7 @@ import {
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
   updateCourse,
-} from "../controllers/courseController.js";
-import { upload } from "../middlewares/upload.js";
-import { isInstructor, userMiddleware } from "../middlewares/userMiddleware.js";
+} from "./courseController.js";
 
 const courseRouter = Router();
 

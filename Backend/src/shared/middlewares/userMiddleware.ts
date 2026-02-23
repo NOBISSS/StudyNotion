@@ -1,23 +1,25 @@
 import { type NextFunction, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/UserModel.js";
+import User from "../modules/user/UserModel.js";
 import { StatusCode, type IUser } from "../types.js";
 export const userMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const accessToken = req.cookies?.accessToken;
     const decodedToken = jwt.verify(
       accessToken,
-      <string>process.env.JWT_ACCESS_TOKEN_SECRET
+      <string>process.env.JWT_ACCESS_TOKEN_SECRET,
     ) as IUser;
     if (!decodedToken) {
       res.status(StatusCode.Unauthorized).json({ message: "Unautorized" });
       return;
     }
-    const user = await User.findById(decodedToken._id).select("-password -refreshToken -__v");
+    const user = await User.findById(decodedToken._id).select(
+      "-password -refreshToken -__v",
+    );
     if (!user) {
       res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });
       return;
@@ -34,10 +36,10 @@ export const userMiddleware = async (
   }
 };
 
-export const isStudent = async (  
+export const isStudent = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (req.accountType == "admin") {
@@ -64,7 +66,7 @@ export const isStudent = async (
 export const isInstructor = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (req.accountType == "admin" || req.accountType == "instructor") {
@@ -93,7 +95,7 @@ export const isInstructor = async (
 export const isAdmin = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (req.accountType !== "admin") {

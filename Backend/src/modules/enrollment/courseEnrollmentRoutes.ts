@@ -1,9 +1,9 @@
 import { Router } from "express";
+import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   EnrollInCourse,
   getAllEnrollments,
-} from "../controllers/courseEnrollmentController.js";
-import { userMiddleware } from "../middlewares/userMiddleware.js";
+} from "./courseEnrollmentController.js";
 
 const courseEnrollmentRouter = Router();
 

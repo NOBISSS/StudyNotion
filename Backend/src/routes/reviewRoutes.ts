@@ -1,11 +1,11 @@
 import { Router } from "express";
+import { userMiddleware } from "../middlewares/userMiddleware.js";
 import {
   deleteReview,
   getAllReviews,
   rateAndReviewCourse,
   updateReview,
-} from "../controllers/ratingsAndReviewController.js";
-import { userMiddleware } from "../middlewares/userMiddleware.js";
+} from "../modules/rating/ratingsAndReviewController.js";
 
 const reviewRouter = Router();
 

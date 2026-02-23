@@ -1,6 +1,13 @@
 import { Router } from "express";
-import { attemptQuiz, createQuiz, deleteQuiz, getQuizAttemptByUser, getQuizBySubSectionId, updateQuiz } from "../controllers/quizController.js";
 import { isInstructor } from "../middlewares/userMiddleware.js";
+import {
+  attemptQuiz,
+  createQuiz,
+  deleteQuiz,
+  getQuizAttemptByUser,
+  getQuizBySubSectionId,
+  updateQuiz,
+} from "../modules/subsection/quiz/quizController.js";
 
 const QuizRouter = Router();
 

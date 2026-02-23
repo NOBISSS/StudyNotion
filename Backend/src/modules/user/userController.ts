@@ -5,11 +5,9 @@ import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
 import otpGenerator from "otp-generator";
 import { z } from "zod";
-import { OTP } from "../models/OTPModel.js";
-import { Profile } from "../models/ProfileModel.js";
-import User from "../models/UserModel.js";
+import { OTP } from "../../models/OTPModel.js";
+import { type Handler, StatusCode } from "../../shared/types.js";
 import { emailQueue } from "../queue/emailQueue.js";
-import { type Handler, StatusCode } from "../types.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
@@ -21,7 +19,15 @@ import {
   saveOTP,
   verifyOTP,
 } from "../utils/otp.service.js";
-import { changePasswordInputSchema, forgetInputSchema, signinInputSchema, signupInputSchema, userInputSchema } from "../validations/userValidation.js";
+import { Profile } from "./ProfileModel.js";
+import User from "./UserModel.js";
+import {
+  changePasswordInputSchema,
+  forgetInputSchema,
+  signinInputSchema,
+  signupInputSchema,
+  userInputSchema,
+} from "./userValidation.js";
 
 export const signupWithOTP: Handler = async (req, res): Promise<void> => {
   try {
@@ -51,7 +57,7 @@ export const signupWithOTP: Handler = async (req, res): Promise<void> => {
         firstName,
         lastName,
         accountType,
-        otpType:"registration",
+        otpType: "registration",
       },
     });
 
@@ -119,11 +125,17 @@ export const resendOTP: Handler = async (req, res): Promise<void> => {
       path: "/",
       maxAge: 10 * 60000, // 10 minutes
     };
-    res.cookie(
+    res
+      .cookie(
         "otp_data",
-        { email: email, type: otpData.otpType === "registration" ? "signup" : "forget" },
-        cookieOptions
-      ).status(StatusCode.Success).json({ message: "OTP Reset Successfully" });
+        {
+          email: email,
+          type: otpData.otpType === "registration" ? "signup" : "forget",
+        },
+        cookieOptions,
+      )
+      .status(StatusCode.Success)
+      .json({ message: "OTP Reset Successfully" });
   } catch (err: any) {
     res
       .status(StatusCode.ServerError)
@@ -259,7 +271,7 @@ export const refreshTokens: Handler = async (req, res): Promise<void> => {
     }
     const decodedToken = jwt.verify(
       IRefreshToken,
-      <string>process.env.JWT_REFRESH_TOKEN_SECRET
+      <string>process.env.JWT_REFRESH_TOKEN_SECRET,
     );
     if (!decodedToken) {
       res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });
@@ -339,10 +351,10 @@ export const changePassword: Handler = async (req, res): Promise<void> => {
     }
     await User.updateOne(
       { _id: userId },
-      { $set: { password: bcrypt.hashSync(newPassword, 10) } }
+      { $set: { password: bcrypt.hashSync(newPassword, 10) } },
     );
     const updatedUser = await User.findById(userId).select(
-      "-password -refreshToken"
+      "-password -refreshToken",
     );
     res
       .status(StatusCode.Success)
@@ -413,7 +425,7 @@ export const forgetWithOTP: Handler = async (req, res): Promise<void> => {
       .cookie(
         "otp_data",
         { email: newOtp.email, type: "forget" },
-        cookieOptions
+        cookieOptions,
       )
       .status(200)
       .json({ message: "OTP sent successfully" });
@@ -461,11 +473,7 @@ export const forgetWithOTPRedis: Handler = async (req, res): Promise<void> => {
       maxAge: 10 * 60000, // 10 minutes
     };
     res
-      .cookie(
-        "otp_data",
-        { email: email, type: "forget" },
-        cookieOptions
-      )
+      .cookie("otp_data", { email: email, type: "forget" }, cookieOptions)
       .status(200)
       .json({ message: "OTP sent successfully" });
     return;
@@ -478,7 +486,7 @@ export const forgetWithOTPRedis: Handler = async (req, res): Promise<void> => {
 };
 export const forgetOTPVerification: Handler = async (
   req,
-  res
+  res,
 ): Promise<void> => {
   try {
     const parsedInput = forgetInputSchema.safeParse(req.body);
@@ -507,7 +515,7 @@ export const forgetOTPVerification: Handler = async (
         $set: {
           password: bcrypt.hashSync(password, 10),
         },
-      }
+      },
     );
     // const cookieOptions: CookieOptions = {
     //   httpOnly: true,
@@ -535,7 +543,7 @@ export const forgetOTPVerification: Handler = async (
 };
 export const forgetOTPVerificationRedis: Handler = async (
   req,
-  res
+  res,
 ): Promise<void> => {
   try {
     const parsedInput = forgetInputSchema.safeParse(req.body);
@@ -548,12 +556,10 @@ export const forgetOTPVerificationRedis: Handler = async (
     }
     const { otp, password } = parsedInput.data;
     const { email } = req.cookies.otp_data;
-    const otpData = await verifyOTP(email, otp.toString(),"forget");
+    const otpData = await verifyOTP(email, otp.toString(), "forget");
 
     if (!otpData || otpData.otpType !== "forget") {
-      res
-        .status(StatusCode.NotFound)
-        .json({ message: "Invalid OTP" });
+      res.status(StatusCode.NotFound).json({ message: "Invalid OTP" });
       return;
     }
 
@@ -563,7 +569,7 @@ export const forgetOTPVerificationRedis: Handler = async (
         $set: {
           password: bcrypt.hashSync(password, 10),
         },
-      }
+      },
     );
     // const cookieOptions: CookieOptions = {
     //   httpOnly: true,
@@ -624,10 +630,10 @@ export const updateProfile: Handler = async (req, res): Promise<void> => {
             country,
             birthdate,
           },
-        }
+        },
       );
       const updatedUser = await User.findById(userId).select(
-        "-password -refreshToken"
+        "-password -refreshToken",
       );
       res.status(StatusCode.Success).json({
         message: "Profile updated successfully",
@@ -709,7 +715,7 @@ export const updateProfilePhoto: Handler = async (req, res): Promise<void> => {
     const profile = await Profile.findOneAndUpdate(
       { userId: req.userId! },
       { profilePicture: avatar.secure_url },
-      { new: true }
+      { new: true },
     );
 
     res

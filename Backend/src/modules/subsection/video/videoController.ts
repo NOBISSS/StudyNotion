@@ -9,10 +9,10 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import path from "path";
 import querystring from "querystring";
-import { s3 } from "../config/s3Config.js";
-import Video from "../models/VideoModel.js";
-import { videoQueue } from "../queue/videoQueue.js";
-import { StatusCode, type Handler } from "../types.js";
+import { s3 } from "../../../shared/config/s3Config.js";
+import { videoQueue } from "../../../shared/queue/videoQueue.js";
+import { StatusCode, type Handler } from "../../../shared/types.js";
+import Video from "./VideoModel.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
@@ -113,11 +113,23 @@ export const completeVideoUpload: Handler = async (req, res) => {
     }
 
     const sortedParts = parts
-      .map((p: { etag: any; ETag: any; eTag: any; part: any; partNumber: any; PartNumber: any; }) => ({
-        ETag: p.etag ?? p.ETag ?? p.eTag,
-        PartNumber: Number(p.part ?? p.partNumber ?? p.PartNumber),
-      }))
-      .sort((a: { PartNumber: number; }, b: { PartNumber: number; }) => a.PartNumber - b.PartNumber);
+      .map(
+        (p: {
+          etag: any;
+          ETag: any;
+          eTag: any;
+          part: any;
+          partNumber: any;
+          PartNumber: any;
+        }) => ({
+          ETag: p.etag ?? p.ETag ?? p.eTag,
+          PartNumber: Number(p.part ?? p.partNumber ?? p.PartNumber),
+        }),
+      )
+      .sort(
+        (a: { PartNumber: number }, b: { PartNumber: number }) =>
+          a.PartNumber - b.PartNumber,
+      );
 
     const completeCmd = new CompleteMultipartUploadCommand({
       Bucket: BUCKET,

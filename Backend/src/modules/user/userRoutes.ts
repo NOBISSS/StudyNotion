@@ -1,9 +1,10 @@
 import { Router } from "express";
+import { upload } from "../../middlewares/upload.js";
+import { userMiddleware } from "../../middlewares/userMiddleware.js";
 import {
   changePassword,
   deleteAccount,
   forgetOTPVerificationRedis,
-  forgetWithOTP,
   forgetWithOTPRedis,
   getUser,
   refreshTokens,
@@ -14,9 +15,7 @@ import {
   signupWithOTP,
   updateProfile,
   updateProfilePhoto,
-} from "../controllers/userController.js";
-import { upload } from "../middlewares/upload.js";
-import { userMiddleware } from "../middlewares/userMiddleware.js";
+} from "./userController.js";
 export const userRouter = Router();
 // export const router=Router();
 // router.post("/signup",signupWithOTP);

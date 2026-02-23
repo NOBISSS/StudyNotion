@@ -1,10 +1,9 @@
 import { Types } from "mongoose";
-import z from "zod";
-import { CourseEnrollment } from "../models/CourseEnrollment.js";
-import { Course } from "../models/CourseModel.js";
-import { RatingAndReview } from "../models/RatingAndReview.js";
-import { StatusCode, type Handler } from "../types.js";
-import { CourseRatingAndReviewSchema } from "../validations/ratingValidation.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { Course } from "../course/CourseModel.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
+import { RatingAndReview } from "./RatingAndReview.js";
+import { CourseRatingAndReviewSchema } from "./ratingValidation.js";
 
 export const rateAndReviewCourse: Handler = async (req, res) => {
   try {
@@ -139,7 +138,7 @@ export const updateReview: Handler = async (req, res) => {
           rating,
           review,
         },
-      }
+      },
     );
     if (!existingReview) {
       res
@@ -175,7 +174,7 @@ export const deleteReview: Handler = async (req, res) => {
         _id: new Types.ObjectId(reviewId),
       },
       { isActive: false },
-      { new: true }
+      { new: true },
     );
     if (!existingReview) {
       res

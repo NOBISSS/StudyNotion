@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import z from "zod";
-import { CourseEnrollment } from "../models/CourseEnrollment.js";
-import { Course } from "../models/CourseModel.js";
-import { StatusCode, type Handler } from "../types.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { Course } from "../course/CourseModel.js";
+import { CourseEnrollment } from "./CourseEnrollment.js";
 
 export const EnrollInCourse: Handler = async (req, res) => {
   try {

@@ -1,13 +1,16 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Types } from "mongoose";
-import { s3 } from "../config/s3Config.js";
-import { Course } from "../models/CourseModel.js";
-import { Material } from "../models/MaterialModel.js";
-import { Section } from "../models/SectionModel.js";
-import { SubSection } from "../models/SubSectionModel.js";
-import { StatusCode, type Handler } from "../types.js";
-import { deleteObject, generateSignedUrl } from "../utils/getSignedUrl.js";
-import { materialSchema } from "../validations/materialValidation.js";
+import { s3 } from "../../../shared/config/s3Config.js";
+import { StatusCode, type Handler } from "../../../shared/types.js";
+import {
+  deleteObject,
+  generateSignedUrl,
+} from "../../../shared/utils/getSignedUrl.js";
+import { Course } from "../../course/CourseModel.js";
+import { Section } from "../../section/SectionModel.js";
+import { SubSection } from "../SubSectionModel.js";
+import { Material } from "./MaterialModel.js";
+import { materialSchema } from "./materialValidation.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,

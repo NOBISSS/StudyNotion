@@ -1,5 +1,5 @@
-import { SubSection } from "../models/SubSectionModel.js";
-import { StatusCode, type Handler } from "../types.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { SubSection } from "./SubSectionModel.js";
 
 export const getAllSubsections: Handler = async (req, res) => {
   try {
@@ -21,11 +21,9 @@ export const getAllSubsections: Handler = async (req, res) => {
     });
     return;
   } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({
-        message: "An error occurred while fetching subsections.",
-        error: err instanceof Error ? err.message : "Unknown error",
-      });
+    res.status(StatusCode.ServerError).json({
+      message: "An error occurred while fetching subsections.",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
   }
 };

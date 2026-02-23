@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import Comment from "../models/CommentModel.js";
-import { StatusCode, type Handler } from "../types.js";
-import { createCommentSchema } from "../validations/commentValidation.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import Comment from "./CommentModel.js";
+import { createCommentSchema } from "./commentValidation.js";
 
 export const createComment: Handler = async (req, res) => {
   try {

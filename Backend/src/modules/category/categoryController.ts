@@ -1,5 +1,5 @@
-import { Category } from "../models/CategoryModel.js";
-import { StatusCode, type Handler } from "../types.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { Category } from "./CategoryModel.js";
 
 export const createCategory: Handler = async (req, res) => {
   try {
@@ -46,7 +46,7 @@ export const updateCategory: Handler = async (req, res) => {
         name: name,
         description: description,
       },
-      { new: true }
+      { new: true },
     );
     if (!categoryDetails) {
       return res.status(StatusCode.NotFound).json({
@@ -80,7 +80,7 @@ export const deleteCategory: Handler = async (req, res) => {
     const categoryDetails = await Category.findByIdAndUpdate(
       categoryId,
       { isActive: false },
-      { new: true }
+      { new: true },
     );
     if (!categoryDetails) {
       return res.status(StatusCode.NotFound).json({
@@ -104,8 +104,8 @@ export const deleteCategory: Handler = async (req, res) => {
 export const getAllCategory: Handler = async (req, res) => {
   try {
     const getCategory = await Category.find(
-      {isActive: true},
-      { name: true, description: true }
+      { isActive: true },
+      { name: true, description: true },
     );
     return res.status(StatusCode.Success).json({
       success: true,

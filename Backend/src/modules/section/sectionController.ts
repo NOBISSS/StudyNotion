@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
-import { Course } from "../models/CourseModel.js";
-import { Section } from "../models/SectionModel.js";
-import { StatusCode, type Handler } from "../types.js";
-import { createSectionSchema } from "../validations/sectionValidation.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { Course } from "../course/CourseModel.js";
+import { Section } from "./SectionModel.js";
+import { createSectionSchema } from "./sectionValidation.js";
 
 export const createSection: Handler = async (req, res): Promise<void> => {
   try {
@@ -17,7 +17,7 @@ export const createSection: Handler = async (req, res): Promise<void> => {
     }
     const { name, courseId, order } = parsedData.data;
     const existingSection = await Section.findOne({ courseId }).populate(
-      "courseId"
+      "courseId",
     );
     if (existingSection && existingSection.name === name) {
       res.status(StatusCode.DocumentExists).json({
@@ -42,7 +42,7 @@ export const createSection: Handler = async (req, res): Promise<void> => {
     });
     await Section.updateMany(
       { courseId, _id: { $ne: section._id }, order: { $gte: order } },
-      { $inc: { order: 1 } }
+      { $inc: { order: 1 } },
     );
     res.status(StatusCode.Success).json({
       success: true,
@@ -87,11 +87,11 @@ export const removeSection: Handler = async (req, res): Promise<void> => {
         courseId: existingSection.courseId,
         order: { $gt: existingSection.order },
       },
-      { $inc: { order: -1 } }
+      { $inc: { order: -1 } },
     );
     const section = await Section.updateOne(
       { _id: sectionId },
-      { isRemoved: true, order: -1, lastOrder: existingSection.order }
+      { isRemoved: true, order: -1, lastOrder: existingSection.order },
     );
     res.status(StatusCode.Success).json({
       success: true,
@@ -166,7 +166,7 @@ export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
           courseId: existingSection.courseId,
           order: { $gt: oldOrder, $lte: newOrder },
         },
-        { $inc: { order: -1 } }
+        { $inc: { order: -1 } },
       );
     } else {
       await Section.updateMany(
@@ -175,7 +175,7 @@ export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
           courseId: existingSection.courseId,
           order: { $gte: newOrder, $lt: oldOrder },
         },
-        { $inc: { order: 1 } }
+        { $inc: { order: 1 } },
       );
     }
     res.status(StatusCode.Success).json({
@@ -281,8 +281,7 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
     const sections = await Section.find({
       courseId: new Types.ObjectId(courseId),
       isRemoved: true,
-    })
-      .sort({ order: 1 });
+    }).sort({ order: 1 });
     if (sections.length === 0) {
       res.status(StatusCode.DocumentExists).json({
         success: false,
@@ -322,7 +321,7 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
         _id: sectionId,
         isRemoved: true,
       });
-    }else{
+    } else {
       existingSection = await Section.findOne({
         courseId: new Types.ObjectId(courseId),
         isRemoved: true,
@@ -337,7 +336,7 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
     }
     await Section.updateOne(
       { _id: existingSection._id },
-      { isRemoved: false, order: existingSection.lastOrder, lastOrder: null }
+      { isRemoved: false, order: existingSection.lastOrder, lastOrder: null },
     );
     await Section.updateMany(
       {
@@ -345,7 +344,7 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
         courseId: existingSection.courseId,
         order: { $gte: existingSection.lastOrder || 1 },
       },
-      { $inc: { order: 1 } }
+      { $inc: { order: 1 } },
     );
     res.status(StatusCode.Success).json({
       success: true,

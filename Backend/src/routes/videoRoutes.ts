@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { abortVideoUpload, completeVideoUpload, generateMultipartPresignedURL, getVideo, initializeVideoUpload, videoBatchHandler } from "../controllers/videoController.js";
+import { getVideo } from "../modules/subsection/video/videoController.js";
 
 const videoRouter = Router();
 

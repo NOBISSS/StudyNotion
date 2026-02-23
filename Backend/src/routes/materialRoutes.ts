@@ -1,6 +1,11 @@
 import { Router } from "express";
-import { addMaterial, deleteMaterial, getMaterial, updateMaterial } from "../controllers/materialController.js";
 import { isInstructor } from "../middlewares/userMiddleware.js";
+import {
+  addMaterial,
+  deleteMaterial,
+  getMaterial,
+  updateMaterial,
+} from "../modules/subsection/material/materialController.js";
 
 const materialRouter = Router();
 

@@ -1,14 +1,14 @@
 import type { UploadApiResponse } from "cloudinary";
 import { Types } from "mongoose";
-import { Category } from "../models/CategoryModel.js";
-import { CourseEnrollment } from "../models/CourseEnrollment.js";
-import { Course } from "../models/CourseModel.js";
-import { RatingAndReview } from "../models/RatingAndReview.js";
-import { Section } from "../models/SectionModel.js";
-import User from "../models/UserModel.js";
-import { StatusCode, type Handler } from "../types.js";
-import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-import { courseInputSchema } from "../validations/courseValidation.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { uploadToCloudinary } from "../../shared/utils/cloudinaryUpload.js";
+import { Category } from "../category/CategoryModel.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
+import { RatingAndReview } from "../rating/RatingAndReview.js";
+import { Section } from "../section/SectionModel.js";
+import User from "../user/UserModel.js";
+import { Course } from "./CourseModel.js";
+import { courseInputSchema } from "./courseValidation.js";
 
 export const createCourse: Handler = async (req, res) => {
   try {
@@ -226,7 +226,7 @@ export const deleteCourse: Handler = async (req, res) => {
       return;
     }
     course.isActive = false;
-    await course.save({validateBeforeSave: false});
+    await course.save({ validateBeforeSave: false });
     await RatingAndReview.updateMany(
       { courseId: new Types.ObjectId(courseId) },
       { isActive: false },
@@ -265,7 +265,7 @@ export const updateCourse: Handler = async (req, res) => {
       level,
       tag,
     } = parsedCourseData.data;
-    const course = await Course.findById(courseId,);
+    const course = await Course.findById(courseId);
     if (!course) {
       res.status(StatusCode.NotFound).json({ message: "Course not found" });
       return;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IUser } from "../../types.ts";
+import { IUser } from "../../shared/types.ts";
 //Custom Request Objects:
 declare global {
   namespace Express {

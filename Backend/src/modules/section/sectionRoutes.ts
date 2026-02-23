@@ -1,5 +1,9 @@
 import { Router } from "express";
 import {
+  isInstructor,
+  userMiddleware,
+} from "../../shared/middlewares/userMiddleware.js";
+import {
   changeSectionOrder,
   createSection,
   getAllSections,
@@ -7,8 +11,7 @@ import {
   removeSection,
   undoRemoveSection,
   updateSection,
-} from "../controllers/sectionController.js";
-import { isInstructor, userMiddleware } from "../middlewares/userMiddleware.js";
+} from "./sectionController.js";
 
 const sectionRouter = Router();
 
