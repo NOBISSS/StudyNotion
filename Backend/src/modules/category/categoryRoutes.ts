@@ -1,12 +1,15 @@
 import { Router } from "express";
-import { isAdmin, userMiddleware } from "../middlewares/userMiddleware.js";
+import {
+  isAdmin,
+  userMiddleware,
+} from "../../shared/middlewares/userMiddleware.js";
 import {
   categoryPageDetails,
   createCategory,
   deleteCategory,
   getAllCategory,
   updateCategory,
-} from "../modules/category/categoryController.js";
+} from "./categoryController.js";
 
 const categoryRouter = Router();
 

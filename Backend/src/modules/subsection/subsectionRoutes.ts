@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
-import materialRouter from "../../routes/materialRoutes.js";
-import QuizRouter from "../../routes/quizRoutes.js";
-import videoRouter from "../../routes/videoRoutes.js";
+import materialRouter from "./material/materialRoutes.js";
+import QuizRouter from "./quiz/quizRoutes.js";
 import { getAllSubsections } from "./subsectionController.js";
+import videoRouter from "./video/videoRoutes.js";
 
 const subsectionRouter = Router();
 

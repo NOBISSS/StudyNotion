@@ -8,6 +8,7 @@ import {
   forgetOTPVerificationRedis,
   forgetWithOTPRedis,
   getUser,
+  getUsers,
   refreshTokens,
   resendOTP,
   signin,
@@ -31,7 +32,8 @@ userRouter.route("/forgotpassword/verify").post(forgetOTPVerificationRedis);
 userRouter.route("/resendotp").post(resendOTP);
 userRouter.route("/login").post(signin);
 
-userRouter.route("/create").post(isAdmin, createUser);
+userRouter.route("/create").post(userMiddleware,isAdmin, createUser);
+userRouter.route("/getall").get(userMiddleware,isAdmin, getUsers);
 
 userRouter.use(userMiddleware);
 

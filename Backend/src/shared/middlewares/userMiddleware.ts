@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../modules/user/UserModel.js";
+import User from "../../modules/user/UserModel.js";
 import { StatusCode, type IUser } from "../types.js";
 export const userMiddleware = async (
   req: Request,

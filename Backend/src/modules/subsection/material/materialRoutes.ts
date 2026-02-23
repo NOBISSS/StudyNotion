@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { isInstructor } from "../middlewares/userMiddleware.js";
+import { isInstructor } from "../../../shared/middlewares/userMiddleware.js";
 import {
   addMaterial,
   deleteMaterial,
   getMaterial,
   updateMaterial,
-} from "../modules/subsection/material/materialController.js";
+} from "./materialController.js";
 
 const materialRouter = Router();
 

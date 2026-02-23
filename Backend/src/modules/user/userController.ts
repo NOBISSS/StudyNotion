@@ -634,3 +634,13 @@ export const createUser: Handler = async (req, res): Promise<void> => {
     return;
   }
 }
+export const getUsers: Handler = async (req, res): Promise<void> => {
+  try {
+    const users = await User.find().select("-password -refreshToken");
+    res.status(StatusCode.Success).json({ message: "Users fetched successfully", users });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+}

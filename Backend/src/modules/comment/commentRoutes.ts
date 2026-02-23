@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { userMiddleware } from "../middlewares/userMiddleware.js";
+import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   createComment,
   deleteComment,
   getCommentsBySubSectionId,
   updateComment,
-} from "../modules/comment/commentController.js";
+} from "./commentController.js";
 
 const CommentRouter = Router();
 

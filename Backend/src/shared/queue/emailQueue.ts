@@ -1,7 +1,7 @@
 import {Queue,Worker} from "bullmq";
 import redis from "../config/redis.js";
 import { sendMail } from "../utils/mailer.js";
-import {OtpTemp} from "../mail/templates/OTPTemplate.js";
+import {OtpTemp} from "../templates/OTPTemplate.js";
 
 export const emailQueue=new Queue("email-queue",{
     connection:redis,
