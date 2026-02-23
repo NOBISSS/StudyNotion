@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { upload } from "../../middlewares/upload.js";
-import { userMiddleware } from "../../middlewares/userMiddleware.js";
+import { upload } from "../../shared/middlewares/upload.js";
+import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   changePassword,
+  createUser,
   deleteAccount,
   forgetOTPVerificationRedis,
   forgetWithOTPRedis,
@@ -16,6 +17,7 @@ import {
   updateProfile,
   updateProfilePhoto,
 } from "./userController.js";
+import { isAdmin } from "../../shared/middlewares/userMiddleware.js";
 export const userRouter = Router();
 // export const router=Router();
 // router.post("/signup",signupWithOTP);
@@ -28,6 +30,8 @@ userRouter.route("/forgotpassword").post(forgetWithOTPRedis);
 userRouter.route("/forgotpassword/verify").post(forgetOTPVerificationRedis);
 userRouter.route("/resendotp").post(resendOTP);
 userRouter.route("/login").post(signin);
+
+userRouter.route("/create").post(isAdmin, createUser);
 
 userRouter.use(userMiddleware);
 
