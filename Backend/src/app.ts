@@ -8,6 +8,7 @@ import { courseRouter } from "./modules/course/courseRoutes.js";
 import { courseEnrollmentRouter } from "./modules/enrollment/courseEnrollmentRoutes.js";
 import { reviewRouter } from "./modules/rating/reviewRoutes.js";
 import { sectionRouter } from "./modules/section/sectionRoutes.js";
+import SignatureGenerationRouter from "./modules/signatureGeneration/generateSignatures.routes.js";
 import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import { userRedisRouter } from "./modules/user/userRedisRouter.js";
 import { userRouter } from "./modules/user/userRoutes.js";
@@ -50,5 +51,6 @@ app.use("/api/sections", sectionRouter);
 app.use("/api/subsections", subsectionRouter);
 app.use("/s3", multipartUploadRoute);
 app.use("/api/comments", CommentRouter);
+app.use("/api/signatures", SignatureGenerationRouter);
 
 export default app;
