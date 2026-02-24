@@ -3,10 +3,9 @@ import type { UploadApiResponse } from "cloudinary";
 import { type CookieOptions } from "express";
 import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
-import otpGenerator from "otp-generator";
-import { z } from "zod";
-import { type Handler, StatusCode } from "../../shared/types.js";
+import { httpUrl, z } from "zod";
 import { emailQueue } from "../../shared/queue/emailQueue.js";
+import { type Handler, StatusCode } from "../../shared/types.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
@@ -19,7 +18,7 @@ import {
   verifyOTP,
 } from "../../shared/utils/otp.service.js";
 import { Profile } from "./ProfileModel.js";
-import User from "./UserModel.js";
+import User, { type IUser, type UserDocument } from "./UserModel.js";
 import {
   changePasswordInputSchema,
   forgetInputSchema,
@@ -27,6 +26,7 @@ import {
   signupInputSchema,
   userInputSchema,
 } from "./userValidation.js";
+import { accessTokenCookieOptions, logoutCookieOptions, OTPDatacookieOptions, refreshTokenCookieOptions } from "../../shared/constants.js";
 
 export const signupWithOTP: Handler = async (req, res): Promise<void> => {
   try {
@@ -61,16 +61,8 @@ export const signupWithOTP: Handler = async (req, res): Promise<void> => {
     });
 
     await emailQueue.add("send-otp", { email, otp });
-
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 20 * 60 * 1000, // 20 minutes
-    };
     res
-      .cookie("otp_data", { email, type: "signup" }, cookieOptions)
+      .cookie("otp_data", { email, type: "signup" }, OTPDatacookieOptions)
       .status(StatusCode.Success)
       .json({ message: "OTP sent successfully" });
     return;
@@ -117,13 +109,6 @@ export const resendOTP: Handler = async (req, res): Promise<void> => {
     });
 
     await emailQueue.add("send-otp", { email, otp });
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 10 * 60000, // 10 minutes
-    };
     res
       .cookie(
         "otp_data",
@@ -131,7 +116,7 @@ export const resendOTP: Handler = async (req, res): Promise<void> => {
           email: email,
           type: otpData.otpType === "registration" ? "signup" : "forget",
         },
-        cookieOptions,
+        OTPDatacookieOptions,
       )
       .status(StatusCode.Success)
       .json({ message: "OTP Reset Successfully" });
@@ -173,8 +158,8 @@ export const signupOTPVerification: Handler = async (req, res) => {
     await user.updateOne({ refreshToken });
 
     res
-      .cookie("accessToken", accessToken, { httpOnly: true })
-      .cookie("refreshToken", refreshToken, { httpOnly: true })
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .json({ message: "Signup successful", user });
   } catch (err: any) {
     res.status(StatusCode.ServerError).json({
@@ -219,16 +204,9 @@ export const signin: Handler = async (req, res): Promise<void> => {
       return;
     }
     const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: <"none">"none",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    };
     res
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .status(StatusCode.Success)
       .json({ message: "signin successfull", user });
     return;
@@ -271,12 +249,11 @@ export const refreshTokens: Handler = async (req, res): Promise<void> => {
     const decodedToken = jwt.verify(
       IRefreshToken,
       <string>process.env.JWT_REFRESH_TOKEN_SECRET,
-    );
+    ) as UserDocument;
     if (!decodedToken) {
       res.status(StatusCode.Unauthorized).json({ message: "Unauthorized" });
       return;
     }
-    //@ts-ignore
     const user = await User.findById(decodedToken._id);
     if (!user) {
       res
@@ -285,15 +262,9 @@ export const refreshTokens: Handler = async (req, res): Promise<void> => {
       return;
     }
     const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: <"none">"none",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    };
     res
-      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
       .status(StatusCode.Success)
       .json({ message: "Access token refreshed" });
     return;
@@ -305,16 +276,9 @@ export const refreshTokens: Handler = async (req, res): Promise<void> => {
 };
 export const signout: Handler = async (req, res): Promise<void> => {
   try {
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: <"none">"none",
-      path: "/",
-      maxAge: 0, // 1 day
-    };
     res
-      .clearCookie("accessToken", cookieOptions)
-      .clearCookie("refreshToken", cookieOptions)
+      .clearCookie("accessToken", logoutCookieOptions)
+      .clearCookie("refreshToken", logoutCookieOptions)
       .status(StatusCode.Success)
       .json({ message: "user signout success" });
     return;
@@ -394,15 +358,8 @@ export const forgetWithOTPRedis: Handler = async (req, res): Promise<void> => {
     });
 
     await emailQueue.add("send-otp", { email, otp });
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 10 * 60000, // 10 minutes
-    };
     res
-      .cookie("otp_data", { email: email, type: "forget" }, cookieOptions)
+      .cookie("otp_data", { email: email, type: "forget" }, OTPDatacookieOptions)
       .status(200)
       .json({ message: "OTP sent successfully" });
     return;
@@ -648,6 +605,16 @@ export const getInstructors: Handler = async (req, res): Promise<void> => {
   try {
     const users = await User.find({ accountType: "instructor" }).select("-password -refreshToken");
     res.status(StatusCode.Success).json({ message: "Instructors fetched successfully", users });
+    return;
+  } catch (err) {
+    res.status(StatusCode.ServerError).json({ message: "Something went wrong from ourside", error: err });
+    return;
+  }
+}
+export const getStudents: Handler = async (req, res): Promise<void> => {
+  try {
+    const users = await User.find({ accountType: "student" }).select("-password -refreshToken");
+    res.status(StatusCode.Success).json({ message: "Students fetched successfully", users });
     return;
   } catch (err) {
     res.status(StatusCode.ServerError).json({ message: "Something went wrong from ourside", error: err });

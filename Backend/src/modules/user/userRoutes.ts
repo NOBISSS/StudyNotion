@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { upload } from "../../shared/middlewares/upload.js";
-import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
+import { isAdmin, userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   changePassword,
   createUser,
@@ -8,6 +8,7 @@ import {
   forgetOTPVerificationRedis,
   forgetWithOTPRedis,
   getInstructors,
+  getStudents,
   getUser,
   getUsers,
   refreshTokens,
@@ -19,7 +20,6 @@ import {
   updateProfile,
   updateProfilePhoto,
 } from "./userController.js";
-import { isAdmin } from "../../shared/middlewares/userMiddleware.js";
 export const userRouter = Router();
 // export const router=Router();
 // router.post("/signup",signupWithOTP);
@@ -36,6 +36,7 @@ userRouter.route("/login").post(signin);
 userRouter.route("/create").post(userMiddleware,isAdmin, createUser);
 userRouter.route("/getall").get(userMiddleware,isAdmin, getUsers);
 userRouter.route("/getinstructors").get(userMiddleware,isAdmin, getInstructors);
+userRouter.route("/getstudents").get(userMiddleware,isAdmin, getStudents);
 
 userRouter.use(userMiddleware);
 

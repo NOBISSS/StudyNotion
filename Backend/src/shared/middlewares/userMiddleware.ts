@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../../modules/user/UserModel.js";
-import { StatusCode, type IUser } from "../types.js";
+import User, { type UserDocument } from "../../modules/user/UserModel.js";
+import { StatusCode } from "../types.js";
 export const userMiddleware = async (
   req: Request,
   res: Response,
@@ -12,7 +12,7 @@ export const userMiddleware = async (
     const decodedToken = jwt.verify(
       accessToken,
       <string>process.env.JWT_ACCESS_TOKEN_SECRET,
-    ) as IUser;
+    ) as UserDocument;
     if (!decodedToken) {
       res.status(StatusCode.Unauthorized).json({ message: "Unautorized" });
       return;
@@ -28,10 +28,10 @@ export const userMiddleware = async (
     req.user = user;
     req.accountType = user.accountType;
     next();
-  } catch (err: any) {
+  } catch (err) {
     res
       .status(StatusCode.Unauthorized)
-      .json({ message: err.message || "Something went wrong from our side" });
+      .json({ message: "Something went wrong from our side", error: err });
     return;
   }
 };
@@ -54,10 +54,10 @@ export const isStudent = async (
     }
     next();
   } catch (error) {
-    console.log(error);
     return res.status(StatusCode.Unauthorized).json({
       success: false,
       message: "Something went wrong from our side",
+      error: error,
     });
   }
 };
@@ -83,10 +83,10 @@ export const isInstructor = async (
     next();
     return;
   } catch (error) {
-    console.log(error);
     return res.status(StatusCode.Unauthorized).json({
       success: false,
       message: "Something went wrong from our side",
+      error: error,
     });
   }
 };
@@ -106,10 +106,10 @@ export const isAdmin = async (
     }
     next();
   } catch (error) {
-    console.log(error);
     return res.status(StatusCode.Unauthorized).json({
       success: false,
       message: "Something went wrong from our side",
+      error: error,
     });
   }
 };
