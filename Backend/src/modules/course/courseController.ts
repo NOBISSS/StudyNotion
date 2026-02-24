@@ -11,7 +11,7 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 
 export const createCourse: Handler = async (req, res) => {
-  let thumbnailImage: UploadApiResponse;
+  let thumbnailImage: UploadApiResponse | null = null;
   try {
     const userId = req.userId;
     const parsedCourseData = courseInputSchema.safeParse(req.body);
@@ -33,7 +33,13 @@ export const createCourse: Handler = async (req, res) => {
     try {
       console.log("Received thumbnail file:", thumbnail.originalname, "Size:", thumbnail.size);
       console.log("Thumbnail file buffer type:", typeof thumbnail.buffer);
-      thumbnailImage = await uploadToCloudinary(Buffer.from(thumbnail.buffer));
+      thumbnailImage = await uploadToCloudinary(thumbnail.buffer, "StudyNotion/Thumbnails");
+      if (!thumbnailImage) {
+        res.status(StatusCode.ServerError).json({
+          message: "Failed to upload thumbnail image to Cloudinary",
+        });
+        return;
+      }
     } catch (err) {
       res.status(StatusCode.ServerError).json({
         message:
