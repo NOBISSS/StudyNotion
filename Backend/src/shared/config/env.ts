@@ -1,5 +1,8 @@
 // src/config/env.ts
 import { z } from 'zod';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'staging', 'production']),
@@ -8,7 +11,7 @@ const envSchema = z.object({
   MONGODB_URI: z.url(),
   // MONGO_DB_NAME: z.string().min(1),
 
-  REDIS_URL: z.string().url(),
+  REDIS_URL: z.url(),
 
   JWT_ACCESS_TOKEN_SECRET: z.string().min(32),
   JWT_REFRESH_TOKEN_SECRET: z.string().min(32),

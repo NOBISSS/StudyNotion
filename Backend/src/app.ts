@@ -10,10 +10,10 @@ import { reviewRouter } from "./modules/rating/reviewRoutes.js";
 import { sectionRouter } from "./modules/section/sectionRoutes.js";
 import SignatureGenerationRouter from "./modules/signatureGeneration/generateSignatures.routes.js";
 import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
-import { userRedisRouter } from "./modules/user/userRedisRouter.js";
-import { userRouter } from "./modules/user/userRoutes.js";
+import userRouter  from "./modules/user/userRoutes.js";
 import multipartUploadRoute from "./routes/MultipartUploadRoute.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
+import authRouter from "./modules/auth/authRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
   res.send("Hello, StudyNotion!");
 });
 
-app.use("/api/users", userRedisRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/courses", courseRouter);
 app.use("/api/categories", categoryRouter);

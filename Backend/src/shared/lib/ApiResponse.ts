@@ -1,5 +1,6 @@
 // src/lib/apiResponse.ts
 import { type Response } from "express";
+import type { CookieType } from "../types.js";
 
 interface PaginationMeta {
   page: number;
@@ -16,7 +17,13 @@ export class ApiResponse {
     data: T,
     message = "Success",
     statusCode = 200,
+    cookies?: CookieType[],
   ): Response {
+    if (cookies && cookies.length > 0) {
+      cookies.forEach((cookie) => {
+        res.cookie(cookie.name, cookie.value, cookie.options);
+      });
+    }
     return res.status(statusCode).json({
       success: true,
       message,
@@ -24,8 +31,13 @@ export class ApiResponse {
     });
   }
 
-  static created<T>(res: Response, data: T, message = "Created"): Response {
-    return ApiResponse.success(res, data, message, 201);
+  static created<T>(
+    res: Response,
+    data: T,
+    message = "Created",
+    cookies?: CookieType[],
+  ): Response {
+    return ApiResponse.success(res, data, message, 201, cookies);
   }
 
   static paginated<T>(
