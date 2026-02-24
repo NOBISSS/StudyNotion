@@ -219,7 +219,7 @@ export const signin: Handler = async (req, res): Promise<void> => {
 export const getUser: Handler = async (req, res): Promise<void> => {
   try {
     const userId = req.userId;
-    const user = await User.findById(userId).select("-password -refreshToken");
+    const user = req.user;
     if (!user) {
       res.status(StatusCode.NotFound).json({ message: "User not found" });
       return;

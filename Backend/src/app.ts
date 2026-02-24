@@ -13,6 +13,7 @@ import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import { userRedisRouter } from "./modules/user/userRedisRouter.js";
 import { userRouter } from "./modules/user/userRoutes.js";
 import multipartUploadRoute from "./routes/MultipartUploadRoute.js";
+import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 dotenv.config();
 
 const app = express();
@@ -52,5 +53,7 @@ app.use("/api/subsections", subsectionRouter);
 app.use("/s3", multipartUploadRoute);
 app.use("/api/comments", CommentRouter);
 app.use("/api/signatures", SignatureGenerationRouter);
+
+app.use(globalErrorHandler);
 
 export default app;

@@ -51,6 +51,6 @@ export function globalErrorHandler(
   res.status(500).json({
     success: false,
     code: "INTERNAL_ERROR",
-    message: "Something went wrong",
+    message: "Something went wrong from our side",
   });
 }

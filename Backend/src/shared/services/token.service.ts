@@ -33,8 +33,8 @@ class TokenService {
   generateAccessToken(
     payload: Omit<AccessTokenPayload, "iat" | "exp">,
   ): string {
-    return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-      expiresIn: env.JWT_ACCESS_EXPIRES_IN,
+    return jwt.sign(payload, env.JWT_ACCESS_TOKEN_SECRET, {
+      expiresIn: env.JWT_ACCESS_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     } as SignOptions);
   }
@@ -42,8 +42,8 @@ class TokenService {
   generateRefreshToken(
     payload: Omit<RefreshTokenPayload, "iat" | "exp">,
   ): string {
-    return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+    return jwt.sign(payload, env.JWT_REFRESH_TOKEN_SECRET, {
+      expiresIn: env.JWT_REFRESH_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     } as SignOptions);
   }
@@ -54,7 +54,7 @@ class TokenService {
     try {
       const payload = jwt.verify(
         token,
-        env.JWT_ACCESS_SECRET,
+        env.JWT_ACCESS_TOKEN_SECRET,
       ) as UserDocument;
       return payload;
     } catch (err) {
@@ -67,7 +67,7 @@ class TokenService {
 
   verifyRefreshToken(token: string): RefreshTokenPayload {
     try {
-      return jwt.verify(token, env.JWT_REFRESH_SECRET) as RefreshTokenPayload;
+      return jwt.verify(token, env.JWT_REFRESH_TOKEN_SECRET) as RefreshTokenPayload;
     } catch (err) {
       if ((err as any).name === "TokenExpiredError") {
         throw AppError.unauthorized("Refresh token expired");
@@ -154,7 +154,7 @@ class TokenService {
       sessionId: newSessionId,
     });
 
-    const refreshTTL = this.parseTTL(env.JWT_REFRESH_EXPIRES_IN);
+    const refreshTTL = this.parseTTL(env.JWT_REFRESH_TOKEN_EXPIRES_IN);
     await this.storeRefreshToken(
       userId,
       newSessionId,
