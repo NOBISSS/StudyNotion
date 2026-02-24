@@ -1,9 +1,9 @@
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner/dist-types/getSignedUrl.js";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import cloudinary from "../../shared/config/cloudinary.js";
 import { s3 } from "../../shared/config/s3Config.js";
-import { StatusCode, type Handler } from "../../shared/types.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3/dist-types/commands/index.js";
 import { MATERIAL_MAX_FILE_SIZE } from "../../shared/constants.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const generateCloudinarySignature: Handler = (req, res) => {
   try {

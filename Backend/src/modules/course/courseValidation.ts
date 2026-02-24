@@ -18,9 +18,9 @@ export const courseInputSchema = z.object({
     .number({ error: "Price is required" })
     .min(0, { error: "Price cannot be negative" })
     .optional(),
-  // thumbnailUrl: z
-  //   .url({ error: "Thumbnail URL must be a valid URL" })
-  //   .optional(),
+  thumbnailUrl: z
+    .url({ error: "Thumbnail URL must be a valid URL" })
+    .optional(),
   level: z.enum(
     ["Beginner", "Intermediate", "Advance", "Beginner-to-Advance"],
     {

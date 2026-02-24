@@ -11,28 +11,25 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 
 export const createCourse: Handler = async (req, res) => {
-  let thumbnailImage: UploadApiResponse | null = null;
   try {
     const userId = req.userId;
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
       res.status(StatusCode.InputError).json({
         message:
-          parsedCourseData.error.issues[0]?.message || "Invalid course data",
+        parsedCourseData.error.issues[0]?.message || "Invalid course data",
       });
       return;
     }
     const thumbnail = req.file;
     if (!thumbnail) {
       res
-        .status(StatusCode.InputError)
-        .json({ message: "Thumbnail image is required" });
+      .status(StatusCode.InputError)
+      .json({ message: "Thumbnail image is required" });
       return;
-    }
-    
+    }    
+    let thumbnailImage: UploadApiResponse | null = null;
     try {
-      console.log("Received thumbnail file:", thumbnail.originalname, "Size:", thumbnail.size);
-      console.log("Thumbnail file buffer type:", typeof thumbnail.buffer);
       thumbnailImage = await uploadToCloudinary(thumbnail.buffer, "StudyNotion/Thumbnails");
       if (!thumbnailImage) {
         res.status(StatusCode.ServerError).json({
@@ -45,8 +42,6 @@ export const createCourse: Handler = async (req, res) => {
         message:
           "Something went wrong from our side while uploading the thumbnail image",
         error: err,
-        //@ts-ignore
-        err: thumbnailImage
       });
       return;
     }
@@ -106,9 +101,85 @@ export const createCourse: Handler = async (req, res) => {
   } catch (err) {
     res
       .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err,
-        //@ts-ignore 
-        thumbnailImage });
+      .json({ message: "Something went wrong from ourside", err});
+    return;
+  }
+};
+export const createCourseWithThumbnailURL: Handler = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const parsedCourseData = courseInputSchema.safeParse(req.body);
+    if (!parsedCourseData.success) {
+      res.status(StatusCode.InputError).json({
+        message:
+        parsedCourseData.error.issues[0]?.message || "Invalid course data",
+      });
+      return;
+    }
+    const instructorId = req.accountType === "instructor" ? userId : parsedCourseData.data.instructorId;
+    if (!instructorId) {
+      res.status(StatusCode.InputError).json({
+        message: "Instructor ID is required for course creation",
+      });
+      return;
+    }
+    const instructor = await User.findById(instructorId);
+    if (!instructor) {
+      res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
+      return;
+    }
+    const {
+      categoryId,
+      courseName,
+      description,
+      typeOfCourse,
+      coursePlan,
+      price,
+      level,
+      tag,
+      thumbnailUrl,
+    } = parsedCourseData.data;
+    if (!thumbnailUrl) {
+      res.status(StatusCode.InputError).json({
+        message: "Thumbnail URL is required for course creation",
+      });
+      return;
+    }
+    const course = await Course.create({
+      courseName,
+      description,
+      instructorId: new Types.ObjectId(instructorId),
+      instructorName: `${instructor?.firstName} ${instructor?.lastName}`,
+      categoryId,
+      typeOfCourse,
+      coursePlan: coursePlan ? new Types.ObjectId(coursePlan) : null,
+      originalPrice: price || 0,
+      level,
+      tag: tag || [],
+      thumbnailUrl,
+      slug:
+        courseName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
+    });
+    await Category.findByIdAndUpdate(categoryId, {
+      $push: { courses: course._id },
+    });
+    await Section.create({
+      name: "Introduction",
+      courseId: course._id,
+      order: 1,
+      subSectionIds: [],
+    });
+    res
+      .status(StatusCode.Success)
+      .json({ message: "Course created successfully", course });
+    return;
+  } catch (err) {
+    res
+      .status(StatusCode.ServerError)
+      .json({ message: "Something went wrong from ourside", err});
     return;
   }
 };

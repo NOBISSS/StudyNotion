@@ -6,6 +6,7 @@ import {
 } from "../../shared/middlewares/userMiddleware.js";
 import {
   createCourse,
+  createCourseWithThumbnailURL,
   deleteCourse,
   getAllCourse,
   getAllCourseByEnrollmentsAndRatings,
@@ -23,6 +24,7 @@ courseRouter
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.use(isInstructor);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
+courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
 // courseRouter.route("/getcourse/:id").get();
 courseRouter.route("/update/:courseId").put(updateCourse);
