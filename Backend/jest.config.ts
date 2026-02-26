@@ -1,20 +1,21 @@
 import type { Config } from "jest";
+import { createDefaultEsmPreset } from "ts-jest";
 
-const config: Config = {
-  preset: "ts-jest",
+const presetConfig = createDefaultEsmPreset({});
+
+export default {
+  ...presetConfig,
   testEnvironment: "node",
-
-  setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-  globalTeardown: "<rootDir>/tests/teardown.ts",
-
-  transform: {
-    "^.+\\.ts$": [
-      "ts-jest",
-      {
-        tsconfig: "tsconfig.test.json",
-      },
-    ],
+  testMatch: [
+    "**/tests/**/*.test.ts",
+    "**/__tests__/**/*.test.ts",
+    "**/?(*.)+(spec|test).ts",
+  ],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  globalTeardown: '<rootDir>/tests/teardown.ts',
+  
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-};
-
-export default config;
+  testTimeout: 30000,
+} satisfies Config;

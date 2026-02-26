@@ -1,7 +1,15 @@
-import { afterAll, beforeAll, beforeEach } from "@jest/globals";
+import { afterAll, beforeAll, beforeEach, jest } from "@jest/globals";
+import dotenv from "dotenv";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+dotenv.config();
 
+jest.mock("../src/shared/queue/emailQueue.js", () =>
+  require("../__mocks__/emailQueue.js"),
+);
+jest.mock("../src/shared/utils/otp.service.js", () =>
+  require("../__mocks__/generateOTP.js"),
+);
 declare global {
   var __MONGO_SERVER__: MongoMemoryServer;
 }

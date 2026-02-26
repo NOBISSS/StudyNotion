@@ -1,4 +1,4 @@
-export const OtpTemp = (otp) => {
+export const OtpTemp = (otp:string) => {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>

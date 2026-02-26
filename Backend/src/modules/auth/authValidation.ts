@@ -26,20 +26,20 @@ export const signupInputSchema = z.object({
     .string()
     .min(3, { message: "Last name must be atleast 3 characters" }),
   accountType: z.enum(["admin", "instructor", "student"]),
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.email({ message: "Invalid email address" }),
   password: z
     .string()
     .regex(/[A-Z]/, {
-      message: "Pasword should include atlist 1 uppercasecharacter",
+      message: "Password should include atlist 1 uppercase character",
     })
     .regex(/[a-z]/, {
-      message: "Pasword should include atlist 1 lowercasecharacter",
+      message: "Password should include atlist 1 lowercase character",
     })
     .regex(/[0-9]/, {
-      message: "Pasword should include atlist 1 number character",
+      message: "Password should include atlist 1 number character",
     })
     .regex(/[^A-Za-z0-9]/, {
-      message: "Pasword should include atlist 1 special character",
+      message: "Password should include atlist 1 special character",
     })
     .min(8, { message: "Password length shouldn't be less than 8" }),
 });
@@ -53,15 +53,15 @@ export const changePasswordInputSchema = z.object({
     .string()
     .min(8, { message: "New Password length shouldn't be less than 8" })
     .regex(/[A-Z]/, {
-      message: "New Pasword should include atlist 1 uppercasecharacter",
+      message: "New Password should include atlist 1 uppercase character",
     })
     .regex(/[a-z]/, {
-      message: "New Pasword should include atlist 1 lowercasecharacter",
+      message: "New Password should include atlist 1 lowercase character",
     })
     .regex(/[0-9]/, {
-      message: "New Pasword should include atlist 1 number character",
+      message: "New Password should include atlist 1 number character",
     })
     .regex(/[^A-Za-z0-9]/, {
-      message: "New Pasword should include atlist 1 special character",
+      message: "New Password should include atlist 1 special character",
     }),
 });

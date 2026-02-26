@@ -2,9 +2,12 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type IUser, type UserDocument } from "../../modules/user/UserModel.js";
-import { env } from "../config/env.js";
+// import { getEnv } from "../config/env.js";
 import redis  from "../config/redis.js";
 import { AppError } from "../lib/AppError.js";
+
+// const env = getEnv();
+const env = process.env as any; // For simplicity in this example, but ideally use getEnv() for validation
 
 export interface AccessTokenPayload {
   sub: string; // userId

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "rootDir": ".",
     "types": ["node", "jest"],
-    "noEmit": true
+    "noEmit": true,
+    "module": "esnext",
+    "target": "esnext",
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tests/**/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
 }

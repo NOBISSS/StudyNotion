@@ -1,9 +1,12 @@
 // src/middleware/errorHandler.ts
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { env } from "../config/env.js";
+// import { getEnv } from "../config/env.js";
 import { AppError } from "./AppError.js";
-import { logger } from "./logger.js";
+import { getLogger } from "./logger.js";
+
+// const env = getEnv();
+const logger = getLogger();
 
 export function globalErrorHandler(
   err: unknown,
@@ -41,7 +44,7 @@ export function globalErrorHandler(
       success: false,
       code: err.code,
       message: err.message,
-      ...(env.NODE_ENV !== "production" && { meta: err.meta }),
+      ...(process.env.NODE_ENV !== "production" && { meta: err.meta }),
     });
     return;
   }
