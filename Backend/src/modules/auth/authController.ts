@@ -37,14 +37,15 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
     );
   }
   const { email, password, firstName, lastName, accountType } = userInput.data;
-  const userExists = await User.findOne({ email });
+  const lowerCaseEmail = email.toLowerCase();
+  const userExists = await User.findOne({ email: lowerCaseEmail });
   if (userExists) {
     throw AppError.conflict("User already exists with this username or email");
   }
-
+  
   const otp = generateOTP();
   await saveOTP({
-    email,
+    email: lowerCaseEmail,
     otp,
     data: {
       password: await bcrypt.hash(password, 10),
@@ -55,16 +56,16 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
     },
   });
 
-  await emailQueue.add("send-otp", { email, otp });
+  await emailQueue.add("send-otp", { email: lowerCaseEmail, otp });
   return ApiResponse.success<{ email: string }>(
     res,
-    { email },
+    { email: lowerCaseEmail },
     "OTP sent successfully",
     StatusCode.Success,
     [
       {
         name: "otp_data",
-        value: JSON.stringify({ email, type: "signup" }),
+        value: JSON.stringify({ email: lowerCaseEmail, type: "signup" }),
         options: OTPDatacookieOptions,
       },
     ],

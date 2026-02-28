@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,11 +13,37 @@
     "sourceMap": true,
     "types": ["node", "jest"],
     "isolatedModules": true,
-    "declaration": false,
-    "removeComments": true
+    "declaration": true,
+    "removeComments": true,
+    "allowJs": true,
+    "noEmit": false,
+    "lib": ["esnext"],
+    "declarationMap": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Style Options (uncomment as needed)
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "verbatimModuleSyntax": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "include": ["src/**/*", "tests/**/*"],
+
+  // Only exclude node_modules and compiled output.
+  // Removed **/*.test.ts and **/*.spec.ts exclusions — those prevented
+  // TypeScript from type-checking your test files entirely.
+  "exclude": ["node_modules", "dist"],
+
   "ts-node": {
     "esm": true
   }

@@ -26,7 +26,7 @@ authRouter.route("/login").post(signin);
 authRouter.use(userMiddleware);
 
 authRouter.route("/logout").post(signout);
-authRouter.route("/password").put(changePassword);
+authRouter.route("/changepassword").put(changePassword);
 authRouter.route("/refreshtoken").post(refreshTokens);
 authRouter.route("/getuser").get(getUser);
 authRouter.route("/deleteaccount").delete(deleteAccount);
