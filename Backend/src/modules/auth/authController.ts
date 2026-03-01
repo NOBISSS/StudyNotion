@@ -228,7 +228,6 @@ export const signin = asyncHandler(async (req, res) => {
   );
 });
 export const getUser = asyncHandler(async (req, res) => {
-  try {
     const userId = req.userId;
     const user = req.user;
     if (!user) {
@@ -242,11 +241,6 @@ export const getUser = asyncHandler(async (req, res) => {
       { user, profile: userProfile },
       "User fetched successfully",
     );
-  } catch (err: any) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: err.message || "Something went wrong from ourside" });
-  }
 });
 export const refreshTokens = asyncHandler(async (req, res) => {
   const IRefreshToken = req.cookies?.refreshToken;

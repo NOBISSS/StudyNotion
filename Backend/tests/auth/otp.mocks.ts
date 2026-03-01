@@ -5,6 +5,7 @@ import { emailQueue } from "../../src/shared/queue/emailQueue.js";
 
 jest.spyOn(bcrypt, "hash").mockResolvedValue("hashed-password" as never);
 jest.spyOn(bcrypt, "compare").mockResolvedValue(true as never);
+jest.spyOn(bcrypt, "compareSync").mockResolvedValue(true as never);
 
 jest.spyOn(redis, "pipeline").mockReturnValue({
   set: jest.fn().mockReturnThis(),
