@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import { endpoints } from "../../../src/endpoints.js";
-import { accountTypes } from "../../../src/modules/auth/auth.type.js";
 import "../otp.mocks.js";
 const { verifyOTP } = await import("../../../src/shared/utils/otp.service.js");
 

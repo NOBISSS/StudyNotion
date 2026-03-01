@@ -1,12 +1,17 @@
 import { describe, expect, it } from "@jest/globals";
-import request from "supertest";
-import app from "../../../src/app.js";
-import { registerPayload, URL } from "./signup.fixtures.js";
 import "../otp.mocks.js";
+const { default: app } = await import("../../../src/app.js");
+const { buildOtpCookie } =
+  await import("../signup-verify/signup-verification.fixtures.js");
+const request = (await import("supertest")).default;
+const { mockCanResendData, mockCanResendOTP, mockGetOTP, mockGetOTPData, URL } =
+  await import("./resendotp.fixtures.js");
 
 describe(`POST ${URL} → COOKIE`, () => {
   it("should set the otp_data cookie", async () => {
-    const res = await request(app).post(URL).send(registerPayload);
+    mockCanResendOTP.mockResolvedValue(mockCanResendData);
+    mockGetOTP.mockResolvedValue(mockGetOTPData);
+    const res = await request(app).post(URL).set("Cookie", buildOtpCookie()).send();
 
     const cookies: string[] = res.headers["set-cookie"] as unknown as string[];
     console.log("Set-Cookie Headers:", cookies);
@@ -15,7 +20,9 @@ describe(`POST ${URL} → COOKIE`, () => {
   });
 
   it("should set otp_data cookie with HttpOnly and Secure flags", async () => {
-    const res = await request(app).post(URL).send(registerPayload);
+    mockCanResendOTP.mockResolvedValue(mockCanResendData);
+    mockGetOTP.mockResolvedValue(mockGetOTPData);
+    const res = await request(app).post(URL).set("Cookie", buildOtpCookie()).send();
 
     const cookies: string[] = res.headers["set-cookie"] as unknown as string[];
     const otpCookie = cookies?.find((c) => c.startsWith("otp_data="))!;
@@ -26,7 +33,9 @@ describe(`POST ${URL} → COOKIE`, () => {
   });
 
   it("should set otp_data cookie with correct payload", async () => {
-    const res = await request(app).post(URL).send(registerPayload);
+    mockCanResendOTP.mockResolvedValue(mockCanResendData);
+    mockGetOTP.mockResolvedValue(mockGetOTPData);
+    const res = await request(app).post(URL).set("Cookie", buildOtpCookie()).send();
 
     const cookies: string[] = res.headers["set-cookie"] as unknown as string[];
     const otpCookie = cookies?.find((c) => c.startsWith("otp_data="))!;
@@ -38,20 +47,8 @@ describe(`POST ${URL} → COOKIE`, () => {
     const parsed = JSON.parse(jsonStr);
 
     expect(parsed).toMatchObject({
-      email: registerPayload.email,
+      email: "arafat@test.com",
       type: "signup",
     });
-  });
-
-  it("should not set accessToken or refreshToken cookies on register", async () => {
-    const res = await request(app).post(URL).send(registerPayload);
-
-    const cookies: string[] =
-      (res.headers["set-cookie"] as unknown as string[]) ?? [];
-    const hasAccessToken = cookies.some((c) => c.startsWith("accessToken="));
-    const hasRefreshToken = cookies.some((c) => c.startsWith("refreshToken="));
-
-    expect(hasAccessToken).toBe(false);
-    expect(hasRefreshToken).toBe(false);
   });
 });

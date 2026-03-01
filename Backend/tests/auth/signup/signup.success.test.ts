@@ -1,7 +1,7 @@
 import request from "supertest";
 import { describe, it, expect } from "@jest/globals";
 import app from "../../../src/app.js";
-import "./signup.mocks.js";
+import "../otp.mocks.js";
 import { registerPayload,URL } from "./signup.fixtures.js";
 
 describe("POST /api/auth/signup → SUCCESS", () => {

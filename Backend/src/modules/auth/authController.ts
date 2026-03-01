@@ -72,11 +72,11 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
   );
 });
 export const resendOTP = asyncHandler(async (req, res) => {
-  const { email } = req.cookies.otp_data;
-  if (!email) {
+  if (!req.cookies.otp_data || !req.cookies.otp_data.email || !req.cookies.otp_data.type) {
     throw AppError.badRequest("Invalid Request");
   }
-
+  const { email } = req.cookies.otp_data;
+  
   const canResend = await canResendOTP(email);
   if (!canResend) {
     throw AppError.rateLimited(
@@ -87,7 +87,7 @@ export const resendOTP = asyncHandler(async (req, res) => {
   const otp = generateOTP();
   const otpData = await getOTPData(email);
   if (!otpData) {
-    throw AppError.notFound("Invalid OTP request");
+    throw AppError.forbidden("Invalid OTP request");
   }
   await saveOTP({
     email,

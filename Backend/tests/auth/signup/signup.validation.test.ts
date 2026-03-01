@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import request from "supertest";
 import app from "../../../src/app.js";
-import "./signup.mocks.js";
+import "../otp.mocks.js";
 import dotenv from 'dotenv';
 import { registerPayload,URL } from "./signup.fixtures.js";
 dotenv.config();

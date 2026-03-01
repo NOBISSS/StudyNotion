@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../../src/app.js";
 import { emailQueue } from "../../../src/shared/queue/emailQueue.js";
-import "./signup.mocks.js";
+import "../otp.mocks.js";
 import { describe, it, jest, expect } from "@jest/globals";
 import { registerPayload,URL } from "./signup.fixtures.js";
 
