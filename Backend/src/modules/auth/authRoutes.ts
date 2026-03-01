@@ -22,12 +22,12 @@ authRouter.route("/forgotpassword").post(forgetWithOTP);
 authRouter.route("/forgotpassword/verify").post(forgetOTPVerification);
 authRouter.route("/resendotp").post(resendOTP);
 authRouter.route("/login").post(signin);
+authRouter.route("/refreshtoken").post(refreshTokens);
 
 authRouter.use(userMiddleware);
 
 authRouter.route("/logout").post(signout);
 authRouter.route("/changepassword").put(changePassword);
-authRouter.route("/refreshtoken").post(refreshTokens);
 authRouter.route("/getuser").get(getUser);
 authRouter.route("/deleteaccount").delete(deleteAccount);
 

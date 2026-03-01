@@ -3,7 +3,7 @@ import request from "supertest";
 import app from "../../../src/app.js";
 import { getAuthCookie } from "../../getAuthCookie.js";
 import "../otp.mocks.js";
-import { URL } from "./Getuser.fixtures.js";
+import { URL } from "./getuser.fixtures.js";
 
 describe(`GET ${URL} → SUCCESS`, () => {
   it("should return 200 with correct response shape", async () => {

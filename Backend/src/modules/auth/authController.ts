@@ -28,6 +28,7 @@ import {
   signinInputSchema,
   signupInputSchema,
 } from "./authValidation.js";
+import { tokenService } from "../../shared/services/token.service.js";
 
 export const signupWithOTP = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -247,18 +248,12 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   if (!IRefreshToken) {
     throw AppError.unauthorized("Refresh token is required");
   }
-  const decodedToken = jwt.verify(
-    IRefreshToken,
-    <string>process.env.JWT_REFRESH_TOKEN_SECRET,
-  ) as UserDocument;
-  if (!decodedToken) {
-    throw AppError.unauthorized("Unauthorized");
-  }
+  const decodedToken = tokenService.verifyRefreshToken(IRefreshToken);
   const user = await User.findById(decodedToken._id);
   if (!user) {
     throw AppError.unauthorized("Invalid refresh token");
   }
-  const { accessToken } = user.generateAccessAndRefreshToken();
+  const accessToken = user.generateAccessAndRefreshToken().accessToken;
   return ApiResponse.success(
     res,
     { accessToken },
@@ -274,6 +269,8 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   );
 });
 export const signout = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  await User.findByIdAndUpdate(userId, { $set: { refreshToken: null } });
   return ApiResponse.success(
     res,
     {},
