@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import request from "supertest";
 import app from "../../../src/app.js";
 import "../otp.mocks.js";
-import { URL } from "./Getuser.fixtures.js";
+import { URL } from "./getuser.fixtures.js";
 
 describe(`GET ${URL} → ERRORS`, () => {
   it("should return 401 when no accessToken cookie is provided", async () => {
