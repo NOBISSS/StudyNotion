@@ -42,7 +42,7 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
   if (userExists) {
     throw AppError.conflict("User already exists with this username or email");
   }
-  
+
   const otp = generateOTP();
   await saveOTP({
     email: lowerCaseEmail,
@@ -120,17 +120,24 @@ export const resendOTP = asyncHandler(async (req, res) => {
   );
 });
 export const signupOTPVerification = asyncHandler(async (req, res) => {
+  const otpDataCookie = req.cookies.otp_data;
+  if (!otpDataCookie || !otpDataCookie.email || !otpDataCookie.type) {
+    throw AppError.badRequest("Invalid Request");
+  }
+  const { email, type } = req.cookies.otp_data;
   const { otp } = req.body;
-  const { email } = req.cookies.otp_data;
-
-  if (!otp || !email) {
-    throw AppError.badRequest("OTP and email are required for verification");
+  if (!otp) {
+    throw AppError.badRequest("OTP is required");
   }
 
-  const otpData = await verifyOTP(email, otp, "registration");
+  const otpData = await verifyOTP({
+    email,
+    userOtp: otp,
+    otpType: "registration",
+  });
 
-  if (!otpData || otpData.otpType !== "registration") {
-    throw AppError.notFound("Invalid or Expired OTP");
+  if (!otpData || otpData.otpType !== "registration" || type !== "signup") {
+    throw AppError.forbidden("Invalid or Expired OTP");
   }
 
   const user = await User.create({
@@ -360,7 +367,11 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
   }
   const { otp, password } = parsedInput.data;
   const { email } = req.cookies.otp_data;
-  const otpData = await verifyOTP(email, otp.toString(), "forget");
+  const otpData = await verifyOTP({
+    email,
+    userOtp: otp.toString(),
+    otpType: "forget",
+  });
 
   if (!otpData || otpData.otpType !== "forget") {
     throw AppError.badRequest("Invalid OTP");

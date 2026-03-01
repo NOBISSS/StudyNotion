@@ -52,11 +52,15 @@ export const canResendOTP = async (email: string) => {
 };
 
 //verifyOTP
-export const verifyOTP = async (
-  email: string,
-  userOtp: string,
-  otpType: "registration" | "forget"
-) => {
+export const verifyOTP = async ({
+  email,
+  userOtp,
+  otpType,
+}: {
+  email: string;
+  userOtp: string;
+  otpType: "registration" | "forget";
+}) => {
   const data = await getOTPData(email);
   if (!data || !data.otp) return null;
 

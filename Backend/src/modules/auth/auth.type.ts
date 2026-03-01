@@ -9,9 +9,9 @@ export type OTPData = {
   firstName?: string | undefined;
   lastName?: string | undefined;
   contactNo?: string | undefined;
-  accountType?: "admin" | "vendor" | "venue" | "user" | undefined;
+  accountType?: "student" | "admin" | "instructor" | undefined;
   password?: string | undefined;
   otpType?: OTPType;
 };
-export const accountTypes = ["admin", "vendor", "venue", "user"] as const;
+export const accountTypes = ["admin", "student", "instructor"] as const;
 export type account = (typeof accountTypes)[number];
