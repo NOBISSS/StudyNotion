@@ -62,9 +62,9 @@ class TokenService {
       return payload;
     } catch (err) {
       if ((err as any).name === "TokenExpiredError") {
-        throw AppError.unauthorized("Access token expired");
+        throw AppError.unauthorized("Unauthorized: Access token expired");
       }
-      throw AppError.unauthorized("Invalid access token");
+      throw AppError.unauthorized("Unauthorized: Invalid access token");
     }
   }
 
