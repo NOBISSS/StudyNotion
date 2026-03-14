@@ -59,29 +59,20 @@ export const updateProfile = asyncHandler(async (req, res) => {
     throw AppError.conflict("Username already taken");
   }
 });
-export const banUser: Handler = async (req, res) => {
-  try {
+export const banUser = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const user = await User.findById(userId);
     if (!user) {
-      res.status(StatusCode.NotFound).json({ message: "User not found" });
-      return;
+      throw AppError.notFound("User not found");
     }
     await user.updateOne({ isBanned: !user.isBanned });
-    res.status(StatusCode.Success).json({
-      message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully`,
-    });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
-export const updateProfilePhoto: Handler = async (req, res) => {
+    ApiResponse.success(
+      res,
+      { message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully` }
+    );
+});
+export const updateProfilePhoto = asyncHandler(async (req, res) => {
   let avatar: UploadApiResponse | null = null;
-  try {
     const profilePicture = req.file;
     if (!profilePicture) {
       res
@@ -101,36 +92,27 @@ export const updateProfilePhoto: Handler = async (req, res) => {
       { profilePicture: avatar.secure_url },
       { new: true },
     );
-
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Profile photo updated successfully" });
-    return;
-  } catch (err) {
-    if (avatar) await deleteFromCloudinary(avatar.public_id);
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
-export const createUser: Handler = async (req, res) => {
-  try {
+    if (!profile) {
+      if (avatar) await deleteFromCloudinary(avatar.public_id);
+      throw AppError.notFound("Profile not found");
+    }
+    ApiResponse.success(res, {
+      profile,
+      message: "Profile picture updated successfully",
+    });
+});
+export const createUser = asyncHandler(async (req, res) => {
     const userInput = signupInputSchema.safeParse(req.body);
     if (!userInput.success) {
-      res.status(StatusCode.InputError).json({
-        message: userInput.error.issues?.[0]?.message || "User data required",
-      });
-      return;
+      throw AppError.badRequest(
+        userInput.error.issues[0]?.message || "Invalid input data",
+      );
     }
     const { email, password, firstName, lastName, accountType } =
       userInput.data;
     const userExists = await User.findOne({ email });
     if (userExists) {
-      res
-        .status(StatusCode.DocumentExists)
-        .json({ message: "User already exists with this username or email" });
-      return;
+      throw AppError.conflict("User with this email already exists");
     }
     const user = await User.create({
       email,
@@ -139,60 +121,21 @@ export const createUser: Handler = async (req, res) => {
       lastName,
       accountType,
     });
-    res
-      .status(StatusCode.Success)
-      .json({ message: "User created successfully", user });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
-export const getUsers: Handler = async (req, res) => {
-  try {
+    ApiResponse.created(res, { message: "User created successfully", user });
+});
+export const getUsers = asyncHandler(async (req, res) => {
     const users = await User.find().select("-password -refreshToken");
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Users fetched successfully", users });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
-export const getInstructors: Handler = async (req, res) => {
-  try {
+    ApiResponse.success(res, { message: "Users fetched successfully", users });
+});
+export const getInstructors = asyncHandler(async (req, res) => {
     const users = await User.find({ accountType: "instructor" }).select(
       "-password -refreshToken",
     );
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Instructors fetched successfully", users });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
-export const getStudents: Handler = async (req, res) => {
-  try {
+    ApiResponse.success(res, { message: "Instructors fetched successfully", users });
+});
+export const getStudents = asyncHandler(async (req, res) => {
     const users = await User.find({ accountType: "student" }).select(
       "-password -refreshToken",
     );
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Students fetched successfully", users });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", error: err });
-    return;
-  }
-};
+    ApiResponse.success(res, { message: "Students fetched successfully", users });
+});
