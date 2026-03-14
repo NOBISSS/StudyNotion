@@ -9,53 +9,36 @@ import { Section } from "../section/SectionModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
+import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { AppError } from "../../shared/lib/AppError.js";
+import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 
-export const createCourse: Handler = async (req, res) => {
-  try {
+export const createCourse = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
-      res.status(StatusCode.InputError).json({
-        message:
-        parsedCourseData.error.issues[0]?.message || "Invalid course data",
-      });
-      return;
+      throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course data");
     }
     const thumbnail = req.file;
     if (!thumbnail) {
-      res
-      .status(StatusCode.InputError)
-      .json({ message: "Thumbnail image is required" });
-      return;
-    }    
+      throw AppError.badRequest("Thumbnail image is required");
+    }   
     let thumbnailImage: UploadApiResponse | null = null;
     try {
       thumbnailImage = await uploadToCloudinary(thumbnail.buffer, "StudyNotion/Thumbnails");
       if (!thumbnailImage) {
-        res.status(StatusCode.ServerError).json({
-          message: "Failed to upload thumbnail image to Cloudinary",
-        });
-        return;
+        throw AppError.internal("Failed to upload thumbnail image");
       }
     } catch (err) {
-      res.status(StatusCode.ServerError).json({
-        message:
-          "Something went wrong from our side while uploading the thumbnail image",
-        error: err,
-      });
-      return;
+      throw AppError.internal("Something went wrong from our side while uploading the thumbnail image");
     }
     const instructorId = req.accountType === "instructor" ? userId : parsedCourseData.data.instructorId;
     if (!instructorId) {
-      res.status(StatusCode.InputError).json({
-        message: "Instructor ID is required for course creation",
-      });
-      return;
+      throw AppError.badRequest("Instructor ID is required for course creation");
     }
     const instructor = await User.findById(instructorId);
     if (!instructor) {
-      res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
-      return;
+      throw AppError.notFound("Instructor not found");
     }
     const {
       categoryId,
@@ -94,39 +77,21 @@ export const createCourse: Handler = async (req, res) => {
       order: 1,
       subSectionIds: [],
     });
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Course created successfully", course });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err});
-    return;
-  }
-};
-export const createCourseWithThumbnailURL: Handler = async (req, res) => {
-  try {
+    ApiResponse.created(res, { message: "Course created successfully", course });
+});
+export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
-      res.status(StatusCode.InputError).json({
-        message:
-        parsedCourseData.error.issues[0]?.message || "Invalid course data",
-      });
-      return;
+      throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course data");
     }
     const instructorId = req.accountType === "instructor" ? userId : parsedCourseData.data.instructorId;
     if (!instructorId) {
-      res.status(StatusCode.InputError).json({
-        message: "Instructor ID is required for course creation",
-      });
-      return;
+      throw AppError.badRequest("Instructor ID is required for course creation");
     }
     const instructor = await User.findById(instructorId);
     if (!instructor) {
-      res.status(StatusCode.NotFound).json({ message: "Instructor not found" });
-      return;
+      throw AppError.notFound("Instructor not found");
     }
     const {
       categoryId,
@@ -140,10 +105,7 @@ export const createCourseWithThumbnailURL: Handler = async (req, res) => {
       thumbnailUrl,
     } = parsedCourseData.data;
     if (!thumbnailUrl) {
-      res.status(StatusCode.InputError).json({
-        message: "Thumbnail URL is required for course creation",
-      });
-      return;
+      throw AppError.badRequest("Thumbnail URL is required for course creation");
     }
     const course = await Course.create({
       courseName,
@@ -172,37 +134,17 @@ export const createCourseWithThumbnailURL: Handler = async (req, res) => {
       order: 1,
       subSectionIds: [],
     });
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Course created successfully", course });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err});
-    return;
-  }
-};
-export const getAllCourse: Handler = async (req, res) => {
-  try {
+    ApiResponse.created(res, { message: "Course created successfully", course });
+});
+export const getAllCourse = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const courses = await Course.find();
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Courses retrieved successfully", courses });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
-    return;
-  }
-};
-export const getAllCourseByEnrollmentsAndRatings: Handler = async (
+    ApiResponse.success(res, { message: "Courses retrieved successfully", courses });
+});
+export const getAllCourseByEnrollmentsAndRatings = asyncHandler(async (
   req,
   res,
 ) => {
-  try {
     const userId = req.userId;
     const courses = await Course.find();
     const coursesWithEnrollmentCount = await Promise.all(
@@ -235,24 +177,16 @@ export const getAllCourseByEnrollmentsAndRatings: Handler = async (
       }
       return b.enrollmentsCount - a.enrollmentsCount;
     });
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Courses retrieved successfully",
       courses,
       sortedCourses,
     });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
-    return;
-  }
-};
-export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
+});
+export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(async (
   req,
   res,
 ) => {
-  try {
     const userId = req.userId;
     const categoryId = req.params.categoryId;
     const courses = await Course.find({
@@ -288,32 +222,20 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler = async (
       }
       return b.enrollmentsCount - a.enrollmentsCount;
     });
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Courses retrieved successfully",
       courses,
       sortedCourses,
     });
-    return;
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
-    return;
-  }
-};
-export const deleteCourse: Handler = async (req, res) => {
-  try {
+});
+export const deleteCourse = asyncHandler(async (req, res) => {
     const courseId = req.params.courseId;
     const course = await Course.findById(courseId);
     if (!course) {
-      res.status(StatusCode.NotFound).json({ message: "Course not found" });
-      return;
+      throw AppError.notFound("Course not found");
     }
     if (course.instructorId !== req.userId) {
-      res
-        .status(StatusCode.Unauthorized)
-        .json({ message: "You are not authorized to delete this course" });
-      return;
+      throw AppError.unauthorized("You are not authorized to delete this course");
     }
     course.isActive = false;
     await course.save({ validateBeforeSave: false });
@@ -321,30 +243,16 @@ export const deleteCourse: Handler = async (req, res) => {
       { courseId: new Types.ObjectId(courseId) },
       { isActive: false },
     );
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Course deleted successfully" });
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
-    return;
-  }
-};
-export const updateCourse: Handler = async (req, res) => {
-  try {
+    ApiResponse.success(res, { message: "Course deleted successfully" });
+});
+export const updateCourse = asyncHandler(async (req, res) => {
     const courseId = req.params.courseId;
     if (courseId && !Types.ObjectId.isValid(courseId as string)) {
-      res.status(StatusCode.InputError).json({ message: "Invalid course ID" });
-      return;
+      throw AppError.badRequest("Invalid course ID");
     }
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
-      res.status(StatusCode.InputError).json({
-        message:
-          parsedCourseData.error.issues[0]?.message || "Invalid course data",
-      });
-      return;
+      throw AppError.badRequest("Invalid course data");
     }
     const {
       courseName,
@@ -357,14 +265,10 @@ export const updateCourse: Handler = async (req, res) => {
     } = parsedCourseData.data;
     const course = await Course.findById(courseId);
     if (!course) {
-      res.status(StatusCode.NotFound).json({ message: "Course not found" });
-      return;
+      throw AppError.notFound("Course not found");
     }
     if (course.instructorId !== req.userId) {
-      res
-        .status(StatusCode.Unauthorized)
-        .json({ message: "You are not authorized to update this course" });
-      return;
+      throw AppError.unauthorized("You are not authorized to update this course");
     }
     const updatedCourse = await Course.findByIdAndUpdate(
       courseId,
@@ -379,13 +283,5 @@ export const updateCourse: Handler = async (req, res) => {
       },
       { new: true, runValidators: true },
     );
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Course updated successfully" });
-  } catch (err) {
-    res
-      .status(StatusCode.ServerError)
-      .json({ message: "Something went wrong from ourside", err });
-    return;
-  }
-};
+    ApiResponse.success(res, { message: "Course updated successfully" });
+});
