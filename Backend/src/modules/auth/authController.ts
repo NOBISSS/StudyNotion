@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import type { Types } from "mongoose";
 import { z } from "zod";
 import {
@@ -12,6 +11,7 @@ import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { emailQueue } from "../../shared/queue/emailQueue.js";
+import { tokenService } from "../../shared/services/token.service.js";
 import { StatusCode } from "../../shared/types.js";
 import {
   canResendOTP,
@@ -21,14 +21,13 @@ import {
   verifyOTP,
 } from "../../shared/utils/otp.service.js";
 import { Profile } from "../user/ProfileModel.js";
-import User, { type UserDocument } from "../user/UserModel.js";
+import User from "../user/UserModel.js";
 import {
   changePasswordInputSchema,
   forgetInputSchema,
   signinInputSchema,
   signupInputSchema,
 } from "./authValidation.js";
-import { tokenService } from "../../shared/services/token.service.js";
 
 export const signupWithOTP = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -73,11 +72,15 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
   );
 });
 export const resendOTP = asyncHandler(async (req, res) => {
-  if (!req.cookies.otp_data || !req.cookies.otp_data.email || !req.cookies.otp_data.type) {
+  if (
+    !req.cookies.otp_data ||
+    !req.cookies.otp_data.email ||
+    !req.cookies.otp_data.type
+  ) {
     throw AppError.badRequest("Invalid Request");
   }
   const { email } = req.cookies.otp_data;
-  
+
   const canResend = await canResendOTP(email);
   if (!canResend) {
     throw AppError.rateLimited(
@@ -229,19 +232,19 @@ export const signin = asyncHandler(async (req, res) => {
   );
 });
 export const getUser = asyncHandler(async (req, res) => {
-    const userId = req.userId;
-    const user = req.user;
-    if (!user) {
-      throw AppError.notFound("User not found");
-    }
-    const userProfile = await Profile.findOne({
-      userId: userId as Types.ObjectId,
-    });
-    return ApiResponse.success(
-      res,
-      { user, profile: userProfile },
-      "User fetched successfully",
-    );
+  const userId = req.userId;
+  const user = req.user;
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+  const userProfile = await Profile.findOne({
+    userId: userId as Types.ObjectId,
+  });
+  return ApiResponse.success(
+    res,
+    { user, profile: userProfile },
+    "User fetched successfully",
+  );
 });
 export const refreshTokens = asyncHandler(async (req, res) => {
   const IRefreshToken = req.cookies?.refreshToken;
@@ -313,7 +316,9 @@ export const changePassword = asyncHandler(async (req, res) => {
   );
 });
 export const forgetWithOTP = asyncHandler(async (req, res) => {
-  const userEmail = z.email({ message: "Invalid email address" });
+  const userEmail = z
+    .string({ error: "Email is required" })
+    .email({ message: "Invalid email address" })
   const userInput = userEmail.safeParse(req.body.email);
   if (!userInput.success) {
     throw AppError.badRequest(
@@ -321,29 +326,30 @@ export const forgetWithOTP = asyncHandler(async (req, res) => {
     );
   }
   const email = userInput.data;
-  const user = await User.findOne({ email });
+  const lowerCaseEmail = email.toLowerCase();
+  const user = await User.findOne({ email: lowerCaseEmail });
   if (!user) {
     throw AppError.notFound("User not found with this email");
   }
   const otp = generateOTP();
   await saveOTP({
-    email,
+    email: lowerCaseEmail,
     otp,
     data: {
-      otpType: "forget",
+      otpType: "forgot",
     },
   });
 
-  await emailQueue.add("send-otp", { email, otp });
+  await emailQueue.add("send-otp", { email: lowerCaseEmail, otp });
   return ApiResponse.success<{ email: string }>(
     res,
-    { email },
+    { email: lowerCaseEmail },
     "OTP sent successfully",
     StatusCode.Success,
     [
       {
         name: "otp_data",
-        value: JSON.stringify({ email, type: "forget" }),
+        value: JSON.stringify({ email: lowerCaseEmail, type: "forgot" }),
         options: OTPDatacookieOptions,
       },
     ],
@@ -358,18 +364,19 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
   }
   const { otp, password } = parsedInput.data;
   const { email } = req.cookies.otp_data;
+  const lowerCaseEmail = email.toLowerCase();
   const otpData = await verifyOTP({
-    email,
+    email: lowerCaseEmail,
     userOtp: otp.toString(),
-    otpType: "forget",
+    otpType: "forgot",
   });
 
-  if (!otpData || otpData.otpType !== "forget") {
+  if (!otpData || otpData.otpType !== "forgot") {
     throw AppError.badRequest("Invalid OTP");
   }
 
   await User.updateOne(
-    { email },
+    { email: lowerCaseEmail },
     {
       $set: {
         password: bcrypt.hashSync(password, 10),
