@@ -1,29 +1,19 @@
-import { StatusCode, type Handler } from "../../shared/types.js";
+import { ApiResponse } from "../../shared/lib/ApiResponse.js";
+import { AppError } from "../../shared/lib/AppError.js";
+import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { SubSection } from "./SubSectionModel.js";
 
-export const getAllSubsections: Handler = async (req, res) => {
-  try {
-    const sectionId = req.params.sectionId;
-    if (!sectionId) {
-      res
-        .status(StatusCode.InputError)
-        .json({ message: "Section ID is required" });
-      return;
-    }
-    const subsections = await SubSection.find({ sectionId, isActive: true });
-    if (!subsections) {
-      res.status(StatusCode.NotFound).json({ message: "No subsections found" });
-      return;
-    }
-    res.status(StatusCode.Success).json({
-      message: "Subsections retrieved successfully",
-      subsections,
-    });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "An error occurred while fetching subsections.",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
+export const getAllSubsections = asyncHandler(async (req, res) => {
+  const sectionId = req.params.sectionId;
+  if (!sectionId) {
+    throw AppError.badRequest("Section ID is required");
   }
-};
+  const subsections = await SubSection.find({ sectionId, isActive: true });
+  if (!subsections) {
+    throw AppError.notFound("SubSections not found");
+  }
+  ApiResponse.success(res, {
+    message: "Subsections retrieved successfully",
+    subsections,
+  });
+});
