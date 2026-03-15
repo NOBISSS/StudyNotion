@@ -5,14 +5,16 @@ import {
   getAllEnrollments,
   getUserEnrollments,
 } from "./courseEnrollmentController.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { ROLES } from "../../shared/constants.js";
 
 const courseEnrollmentRouter = Router();
 
 courseEnrollmentRouter.use(userMiddleware);
 
-courseEnrollmentRouter.route("/enroll").post(EnrollInCourse);
-courseEnrollmentRouter.route("/getmy").get(getUserEnrollments);
-courseEnrollmentRouter.route("/getall").get(isAdmin,getAllEnrollments);
+courseEnrollmentRouter.route("/enroll").post(authorizeRoles(ROLES.STUDENT),EnrollInCourse);
+courseEnrollmentRouter.route("/getmy").get(authorizeRoles(ROLES.STUDENT),getUserEnrollments);
+courseEnrollmentRouter.route("/getall").get(authorizeRoles(ROLES.ADMIN),getAllEnrollments);
 // courseEnrollmentRouter.route("/pagedetails/:categoryId").get();
 
 export { courseEnrollmentRouter };

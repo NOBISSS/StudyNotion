@@ -28,3 +28,10 @@ export const OTPDatacookieOptions: CookieOptions = {
   path: "/",
   maxAge: 10 * 60 * 1000, // 10 minutes
 };
+export const ROLES = {
+  STUDENT: "student",
+  INSTRUCTOR: "instructor",
+  ADMIN: "admin",
+} as const;
+
+export type Role = (typeof ROLES)[keyof typeof ROLES];

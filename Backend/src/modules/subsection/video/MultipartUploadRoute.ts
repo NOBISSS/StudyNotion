@@ -1,14 +1,17 @@
 import { Router } from "express";
+import { ROLES } from "../../../shared/constants.js";
+import { authorizeRoles } from "../../../shared/middlewares/role.middleware.js";
 import {
   abortVideoUpload,
   completeVideoUpload,
   generateMultipartPresignedURL,
   initializeVideoUpload,
   videoBatchHandler,
-} from "../modules/subsection/video/videoController.js";
+} from "./videoController.js";
 
 const multipartUploadRoute = Router();
 
+authorizeRoles(ROLES.INSTRUCTOR);
 multipartUploadRoute.route("/multipart").post(initializeVideoUpload);
 multipartUploadRoute
   .route("/multipart/:uploadId/part")

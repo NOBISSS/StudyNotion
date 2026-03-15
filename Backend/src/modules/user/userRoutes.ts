@@ -9,6 +9,8 @@ import {
   updateProfile,
   updateProfilePhoto,
 } from "./userController.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { ROLES } from "../../shared/constants.js";
 
 const userRouter = Router();
 
@@ -19,7 +21,7 @@ userRouter
 .route("/changeprofilephoto")
 .put(upload.single("profilephoto"), updateProfilePhoto);
 
-userRouter.use(isAdmin);
+userRouter.use(authorizeRoles(ROLES.ADMIN));
 userRouter.route("/create").post(createUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);

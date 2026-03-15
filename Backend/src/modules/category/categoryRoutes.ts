@@ -10,16 +10,18 @@ import {
   getAllCategory,
   updateCategory,
 } from "./categoryController.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { ROLES } from "../../shared/constants.js";
 
 const categoryRouter = Router();
 
 categoryRouter.use(userMiddleware);
-categoryRouter.use(isAdmin);
+categoryRouter.route("/getall").get(getAllCategory);
+categoryRouter.route("/pagedetails/:categoryId").get(categoryPageDetails);
 
+categoryRouter.use(authorizeRoles(ROLES.ADMIN));
 categoryRouter.route("/create").post(createCategory);
 categoryRouter.route("/update/:categoryId").put(updateCategory);
 categoryRouter.route("/delete/:categoryId").delete(deleteCategory);
-categoryRouter.route("/getall").get(getAllCategory);
-categoryRouter.route("/pagedetails/:categoryId").get(categoryPageDetails);
 
 export { categoryRouter };
