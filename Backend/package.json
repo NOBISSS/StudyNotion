@@ -7,8 +7,7 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "tsx src/server.ts",
     "build": "tsc",
-    "devv": "tsx watch src/server.ts",
-    "dev":"concurrently -n \"Stud-Web,server\" -c \"bgBlue,bgYellow\" \"npm start\" \"npm run server\""
+    "dev": "tsx watch src/server.ts"
   },
   "author": "",
   "license": "ISC",
