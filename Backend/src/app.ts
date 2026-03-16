@@ -14,6 +14,7 @@ import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import multipartUploadRoute from "./modules/subsection/video/MultipartUploadRoute.js";
 import userRouter from "./modules/user/userRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
+import profileRouter from "./modules/profile/profileRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 const baseRoute = "/api/v1";
 
 app.use(`${baseRoute}/auth`, authRouter);
+app.use(`${baseRoute}/profile`, profileRouter);
 app.use(`${baseRoute}/users`, userRouter);
 app.use(`${baseRoute}/courses`, courseRouter);
 app.use(`${baseRoute}/categories`, categoryRouter);

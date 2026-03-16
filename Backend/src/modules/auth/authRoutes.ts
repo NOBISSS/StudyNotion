@@ -2,11 +2,8 @@ import { Router } from "express";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 
 import {
-  changePassword,
-  deleteAccount,
   forgetOTPVerification,
   forgetWithOTP,
-  getUser,
   refreshTokens,
   resendOTP,
   signin,
@@ -27,8 +24,4 @@ authRouter.route("/refreshtoken").post(refreshTokens);
 authRouter.use(userMiddleware);
 
 authRouter.route("/logout").post(signout);
-authRouter.route("/changepassword").put(changePassword);
-authRouter.route("/getuser").get(getUser);
-authRouter.route("/deleteaccount").delete(deleteAccount);
-
 export default authRouter;
