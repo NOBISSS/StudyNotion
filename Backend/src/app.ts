@@ -42,17 +42,19 @@ app.get("/", (req, res) => {
   res.send("Hello, StudyNotion!");
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/users", userRouter);
-app.use("/api/courses", courseRouter);
-app.use("/api/categories", categoryRouter);
-app.use("/api/enrollments", courseEnrollmentRouter);
-app.use("/api/reviews", reviewRouter);
-app.use("/api/sections", sectionRouter);
-app.use("/api/subsections", subsectionRouter);
+const baseRoute = "/api/v1";
+
+app.use(`${baseRoute}/auth`, authRouter);
+app.use(`${baseRoute}/users`, userRouter);
+app.use(`${baseRoute}/courses`, courseRouter);
+app.use(`${baseRoute}/categories`, categoryRouter);
+app.use(`${baseRoute}/enrollments`, courseEnrollmentRouter);
+app.use(`${baseRoute}/reviews`, reviewRouter);
+app.use(`${baseRoute}/sections`, sectionRouter);
+app.use(`${baseRoute}/subsections`, subsectionRouter);
 app.use("/s3", multipartUploadRoute);
-app.use("/api/comments", CommentRouter);
-app.use("/api/signatures", SignatureGenerationRouter);
+app.use(`${baseRoute}/comments`, CommentRouter);
+app.use(`${baseRoute}/signatures`, SignatureGenerationRouter);
 
 app.use(globalErrorHandler);
 
