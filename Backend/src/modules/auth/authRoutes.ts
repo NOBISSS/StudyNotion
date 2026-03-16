@@ -4,6 +4,7 @@ import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   forgetOTPVerification,
   forgetWithOTP,
+  googleSignin,
   refreshTokens,
   resendOTP,
   signin,
@@ -19,6 +20,7 @@ authRouter.route("/forgotpassword").post(forgetWithOTP);
 authRouter.route("/forgotpassword/verify").post(forgetOTPVerification);
 authRouter.route("/resendotp").post(resendOTP);
 authRouter.route("/login").post(signin);
+authRouter.route("/google").post(googleSignin);
 authRouter.route("/refreshtoken").post(refreshTokens);
 
 authRouter.use(userMiddleware);

@@ -361,13 +361,6 @@ export const googleSignin = asyncHandler(async (req, res) => {
   }
   const { accessToken, refreshToken } =
     await user.generateAccessAndRefreshToken();
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: <"none">"none",
-    path: "/",
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-  };
   ApiResponse.success(res, { user }, "Signin successfull", 200, [
     {
       name: "accessToken",
