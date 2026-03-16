@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { isAdmin, userMiddleware } from "../../shared/middlewares/userMiddleware.js";
+import { ROLES } from "../../shared/constants.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   EnrollInCourse,
   getAllEnrollments,
   getUserEnrollments,
 } from "./courseEnrollmentController.js";
-import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
-import { ROLES } from "../../shared/constants.js";
 
 const courseEnrollmentRouter = Router();
 
