@@ -1,36 +1,30 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./src",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "target": "es2020",
-    "module": "node16",
-    "esModuleInterop": true,
+    "rootDir": ".",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "types": ["node", "jest"],
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
     "allowJs": true,
     "noEmit": false,
-    "isolatedModules": true,
-    "types": ["node"],
-    // For nodejs:
     "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
-
-    // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
     "declarationMap": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
-    // Style Options
+    // Style Options (uncomment as needed)
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
@@ -39,9 +33,18 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    "moduleDetection": "force"
+  },
+  "include": ["src/**/*", "tests/**/*"],
+
+  // Only exclude node_modules and compiled output.
+  // Removed **/*.test.ts and **/*.spec.ts exclusions — those prevented
+  // TypeScript from type-checking your test files entirely.
+  "exclude": ["node_modules", "dist"],
+
+  "ts-node": {
+    "esm": true
   }
 }

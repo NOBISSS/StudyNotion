@@ -1,4 +1,4 @@
-import type { OTPData, OTPType, SaveOTPOptions } from "../../modules/user/auth.type.js";
+import type { OTPData, OTPType, SaveOTPOptions } from "../../modules/auth/auth.type.js";
 import redis  from "../config/redis.js";
 
 const OTP_TTL = 5 * 60; // 5 minutes

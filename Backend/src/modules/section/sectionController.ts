@@ -1,150 +1,107 @@
 import { Types } from "mongoose";
-import { StatusCode, type Handler } from "../../shared/types.js";
+import { ApiResponse } from "../../shared/lib/ApiResponse.js";
+import { AppError } from "../../shared/lib/AppError.js";
+import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { StatusCode } from "../../shared/types.js";
 import { Course } from "../course/CourseModel.js";
 import { Section } from "./SectionModel.js";
 import { createSectionSchema } from "./sectionValidation.js";
 
-export const createSection: Handler = async (req, res): Promise<void> => {
-  try {
-    const parsedData = createSectionSchema.safeParse(req.body);
-    const instructorId = req.userId;
-    if (!parsedData.success) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: parsedData.error.issues[0]?.message || "Invalid input data",
-      });
-      return;
-    }
-    const { name, courseId, order } = parsedData.data;
-    const existingSection = await Section.findOne({ courseId }).populate(
-      "courseId",
+export const createSection = asyncHandler(async (req, res): Promise<void> => {
+  const parsedData = createSectionSchema.safeParse(req.body);
+  const instructorId = req.userId;
+  if (!parsedData.success) {
+    throw AppError.badRequest(
+      parsedData.error.issues[0]?.message || "Invalid section data",
     );
-    if (existingSection && existingSection.name === name) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this name already exists for the course",
-      });
-      return;
-    }
-    const existingCourse = await Course.findOne({ _id: courseId });
+  }
+  const { name, courseId, order } = parsedData.data;
+  const existingSection = await Section.findOne({ courseId }).populate(
+    "courseId",
+  );
+  if (existingSection && existingSection.name === name) {
+    throw AppError.conflict(
+      "Section with this name already exists for the course",
+    );
+  }
+  const existingCourse = await Course.findOne({ _id: courseId });
 
-    if (existingCourse?.instructorId.toString() != instructorId) {
-      res.status(StatusCode.Unauthorized).json({
-        success: false,
-        message: "You are not authorized to add sections to this course",
-      });
-      return;
-    }
-    const section = await Section.create({
-      name,
-      courseId,
-      order,
-    });
-    await Section.updateMany(
-      { courseId, _id: { $ne: section._id }, order: { $gte: order } },
-      { $inc: { order: 1 } },
+  if (existingCourse?.instructorId.toString() != instructorId) {
+    throw AppError.unauthorized(
+      "You are not authorized to add sections to this course",
     );
-    res.status(StatusCode.Success).json({
-      success: true,
-      message: "Section created successfully",
-      section,
-    });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
+  }
+  const section = await Section.create({
+    name,
+    courseId,
+    order,
+  });
+  await Section.updateMany(
+    { courseId, _id: { $ne: section._id }, order: { $gte: order } },
+    { $inc: { order: 1 } },
+  );
+  ApiResponse.created(res, {
+    success: true,
+    message: "Section created successfully",
+    section,
+  });
+});
+export const removeSection = asyncHandler(async (req, res): Promise<void> => {
+  const instructorId = req.userId;
+  const sectionId = req.params.sectionId;
+  if (!sectionId) {
+    res.status(StatusCode.InputError).json({
       success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
+      message: "Section ID is required",
     });
     return;
   }
-};
-export const removeSection: Handler = async (req, res): Promise<void> => {
-  try {
-    const instructorId = req.userId;
-    const sectionId = req.params.sectionId;
-    if (!sectionId) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: "Section ID is required",
-      });
-      return;
-    }
-    const existingSection = await Section.findOne({
-      _id: sectionId,
-      isRemoved: false,
-    });
-    if (!existingSection) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this ID does not exist",
-      });
-      return;
-    }
-    await Section.updateMany(
-      {
-        _id: { $ne: sectionId },
-        courseId: existingSection.courseId,
-        order: { $gt: existingSection.order },
-      },
-      { $inc: { order: -1 } },
-    );
-    const section = await Section.updateOne(
-      { _id: sectionId },
-      { isRemoved: true, order: -1, lastOrder: existingSection.order },
-    );
-    res.status(StatusCode.Success).json({
-      success: true,
-      message: "Section removed successfully",
-      section,
-    });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
+  const existingSection = await Section.findOne({
+    _id: sectionId,
+    isRemoved: false,
+  });
+  if (!existingSection) {
+    throw AppError.notFound("Section with this ID does not exist");
   }
-};
-export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
-  try {
+  await Section.updateMany(
+    {
+      _id: { $ne: sectionId },
+      courseId: existingSection.courseId,
+      order: { $gt: existingSection.order },
+    },
+    { $inc: { order: -1 } },
+  );
+  const section = await Section.updateOne(
+    { _id: sectionId },
+    { isRemoved: true, order: -1, lastOrder: existingSection.order },
+  );
+  ApiResponse.success(res, {
+    success: true,
+    message: "Section removed successfully",
+    section,
+  });
+});
+export const changeSectionOrder = asyncHandler(
+  async (req, res): Promise<void> => {
     const instructorId = req.userId;
     const sectionId = req.params.sectionId;
     const { newOrder } = req.body;
     if (!sectionId) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: "Section ID is required",
-      });
-      return;
+      throw AppError.badRequest("Section ID is required");
     }
     const existingSection = await Section.findOne({
       _id: sectionId,
       isRemoved: false,
     });
     if (!existingSection) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this ID does not exist",
-      });
-      return;
+      throw AppError.notFound("Section with this ID does not exist");
     }
     const oldOrder = existingSection.order;
     if (newOrder === oldOrder) {
-      res.status(StatusCode.Success).json({
-        success: true,
-        message: "Section order is unchanged",
-      });
-      return;
+      throw AppError.badRequest("Section order is unchanged");
     }
     if (newOrder < 1) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: "New order must be greater than 0",
-      });
-      return;
+      throw AppError.badRequest("New order must be greater than 0");
     }
     const maxOrderSection = await Section.findOne({
       courseId: existingSection.courseId,
@@ -152,11 +109,7 @@ export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
     }).sort({ order: -1 });
     const maxOrder = maxOrderSection ? maxOrderSection.order : 0;
     if (newOrder > maxOrder) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: `New order must be between 1 and ${maxOrder}`,
-      });
-      return;
+      throw AppError.badRequest(`New order must be between 1 and ${maxOrder}`);
     }
     await Section.updateOne({ _id: sectionId }, { order: newOrder });
     if (newOrder > oldOrder) {
@@ -178,104 +131,65 @@ export const changeSectionOrder: Handler = async (req, res): Promise<void> => {
         { $inc: { order: 1 } },
       );
     }
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       success: true,
       message: "Section order changed successfully",
     });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
+  },
+);
+export const updateSection = asyncHandler(async (req, res): Promise<void> => {
+  const { name } = req.body;
+  const sectionId = req.params.sectionId;
+  const instructorId = req.userId;
+  if (!sectionId) {
+    throw AppError.badRequest("Section ID is required");
   }
-};
-export const updateSection: Handler = async (req, res): Promise<void> => {
-  try {
-    const { name } = req.body;
-    const sectionId = req.params.sectionId;
-    const instructorId = req.userId;
-    if (!sectionId) {
-      res.status(StatusCode.InputError).json({
-        success: false,
-        message: "Section ID is required",
-      });
-      return;
-    }
-    const currentSection = await Section.findOne({
-      _id: sectionId,
-      isRemoved: false,
-    });
-    if (!currentSection) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this ID does not exist",
-      });
-      return;
-    }
-    const existingSection = await Section.findOne({
-      courseId: currentSection.courseId,
-    }).populate("courseId");
-    if (existingSection && existingSection.name === name) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this name already exists for the course",
-      });
-      return;
-    }
-    if (
-      // @ts-ignore
-      existingSection?.courseId.instructorId.toString() != instructorId
-    ) {
-      res.status(StatusCode.Unauthorized).json({
-        success: false,
-        message: "You are not authorized to add sections to this course",
-      });
-      return;
-    }
-    currentSection.name = name || currentSection.name;
-    await currentSection.save();
-    res.status(StatusCode.Success).json({
-      success: true,
-      message: "Section updated successfully",
-      section: currentSection,
-    });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
+  const currentSection = await Section.findOne({
+    _id: sectionId,
+    isRemoved: false,
+  });
+  if (!currentSection) {
+    throw AppError.notFound("Section with this ID does not exist");
   }
-};
-export const getAllSections: Handler = async (req, res): Promise<void> => {
-  try {
-    const instructorId = req.userId;
-    const courseId = req.params.courseId;
-    const sections = await Section.find({
-      courseId: new Types.ObjectId(courseId),
-      isRemoved: false,
-    }).sort({ order: 1 });
-    res.status(StatusCode.Success).json({
-      success: true,
-      message: "Sections retrieved successfully",
-      sections,
-    });
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
+  const existingSection = await Section.findOne({
+    courseId: currentSection.courseId,
+  }).populate("courseId");
+  if (existingSection && existingSection.name === name) {
+    throw AppError.conflict(
+      "Section with this name already exists for the course",
+    );
   }
-};
-export const getRemovedSections: Handler = async (req, res): Promise<void> => {
-  try {
+  if (
+    // @ts-ignore
+    existingSection?.courseId.instructorId.toString() != instructorId
+  ) {
+    throw AppError.unauthorized(
+      "You are not authorized to add sections to this course",
+    );
+  }
+  currentSection.name = name || currentSection.name;
+  await currentSection.save();
+  ApiResponse.success(res, {
+    success: true,
+    message: "Section updated successfully",
+    section: currentSection,
+  });
+});
+export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
+  const instructorId = req.userId;
+  const courseId = req.params.courseId;
+  const sections = await Section.find({
+    courseId: new Types.ObjectId(courseId),
+    isRemoved: false,
+  }).sort({ order: 1 });
+  ApiResponse.success(res, {
+    success: true,
+    message: "Sections retrieved successfully",
+    sections,
+  });
+});
+export const getRemovedSections = asyncHandler(
+  async (req, res): Promise<void> => {
     const instructorId = req.userId;
     const courseId = req.params.courseId;
     const sections = await Section.find({
@@ -283,36 +197,23 @@ export const getRemovedSections: Handler = async (req, res): Promise<void> => {
       isRemoved: true,
     }).sort({ order: 1 });
     if (sections.length === 0) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "No removed sections found for this course",
-      });
-      return;
+      throw AppError.notFound("No removed sections found for this course");
     }
     const existingCourse = await Course.findOne({ _id: courseId });
     if (existingCourse?.instructorId.toString() != instructorId) {
-      res.status(StatusCode.Unauthorized).json({
-        success: false,
-        message: "You are not authorized to view sections of this course",
-      });
-      return;
+      throw AppError.unauthorized(
+        "You are not authorized to view removed sections of this course",
+      );
     }
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       success: true,
       message: "Removed sections retrieved successfully",
       sections,
     });
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
-  }
-};
-export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
-  try {
+  },
+);
+export const undoRemoveSection = asyncHandler(
+  async (req, res): Promise<void> => {
     const sectionId = req.params.sectionId;
     const courseId = req.params.courseId;
     let existingSection;
@@ -328,11 +229,9 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
       }).sort({ order: -1 });
     }
     if (!existingSection) {
-      res.status(StatusCode.DocumentExists).json({
-        success: false,
-        message: "Section with this ID does not exist or is not removed",
-      });
-      return;
+      throw AppError.notFound(
+        "Section with this ID does not exist or is not removed",
+      );
     }
     await Section.updateOne(
       { _id: existingSection._id },
@@ -346,17 +245,9 @@ export const undoRemoveSection: Handler = async (req, res): Promise<void> => {
       },
       { $inc: { order: 1 } },
     );
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       success: true,
       message: "Section restored successfully",
     });
-    return;
-  } catch (error) {
-    res.status(StatusCode.ServerError).json({
-      success: false,
-      message: "Something went wrong from our side",
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return;
-  }
-};
+  },
+);

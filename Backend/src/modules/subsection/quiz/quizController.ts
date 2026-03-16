@@ -1,5 +1,7 @@
 import { Types } from "mongoose";
-import { StatusCode, type Handler } from "../../../shared/types.js";
+import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
+import { AppError } from "../../../shared/lib/AppError.js";
+import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { isValidInstructor } from "../material/materialController.js";
 import { SubSection } from "../SubSectionModel.js";
 import QuizAttempt from "./QuizAttemptModel.js";
@@ -10,20 +12,14 @@ import {
   updateQuizSchema,
 } from "./quizValidation.js";
 
-export const createQuiz: Handler = async (req, res) => {
-  try {
+export const createQuiz = asyncHandler(async (req, res) => {
     const parsedQuizData = createQuizSchema.safeParse(req.body);
     const userId = new Types.ObjectId(req.userId);
     if (!userId) {
-      res.status(StatusCode.Unauthorized).json({
-        message: "Unauthorized. User ID is missing.",
-      });
-      return;
+      throw AppError.unauthorized("User ID is required");
     }
     if (!parsedQuizData.success) {
-      return res.status(StatusCode.InputError).json({
-        message: parsedQuizData.error.issues[0]?.message,
-      });
+      throw AppError.badRequest(parsedQuizData.error.issues[0]?.message || "Invalid input data");
     }
     const { title, description, courseId, sectionId, questions } =
       parsedQuizData.data;
@@ -33,10 +29,7 @@ export const createQuiz: Handler = async (req, res) => {
       req.user?.accountType,
     );
     if (!course) {
-      res.status(StatusCode.Unauthorized).json({
-        message: "You are not authorized to add quiz to this course.",
-      });
-      return;
+      throw AppError.unauthorized("You are not authorized to add quiz to this course.");
     }
     const questionsWithIds = questions.map((q) => {
       return {
@@ -71,28 +64,16 @@ export const createQuiz: Handler = async (req, res) => {
       subSectionId: subSection._id,
       questions: questionsWithIds,
     });
-    res.status(StatusCode.Success).json({
+    ApiResponse.created(res, {
       message: "Quiz created successfully",
       quiz,
     });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const deleteQuiz: Handler = async (req, res) => {
-  try {
+});
+export const deleteQuiz = asyncHandler(async (req, res) => {
     const subsectionId = req.params.subSectionId;
     const subsection = await SubSection.findById(subsectionId);
     if (!subsection) {
-      res
-        .status(StatusCode.NotFound)
-        .json({ message: "Subsection not found." });
-      return;
+      throw AppError.notFound("Subsection not found.");
     }
     const course = await isValidInstructor(
       new Types.ObjectId(subsection.courseId),
@@ -100,36 +81,22 @@ export const deleteQuiz: Handler = async (req, res) => {
       req.user?.accountType,
     );
     if (!course) {
-      res.status(StatusCode.Unauthorized).json({
-        message: "You are not authorized to delete quiz from this course.",
-      });
-      return;
+      throw AppError.unauthorized("You are not authorized to delete quiz of this course.");
     }
     const quiz = await Quiz.findOneAndUpdate(
       { subSectionId: subsection._id, courseId: subsection.courseId },
       { isActive: false },
     );
     if (!quiz) {
-      return res
-        .status(StatusCode.NotFound)
-        .json({ message: "Quiz not found for the given subsection ID." });
+      throw AppError.notFound("Quiz not found for the given subsection ID.");
     }
     subsection.isActive = false;
     await subsection.save();
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Quiz deleted successfully." });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
+    ApiResponse.success(res, {
+      message: "Quiz deleted successfully.",
     });
-    return;
-  }
-};
-export const getQuizBySubSectionId: Handler = async (req, res) => {
-  try {
+});
+export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
     const subSectionId = req.params.subSectionId;
     // const quiz = await Quiz.findOne({
     //   subSectionId: new Types.ObjectId(subSectionId),
@@ -140,39 +107,21 @@ export const getQuizBySubSectionId: Handler = async (req, res) => {
       isActive: true,
     }).select("-questions.correctAnswer");
     if (!quiz) {
-      res
-        .status(StatusCode.NotFound)
-        .json({ message: "Quiz not found for the given subsection ID." });
-      return;
+      throw AppError.notFound("Quiz not found for the given subsection ID.");
     }
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Quiz retrieved successfully.",
       quiz,
     });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const updateQuiz: Handler = async (req, res) => {
-  try {
+});
+export const updateQuiz = asyncHandler(async (req, res) => {
     const parsedQuizData = updateQuizSchema.safeParse(req.body);
     const subsectionId = req.params.subSectionId;
     if (!subsectionId) {
-      res.status(StatusCode.InputError).json({
-        message: "Quiz/Subsection ID is required in the URL parameters.",
-      });
-      return;
+      throw AppError.badRequest("Quiz/Subsection ID is required in the URL parameters.");
     }
     if (!parsedQuizData.success) {
-      res.status(StatusCode.InputError).json({
-        message: parsedQuizData.error.issues[0]?.message,
-      });
-      return;
+      throw AppError.badRequest(parsedQuizData.error.issues[0]?.message || "Invalid input data");
     }
     const { title, description, questions } = parsedQuizData.data;
     const questionsWithIds = questions.map((q) => {
@@ -219,40 +168,22 @@ export const updateQuiz: Handler = async (req, res) => {
       { new: true },
     );
     if (!quiz) {
-      res.status(StatusCode.NotFound).json({
-        message: "Quiz not found for the given subsection ID.",
-      });
-      return;
+      throw AppError.notFound("Quiz not found for the given subsection ID.");
     }
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Quiz updated successfully.",
       quiz,
     });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const attemptQuiz: Handler = async (req, res) => {
-  try {
+});
+export const attemptQuiz = asyncHandler(async (req, res) => {
     const parsedAttemptData = attemptQuizSchema.safeParse(req.body);
     if (!parsedAttemptData.success) {
-      res.status(StatusCode.InputError).json({
-        message: parsedAttemptData.error.issues[0]?.message,
-      });
-      return;
+      throw AppError.badRequest(parsedAttemptData.error.issues[0]?.message || "Invalid input data");
     }
     const { quizId, answers } = parsedAttemptData.data;
     const quiz = await Quiz.findById(new Types.ObjectId(quizId));
     if (!quiz) {
-      res.status(StatusCode.NotFound).json({
-        message: "Quiz not found for the given quiz ID.",
-      });
-      return;
+      throw AppError.notFound("Quiz not found for the given quiz ID.");
     }
     let score = 0;
     const answersWithCorrectness = answers.map((answer) => {
@@ -282,42 +213,22 @@ export const attemptQuiz: Handler = async (req, res) => {
       score,
       answers: answersWithCorrectness,
     });
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Quiz attempt recorded successfully.",
       quizAttempt,
     });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const getQuizAttemptByUser: Handler = async (req, res) => {
-  try {
+});
+export const getQuizAttemptByUser = asyncHandler(async (req, res) => {
     const userId = new Types.ObjectId(req.userId);
     const quizId = req.params.quizId;
     if (!quizId || !userId) {
-      res.status(StatusCode.InputError).json({
-        message: "Quiz ID and User ID are required.",
-      });
-      return;
+      throw AppError.badRequest("Quiz ID and User ID are required.");
     }
     const quizAttempts = await QuizAttempt.find({ userId, quizId })
       .populate("quizId", "title")
       .sort({ createdAt: -1, score: -1 });
-    res.status(StatusCode.Success).json({
+    ApiResponse.success(res, {
       message: "Quiz attempts retrieved successfully.",
       quizAttempts,
     });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "Something went wrong from ourside",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
+});

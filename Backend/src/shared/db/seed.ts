@@ -1,11 +1,14 @@
 import dotenv from "dotenv";
-import { Category } from "../models/CategoryModel.js";
-import { Course } from "../models/CourseModel.js";
+import mongoose from "mongoose";
+import { Category } from "../../modules/category/CategoryModel.js";
+import { Course } from "../../modules/course/CourseModel.js";
+import { CourseEnrollment } from "../../modules/enrollment/CourseEnrollment.js";
 import { connectDB } from "./index.js";
+
 dotenv.config();
 
 async function seedData() {
-  await connectDB();
+  await connectDB(process.env.MONGODB_URI!);
   const courses = await Course.insertMany([
     {
       courseName: "Complete MERN Stack Development",
@@ -114,7 +117,105 @@ async function seedData() {
     $push: { courses: courses.map((course) => course._id) },
   });
 }
-seedData()
+
+export const seedCourseEnrollments = async () => {
+  try {
+    await connectDB(process.env.MONGODB_URI!);
+    const enrollments = [
+      {
+        userId: new mongoose.Types.ObjectId("6953a3ba335df77c52c3df02"),
+        courseId: new mongoose.Types.ObjectId("699d49eddbd93e88d301b55f"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6953a3f6335df77c52c3df11"),
+        courseId: new mongoose.Types.ObjectId("699d49eddbd93e88d301b55f"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6956cb03b0918d3ff01c0d80"),
+        courseId: new mongoose.Types.ObjectId("699d49eddbd93e88d301b55f"),
+      },
+
+      {
+        userId: new mongoose.Types.ObjectId("69580d525b47687eb4a71957"),
+        courseId: new mongoose.Types.ObjectId("699d4a803afda61bfe334ebc"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfaffda0b668afc6b7511"),
+        courseId: new mongoose.Types.ObjectId("699d4a803afda61bfe334ebc"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfb15da0b668afc6b7519"),
+        courseId: new mongoose.Types.ObjectId("699d4a803afda61bfe334ebc"),
+      },
+
+      {
+        userId: new mongoose.Types.ObjectId("699bfb27da0b668afc6b7521"),
+        courseId: new mongoose.Types.ObjectId("699d4aac3afda61bfe334ec3"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6953a3ba335df77c52c3df02"),
+        courseId: new mongoose.Types.ObjectId("699d4aac3afda61bfe334ec3"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6953a3f6335df77c52c3df11"),
+        courseId: new mongoose.Types.ObjectId("699d4aac3afda61bfe334ec3"),
+      },
+
+      {
+        userId: new mongoose.Types.ObjectId("6956cb03b0918d3ff01c0d80"),
+        courseId: new mongoose.Types.ObjectId("699d4ad43afda61bfe334ecb"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("69580d525b47687eb4a71957"),
+        courseId: new mongoose.Types.ObjectId("699d4ad43afda61bfe334ecb"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfaffda0b668afc6b7511"),
+        courseId: new mongoose.Types.ObjectId("699d4ad43afda61bfe334ecb"),
+      },
+
+      {
+        userId: new mongoose.Types.ObjectId("699bfb15da0b668afc6b7519"),
+        courseId: new mongoose.Types.ObjectId("699d4ae93afda61bfe334ed2"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfb27da0b668afc6b7521"),
+        courseId: new mongoose.Types.ObjectId("699d4ae93afda61bfe334ed2"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6953a3ba335df77c52c3df02"),
+        courseId: new mongoose.Types.ObjectId("699d4ae93afda61bfe334ed2"),
+      },
+
+      {
+        userId: new mongoose.Types.ObjectId("6953a3f6335df77c52c3df11"),
+        courseId: new mongoose.Types.ObjectId("699d3c2b9a999b244781c5b1"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("6956cb03b0918d3ff01c0d80"),
+        courseId: new mongoose.Types.ObjectId("699d3c2b9a999b244781c5b1"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("69580d525b47687eb4a71957"),
+        courseId: new mongoose.Types.ObjectId("699d3c924e48f04f3d9938e1"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfaffda0b668afc6b7511"),
+        courseId: new mongoose.Types.ObjectId("699d3c924e48f04f3d9938e1"),
+      },
+      {
+        userId: new mongoose.Types.ObjectId("699bfb15da0b668afc6b7519"),
+        courseId: new mongoose.Types.ObjectId("699d3c924e48f04f3d9938e1"),
+      },
+    ];
+
+    await CourseEnrollment.insertMany(enrollments);
+    console.log("✅ Course enrollments seeded successfully");
+  } catch (error) {
+    console.error("❌ Error seeding enrollments:", error);
+  }
+};
+seedCourseEnrollments()
   .then(() => {
     console.log("Seeding completed");
     process.exit(0);

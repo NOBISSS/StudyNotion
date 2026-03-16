@@ -62,8 +62,8 @@ export class AppError extends Error {
     return new AppError('Invalid OTP', 400, 'OTP_INVALID');
   }
 
-  static rateLimited() {
-    return new AppError('Too many requests', 429, 'RATE_LIMITED');
+  static rateLimited(message = 'Too many requests') {
+    return new AppError(message, 429, 'RATE_LIMITED');
   }
 
   static internal(message = 'Internal server error') {

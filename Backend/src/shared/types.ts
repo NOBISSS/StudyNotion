@@ -1,7 +1,7 @@
-import { type Request, type Response } from "express";
+import { type CookieOptions, type NextFunction, type Request, type Response } from "express";
 import type { Document, Types } from "mongoose";
 
-export type Handler = (req: Request, res: Response) => any;
+export type Handler = (req: Request, res: Response,next:NextFunction) => any;
 
 export enum StatusCode {
   Success = 200,
@@ -11,7 +11,11 @@ export enum StatusCode {
   NotFound = 404,
   Unauthorized = 401,
 }
-
+export type CookieType = {
+  name: string;
+  value: string;
+  options: CookieOptions;
+};
 export interface IUser extends Document {
   _id: Types.ObjectId;
   firstName: string;

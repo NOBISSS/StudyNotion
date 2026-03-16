@@ -1,7 +1,9 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Types } from "mongoose";
 import { s3 } from "../../../shared/config/s3Config.js";
-import { StatusCode, type Handler } from "../../../shared/types.js";
+import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
+import { AppError } from "../../../shared/lib/AppError.js";
+import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import {
   deleteObject,
   generateSignedUrl,
@@ -24,220 +26,172 @@ export const isValidInstructor = async (
   const course = await Course.findOne({ _id: courseId, instructorId: userId });
   if (course) {
     return course;
-  } else null;
+  } else {
+    throw AppError.notFound("Course not found");
+  }
 };
 
-export const addMaterial: Handler = async (req, res) => {
-  try {
-    const parsedMaterialData = materialSchema.safeParse(req.body);
-    const userId = new Types.ObjectId(req.userId);
-    if (!userId) {
-      res.status(StatusCode.Unauthorized).json({
-        message: "Unauthorized. User ID is missing.",
-      });
-      return;
-    }
-    if (!parsedMaterialData.success) {
-      return res.status(StatusCode.InputError).json({
-        message: parsedMaterialData.error.issues[0]?.message,
-      });
-    }
-    const {
-      materialType,
-      description,
-      courseId,
-      title,
-      sectionId,
-      materialSize,
-      materialS3Key,
-    } = parsedMaterialData.data;
-    console.log(userId);
-    const course = await isValidInstructor(
-      new Types.ObjectId(courseId),
-      userId,
-      req.user?.accountType,
+export const addMaterial = asyncHandler(async (req, res) => {
+  const parsedMaterialData = materialSchema.safeParse(req.body);
+  const userId = new Types.ObjectId(req.userId);
+  if (!userId) {
+    throw AppError.unauthorized("User ID is required");
+  }
+  if (!parsedMaterialData.success) {
+    throw AppError.badRequest(
+      parsedMaterialData.error.issues[0]?.message || "Invalid input data",
     );
-    if (!course) {
-      res.status(StatusCode.Unauthorized).json({
-        message: "You are not authorized to add material to this course.",
-      });
-      return;
-    }
-    const subsection = await SubSection.create({
-      title,
-      description: description || "",
-      courseId,
-      contentType: "material",
-      sectionId,
-    });
-    const materialURL = await generateSignedUrl(materialS3Key);
-    const material = await Material.create({
-      materialName: title,
+  }
+  const {
+    materialType,
+    description,
+    courseId,
+    title,
+    sectionId,
+    materialSize,
+    materialS3Key,
+  } = parsedMaterialData.data;
+  console.log(userId);
+  const course = await isValidInstructor(
+    new Types.ObjectId(courseId),
+    userId,
+    req.user?.accountType,
+  );
+  if (!course) {
+    throw AppError.unauthorized(
+      "You are not authorized to add material to this course.",
+    );
+  }
+  const subsection = await SubSection.create({
+    title,
+    description: description || "",
+    courseId,
+    contentType: "material",
+    sectionId,
+  });
+  const materialURL = await generateSignedUrl(materialS3Key);
+  const material = await Material.create({
+    materialName: title,
+    contentUrl: materialURL,
+    materialType,
+    materialSize: materialSize || null,
+    materialS3Key,
+    URLExpiration: new Date(Date.now() + 3600000),
+    subsectionId: subsection._id,
+  });
+  await Section.findByIdAndUpdate(sectionId, {
+    $push: { subSectionIds: material._id },
+  });
+  ApiResponse.created(res, {
+    message: "Material added successfully.",
+    data: material,
+  });
+});
+export const getMaterial = asyncHandler(async (req, res) => {
+  const materialId = req.params.materialId;
+  const material = await Material.findById(materialId);
+  if (!material) {
+    throw AppError.notFound("Material not found");
+  }
+  let materialURL = material.contentUrl;
+  if (material.URLExpiration && material.URLExpiration < new Date()) {
+    materialURL = await generateSignedUrl(material.materialS3Key);
+  }
+  ApiResponse.success(res, {
+    message: "Material retrieved successfully.",
+    material: {
+      ...material.toObject(),
       contentUrl: materialURL,
-      materialType,
-      materialSize: materialSize || null,
-      materialS3Key,
-      URLExpiration: new Date(Date.now() + 3600000),
-      subsectionId: subsection._id,
-    });
-    await Section.findByIdAndUpdate(sectionId, {
-      $push: { subSectionIds: material._id },
-    });
-    res.status(StatusCode.Success).json({
-      message: "Material added successfully.",
-      data: material,
-    });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "An error occurred while adding material.",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const getMaterial: Handler = async (req, res) => {
-  try {
-    const materialId = req.params.materialId;
-    const material = await Material.findById(materialId);
-    if (!material) {
-      res.status(StatusCode.NotFound).json({ message: "Material not found" });
-      return;
-    }
-    let materialURL = material.contentUrl;
-    if (material.URLExpiration && material.URLExpiration < new Date()) {
-      materialURL = await generateSignedUrl(material.materialS3Key);
-    }
-    res.status(StatusCode.Success).json({
-      message: "Material retrieved successfully.",
-      material: {
-        ...material.toObject(),
-        contentUrl: materialURL,
-      },
-    });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "An error occurred while retrieving material.",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
-  }
-};
-export const deleteMaterial: Handler = async (req, res) => {
-  try {
-    const subsectionId = req.params.subsectionId;
+    },
+  });
+});
+export const deleteMaterial = asyncHandler(async (req, res) => {
+  const subsectionId = req.params.subsectionId;
 
-    const subsection = await SubSection.findById(subsectionId);
-    if (!subsection) {
-      res.status(StatusCode.NotFound).json({ message: "Subsection not found" });
-      return;
-    }
-    const course = await isValidInstructor(
-      new Types.ObjectId(subsection.courseId),
-      new Types.ObjectId(req.userId),
-      req.user?.accountType,
+  const subsection = await SubSection.findById(subsectionId);
+  if (!subsection) {
+    throw AppError.notFound("Subsection not found");
+  }
+  const course = await isValidInstructor(
+    new Types.ObjectId(subsection.courseId),
+    new Types.ObjectId(req.userId),
+    req.user?.accountType,
+  );
+  if (!course) {
+    throw AppError.notFound(
+      "Course not found or you are not authorized to delete this material.",
     );
-    if (!course) {
-      res.status(StatusCode.NotFound).json({
-        message:
-          "Course not found or you are not authorized to delete this material.",
-      });
-      return;
-    }
+  }
 
-    const material = await Material.findOneAndDelete({
-      subsectionId: new Types.ObjectId(subsectionId),
-    });
-    if (!material) {
-      res.status(StatusCode.NotFound).json({ message: "Material not found" });
-      return;
-    }
-    const deleteCommand = new DeleteObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: material.materialS3Key || "",
-    });
-    await s3.send(deleteCommand);
-    subsection.isActive = false;
-    await subsection.save();
-    await Section.findByIdAndUpdate(subsection.sectionId, {
-      $pull: { subSectionIds: material._id },
-    });
-    res
-      .status(StatusCode.Success)
-      .json({ message: "Material deleted successfully." });
-    return;
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "An error occurred while deleting material.",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
+  const material = await Material.findOneAndDelete({
+    subsectionId: new Types.ObjectId(subsectionId),
+  });
+  if (!material) {
+    throw AppError.notFound("Material not found");
   }
-};
-export const updateMaterial: Handler = async (req, res) => {
-  try {
-    const subsectionId = req.params.subsectionId;
-    const parsedMaterialData = materialSchema.partial().safeParse(req.body);
-    if (!parsedMaterialData.success) {
-      return res.status(StatusCode.InputError).json({
-        message: parsedMaterialData.error.issues[0]?.message,
-      });
-    }
-    const { materialType, description, title, materialSize, materialS3Key } =
-      parsedMaterialData.data;
-    const subsection = await SubSection.findByIdAndUpdate(subsectionId, {
-      $set: {
-        title: title || undefined,
-        description: description || undefined,
-      },
-    });
-    if (!subsection) {
-      res.status(StatusCode.NotFound).json({ message: "Subsection not found" });
-      return;
-    }
-    const course = await isValidInstructor(
-      new Types.ObjectId(subsection.courseId),
-      new Types.ObjectId(req.userId),
-      req.user?.accountType,
+  const deleteCommand = new DeleteObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: material.materialS3Key || "",
+  });
+  await s3.send(deleteCommand);
+  subsection.isActive = false;
+  await subsection.save();
+  await Section.findByIdAndUpdate(subsection.sectionId, {
+    $pull: { subSectionIds: material._id },
+  });
+  ApiResponse.success(res, { message: "Material deleted successfully." });
+});
+export const updateMaterial = asyncHandler(async (req, res) => {
+  const subsectionId = req.params.subsectionId;
+  const parsedMaterialData = materialSchema.partial().safeParse(req.body);
+  if (!parsedMaterialData.success) {
+    throw AppError.badRequest(
+      parsedMaterialData.error.issues[0]?.message || "Invalid input data",
     );
-    if (!course) {
-      res.status(StatusCode.NotFound).json({
-        message:
-          "Course not found or you are not authorized to update this material.",
-      });
-      return;
-    }
-    const materialURL = await generateSignedUrl(materialS3Key || "");
-    const material = await Material.findOneAndUpdate(
-      { subsectionId: new Types.ObjectId(subsectionId) },
-      {
-        materialType: materialType || undefined,
-        materialName: title || undefined,
-        materialSize: materialSize || undefined,
-        materialS3Key: materialS3Key || undefined,
-        contentUrl: materialURL || undefined,
-        description: description || undefined,
-      },
-      { new: false },
-    );
-    if (!material) {
-      res.status(StatusCode.NotFound).json({ message: "Material not found" });
-      return;
-    }
-    await deleteObject(material.materialS3Key || "");
-    res.status(StatusCode.Success).json({
-      message: "Material updated successfully.",
-      material: {
-        ...material.toObject(),
-        contentUrl: materialURL,
-      },
-    });
-  } catch (err) {
-    res.status(StatusCode.ServerError).json({
-      message: "An error occurred while updating material.",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-    return;
   }
-};
+  const { materialType, description, title, materialSize, materialS3Key } =
+    parsedMaterialData.data;
+  const subsection = await SubSection.findByIdAndUpdate(subsectionId, {
+    $set: {
+      title: title || undefined,
+      description: description || undefined,
+    },
+  });
+  if (!subsection) {
+    throw AppError.notFound("Subsection not found");
+  }
+  const course = await isValidInstructor(
+    new Types.ObjectId(subsection.courseId),
+    new Types.ObjectId(req.userId),
+    req.user?.accountType,
+  );
+  if (!course) {
+    throw AppError.notFound(
+      "Course not found or you are not authorized to update this material.",
+    );
+  }
+  const materialURL = await generateSignedUrl(materialS3Key || "");
+  const material = await Material.findOneAndUpdate(
+    { subsectionId: new Types.ObjectId(subsectionId) },
+    {
+      materialType: materialType || undefined,
+      materialName: title || undefined,
+      materialSize: materialSize || undefined,
+      materialS3Key: materialS3Key || undefined,
+      contentUrl: materialURL || undefined,
+      description: description || undefined,
+    },
+    { new: false },
+  );
+  if (!material) {
+    throw AppError.notFound("Material not found");
+  }
+  await deleteObject(material.materialS3Key || "");
+  ApiResponse.success(res, {
+    message: "Material updated successfully.",
+    material: {
+      ...material.toObject(),
+      contentUrl: materialURL,
+    },
+  });
+});

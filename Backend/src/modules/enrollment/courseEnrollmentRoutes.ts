@@ -1,16 +1,20 @@
 import { Router } from "express";
-import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
+import { isAdmin, userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   EnrollInCourse,
   getAllEnrollments,
+  getUserEnrollments,
 } from "./courseEnrollmentController.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { ROLES } from "../../shared/constants.js";
 
 const courseEnrollmentRouter = Router();
 
 courseEnrollmentRouter.use(userMiddleware);
 
-courseEnrollmentRouter.route("/enroll").post(EnrollInCourse);
-courseEnrollmentRouter.route("/getall").get(getAllEnrollments);
+courseEnrollmentRouter.route("/enroll").post(authorizeRoles(ROLES.STUDENT),EnrollInCourse);
+courseEnrollmentRouter.route("/getmy").get(authorizeRoles(ROLES.STUDENT),getUserEnrollments);
+courseEnrollmentRouter.route("/getall").get(authorizeRoles(ROLES.ADMIN),getAllEnrollments);
 // courseEnrollmentRouter.route("/pagedetails/:categoryId").get();
 
 export { courseEnrollmentRouter };

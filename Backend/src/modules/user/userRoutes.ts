@@ -1,42 +1,30 @@
 import { Router } from "express";
-import { upload } from "../../middlewares/upload.js";
-import { userMiddleware } from "../../middlewares/userMiddleware.js";
+import { upload } from "../../shared/middlewares/upload.js";
+import { isAdmin, userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
-  changePassword,
-  deleteAccount,
-  forgetOTPVerificationRedis,
-  forgetWithOTPRedis,
-  getUser,
-  refreshTokens,
-  resendOTP,
-  signin,
-  signout,
-  signupOTPVerification,
-  signupWithOTP,
+  createUser,
+  getInstructors,
+  getStudents,
+  getUsers,
   updateProfile,
   updateProfilePhoto,
 } from "./userController.js";
-export const userRouter = Router();
-// export const router=Router();
-// router.post("/signup",signupWithOTP);
-// router.post("/signup/verify",verifyOtpSession,signupOTPVerification);
-// router.post("/resendotp",verifyOtpSession,resendOTP);
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { ROLES } from "../../shared/constants.js";
 
-userRouter.route("/signup").post(signupWithOTP);
-userRouter.route("/signup/verify").post(signupOTPVerification);
-userRouter.route("/forgotpassword").post(forgetWithOTPRedis);
-userRouter.route("/forgotpassword/verify").post(forgetOTPVerificationRedis);
-userRouter.route("/resendotp").post(resendOTP);
-userRouter.route("/login").post(signin);
+const userRouter = Router();
+
 
 userRouter.use(userMiddleware);
-
-userRouter.route("/logout").post(signout);
-userRouter.route("/password").put(changePassword);
 userRouter.route("/updateprofile").put(updateProfile);
 userRouter
-  .route("/changeprofilephoto")
-  .put(upload.single("profilephoto"), updateProfilePhoto);
-userRouter.route("/refreshtoken").post(refreshTokens);
-userRouter.route("/getuser").get(getUser);
-userRouter.route("/deleteaccount").delete(deleteAccount);
+.route("/changeprofilephoto")
+.put(upload.single("profilephoto"), updateProfilePhoto);
+
+userRouter.use(authorizeRoles(ROLES.ADMIN));
+userRouter.route("/create").post(createUser);
+userRouter.route("/getall").get(getUsers);
+userRouter.route("/getinstructors").get(getInstructors);
+userRouter.route("/getstudents").get(getStudents);
+
+export default userRouter;

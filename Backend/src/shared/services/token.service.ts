@@ -2,9 +2,12 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type IUser, type UserDocument } from "../../modules/user/UserModel.js";
-import { env } from "../config/env.js";
+// import { getEnv } from "../config/env.js";
 import redis  from "../config/redis.js";
 import { AppError } from "../lib/AppError.js";
+
+// const env = getEnv();
+const env = process.env as any; // For simplicity in this example, but ideally use getEnv() for validation
 
 export interface AccessTokenPayload {
   sub: string; // userId
@@ -31,10 +34,10 @@ const KEYS = {
 
 class TokenService {
   generateAccessToken(
-    payload: Omit<AccessTokenPayload, "iat" | "exp">,
+    payload: Omit<AccessTokenPayload, "iat" | "exp"> & { _id: Types.ObjectId; email: string },
   ): string {
-    return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-      expiresIn: env.JWT_ACCESS_EXPIRES_IN,
+    return jwt.sign(payload, env.JWT_ACCESS_TOKEN_SECRET, {
+      expiresIn: env.JWT_ACCESS_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     } as SignOptions);
   }
@@ -42,8 +45,8 @@ class TokenService {
   generateRefreshToken(
     payload: Omit<RefreshTokenPayload, "iat" | "exp">,
   ): string {
-    return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+    return jwt.sign(payload, env.JWT_REFRESH_TOKEN_SECRET, {
+      expiresIn: env.JWT_REFRESH_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     } as SignOptions);
   }
@@ -54,25 +57,25 @@ class TokenService {
     try {
       const payload = jwt.verify(
         token,
-        env.JWT_ACCESS_SECRET,
+        env.JWT_ACCESS_TOKEN_SECRET,
       ) as UserDocument;
       return payload;
     } catch (err) {
       if ((err as any).name === "TokenExpiredError") {
-        throw AppError.unauthorized("Access token expired");
+        throw AppError.unauthorized("Unauthorized: Access token expired");
       }
-      throw AppError.unauthorized("Invalid access token");
+      throw AppError.unauthorized("Unauthorized: Invalid access token");
     }
   }
 
-  verifyRefreshToken(token: string): RefreshTokenPayload {
+  verifyRefreshToken(token: string): UserDocument & RefreshTokenPayload {
     try {
-      return jwt.verify(token, env.JWT_REFRESH_SECRET) as RefreshTokenPayload;
+      return jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET!) as UserDocument & RefreshTokenPayload;
     } catch (err) {
       if ((err as any).name === "TokenExpiredError") {
-        throw AppError.unauthorized("Refresh token expired");
+        throw AppError.unauthorized("Unauthorized: Refresh token expired");
       }
-      throw AppError.unauthorized("Invalid refresh token");
+      throw AppError.unauthorized("Unauthorized: Invalid refresh token");
     }
   }
 
@@ -107,7 +110,7 @@ class TokenService {
       // Possible token theft — invalidate ALL sessions for this user
       await this.revokeAllSessions(userId);
       throw AppError.unauthorized(
-        "Refresh token reuse detected. All sessions revoked.",
+        "Unauthorized: Refresh token reuse detected. All sessions revoked.",
       );
     }
 
@@ -121,22 +124,22 @@ class TokenService {
 
   async rotateTokens(
     oldRefreshToken: string,
-    user: { _id: string; accountType: IUser["accountType"] },
+    user: { _id: string; accountType: IUser["accountType"], email: string },
   ): Promise<{ accessToken: string; refreshToken: string; sessionId: string }> {
     const payload = this.verifyRefreshToken(oldRefreshToken);
     const { sub: userId, sessionId } = payload;
 
     if (userId !== user._id) {
-      throw AppError.unauthorized("Token user mismatch");
+      throw AppError.unauthorized("Unauthorized: Token user mismatch");
     }
 
     const storedHash = await redis.get(KEYS.refreshToken(userId, sessionId));
-    if (!storedHash) throw AppError.unauthorized("Session expired");
+    if (!storedHash) throw AppError.unauthorized("Unauthorized: Session expired");
 
     const isValid = await this.compareTokenHash(oldRefreshToken, storedHash);
     if (!isValid) {
       await this.revokeAllSessions(userId);
-      throw AppError.unauthorized("Refresh token reuse detected");
+      throw AppError.unauthorized("Unauthorized: Refresh token reuse detected");
     }
 
     // Invalidate old
@@ -148,13 +151,15 @@ class TokenService {
       sub: userId,
       accountType: user.accountType,
       sessionId: newSessionId,
+      _id: new Types.ObjectId(userId),
+      email: user.email,
     });
     const refreshToken = this.generateRefreshToken({
       sub: userId,
       sessionId: newSessionId,
     });
 
-    const refreshTTL = this.parseTTL(env.JWT_REFRESH_EXPIRES_IN);
+    const refreshTTL = this.parseTTL(env.JWT_REFRESH_TOKEN_EXPIRES_IN);
     await this.storeRefreshToken(
       userId,
       newSessionId,
