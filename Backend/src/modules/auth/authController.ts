@@ -1,6 +1,7 @@
+import axios from "axios";
 import bcrypt from "bcrypt";
-import type { Types } from "mongoose";
 import { z } from "zod";
+import { oAuth2Client } from "../../shared/config/OAuth2Client.js";
 import {
   accessTokenCookieOptions,
   logoutCookieOptions,
@@ -20,10 +21,8 @@ import {
   saveOTP,
   verifyOTP,
 } from "../../shared/utils/otp.service.js";
-import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
 import {
-  changePasswordInputSchema,
   forgetInputSchema,
   signinInputSchema,
   signupInputSchema,
@@ -231,21 +230,6 @@ export const signin = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const getUser = asyncHandler(async (req, res) => {
-  const userId = req.userId;
-  const user = req.user;
-  if (!user) {
-    throw AppError.notFound("User not found");
-  }
-  const userProfile = await Profile.findOne({
-    userId: userId as Types.ObjectId,
-  });
-  return ApiResponse.success(
-    res,
-    { user, profile: userProfile },
-    "User fetched successfully",
-  );
-});
 export const refreshTokens = asyncHandler(async (req, res) => {
   const IRefreshToken = req.cookies?.refreshToken;
   if (!IRefreshToken) {
@@ -285,40 +269,10 @@ export const signout = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const changePassword = asyncHandler(async (req, res) => {
-  const userId = req.userId;
-  const parsedPasswords = changePasswordInputSchema.safeParse(req.body);
-  if (!parsedPasswords.success) {
-    throw AppError.badRequest(
-      parsedPasswords.error?.issues[0]?.message || "Invalid input data",
-    );
-  }
-  const { oldPassword, newPassword } = parsedPasswords.data;
-  const user = await User.findById(userId);
-  if (!user) {
-    throw AppError.notFound("User not found");
-  }
-  const isOldPasswordCorrect = user.comparePassword(oldPassword);
-  if (!isOldPasswordCorrect) {
-    throw AppError.badRequest("Old password is incorrect");
-  }
-  await User.updateOne(
-    { _id: userId },
-    { $set: { password: bcrypt.hashSync(newPassword, 10) } },
-  );
-  const updatedUser = await User.findById(userId).select(
-    "-password -refreshToken",
-  );
-  return ApiResponse.success(
-    res,
-    { user: updatedUser },
-    "Password changed successfully",
-  );
-});
 export const forgetWithOTP = asyncHandler(async (req, res) => {
   const userEmail = z
     .string({ error: "Email is required" })
-    .email({ message: "Invalid email address" })
+    .email({ message: "Invalid email address" });
   const userInput = userEmail.safeParse(req.body.email);
   if (!userInput.success) {
     throw AppError.badRequest(
@@ -389,13 +343,41 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
     "Password reset successfully, Please signin with new password",
   );
 });
-export const deleteAccount = asyncHandler(async (req, res) => {
-  const userId = req.userId;
-  const user = await User.findByIdAndUpdate(userId, {
-    $set: { isDeleted: true },
-  });
+export const googleSignin = asyncHandler(async (req, res) => {
+  const code = req.query.code;
+  const googleResponse = await oAuth2Client.getToken(code as string);
+  oAuth2Client.setCredentials(googleResponse.tokens);
+  const userRes = await axios.get(
+    `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleResponse.tokens.access_token}`,
+  );
+
+  let user = await User.findOne({ email: userRes.data.email });
   if (!user) {
-    throw AppError.notFound("User not found");
+    user = await User.create({
+      firstName: userRes.data.given_name,
+      email: userRes.data.email,
+      // method: "oauth",
+    });
   }
-  return ApiResponse.success(res, {}, "Account deleted successfully");
+  const { accessToken, refreshToken } =
+    await user.generateAccessAndRefreshToken();
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: <"none">"none",
+    path: "/",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  };
+  ApiResponse.success(res, { user }, "Signin successfull", 200, [
+    {
+      name: "accessToken",
+      value: accessToken,
+      options: accessTokenCookieOptions,
+    },
+    {
+      name: "refreshToken",
+      value: refreshToken,
+      options: refreshTokenCookieOptions,
+    },
+  ]);
 });
