@@ -22,76 +22,14 @@ import { ACCOUNT_TYPE } from './utils/constants';
 import { useSelector } from 'react-redux';
 import MyCourses from './components/Instructor/MyCourses';
 import AddCourse from './components/core/Dashboard/Add-Course/AddCourse';
+import AppRoutes from './components/Routes/AppRoutes';
 function App() {
   const {user}=useSelector((state)=>state.profile);
   return (
     <div className='w-screen min-h-screen outline outline-red-500 bg-[#000917] font-inter'>
       <Navbar/>
-      <Routes>
-        <Route path='/' element={
-          <OpenRoute>
-          <Home/>
-          </OpenRoute>
-          }/>
-
-        <Route path='/catalog/:catalogName/:catalogId' element={
-          <OpenRoute>
-          <CatalogItem/>
-          </OpenRoute>
-          }/>
-        <Route path='/signup' element={
-          <OpenRoute>
-          <Signup/>
-          </OpenRoute>
-          }/>
-        <Route path='/forgotpassword' element={
-          <OpenRoute>
-          <ForgotPassword/>
-          </OpenRoute>
-          }/>
-
-        <Route path='/update-password/:id' element={
-          <OpenRoute>
-          <UpdatePassword/>
-          </OpenRoute>}/>
-        <Route path='/verifyemail' element={<VerifyEmail/>}/>
-        <Route path='/about' element={
-          <OpenRoute>
-          <About/>
-          </OpenRoute>
-          }/>
-        <Route path='/contact' element={<ContactUs/>}/>
-        
-        <Route element={<PrivateRoute><Dashboard/></PrivateRoute>}>
-            <Route path="/dashboard/my-profile" element={<MyProfile />}/>
-            <Route path="/dashboard/cart" element={<Cart />}/>
-            <Route path="/dashboard/settings" element={<Settings/>}/>
-            <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
-            {
-              user?.accountType===ACCOUNT_TYPE.STUDENT && (
-                <>
-                <Route path="/dashboard/settings" element={<Settings/>}/>
-                <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
-                </>
-              )
-            }
-            {
-              user?.accountType===ACCOUNT_TYPE.INSTRUCTOR && (
-                <>
-                <Route path="/dashboard/my-courses" element={<MyCourses/>}/>
-                <Route path="/dashboard/add-course" element={<AddCourse/>}/>
-                </>
-              )
-            }
-
-        </Route>
-        
-        <Route path='/login' element={<Login/>}/>
-        <Route path='*' element={<Error/>}/>
-        </Routes>
-        
+      <AppRoutes/>
     </div>
-
   )
 }
 
