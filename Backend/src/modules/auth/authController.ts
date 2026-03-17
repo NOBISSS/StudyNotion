@@ -21,6 +21,7 @@ import {
   saveOTP,
   verifyOTP,
 } from "../../shared/utils/otp.service.js";
+import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
 import {
   forgetInputSchema,
@@ -350,27 +351,54 @@ export const googleSignin = asyncHandler(async (req, res) => {
   const userRes = await axios.get(
     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleResponse.tokens.access_token}`,
   );
-
-  let user = await User.findOne({ email: userRes.data.email });
+  
+  let user = await User.findOne({ email: userRes.data.email, isDeleted: false });
   if (!user) {
+//     data: {
+//     id: '100612055580398392690',
+//     email: 'mansuriarafat302@gmail.com',
+//     verified_email: true,
+//     name: 'Arafat Mansuri',
+//     given_name: 'Arafat',
+//     family_name: 'Mansuri',
+//     picture: 'https://lh3.googleusercontent.com/a/ACg8ocJrM6TzMclHa2mnjSgqcxvMpGVyYCKQ9_UUxJruMNLmiUVZcI3k=s96-c'
+//   }
     user = await User.create({
-      firstName: userRes.data.given_name,
+      firstName: userRes.data.name.split(" ")[0],
+      lastName: userRes.data.name.split(" ").slice(1).join(" "),
       email: userRes.data.email,
       // method: "oauth",
     });
   }
-  const { accessToken, refreshToken } =
-    await user.generateAccessAndRefreshToken();
-  ApiResponse.success(res, { user }, "Signin successfull", 200, [
+  const userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
+  if (!userProfile) {
+    await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
+  }
+  const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+  return ApiResponse.success(
+    res,
     {
-      name: "accessToken",
-      value: accessToken,
-      options: accessTokenCookieOptions,
+      user: {
+        ...user.toObject(),
+        refreshToken: undefined,
+        password: undefined,
+      },
+      accessToken,
+      refreshToken,
     },
-    {
-      name: "refreshToken",
-      value: refreshToken,
-      options: refreshTokenCookieOptions,
-    },
-  ]);
+    "Signin successful",
+    StatusCode.Success,
+    [
+      {
+        name: "accessToken",
+        value: accessToken,
+        options: accessTokenCookieOptions,
+      },
+      {
+        name: "refreshToken",
+        value: refreshToken,
+        options: refreshTokenCookieOptions,
+      },
+    ],
+  );
 });

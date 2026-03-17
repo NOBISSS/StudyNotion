@@ -7,6 +7,7 @@ import { categoryRouter } from "./modules/category/categoryRoutes.js";
 import CommentRouter from "./modules/comment/commentRoutes.js";
 import { courseRouter } from "./modules/course/courseRoutes.js";
 import { courseEnrollmentRouter } from "./modules/enrollment/courseEnrollmentRoutes.js";
+import profileRouter from "./modules/profile/profileRoutes.js";
 import { reviewRouter } from "./modules/rating/reviewRoutes.js";
 import { sectionRouter } from "./modules/section/sectionRoutes.js";
 import SignatureGenerationRouter from "./modules/signatureGeneration/generateSignatures.routes.js";
@@ -14,7 +15,6 @@ import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import multipartUploadRoute from "./modules/subsection/video/MultipartUploadRoute.js";
 import userRouter from "./modules/user/userRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
-import profileRouter from "./modules/profile/profileRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -32,6 +32,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    credentials: true,
   }),
 );
 
