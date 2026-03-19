@@ -12,38 +12,37 @@ import {
 import { signupInputSchema } from "../auth/authValidation.js";
 import { Profile } from "./ProfileModel.js";
 import User from "./UserModel.js";
-import { userInputSchema } from "./userValidation.js";
+import { updateProfileSchema } from "./userValidation.js";
 
 export const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  const updateProfileInput = userInputSchema.safeParse(req.body);
+  const updateProfileInput = updateProfileSchema.safeParse(req.body);
   if (!updateProfileInput.success) {
     throw AppError.badRequest(
       updateProfileInput.error?.issues[0]?.message || "Invalid input data",
     );
   }
-  const {
-    firstName,
-    lastName,
-    contactNumber,
-    gender,
-    city,
-    country,
-    birthdate,
-    about,
-  } = updateProfileInput.data;
+  const { additionalDetails } = updateProfileInput.data;
   try {
-    await User.updateOne({ _id: userId }, { $set: { firstName, lastName } });
+    await User.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          firstName: additionalDetails.firstName,
+          lastName: additionalDetails.lastName,
+        },
+      },
+    );
     const updatedProfile = await Profile.updateOne(
       { userId: userId as Types.ObjectId },
       {
         $set: {
-          about,
-          contactNumber,
-          gender,
-          city,
-          country,
-          birthdate,
+          about: additionalDetails.about,
+          contactNumber: additionalDetails.contactNumber,
+          gender: additionalDetails.gender,
+          city: additionalDetails.city,
+          country: additionalDetails.country,
+          birthdate: additionalDetails.birthdate,
         },
       },
     );
