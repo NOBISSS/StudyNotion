@@ -310,5 +310,9 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
       throw AppError.notFound("Course not found");
     }
     const sections = await Section.find({ courseId: new Types.ObjectId(courseId) });
-    ApiResponse.success(res, { message: "Course details retrieved successfully", course, sections });
+    const enrollmentsCount = await CourseEnrollment.countDocuments({
+      courseId: new Types.ObjectId(courseId),
+    });
+    const reviews = await RatingAndReview.find({ courseId: new Types.ObjectId(courseId) }).populate("userId", "firstName lastName profilePicture");
+    ApiResponse.success(res, { message: "Course details retrieved successfully", course, sections, enrollmentsCount, reviews });
 });

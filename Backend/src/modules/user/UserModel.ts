@@ -5,7 +5,7 @@ import mongoose, { Schema, type HydratedDocument, type InferSchemaType } from "m
 export const userSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, trim: true },
+    lastName: { type: String, required: true, trim: true },
     password: { type: String },
     accountType: {
       type: String,
