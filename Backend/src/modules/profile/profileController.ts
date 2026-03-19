@@ -18,7 +18,7 @@ export const getUser = asyncHandler(async (req, res) => {
   });
   return ApiResponse.success(
     res,
-    { user, profile: userProfile },
+    { user, additionalDetails: userProfile },
     "User fetched successfully",
   );
 });

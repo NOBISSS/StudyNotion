@@ -300,3 +300,15 @@ export const updateCourse = asyncHandler(async (req, res) => {
   );
   ApiResponse.success(res, { message: "Course updated successfully" });
 });
+export const getCourseDetails = asyncHandler(async (req, res) => {
+    const courseId = req.params.courseId;
+    if (courseId && !Types.ObjectId.isValid(courseId as string)) {
+      throw AppError.badRequest("Invalid course ID");
+    }
+    const course = await Course.findById(courseId);
+    if (!course) {
+      throw AppError.notFound("Course not found");
+    }
+    const sections = await Section.find({ courseId: new Types.ObjectId(courseId) });
+    ApiResponse.success(res, { message: "Course details retrieved successfully", course, sections });
+});

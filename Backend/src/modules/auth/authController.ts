@@ -203,6 +203,7 @@ export const signin = asyncHandler(async (req, res) => {
   if (!isPasswordCorrect) {
     throw AppError.badRequest("Invalid password");
   }
+  const additionalDetails = await Profile.findOne({ userId: user._id });
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   return ApiResponse.success(
     res,
@@ -212,6 +213,7 @@ export const signin = asyncHandler(async (req, res) => {
         refreshToken: undefined,
         password: undefined,
       },
+      additionalDetails,
       accessToken,
       refreshToken,
     },
