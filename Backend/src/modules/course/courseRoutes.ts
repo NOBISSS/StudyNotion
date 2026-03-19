@@ -23,9 +23,9 @@ courseRouter
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter
-  .route("/createcourse")
+  .route("/create")
   .post(upload.single("thumbnail"), createCourse);
-courseRouter.route("/create").post(createCourseWithThumbnailURL);
+courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
 // courseRouter.route("/getcourse/:id").get();
 courseRouter.route("/update/:courseId").put(updateCourse);
