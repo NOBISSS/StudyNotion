@@ -151,7 +151,7 @@ export const signupOTPVerification = asyncHandler(async (req, res) => {
     lastName: otpData.lastName as string,
     accountType: otpData.accountType as "admin" | "instructor" | "student",
   });
-
+  const profile = await Profile.create({ userId: user._id });
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   await user.updateOne({ refreshToken });
 

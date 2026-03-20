@@ -24,7 +24,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
   const { additionalDetails } = updateProfileInput.data;
   try {
-    await User.updateOne(
+    const updatedUser = await User.findOneAndUpdate(
       { _id: userId },
       {
         $set: {
@@ -32,8 +32,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
           lastName: additionalDetails.lastName,
         },
       },
-    );
-    const updatedProfile = await Profile.updateOne(
+      { new: true },
+    ).select("-password -refreshToken");
+    let updatedProfile = await Profile.findOneAndUpdate(
       { userId: userId as Types.ObjectId },
       {
         $set: {
@@ -45,17 +46,29 @@ export const updateProfile = asyncHandler(async (req, res) => {
           birthdate: additionalDetails.birthdate,
         },
       },
+      { new: true },
     );
-    const updatedUser = await User.findById(userId).select(
-      "-password -refreshToken",
-    );
+    if (!updatedProfile) {
+      updatedProfile = await Profile.create({
+        userId: userId as Types.ObjectId,
+        about: additionalDetails.about || "",
+        contactNumber: additionalDetails.contactNumber || null,
+        gender: additionalDetails.gender || "other",
+        city: additionalDetails.city || "",
+        country: additionalDetails.country || "",
+        birthdate: additionalDetails.birthdate || "",
+      });
+    }
     return ApiResponse.success(
       res,
       { user: updatedUser, profile: updatedProfile },
       "Profile updated successfully",
     );
   } catch (error) {
-    throw AppError.conflict("Username already taken");
+    if ((error as any)?.code === 11000)
+      throw AppError.conflict("Username already taken");
+    else
+      throw AppError.internal("Something went wrong while updating the profile");
   }
 });
 export const banUser = asyncHandler(async (req, res) => {

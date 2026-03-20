@@ -14,7 +14,7 @@ export const userInputSchema = z.object({
     gender: z.enum(["male", "female", "other"]).optional(),
     city: z.string().optional(),
     country: z.string().optional(),
-    birthdate: z.date().optional(),
+    birthdate: z.string().datetime().optional(),
   });
 
 export const updateProfileSchema = z.object({
