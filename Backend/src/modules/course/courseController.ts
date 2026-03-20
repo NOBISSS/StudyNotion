@@ -86,7 +86,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     order: 1,
     subSectionIds: [],
   });
-  ApiResponse.created(res, { message: "Course created successfully", course });
+  ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -148,15 +148,18 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     order: 1,
     subSectionIds: [],
   });
-  ApiResponse.created(res, { message: "Course created successfully", course });
+  ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const courses = await Course.find();
-  ApiResponse.success(res, {
-    message: "Courses retrieved successfully",
-    courses,
-  });
+  ApiResponse.success(
+    res,
+    {
+      courses,
+    },
+    "Courses retrieved successfully",
+  );
 });
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
@@ -192,11 +195,14 @@ export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
       }
       return b.enrollmentsCount - a.enrollmentsCount;
     });
-    ApiResponse.success(res, {
-      message: "Courses retrieved successfully",
-      courses,
-      sortedCourses,
-    });
+    ApiResponse.success(
+      res,
+      {
+        courses,
+        sortedCourses,
+      },
+      "Courses retrieved successfully",
+    );
   },
 );
 export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(
@@ -236,11 +242,14 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(
       }
       return b.enrollmentsCount - a.enrollmentsCount;
     });
-    ApiResponse.success(res, {
-      message: "Courses retrieved successfully",
-      courses,
-      sortedCourses,
-    });
+    ApiResponse.success(
+      res,
+      {
+        courses,
+        sortedCourses,
+      },
+      "Courses retrieved successfully",
+    );
   },
 );
 export const deleteCourse = asyncHandler(async (req, res) => {
@@ -258,7 +267,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     { courseId: new Types.ObjectId(courseId) },
     { isActive: false },
   );
-  ApiResponse.success(res, { message: "Course deleted successfully" });
+  ApiResponse.success(res, {}, "Course deleted successfully");
 });
 export const updateCourse = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
@@ -298,21 +307,33 @@ export const updateCourse = asyncHandler(async (req, res) => {
     },
     { new: true, runValidators: true },
   );
-  ApiResponse.success(res, { message: "Course updated successfully" });
+  ApiResponse.success(
+    res,
+    { course: updatedCourse },
+    "Course updated successfully",
+  );
 });
 export const getCourseDetails = asyncHandler(async (req, res) => {
-    const courseId = req.params.courseId;
-    if (courseId && !Types.ObjectId.isValid(courseId as string)) {
-      throw AppError.badRequest("Invalid course ID");
-    }
-    const course = await Course.findById(courseId);
-    if (!course) {
-      throw AppError.notFound("Course not found");
-    }
-    const sections = await Section.find({ courseId: new Types.ObjectId(courseId) });
-    const enrollmentsCount = await CourseEnrollment.countDocuments({
-      courseId: new Types.ObjectId(courseId),
-    });
-    const reviews = await RatingAndReview.find({ courseId: new Types.ObjectId(courseId) }).populate("userId", "firstName lastName profilePicture");
-    ApiResponse.success(res, { message: "Course details retrieved successfully", course, sections, enrollmentsCount, reviews });
+  const courseId = req.params.courseId;
+  if (courseId && !Types.ObjectId.isValid(courseId as string)) {
+    throw AppError.badRequest("Invalid course ID");
+  }
+  const course = await Course.findById(courseId);
+  if (!course) {
+    throw AppError.notFound("Course not found");
+  }
+  const sections = await Section.find({
+    courseId: new Types.ObjectId(courseId),
+  });
+  const enrollmentsCount = await CourseEnrollment.countDocuments({
+    courseId: new Types.ObjectId(courseId),
+  });
+  const reviews = await RatingAndReview.find({
+    courseId: new Types.ObjectId(courseId),
+  }).populate("userId", "firstName lastName profilePicture");
+  ApiResponse.success(
+    res,
+    { course, sections, enrollmentsCount, reviews },
+    "Course details retrieved successfully",
+  );
 });

@@ -14,10 +14,11 @@ export const createCategory = asyncHandler(async (req, res) => {
     description: description,
   });
 
-  ApiResponse.created(res, {
-    message: "Category created successfully",
-    category: categoryDetails,
-  });
+  ApiResponse.created(
+    res,
+    { category: categoryDetails },
+    "Category created successfully",
+  );
 });
 export const updateCategory = asyncHandler(async (req, res) => {
   const { categoryId } = req.params;
@@ -37,10 +38,13 @@ export const updateCategory = asyncHandler(async (req, res) => {
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");
   }
-  ApiResponse.success(res, {
-    message: "Category updated successfully",
-    category: categoryDetails,
-  });
+  ApiResponse.success(
+    res,
+    {
+      category: categoryDetails,
+    },
+    "Category updated successfully",
+  );
 });
 export const deleteCategory = asyncHandler(async (req, res) => {
   const { categoryId } = req.params;
@@ -56,20 +60,26 @@ export const deleteCategory = asyncHandler(async (req, res) => {
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");
   }
-  ApiResponse.success(res, {
-    message: "Category deleted successfully",
-    category: categoryDetails,
-  });
+  ApiResponse.success(
+    res,
+    {
+      category: categoryDetails,
+    },
+    "Category deleted successfully",
+  );
 });
 export const getAllCategory = asyncHandler(async (req, res) => {
   const getCategory = await Category.find(
     { isActive: true },
     { name: true, description: true },
   );
-  ApiResponse.success(res, {
-    message: "All Category fetched successfully",
-    category: getCategory,
-  });
+  ApiResponse.success(
+    res,
+    {
+      category: getCategory,
+    },
+    "All Category fetched successfully",
+  );
 });
 export const categoryPageDetails = asyncHandler(async (req, res) => {
   const { categoryId } = req.params;
@@ -109,10 +119,13 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
     //   .sort((a, b) => b.sold - a.sold)
     .slice(0, 10);
 
-  ApiResponse.success(res, {
-    message: "Category page details fetched successfully",
-    selectedCategory: selectedCourse,
-    differenceCourses: differenceCourses,
-    mostSellingCourses: mostSellingCourses,
-  });
+  ApiResponse.success(
+    res,
+    {
+      selectedCategory: selectedCourse,
+      differenceCourses: differenceCourses,
+      mostSellingCourses: mostSellingCourses,
+    },
+    "Category page details fetched successfully",
+  );
 });

@@ -45,10 +45,13 @@ export const rateAndReviewCourse = asyncHandler(async (req, res) => {
     rating,
     review,
   });
-  ApiResponse.success(res, {
-    message: "Course review created successfully",
-    ratingAndReview,
-  });
+  ApiResponse.success(
+    res,
+    {
+      ratingAndReview,
+    },
+    "Course review created successfully",
+  );
 });
 export const getAllReviews = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
@@ -65,12 +68,15 @@ export const getAllReviews = asyncHandler(async (req, res) => {
   const averageRating =
     courseReviews.reduce((acc, review) => acc + review.rating, 0) /
     (reviewCount || 1);
-  ApiResponse.success(res, {
-    message: "Course review retrieved successfully",
-    courseReviews,
-    reviewCount,
-    averageRating,
-  });
+  ApiResponse.success(
+    res,
+    {
+      courseReviews,
+      reviewCount,
+      averageRating,
+    },
+    "Course review retrieved successfully",
+  );
 });
 export const updateReview = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -106,10 +112,13 @@ export const updateReview = asyncHandler(async (req, res) => {
   if (!existingReview) {
     throw AppError.notFound("Review not found or user not authorized");
   }
-  ApiResponse.success(res, {
-    message: "Course review updated successfully",
-    ratingAndReview: existingReview,
-  });
+  ApiResponse.success(
+    res,
+    {
+      ratingAndReview: existingReview,
+    },
+    "Course review updated successfully",
+  );
 });
 export const deleteReview = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -128,8 +137,11 @@ export const deleteReview = asyncHandler(async (req, res) => {
   if (!existingReview) {
     throw AppError.notFound("Review not found or user not authorized");
   }
-  ApiResponse.success(res, {
-    message: "Course review deleted successfully",
-    ratingAndReview: existingReview,
-  });
+  ApiResponse.success(
+    res,
+    {
+      ratingAndReview: existingReview,
+    },
+    "Course review deleted successfully",
+  );
 });

@@ -65,9 +65,11 @@ export const banUser = asyncHandler(async (req, res) => {
     throw AppError.notFound("User not found");
   }
   await user.updateOne({ isBanned: !user.isBanned });
-  ApiResponse.success(res, {
-    message: `Account ${user.isBanned ? "unbanned" : "banned"} successfully`,
-  });
+  ApiResponse.success(
+    res,
+    {},
+    `User has been ${user.isBanned ? "unbanned" : "banned"} successfully`,
+  );
 });
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
   let avatar: UploadApiResponse | null = null;
@@ -94,10 +96,7 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
     if (avatar) await deleteFromCloudinary(avatar.public_id);
     throw AppError.notFound("Profile not found");
   }
-  ApiResponse.success(res, {
-    profile,
-    message: "Profile picture updated successfully",
-  });
+  ApiResponse.success(res, { profile }, "Profile picture updated successfully");
 });
 export const createUser = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -118,24 +117,21 @@ export const createUser = asyncHandler(async (req, res) => {
     lastName,
     accountType,
   });
-  ApiResponse.created(res, { message: "User created successfully", user });
+  ApiResponse.created(res, { user }, "User created successfully");
 });
 export const getUsers = asyncHandler(async (req, res) => {
   const users = await User.find().select("-password -refreshToken");
-  ApiResponse.success(res, { message: "Users fetched successfully", users });
+  ApiResponse.success(res, { users }, "Users fetched successfully");
 });
 export const getInstructors = asyncHandler(async (req, res) => {
   const users = await User.find({ accountType: "instructor" }).select(
     "-password -refreshToken",
   );
-  ApiResponse.success(res, {
-    message: "Instructors fetched successfully",
-    users,
-  });
+  ApiResponse.success(res, { users }, "Instructors fetched successfully");
 });
 export const getStudents = asyncHandler(async (req, res) => {
   const users = await User.find({ accountType: "student" }).select(
     "-password -refreshToken",
   );
-  ApiResponse.success(res, { message: "Students fetched successfully", users });
+  ApiResponse.success(res, { users }, "Students fetched successfully");
 });

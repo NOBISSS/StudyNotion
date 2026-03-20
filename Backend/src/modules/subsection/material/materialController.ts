@@ -82,10 +82,13 @@ export const addMaterial = asyncHandler(async (req, res) => {
   await Section.findByIdAndUpdate(sectionId, {
     $push: { subSectionIds: material._id },
   });
-  ApiResponse.created(res, {
-    message: "Material added successfully.",
-    data: material,
-  });
+  ApiResponse.created(
+    res,
+    {
+      material,
+    },
+    "Material added successfully",
+  );
 });
 export const getMaterial = asyncHandler(async (req, res) => {
   const materialId = req.params.materialId;
@@ -97,13 +100,16 @@ export const getMaterial = asyncHandler(async (req, res) => {
   if (material.URLExpiration && material.URLExpiration < new Date()) {
     materialURL = await generateSignedUrl(material.materialS3Key);
   }
-  ApiResponse.success(res, {
-    message: "Material retrieved successfully.",
-    material: {
-      ...material.toObject(),
-      contentUrl: materialURL,
+  ApiResponse.success(
+    res,
+    {
+      material: {
+        ...material.toObject(),
+        contentUrl: materialURL,
+      },
     },
-  });
+    "Material retrieved successfully",
+  );
 });
 export const deleteMaterial = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
@@ -139,7 +145,7 @@ export const deleteMaterial = asyncHandler(async (req, res) => {
   await Section.findByIdAndUpdate(subsection.sectionId, {
     $pull: { subSectionIds: material._id },
   });
-  ApiResponse.success(res, { message: "Material deleted successfully." });
+  ApiResponse.success(res, {}, "Material deleted successfully.");
 });
 export const updateMaterial = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
@@ -187,11 +193,14 @@ export const updateMaterial = asyncHandler(async (req, res) => {
     throw AppError.notFound("Material not found");
   }
   await deleteObject(material.materialS3Key || "");
-  ApiResponse.success(res, {
-    message: "Material updated successfully.",
-    material: {
-      ...material.toObject(),
-      contentUrl: materialURL,
+  ApiResponse.success(
+    res,
+    {
+      material: {
+        ...material.toObject(),
+        contentUrl: materialURL,
+      },
     },
-  });
+    "Material updated successfully",
+  );
 });

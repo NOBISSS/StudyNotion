@@ -12,8 +12,11 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
   if (!subsections) {
     throw AppError.notFound("SubSections not found");
   }
-  ApiResponse.success(res, {
-    message: "Subsections retrieved successfully",
-    subsections,
-  });
+  ApiResponse.success(
+    res,
+    {
+      subsections,
+    },
+    "SubSections fetched successfully",
+  );
 });

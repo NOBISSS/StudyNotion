@@ -22,10 +22,13 @@ export const createComment = asyncHandler(async (req, res) => {
     userId,
     message,
   });
-  ApiResponse.created(res, {
-    message: "Comment created successfully",
-    comment,
-  });
+  ApiResponse.created(
+    res,
+    {
+      comment,
+    },
+    "Comment created successfully",
+  );
 });
 export const getCommentsBySubSectionId = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
@@ -38,10 +41,13 @@ export const getCommentsBySubSectionId = asyncHandler(async (req, res) => {
     ...comment.toObject(),
     isOwner: comment.userId._id === userId,
   }));
-  ApiResponse.success(res, {
-    message: "Comments fetched successfully",
-    comments: commentsWithOwnership,
-  });
+  ApiResponse.success(
+    res,
+    {
+      comments: commentsWithOwnership,
+    },
+    "Comments fetched successfully",
+  );
 });
 export const updateComment = asyncHandler(async (req, res) => {
   const commentId = req.params.commentId;
@@ -60,10 +66,13 @@ export const updateComment = asyncHandler(async (req, res) => {
   if (!comment) {
     throw AppError.notFound("Comment not found");
   }
-  ApiResponse.success(res, {
-    message: "Comment updated successfully",
-    comment,
-  });
+  ApiResponse.success(
+    res,
+    {
+      comment,
+    },
+    "Comment updated successfully",
+  );
 });
 export const deleteComment = asyncHandler(async (req, res) => {
   const commentId = req.params.commentId;
@@ -81,7 +90,5 @@ export const deleteComment = asyncHandler(async (req, res) => {
   if (!comment) {
     throw AppError.notFound("Comment not found");
   }
-  ApiResponse.success(res, {
-    message: "Comment deleted successfully",
-  });
+  ApiResponse.success(res, {}, "Comment deleted successfully");
 });

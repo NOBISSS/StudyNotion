@@ -41,10 +41,8 @@ export const createSection = asyncHandler(async (req, res): Promise<void> => {
     { $inc: { order: 1 } },
   );
   ApiResponse.created(res, {
-    success: true,
-    message: "Section created successfully",
     section,
-  });
+  }, "Section created successfully");
 });
 export const removeSection = asyncHandler(async (req, res): Promise<void> => {
   const instructorId = req.userId;
@@ -76,10 +74,8 @@ export const removeSection = asyncHandler(async (req, res): Promise<void> => {
     { isRemoved: true, order: -1, lastOrder: existingSection.order },
   );
   ApiResponse.success(res, {
-    success: true,
-    message: "Section removed successfully",
     section,
-  });
+  }, "Section removed successfully");
 });
 export const changeSectionOrder = asyncHandler(
   async (req, res): Promise<void> => {
@@ -131,10 +127,7 @@ export const changeSectionOrder = asyncHandler(
         { $inc: { order: 1 } },
       );
     }
-    ApiResponse.success(res, {
-      success: true,
-      message: "Section order changed successfully",
-    });
+    ApiResponse.success(res, {}, "Section order updated successfully");
   },
 );
 export const updateSection = asyncHandler(async (req, res): Promise<void> => {
@@ -170,10 +163,8 @@ export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   currentSection.name = name || currentSection.name;
   await currentSection.save();
   ApiResponse.success(res, {
-    success: true,
-    message: "Section updated successfully",
     section: currentSection,
-  });
+  }, "Section updated successfully");
 });
 export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
   const instructorId = req.userId;
@@ -183,10 +174,8 @@ export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
     isRemoved: false,
   }).sort({ order: 1 });
   ApiResponse.success(res, {
-    success: true,
-    message: "Sections retrieved successfully",
     sections,
-  });
+  }, "Sections retrieved successfully");
 });
 export const getRemovedSections = asyncHandler(
   async (req, res): Promise<void> => {
@@ -206,10 +195,8 @@ export const getRemovedSections = asyncHandler(
       );
     }
     ApiResponse.success(res, {
-      success: true,
-      message: "Removed sections retrieved successfully",
       sections,
-    });
+    }, "Removed sections retrieved successfully");
   },
 );
 export const undoRemoveSection = asyncHandler(
@@ -245,9 +232,6 @@ export const undoRemoveSection = asyncHandler(
       },
       { $inc: { order: 1 } },
     );
-    ApiResponse.success(res, {
-      success: true,
-      message: "Section restored successfully",
-    });
+    ApiResponse.success(res, {}, "Section restored successfully");
   },
 );

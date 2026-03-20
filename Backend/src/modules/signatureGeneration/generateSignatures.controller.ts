@@ -24,8 +24,7 @@ export const generateCloudinarySignature = asyncHandler((req, res) => {
       signature,
       apiKey: process.env.CLOUDINARY_API_KEY,
       cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      message: "Cloudinary signature generated successfully",
-    });
+    }, "Cloudinary signature generated successfully");
 });
 export const generateS3UploadUrl = asyncHandler(async (req, res) => {
     const { fileName, fileType, fileSize } = req.body;
@@ -41,5 +40,5 @@ export const generateS3UploadUrl = asyncHandler(async (req, res) => {
     ApiResponse.success(res, {
       uploadUrl,
       // fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.ap-south-1.amazonaws.com/uploads/${fileName}`,
-    });
+    }, "S3 upload URL generated successfully");
 });

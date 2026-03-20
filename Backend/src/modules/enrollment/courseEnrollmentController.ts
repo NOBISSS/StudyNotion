@@ -30,10 +30,13 @@ export const EnrollInCourse = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     courseId: new Types.ObjectId(courseId),
   });
-  ApiResponse.success(res, {
-    message: "Course enrollment created successfully",
-    courseEnrollment,
-  });
+  ApiResponse.success(
+    res,
+    {
+      courseEnrollment,
+    },
+    "Course enrollment created successfully",
+  );
 });
 export const getUserEnrollments = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -43,17 +46,23 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
   })
     .populate("courseId")
     .sort({ createdAt: -1 });
-  ApiResponse.success(res, {
-    message: "Course enrollments retrieved successfully",
-    courseEnrollments,
-  });
+  ApiResponse.success(
+    res,
+    {
+      courseEnrollments,
+    },
+    "Course enrollments retrieved successfully",
+  );
 });
 export const getAllEnrollments = asyncHandler(async (req, res) => {
   const courseEnrollments = await CourseEnrollment.find({})
     .populate("courseId")
     .sort({ createdAt: -1 });
-  ApiResponse.success(res, {
-    message: "Course enrollments retrieved successfully",
-    courseEnrollments,
-  });
+  ApiResponse.success(
+    res,
+    {
+      courseEnrollments,
+    },
+    "Course enrollments retrieved successfully",
+  );
 });

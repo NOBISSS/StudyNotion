@@ -65,9 +65,8 @@ export const createQuiz = asyncHandler(async (req, res) => {
       questions: questionsWithIds,
     });
     ApiResponse.created(res, {
-      message: "Quiz created successfully",
       quiz,
-    });
+    }, "Quiz created successfully");
 });
 export const deleteQuiz = asyncHandler(async (req, res) => {
     const subsectionId = req.params.subSectionId;
@@ -92,9 +91,7 @@ export const deleteQuiz = asyncHandler(async (req, res) => {
     }
     subsection.isActive = false;
     await subsection.save();
-    ApiResponse.success(res, {
-      message: "Quiz deleted successfully.",
-    });
+    ApiResponse.success(res, {}, "Quiz deleted successfully.");
 });
 export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
     const subSectionId = req.params.subSectionId;
@@ -110,9 +107,8 @@ export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
       throw AppError.notFound("Quiz not found for the given subsection ID.");
     }
     ApiResponse.success(res, {
-      message: "Quiz retrieved successfully.",
       quiz,
-    });
+    }, "Quiz retrieved successfully.");
 });
 export const updateQuiz = asyncHandler(async (req, res) => {
     const parsedQuizData = updateQuizSchema.safeParse(req.body);
@@ -171,9 +167,8 @@ export const updateQuiz = asyncHandler(async (req, res) => {
       throw AppError.notFound("Quiz not found for the given subsection ID.");
     }
     ApiResponse.success(res, {
-      message: "Quiz updated successfully.",
       quiz,
-    });
+    }, "Quiz updated successfully");
 });
 export const attemptQuiz = asyncHandler(async (req, res) => {
     const parsedAttemptData = attemptQuizSchema.safeParse(req.body);
@@ -214,9 +209,8 @@ export const attemptQuiz = asyncHandler(async (req, res) => {
       answers: answersWithCorrectness,
     });
     ApiResponse.success(res, {
-      message: "Quiz attempt recorded successfully.",
       quizAttempt,
-    });
+    }, "Quiz attempt recorded successfully.");
 });
 export const getQuizAttemptByUser = asyncHandler(async (req, res) => {
     const userId = new Types.ObjectId(req.userId);
@@ -228,7 +222,6 @@ export const getQuizAttemptByUser = asyncHandler(async (req, res) => {
       .populate("quizId", "title")
       .sort({ createdAt: -1, score: -1 });
     ApiResponse.success(res, {
-      message: "Quiz attempts retrieved successfully.",
       quizAttempts,
-    });
+    }, "Quiz attempts retrieved successfully.");
 });
