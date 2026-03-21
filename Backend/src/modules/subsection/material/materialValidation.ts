@@ -8,8 +8,8 @@ export const materialSchema = z.object({
   materialType: z.string({ error: "Material type is required" }).nonempty("Material type is required"),
   description: z.string().optional(),
   materialSize: z.number().optional(),
-  materialS3Key: z.string().min(1, "Material S3 Key is required"),
+  materialS3Key: z.string({ error: "Material S3 Key is required" }).min(1, "Material S3 Key is required"),
   URLExpiration: z.date().optional(),
-  courseId: z.string().min(1, "Course is required"),
-  sectionId: z.string().min(1, "Section is required"),
+  courseId: z.string({ error: "Course is required" }).min(1, "Course is required"),
+  sectionId: z.string({ error: "Section is required" }).min(1, "Section is required"),
 });
