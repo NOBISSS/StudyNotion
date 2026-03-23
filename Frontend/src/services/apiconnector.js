@@ -1,5 +1,4 @@
-import axios from "axios"
-import { useSelector } from "react-redux";
+import axios from "axios";
 
 export const axiosInstance = axios.create({
   headers: {
@@ -9,17 +8,24 @@ export const axiosInstance = axios.create({
   },
 });
 
-export const apiConnector=(method,url,bodyData,extraHeaders,params)=>{
-  const token = JSON.parse(localStorage.getItem("token"));
-  console.log(bodyData)
-    return axiosInstance({
-        method:`${method}`,
-        url:`${url}`,
-        data:bodyData ?? null,
-        headers:{
-          Authorization:token?`Bearer ${token}` : undefined,
-          ...extraHeaders
-        },
-        params:params ? params : null
-    })
-}
+export const apiConnector = (method, url, bodyData, extraHeaders, params) => {
+  let token = null;
+
+  try {
+    const storedToken = localStorage.getItem("accessToken");
+    token = storedToken ? JSON.parse(storedToken) : null;
+  } catch (error) {
+    console.log("Token parse error:", error);
+  }
+
+  return axiosInstance({
+    method,
+    url,
+    data: bodyData ?? null,
+    headers: {
+      Authorization: token ? `Bearer ${token}` : undefined,
+      ...extraHeaders,
+    },
+    params: params || null,
+  });
+};

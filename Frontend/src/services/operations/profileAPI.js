@@ -20,7 +20,6 @@ export async function getUserEnrolledCourses(token){
             throw new Error(response.data.message);
         }
         result=response.data.data;
-        return result;
     }catch(error){
         console.log("ERROR ",error);
         toast.error(error.response.data.message || "PLEASE REFRESH THE PAGE");

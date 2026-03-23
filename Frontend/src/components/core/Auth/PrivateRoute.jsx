@@ -15,8 +15,11 @@ const isTokenExpired = (token) => {
 };
 
 const PrivateRoute = ({children}) => {
-    const {token}=useSelector((state)=> state.auth);
+    const {token,loading}=useSelector((state)=> state.auth);
     const dispatch=useDispatch();
+    
+    if(loading) return <div>Loading...</div>
+    
     if (!token) {
         console.log("❌ No token found, redirecting to login");
         return <Navigate to="/login" replace />;

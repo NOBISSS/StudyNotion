@@ -1,7 +1,6 @@
 import toast from "react-hot-toast";
 import { apiConnector } from "../apiconnector";
 import { courseEndpoints } from "../apis";
-import { FaRegTired } from "react-icons/fa";
 
 const {
     GET_ALL_COURSE_API,
@@ -27,8 +26,9 @@ export const editCourseDetails=async(data)=>{
     }catch(error){
         console.log("UPDATED COURSE API ERROR...",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
 }
 
 export const deleteCourse=async(data,token)=>{
@@ -43,8 +43,9 @@ export const deleteCourse=async(data,token)=>{
     }catch(error){
         console.log("DELETE COURSE API ERROR...",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
 }
 
 
@@ -60,8 +61,9 @@ export const fetchInstructorCourses=async(token)=>{
     }catch(error){
         console.log("ERROR OCCURED WHILE FETCHING ALL INSTRUCTOR COURSES::",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
     return result;
 }
 
@@ -75,11 +77,13 @@ export const getFullDetailsOfCourse=async(courseId,token)=>{
             throw new Error("Could not fetch the full details of course");
         }
         result=response?.data?.data;
+        return result;
     }catch(error){
         console.log("ERROR OCCURED WHILE GETTING FULL DETAILS OF COURSE::",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
 }
 
 //FETCH ALL COURSE
@@ -95,8 +99,9 @@ export const getAllCourses=async()=>{
     }catch(error){
         console.log("ERROR OCCURED WHILE FETCHING ALL COURSES::",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
     return result;
 }
 
@@ -112,8 +117,9 @@ export const fetchCourseDetails=async(courseId)=>{
     }catch(error){
         console.log("ERROR OCCURED WHILE FETCHING COURSE DETAILS::",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
     return result;
 }
 
@@ -152,7 +158,8 @@ export const addCourseDetails=async(data,token)=>{
     }catch(error){
         console.log("ERROR OCCURED WHILE ADDING COURSE DETAILS:::",error);
         toast.error(error.message);
-    }
+    }finally{
     toast.dismiss(toastId);
+    }
     return result;
 }

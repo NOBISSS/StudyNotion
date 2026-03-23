@@ -42,7 +42,6 @@ const ContactUsForm = () => {
                 {
                 errors.firstname &&(
                     <span className='text-red-500'>
-                        {console.log("MESSAGE PRINTED")}
                         Enter Your Name
                     </span>
                 )
@@ -59,7 +58,7 @@ const ContactUsForm = () => {
             <div className='flex flex-col mt-10 gap-10'>
                 <label htmlFor="email">
                 <span>Email Address</span><br></br>
-                <input type='text' id='email' name='email' placeholder='Enter email address'
+                <input type='email' id='email' name='email' placeholder='Enter email address'
                 className='p-3 w-[70%] rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
                 {...register("email",{required:true})}
                 />
@@ -92,7 +91,7 @@ const ContactUsForm = () => {
                         <div className='w-[70%]'>
                 <input type='number' id='phoneNo' name='phoneNo' placeholder='Enter Contact No'
                 className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                {...register("phoneNo",{required:{value:10,message:"Enter  Phone Number"},
+                {...register("phoneNo",{required:{value:true,message:"Enter  Phone Number"},
                 maxLength:{value:10,message:"Invalid Phone Number"},
                 minLength:{value:8,message:"Invalid Phone Number"}
             })}
