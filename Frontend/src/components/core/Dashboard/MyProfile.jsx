@@ -7,7 +7,7 @@ const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
     const navigate = useNavigate(); 
     return (
-        <div className='OUTTER DIV text-white py-5 px-7 md:px-10 lg: w-[80vw] '>
+        <div className='OUTTER DIV text-white py-5 px-7 md:px-10 lg:w-[80vw] '>
             <div className='INNER-DIV flex flex-col gap-10 py-5 px-10'>
                 <h1 className='text-2xl mb-5 md:text-3xl   font-semibold'>
                     My Profile
@@ -43,7 +43,7 @@ const MyProfile = () => {
                         <p>{user?.additionalDetails?.about || "Write Something About Yourself"}</p>
                     </div>
                 </div>
-                <div className='flex pl-13 flex-col gap-10 p-7 justify-between h-1/2 bg-[#161D29] rounded-md'>
+                <div className='flex pl-14 flex-col gap-10 p-7 justify-between h-1/2 bg-[#161D29] rounded-md'>
                     <div className='flex justify-between'>
                         <h3 className='text-[20px] font-semibold'>Personal Details</h3>
                         <IconBtn

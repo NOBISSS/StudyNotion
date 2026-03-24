@@ -17,10 +17,10 @@ const Settings = () => {
     const [passwordData, setPasswordData] = useState({ oldPassword: "", confirmPassword: "",email:user?.email });
 
     const defaultAdditionalDetails = {
-    gender: user.additionalDetails.gender,
-    dateOfBirth: user.additionalDetails.dateOfBirth,
-    about: user.about,
-    contactNumber: user.additionalDetails.contactNumber
+    gender: user?.additionalDetails?.gender || "male",
+    dateOfBirth: user?.additionalDetails?.dateOfBirth,
+    about: user?.about,
+    contactNumber: user?.additionalDetails?.contactNumber
     };
 
     const [formData, setFormData] = useState({
@@ -47,7 +47,7 @@ const Settings = () => {
                 firstName: user?.firstName || "",
                 lastName: user?.lastName || "",
                 additionalDetails: {
-                    gender: details?.additionalDetails?.gender,
+                    gender: details?.gender || "Male",
                     dateOfBirth: details?.dateOfBirth ? details?.dateOfBirth : "",
                     about: details?.about || "",
                     contactNumber: details?.contactNumber || ""
@@ -87,8 +87,6 @@ const Settings = () => {
             setProfilePic(file);
             console.log("FILE IS SELECTED...", file);
         }
-
-        console.log(profilePic)
     }
 
     const handleProfileSubmit = (e) => {
@@ -119,7 +117,7 @@ const Settings = () => {
 
     const HandlePassword = (e) => {
         e.preventDefault();
-        if (passwordData.password == "" && passwordData.confirmPassword=="") {
+        if (passwordData.oldPassword == "" && passwordData.confirmPassword=="") {
             toast.error("Please Enter Password");
             return;
         }

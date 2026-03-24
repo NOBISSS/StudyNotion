@@ -19,7 +19,7 @@ const Sidebar = () => {
 
   return (
     <div className='w-[16.5%]'>
-    <div className='flex m-w-[250px] flex-col border-r-[1px] border-r-[#000917] h-[calc(100vh-3.5rem)] bg-[#161D29] py-10 '
+    <div className='flex max-w-[250px] flex-col border-r-[1px] border-r-[#000917] h-[calc(100vh-3.5rem)] bg-[#161D29] py-10 '
     >
       <div className='flex flex-col'>
           {

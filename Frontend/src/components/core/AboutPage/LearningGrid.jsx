@@ -1,8 +1,6 @@
 import { CTAButton } from "../HomePage/Button"
 import { HighlightText } from "../HomePage/HighlightText"
-
-export const LearningGrid=()=>{
-    const AboutData1=[
+const AboutData1=[
     {
         order:-1,
         title:"World-Class Learning For ",
@@ -37,8 +35,9 @@ export const LearningGrid=()=>{
         description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
     },
 ]
+export const LearningGrid=()=>{   
     return(
-        <div className="grid mx-auto grid-col-1 lg:grid-cols-4 mb-10 mt-20 p-10">
+        <div className="grid mx-auto grid-cols-1 lg:grid-cols-4 mb-10 mt-20 p-10">
             {
                 AboutData1.map((card,index)=>{
                     return (
@@ -55,12 +54,12 @@ export const LearningGrid=()=>{
                         `}>
                             {
                                 card.order < 0 ? (
-                                    <div className="bg-[#000814] h-[250px] flex flex-col px-25 gap-3">
+                                    <div className="bg-[#000814] h-[250px] flex flex-col px-24 gap-3">
                                         
                                             <h1 className="text-4xl font-semibold">{card.title}
                                             <HighlightText text={card.highlightText}/></h1>
                                         
-                                        <p className="w-1/1 mb-4">
+                                        <p className="w-full mb-4">
                                             {card.description}
                                         </p>
                                         <div>

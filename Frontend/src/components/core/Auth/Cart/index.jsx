@@ -10,7 +10,7 @@ export default function Cart(){
             <h1>Your Cart</h1>
             <p>{totalItems} Courses in Cart</p>
             {
-                total > 0 ? (<div>
+                totalItems > 0 ? (<div>
                     <RenderCartCourses/>
                     <RenderTotalAmount/>
                 </div>) : (<div><p>Your Cart is Empty</p></div>)

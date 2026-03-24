@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom';
 
 const OpenRoute = ({children}) => {
-    const {token}=useSelector((state)=>state.auth);
-    console.log("IN OPEN ROUTE TOKEN:",token);
+    const {token,loading}=useSelector((state)=>state.auth);
+    if(loading) return <div>Loading...</div>
     if(token){
         return <Navigate to="/dashboard/my-profile"/>
     }

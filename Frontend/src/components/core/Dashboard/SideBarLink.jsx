@@ -11,10 +11,13 @@ const SideBarLink = ({link,iconName}) => {
     const matchRoute=(route)=> matchPath({path:route},location.pathname);
 
   return (
-    <NavLink
-        to={link?.path}
-        className={`text-[#838894] relative px-8 py-2 text-sm font-medium ${matchRoute(link?.path) ? "bg-yellow-700 text-white" : "bg-transparent" }`}
-    >
+    // ✅ Simpler approach
+<NavLink
+    to={link?.path}
+    className={({isActive}) =>
+        `relative px-8 py-2 text-sm font-medium ${isActive ? "bg-yellow-700 text-white" : "text-[#838894]"}`
+    }
+>
         <span className={ ` text-[#838894] absolute left-0 top-0 h-full w-[0.2rem]  ${matchRoute(link.path) ? "bg-yellow-400 text-white" : "bg-transparent "}`}>
 
         </span>

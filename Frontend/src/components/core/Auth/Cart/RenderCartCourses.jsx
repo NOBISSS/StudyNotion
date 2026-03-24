@@ -9,11 +9,13 @@ import { removeFromCart } from '../../../../slices/cartSlice';
 const RenderCartCourses = () => {
     const dispatch=useDispatch();
     const { cart } = useSelector((state) => state.cart);
+    if (!cart?.length) return <h1>Nothing in Cart</h1>;
     return (
         <div>
             {
                 cart.map((course, index) => (
-                    <div>
+
+                    <div key={course._id}>
                         <div>
                             <img src={course?.thumbnail} />
                             <div>
@@ -26,10 +28,12 @@ const RenderCartCourses = () => {
                                     size={20}
                                     edit={false}
                                     activeColor="#ffd700"
-                                    emptyIcon={<IoStarHalfSharp />}
-                                    fullIcon={<IoStarOutline />}
+                                    fullIcon={<IoStarHalfSharp />}
+                                    emptyIcon={<IoStarOutline />}
                                     />
-                                    <span>{course?.ratingsAndReviews?.length} Ratings</span>
+                                    <span>{course?.ratingsAndReviews?.length
+    ? (course.ratingsAndReviews.reduce((sum, r) => sum + r.rating, 0) / course.ratingsAndReviews.length).toFixed(1)
+    : "No ratings"} Ratings</span>
                                 </div>
                             </div>
                         </div>
