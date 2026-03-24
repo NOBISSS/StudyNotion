@@ -1,12 +1,12 @@
-import { studyNotionLogo } from "./announcementTemplate.js";
-
-export const OtpTemp = (otp:string) => {
+export const studyNotionLogo =
+  "https://res.cloudinary.com/djjqvm5wn/image/upload/v1774373011/logo_hgz270.png";
+export const AnnouncementTemp = (title:string,message:string) => {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Brainly OTP Verification</title>
+      <title>${title}</title>
       <style>
           * {
               margin: 0;
@@ -41,18 +41,6 @@ export const OtpTemp = (otp:string) => {
               margin-bottom: 22px;
               line-height: 1.5;
           }
-          .otp-box {
-              font-size: 32px;
-              font-weight: 700;
-              letter-spacing: 3px;
-              margin: 18px 0;
-              color: #5a2dff;
-              background: #f4f2ff;
-              padding: 12px 22px;
-              display: inline-block;
-              border-radius: 8px;
-              border: 2px solid #5a2dff;
-          }
           .support {
               font-size: 14px;
               color: #666;
@@ -69,15 +57,10 @@ export const OtpTemp = (otp:string) => {
   <body>
       <div class="container">
           <img class="logo" src="${studyNotionLogo}" alt="StudyNotion Logo" />
-          <div class="message">Email Verification OTP</div>
+          <div class="message">${title}</div>
 
           <div class="body">
-              <p>Welcome to <b>StudyNotion</b> 👋</p>
-              <p>To complete your sign-up, please enter the verification code below:</p>
-
-              <div class="otp-box">${otp}</div>
-
-              <p>This OTP will expire in <b>2 minutes</b>. Do not share it with anyone for security reasons.</p>
+              <p>${message}</p>
           </div>
 
           <div class="support">

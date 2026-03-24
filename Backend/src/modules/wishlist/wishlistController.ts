@@ -24,7 +24,6 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
   }
   ApiResponse.success(res, { wishlist }, "Wishlist fetched successfully");
 });
-
 export const addToWishlist: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const { courseId } = req.body;
@@ -63,7 +62,9 @@ export const removeFromWishlist: Handler = asyncHandler(async (req, res) => {
   if (!wishlist) {
     throw AppError.notFound("Wishlist not found for user");
   }
-  wishlist.courseIds = wishlist.courseIds.filter((id) => id.toString() !== courseId.toString());
+  wishlist.courseIds = wishlist.courseIds.filter(
+    (id) => id.toString() !== courseId.toString(),
+  );
   await wishlist.save();
   ApiResponse.success(
     res,
