@@ -8,19 +8,19 @@ import toast from 'react-hot-toast';
 
 const Settings = () => {
     const { user } = useSelector((state) => state.profile);
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     //console.log(user);
     const dispatch = useDispatch();
     //USE STATES
     const [profilePic, setProfilePic] = useState(null);
     const fileInputRef = useRef(null);
-    const [passwordData, setPasswordData] = useState({ oldPassword: "", confirmPassword: "",email:user?.email });
+    const [passwordData, setPasswordData] = useState({ oldPassword: "", confirmPassword: "", email: user?.email });
 
     const defaultAdditionalDetails = {
-    gender: user?.additionalDetails?.gender || "male",
-    dateOfBirth: user?.additionalDetails?.dateOfBirth,
-    about: user?.about,
-    contactNumber: user?.additionalDetails?.contactNumber
+        gender: user?.additionalDetails?.gender || "male",
+        dateOfBirth: user?.additionalDetails?.dateOfBirth,
+        about: user?.about,
+        contactNumber: user?.additionalDetails?.contactNumber
     };
 
     const [formData, setFormData] = useState({
@@ -31,15 +31,15 @@ const Settings = () => {
     });
     //const [formData,setFormData]=useState(user);
     useEffect(() => {
-        
-        if (user) {
-            let details=user.additionalDetails;
 
-            if(typeof details === "string"){
-                try{
-                    details=JSON.parse(details);
-                }catch{
-                    details={};
+        if (user) {
+            let details = user.additionalDetails;
+
+            if (typeof details === "string") {
+                try {
+                    details = JSON.parse(details);
+                } catch {
+                    details = {};
                 }
             }
             //console.log("DETAILS OBJECT>>>>>>",details);
@@ -99,13 +99,13 @@ const Settings = () => {
         dispatch(updateProfilePicture(profilePic));
     }
 
-    const HandlePasswordChange=(e)=>{
+    const HandlePasswordChange = (e) => {
         e.preventDefault();
         const { name, value } = e.target;
-    setPasswordData((prev) => ({
-        ...prev,
-        [name]: value
-    }));
+        setPasswordData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
 
     }
 
@@ -117,12 +117,12 @@ const Settings = () => {
 
     const HandlePassword = (e) => {
         e.preventDefault();
-        if (passwordData.oldPassword == "" && passwordData.confirmPassword=="") {
+        if (passwordData.oldPassword == "" && passwordData.confirmPassword == "") {
             toast.error("Please Enter Password");
             return;
         }
         console.log("Password Updated Successfully");
-        dispatch(UpdatePassword(passwordData,navigate))
+        dispatch(UpdatePassword(passwordData, navigate))
     }
 
     return (

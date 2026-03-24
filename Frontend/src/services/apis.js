@@ -15,7 +15,7 @@ export const endPoints={
 
 export const profileEndpoints={
     GET_USER_DETAILS_API:BASE_URL+"/profile/getuser",
-    GET_USER_ENROLLED_COURSE_API:BASE_URL+"/profile/getEnrolledCourses",
+    GET_USER_ENROLLED_COURSE_API:BASE_URL+"/enrollments/getmy",
     DELETE_ACCOUNT:BASE_URL+"/profile/deleteaccount",
     CHANGE_PASSWORD:BASE_URL+"/profile/changepassword",
 

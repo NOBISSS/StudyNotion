@@ -26,6 +26,7 @@ export const apiConnector = (method, url, bodyData, extraHeaders, params) => {
       Authorization: token ? `Bearer ${token}` : undefined,
       ...extraHeaders,
     },
+    withCredentials:true,
     params: params || null,
   });
 };
