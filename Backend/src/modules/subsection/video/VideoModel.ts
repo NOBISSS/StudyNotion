@@ -33,6 +33,7 @@ const VideoSchema = new Schema(
     videoName: String,
     videoS3Key: { type: String, required: true },
     videoURL: { type: String },
+    duration: Number, // in seconds
     status: String,
     URLExpiration: Date,
     videoSize: Number,

@@ -7,6 +7,7 @@ const subSectionSchema = new Schema({
         enum: ["video", "material", "quiz"],
         required: true,
     },
+    isPreview: { type: Boolean, default: false },
     // contentUrl: { type: String, required: true },
     // videoLength: { type: String },
     // materialType: { type: String },

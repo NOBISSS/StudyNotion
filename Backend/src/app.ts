@@ -14,6 +14,7 @@ import SignatureGenerationRouter from "./modules/signatureGeneration/generateSig
 import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import multipartUploadRoute from "./modules/subsection/video/MultipartUploadRoute.js";
 import userRouter from "./modules/user/userRoutes.js";
+import wishlistRouter from "./modules/wishlist/wishlistRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 dotenv.config();
 
@@ -55,8 +56,9 @@ app.use(`${baseRoute}/enrollments`, courseEnrollmentRouter);
 app.use(`${baseRoute}/reviews`, reviewRouter);
 app.use(`${baseRoute}/sections`, sectionRouter);
 app.use(`${baseRoute}/subsections`, subsectionRouter);
-app.use("/s3", multipartUploadRoute);
+app.use(`${baseRoute}/upload/s3`, multipartUploadRoute);
 app.use(`${baseRoute}/comments`, CommentRouter);
+app.use(`${baseRoute}/wishlists`, wishlistRouter);
 app.use(`${baseRoute}/signatures`, SignatureGenerationRouter);
 
 app.use(globalErrorHandler);

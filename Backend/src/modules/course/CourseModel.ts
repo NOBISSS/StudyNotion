@@ -11,6 +11,7 @@ const courseSchema = new Schema(
       enum: ["Free", "Paid"],
       required: true,
     },
+    totalDuration: { type: Number, default: 0 },
     coursePlan: { type: Types.ObjectId, ref: "CoursePlan" },
     originalPrice: { type: Number, default: 0 },
     discountPrice: { type: Number, default: 0 },

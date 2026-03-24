@@ -28,6 +28,7 @@ import {
   signinInputSchema,
   signupInputSchema,
 } from "./authValidation.js";
+import Wishlist from "../wishlist/wishlistModel.js";
 
 export const signupWithOTP = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -152,9 +153,9 @@ export const signupOTPVerification = asyncHandler(async (req, res) => {
     accountType: otpData.accountType as "admin" | "instructor" | "student",
   });
   const profile = await Profile.create({ userId: user._id });
+  const wishlist = await Wishlist.create({ userId: user._id });
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   await user.updateOne({ refreshToken });
-
   return ApiResponse.created(
     res,
     {

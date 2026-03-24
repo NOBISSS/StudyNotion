@@ -11,7 +11,8 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
   }
   const wishlist = await Wishlist.findOne({ userId }).populate({
     path: "courseIds",
-    select: "title description price",
+    select:
+      "courseName description originalPrice discountPrice thumbnailURL TypeOfCourse categoryId",
   });
   if (!wishlist) {
     ApiResponse.success(
@@ -51,7 +52,7 @@ export const addToWishlist: Handler = asyncHandler(async (req, res) => {
 });
 export const removeFromWishlist: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  const { courseId } = req.body;
+  const { courseId } = req.params;
   if (!userId) {
     throw AppError.unauthorized("User ID is required to remove from wishlist");
   }
