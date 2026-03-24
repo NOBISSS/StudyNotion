@@ -97,11 +97,11 @@ export const ratingsEndpoints={
 }
 
 export const categories={
-    CATEGORIES_API:BASE_URL+"/course/showAllCategories",
+    CATEGORIES_API:BASE_URL+"/categories/getall",
 }
 
 export const catalogData={
-    CATALOGPAGEDATA_API:BASE_URL + "/course/getCategory/PageDetails"
+    CATALOGPAGEDATA_API:BASE_URL + "/categories/getall"
 }
 
 export const contactusEndpoint={
