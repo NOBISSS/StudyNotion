@@ -114,7 +114,6 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
   //get Top-selling courses across all categories
   const allCategories = await Category.find().populate("courses");
   const allCourse = allCategories.flatMap((category) => category.courses);
-  console.log(allCourse);
   const mostSellingCourses = allCourse
     //   .sort((a, b) => b.sold - a.sold)
     .slice(0, 10);

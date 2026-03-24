@@ -4,6 +4,7 @@ import { Category } from "../../modules/category/CategoryModel.js";
 import { Course } from "../../modules/course/CourseModel.js";
 import { CourseEnrollment } from "../../modules/enrollment/CourseEnrollment.js";
 import { connectDB } from "./index.js";
+import User from "../../modules/user/UserModel.js";
 
 dotenv.config();
 
@@ -215,7 +216,21 @@ export const seedCourseEnrollments = async () => {
     console.error("❌ Error seeding enrollments:", error);
   }
 };
-seedCourseEnrollments()
+export const updateCourseSlugs = async () => {
+  try {
+    await connectDB(process.env.MONGODB_URI!);
+    const courses = await Course.find();
+    for (const course of courses) {
+      const instructor = await User
+        .findById(course.instructorId);
+      const newSlug = `${instructor?.firstName} ${instructor?.lastName}/${course.courseName}`;
+      await Course.findByIdAndUpdate(course._id, { slug: newSlug });
+    }
+  } catch (error) {
+    console.error("❌ Error updating course slugs:", error);
+  }
+};
+updateCourseSlugs()
   .then(() => {
     console.log("Seeding completed");
     process.exit(0);

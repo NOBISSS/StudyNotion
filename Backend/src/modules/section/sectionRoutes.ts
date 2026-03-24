@@ -20,6 +20,7 @@ const sectionRouter = Router();
 sectionRouter.use(userMiddleware);
 sectionRouter.route("/getall/:courseId").get(getAllSections);
 
+
 sectionRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 
 sectionRouter.route("/create").post(createSection);

@@ -71,11 +71,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     level,
     tag: tag || [],
     thumbnailUrl: thumbnailImage.secure_url,
-    slug:
-      courseName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
+    slug: `${instructor?.firstName} ${instructor?.lastName}/${courseName}`,
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
