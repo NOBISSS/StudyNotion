@@ -1,8 +1,7 @@
 import { Router } from "express";
-import {
-  isAdmin,
-  userMiddleware,
-} from "../../shared/middlewares/userMiddleware.js";
+import { ROLES } from "../../shared/constants.js";
+import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
+import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   categoryPageDetails,
   createCategory,
@@ -10,8 +9,6 @@ import {
   getAllCategory,
   updateCategory,
 } from "./categoryController.js";
-import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
-import { ROLES } from "../../shared/constants.js";
 
 const categoryRouter = Router();
 

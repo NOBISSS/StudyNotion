@@ -16,17 +16,17 @@ import {
 
 const courseRouter = Router();
 
-courseRouter.use(userMiddleware);
 courseRouter.route("/getall").get(getAllCourse);
 courseRouter.route("/get-top").get(getAllCourseByEnrollmentsAndRatings);
 courseRouter
   .route("/get-top/:categoryId")
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
+courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
+courseRouter.use(userMiddleware);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
-courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/update/:courseId").put(updateCourse);
 
 export { courseRouter };

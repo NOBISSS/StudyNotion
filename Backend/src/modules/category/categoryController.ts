@@ -125,6 +125,10 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
       selectedCategory: selectedCourse,
       differenceCourses: differenceCourses,
       mostSellingCourses: mostSellingCourses,
+      category: {
+        name: selectedCategory.name,
+        description: selectedCategory.description,
+      },
     },
     "Category page details fetched successfully",
   );

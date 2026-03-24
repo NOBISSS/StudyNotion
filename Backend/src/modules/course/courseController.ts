@@ -151,7 +151,6 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
-  const userId = req.userId;
   const courses = await Course.find();
   ApiResponse.success(
     res,
