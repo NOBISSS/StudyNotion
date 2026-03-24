@@ -10,6 +10,7 @@ import {
   getAllCourse,
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
+  getCourseDetails,
   updateCourse,
 } from "./courseController.js";
 
@@ -25,7 +26,7 @@ courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
-// courseRouter.route("/getcourse/:id").get();
+courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/update/:courseId").put(updateCourse);
 
 export { courseRouter };
