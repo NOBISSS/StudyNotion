@@ -1,8 +1,14 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Footer from './Footer';
-import { BACKEND_URL } from '../../utils/constants';
+import {
+    fetchSubSections,
+    selectSubSections,
+    selectSectionStatus,
+    selectSectionError,
+} from '../../slices/sectionSlice'; // ← adjust path to match your store layout
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 const NAV_LINKS = ['Home', 'Catalog', 'About us', 'Contact us'];
@@ -25,7 +31,9 @@ function Navbar() {
                 }}>
                     <span style={{ fontSize: 14, fontWeight: 900, color: '#000' }}>S</span>
                 </div>
-                <span style={{ fontWeight: 800, fontSize: 18, color: '#F1F2FF', letterSpacing: -0.5 }}>StudyNotion</span>
+                <span style={{ fontWeight: 800, fontSize: 18, color: '#F1F2FF', letterSpacing: -0.5 }}>
+                    StudyNotion
+                </span>
             </div>
 
             <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
@@ -66,14 +74,12 @@ function Navbar() {
 
 // ─── Star Rating ──────────────────────────────────────────────────────────────
 function StarRating({ rating = 4.5, size = 14 }) {
-    // Clamp rating to [0, 5]
     const clamped = Math.min(5, Math.max(0, rating));
     return (
         <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {[1, 2, 3, 4, 5].map((s) => {
                 const filled = clamped >= s;
                 const half   = !filled && clamped >= s - 0.5;
-                // Use a unique gradient id per star to avoid SVG id collisions in the DOM
                 const gradId = `half-${size}-${s}`;
                 return (
                     <svg key={s} width={size} height={size} viewBox="0 0 20 20"
@@ -95,87 +101,163 @@ function StarRating({ rating = 4.5, size = 14 }) {
 }
 
 // ─── Accordion Section ────────────────────────────────────────────────────────
-// BUG FIX: Previously, the `defaultOpen` prop was used as the initial value of
-// local state, but re-renders from `allSectionsOpen` toggle never propagated
-// because useState ignores prop changes after mount.
-// Fix: use an imperative ref approach — expose a controlled `open` prop and
-// keep a local "manual override" so individual sections can still be toggled.
+// • First open  → dispatches fetchSubSections (thunk checks Redux cache first)
+// • Re-opens    → reads from store, zero network calls
+// • Lock icon   → reminds user content requires purchase
 function AccordionSection({ section, forceOpen }) {
-    // manualOverride tracks if user has clicked this specific section header
-    const manualOverride = useRef(null); // null | true | false
+    const dispatch  = useDispatch();
+    const sectionId = section._id;
+
+    const subSections = useSelector(selectSubSections(sectionId));
+    const status      = useSelector(selectSectionStatus(sectionId));
+    const fetchError  = useSelector(selectSectionError(sectionId));
+
+    const manualOverride = useRef(null);
     const [localOpen, setLocalOpen] = useState(section.defaultOpen || false);
 
-    // Sync to forceOpen when it changes, but only if user hasn't manually overridden
+    // Sync with "Expand all / Collapse all"
     useEffect(() => {
         if (forceOpen !== undefined) {
-            manualOverride.current = null; // reset override when global toggle fires
+            manualOverride.current = null;
             setLocalOpen(forceOpen);
         }
     }, [forceOpen]);
 
+    // Trigger fetch on first open — thunk internally no-ops if already cached
+    useEffect(() => {
+        if (localOpen && sectionId) {
+            dispatch(fetchSubSections(sectionId));
+        }
+    }, [localOpen, sectionId, dispatch]);
+
     const handleToggle = () => {
         manualOverride.current = !localOpen;
-        setLocalOpen(!localOpen);
+        setLocalOpen((prev) => !prev);
     };
 
-    const open = localOpen;
+    const isLoading = status === 'loading';
 
     return (
         <div style={{ borderBottom: '1px solid #2C3244' }}>
+
+            {/* ── Header ─────────────────────────────────────────────────── */}
             <div
                 onClick={handleToggle}
                 style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '14px 16px', cursor: 'pointer',
-                    background: open ? '#1e2535' : '#1A2130',
+                    background: localOpen ? '#1e2535' : '#1A2130',
                     transition: 'background 0.2s',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{
                         color: '#AFB2BF', fontSize: 13, display: 'inline-block',
-                        transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+                        transform: localOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
                         transition: 'transform 0.2s',
                     }}>∧</span>
                     <span style={{ color: '#F1F2FF', fontWeight: 600, fontSize: 14 }}>
                         {section.sectionName || section.name}
                     </span>
                 </div>
-                <span style={{ color: '#FFD60A', fontSize: 12, fontWeight: 500 }}>
-                    {section.subSection?.length || 0} lectures &nbsp; {section.totalDuration || ''}
-                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#FFD60A', fontSize: 12, fontWeight: 500 }}>
+                        {/* Show loaded count if available, else fall back to metadata count */}
+                        {subSections != null
+                            ? `${subSections.length} lectures`
+                            : section.subSectionCount != null
+                                ? `${section.subSectionCount} lectures`
+                                : ''}
+                        {section.totalDuration ? ` · ${section.totalDuration}` : ''}
+                    </span>
+                    {/* Inline spinner while fetching */}
+                    {isLoading && (
+                        <div style={{
+                            width: 12, height: 12,
+                            border: '2px solid #2C3244', borderTop: '2px solid #FFD60A',
+                            borderRadius: '50%', animation: 'sectionSpin 0.7s linear infinite',
+                        }} />
+                    )}
+                </div>
             </div>
 
-            {open && (
+            {/* ── Content ────────────────────────────────────────────────── */}
+            {localOpen && (
                 <div style={{ background: '#0F1624' }}>
-                    {(section.subSection || []).map((lecture, i) => (
+
+                    {/* Loading skeleton */}
+                    {isLoading && (
+                        <div style={{ padding: '14px 16px 14px 40px' }}>
+                            {[85, 70, 55].map((w, n) => (
+                                <div key={n} style={{
+                                    height: 13, borderRadius: 4, marginBottom: 12,
+                                    width: `${w}%`,
+                                    background: 'linear-gradient(90deg, #1e2535 25%, #2C3244 50%, #1e2535 75%)',
+                                    backgroundSize: '200% 100%',
+                                    animation: 'shimmer 1.2s infinite',
+                                }} />
+                            ))}
+                            <style>{`
+                                @keyframes shimmer    { to { background-position: -200% 0; } }
+                                @keyframes sectionSpin { to { transform: rotate(360deg); } }
+                            `}</style>
+                        </div>
+                    )}
+
+                    {/* Error + retry */}
+                    {!isLoading && fetchError && (
+                        <div style={{ padding: '12px 16px 12px 40px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ color: '#FC8181', fontSize: 12 }}>Failed to load lectures.</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); dispatch(fetchSubSections(sectionId)); }}
+                                style={{
+                                    background: 'none', border: 'none', color: '#FFD60A',
+                                    fontSize: 12, cursor: 'pointer', fontWeight: 600,
+                                    textDecoration: 'underline', padding: 0,
+                                }}
+                            >Retry</button>
+                        </div>
+                    )}
+
+                    {/* Subsection rows */}
+                    {!isLoading && !fetchError && subSections?.map((lecture, i) => (
                         <div key={lecture._id || i} style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
                             padding: '10px 16px 10px 40px',
-                            borderBottom: '1px solid #1e2535',
+                            borderBottom: i < subSections.length - 1 ? '1px solid #1e2535' : 'none',
                         }}>
                             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flex: 1 }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    stroke="#AFB2BF" strokeWidth="2" style={{ marginTop: 2, flexShrink: 0 }}>
-                                    <rect x="2" y="3" width="20" height="14" rx="2" />
-                                    <polyline points="8 21 12 17 16 21" />
+                                {/* Lock — content gated behind purchase */}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="#6B7280" strokeWidth="2"
+                                    style={{ marginTop: 3, flexShrink: 0 }}>
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                 </svg>
                                 <div>
-                                    <p style={{ color: '#F1F2FF', fontSize: 13, marginBottom: lecture.description ? 4 : 0 }}>
+                                    <p style={{ color: '#AFB2BF', fontSize: 13, marginBottom: lecture.description ? 4 : 0 }}>
                                         {lecture.title || lecture.subSectionName}
                                     </p>
                                     {lecture.description && (
-                                        <p style={{ color: '#AFB2BF', fontSize: 12, lineHeight: 1.5 }}>
+                                        <p style={{ color: '#6B7280', fontSize: 12, lineHeight: 1.5 }}>
                                             {lecture.description}
                                         </p>
                                     )}
                                 </div>
                             </div>
-                            <span style={{ color: '#AFB2BF', fontSize: 12, flexShrink: 0, marginLeft: 16 }}>
+                            <span style={{ color: '#6B7280', fontSize: 12, flexShrink: 0, marginLeft: 16 }}>
                                 {lecture.timeDuration || ''}
                             </span>
                         </div>
                     ))}
+
+                    {/* Empty state */}
+                    {!isLoading && !fetchError && subSections?.length === 0 && (
+                        <div style={{ padding: '14px 40px', color: '#6B7280', fontSize: 13 }}>
+                            No lectures in this section yet.
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -184,13 +266,13 @@ function AccordionSection({ section, forceOpen }) {
 
 // ─── Review Card ──────────────────────────────────────────────────────────────
 function ReviewCard({ review }) {
-    const name = review?.user?.firstName
+    const name    = review?.user?.firstName
         ? `${review.user.firstName} ${review.user.lastName}`
         : review?.name || 'Student';
     const initial = name.charAt(0).toUpperCase();
     const avatar  = review?.user?.image || null;
     const text    = review?.review || review?.comment || 'Great course!';
-    const rating  = Number(review?.rating) || 4.5; // ensure number
+    const rating  = Number(review?.rating) || 4.5;
 
     return (
         <div style={{
@@ -241,14 +323,13 @@ function Loader() {
 const CourseDetail = () => {
     const { courseId } = useParams();
     const navigate     = useNavigate();
-    const [course, setCourse]             = useState(null);
-    const [isLoading, setIsLoading]       = useState(true);
-    const [error, setError]               = useState(null);
+
+    const [course, setCourse]                   = useState(null);
+    const [isLoading, setIsLoading]             = useState(true);
+    const [error, setError]                     = useState(null);
     const [allSectionsOpen, setAllSectionsOpen] = useState(false);
-    // forceOpen cycles through undefined → true → false to let AccordionSection
-    // detect the change even when toggling in the same direction twice
-    const [forceOpen, setForceOpen]       = useState(undefined);
-    const [addedToCart, setAddedToCart]   = useState(false);
+    const [forceOpen, setForceOpen]             = useState(undefined);
+    const [addedToCart, setAddedToCart]         = useState(false);
 
     useEffect(() => {
         if (!courseId) return;
@@ -259,10 +340,10 @@ const CourseDetail = () => {
                 setIsLoading(true);
                 setError(null);
                 const response = await axios.get(
-                    BACKEND_URL+'/courses/getdetails/'+courseId
+                    `http://localhost:3000/api/v1/courses/getDetails/${courseId}`
                 );
                 if (!cancelled) {
-                    setCourse(response.data?.data ?? response.data?.course ?? response.data);
+                    setCourse(response.data?.data ?? response.data);
                 }
             } catch (err) {
                 if (!cancelled) {
@@ -275,55 +356,44 @@ const CourseDetail = () => {
         };
 
         fetchCourse();
-        // Cleanup: ignore response if component unmounts before fetch completes
         return () => { cancelled = true; };
     }, [courseId]);
 
     // ── Derived values ──────────────────────────────────────────────────────
-    const title           = course?.courseName || course?.title || 'Course Title';
-    const description     = course?.courseDescription || course?.description || '';
-    const instructor      = course?.instructor;
-    const instructorName  = instructor?.firstName
-        ? `${instructor.firstName} ${instructor.lastName}`
-        : 'Instructor Name';
-    const instructorBio   = instructor?.additionalDetails?.about || '';
-    const instructorImg   = instructor?.image || null;
-    const price           = course?.price ?? 1200;
-    const thumbnail       = course?.thumbnail
+    const courseData     = course?.course ?? {};
+    const title          = courseData.courseName || 'Course Title';
+    const description    = courseData.description || '';
+    const instructorName = courseData.instructorName || 'Instructor Name';
+    const instructorBio  = '';
+    const instructorImg  = null;
+    const price          = courseData.discountPrice ?? courseData.originalPrice ?? 0;
+    const originalPrice  = courseData.originalPrice ?? 0;
+    const hasDiscount    = courseData.discountPrice > 0 && courseData.discountPrice < originalPrice;
+    const thumbnail      = courseData.thumbnailUrl
         || 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&q=80';
-    const language        = course?.language || 'English';
-    const createdAt       = course?.createdAt
-        ? new Date(course.createdAt).toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' })
+    const language       = courseData.language || 'English';
+    const level          = courseData.level || '';
+    const tags           = courseData.tag || [];
+    const createdAt      = courseData.createdAt
+        ? new Date(courseData.createdAt).toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' })
         : '';
-    const studentsCount   = course?.studentsEnrolled?.length ?? course?.studentsCount ?? 0;
-    const reviews         = course?.ratingAndReviews || [];
-
-    // Keep avgRating as a number throughout — no premature .toFixed() here
-    const avgRating = reviews.length
+    const studentsCount  = course?.enrollmentsCount ?? 0;
+    const reviews        = course?.reviews || [];
+    const avgRating      = reviews.length
         ? reviews.reduce((a, r) => a + Number(r.rating), 0) / reviews.length
-        : Number(course?.rating) || 4.5;
+        : 0;
+    const sections       = course?.sections || [];
+    // Use subSectionCount metadata if available (avoids waiting for all fetches)
+    const totalLectures  = sections.reduce((a, s) => a + (s.subSectionCount ?? s.subSection?.length ?? 0), 0);
 
-    const sections      = course?.courseContent || course?.sections || [];
-    const totalLectures = sections.reduce((a, s) => a + (s.subSection?.length || 0), 0);
-
-    // Handle both array and newline-separated string; trim each entry
     const whatYouLearn = (() => {
-        if (!course?.whatYouLearn) return [
-            'Introduction to the subject and core concepts',
-            'Understand the basics: Data types, Loops, Conditional statements, Functions and Modules',
-            'Learn object oriented programming',
-            'Build real-world projects from scratch',
-            'Know how to Read and Parse JSON and XML files',
-        ];
-        if (Array.isArray(course.whatYouLearn)) return course.whatYouLearn;
-        return course.whatYouLearn
-            .split(/\\n|\n/)    // handle both escaped \n and real newlines
-            .map((s) => s.trim())
-            .filter(Boolean);
+        if (!courseData.whatYouLearn) return [];
+        if (Array.isArray(courseData.whatYouLearn)) return courseData.whatYouLearn;
+        return courseData.whatYouLearn.split(/\\n|\n/).map((s) => s.trim()).filter(Boolean);
     })();
 
     const INCLUDES = [
-        { icon: '🕐', color: '#47A992', text: `${course?.totalDuration || '8'} hours on-demand video` },
+        { icon: '🕐', color: '#47A992', text: `${courseData.totalDuration || '—'} hours on-demand video` },
         { icon: '♾️',  color: '#47A992', text: 'Full Lifetime access' },
         { icon: '📱', color: '#47A992', text: 'Access on Mobile and TV' },
         { icon: '🏆', color: '#47A992', text: 'Certificate of completion' },
@@ -338,7 +408,6 @@ const CourseDetail = () => {
     // ── Render ──────────────────────────────────────────────────────────────
     return (
         <div style={{ background: '#0A0F1C', minHeight: '100vh', fontFamily: "'Segoe UI', system-ui, sans-serif", color: '#F1F2FF' }}>
-            {/* <Navbar /> */}
 
             {isLoading ? (
                 <Loader />
@@ -360,16 +429,15 @@ const CourseDetail = () => {
                     <div style={{ background: '#161D29', borderBottom: '1px solid #2C3244', padding: '28px 40px 32px' }}>
                         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', gap: 40, alignItems: 'flex-start' }}>
 
-                            {/* Left: Course Info */}
+                            {/* Left */}
                             <div style={{ flex: 1 }}>
-                                {/* Breadcrumb */}
                                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, fontSize: 13, color: '#AFB2BF' }}>
                                     <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Home</span>
                                     <span>/</span>
                                     <span style={{ cursor: 'pointer' }} onClick={() => navigate(-1)}>Learning</span>
                                     <span>/</span>
                                     <span style={{ color: '#FFD60A', fontWeight: 600 }}>
-                                        {course?.category?.name || 'Course'}
+                                        {courseData.categoryId || 'Course'}
                                     </span>
                                 </div>
 
@@ -380,7 +448,6 @@ const CourseDetail = () => {
                                     {description}
                                 </p>
 
-                                {/* Rating row */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
                                     <span style={{ color: '#E7C009', fontWeight: 700, fontSize: 15 }}>
                                         {avgRating.toFixed(1)}
@@ -415,7 +482,22 @@ const CourseDetail = () => {
                                         </svg>
                                         {language}
                                     </span>
+                                    {level && (
+                                        <span style={{ color: '#AFB2BF', fontSize: 13 }}>📶 {level}</span>
+                                    )}
                                 </div>
+
+                                {tags.length > 0 && (
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+                                        {tags.map((tag) => (
+                                            <span key={tag} style={{
+                                                fontSize: 12, padding: '3px 10px', borderRadius: 99,
+                                                background: '#0A0F1C', border: '1px solid #2C3244',
+                                                color: '#AFB2BF',
+                                            }}>{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Right: Purchase Card */}
@@ -428,9 +510,21 @@ const CourseDetail = () => {
                                 <img src={thumbnail} alt={title}
                                     style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
                                 <div style={{ padding: '20px 20px 24px' }}>
-                                    <p style={{ fontSize: 26, fontWeight: 800, color: '#F1F2FF', marginBottom: 16 }}>
-                                        Rs. {Number(price).toLocaleString()}
-                                    </p>
+                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+                                        <span style={{ fontSize: 26, fontWeight: 800, color: '#F1F2FF' }}>
+                                            Rs. {Number(price).toLocaleString()}
+                                        </span>
+                                        {hasDiscount && (
+                                            <>
+                                                <span style={{ fontSize: 16, color: '#6B7280', textDecoration: 'line-through' }}>
+                                                    Rs. {Number(originalPrice).toLocaleString()}
+                                                </span>
+                                                <span style={{ fontSize: 13, color: '#47A992', fontWeight: 600 }}>
+                                                    {Math.round(((originalPrice - price) / originalPrice) * 100)}% off
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
                                     <button
                                         onClick={() => setAddedToCart(true)}
                                         style={{
@@ -455,11 +549,9 @@ const CourseDetail = () => {
                                     >
                                         Buy now
                                     </button>
-
                                     <p style={{ color: '#AFB2BF', fontSize: 12, textAlign: 'center', marginBottom: 16 }}>
                                         30-Day Money-Back Guarantee
                                     </p>
-
                                     <p style={{ color: '#F1F2FF', fontWeight: 600, fontSize: 13, marginBottom: 10 }}>
                                         This course includes:
                                     </p>
@@ -469,7 +561,6 @@ const CourseDetail = () => {
                                             <span style={{ color: item.color, fontSize: 13 }}>{item.text}</span>
                                         </div>
                                     ))}
-
                                     <button style={{
                                         display: 'block', margin: '16px auto 0', background: 'none',
                                         border: 'none', color: '#FFD60A', fontWeight: 600, fontSize: 13,
@@ -483,27 +574,28 @@ const CourseDetail = () => {
                     {/* ── BODY ───────────────────────────────────────────── */}
                     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px' }}>
 
-                        {/* What You'll Learn */}
-                        <section style={{
-                            border: '1px solid #2C3244', borderRadius: 10,
-                            padding: '28px', marginBottom: 48, background: '#161D29',
-                        }}>
-                            <h2 style={{ color: '#F1F2FF', fontSize: 20, fontWeight: 700, marginBottom: 18 }}>
-                                What you'll learn
-                            </h2>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 32px' }}>
-                                {whatYouLearn.map((point, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="#47A992" strokeWidth="2.5"
-                                            style={{ flexShrink: 0, marginTop: 2 }}>
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        <span style={{ color: '#AFB2BF', fontSize: 13, lineHeight: 1.6 }}>{point}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+                        {whatYouLearn.length > 0 && (
+                            <section style={{
+                                border: '1px solid #2C3244', borderRadius: 10,
+                                padding: '28px', marginBottom: 48, background: '#161D29',
+                            }}>
+                                <h2 style={{ color: '#F1F2FF', fontSize: 20, fontWeight: 700, marginBottom: 18 }}>
+                                    What you'll learn
+                                </h2>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 32px' }}>
+                                    {whatYouLearn.map((point, i) => (
+                                        <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="#47A992" strokeWidth="2.5"
+                                                style={{ flexShrink: 0, marginTop: 2 }}>
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            <span style={{ color: '#AFB2BF', fontSize: 13, lineHeight: 1.6 }}>{point}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Course Content */}
                         <section style={{ marginBottom: 48 }}>
@@ -520,8 +612,9 @@ const CourseDetail = () => {
                                 </button>
                             </div>
                             <p style={{ color: '#AFB2BF', fontSize: 13, marginBottom: 16 }}>
-                                {sections.length} sections • {totalLectures} lectures
-                                {course?.totalDuration ? ` • ${course.totalDuration} total length` : ''}
+                                {sections.length} sections
+                                {totalLectures > 0 ? ` • ${totalLectures} lectures` : ''}
+                                {courseData.totalDuration ? ` • ${courseData.totalDuration} total length` : ''}
                             </p>
                             <div style={{ border: '1px solid #2C3244', borderRadius: 8, overflow: 'hidden' }}>
                                 {sections.length > 0
