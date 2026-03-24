@@ -29,6 +29,10 @@ export const AnnouncementTemp = (title:string,message:string) => {
           .logo {
               width: 140px;
               margin-bottom: 22px;
+			  background-color: black;
+			  padding:10px;
+			  border-radius:5%;
+			  border:none;
           }
           .message {
               font-size: 20px;
@@ -65,7 +69,7 @@ export const AnnouncementTemp = (title:string,message:string) => {
 
           <div class="support">
               Need assistance? Contact us at
-              <a href="mailto:studyNotion.webapp@gmail.com">studyNotion.webapp@gmail.com</a>
+              <a href="mailto:studynotion.webapp@gmail.com">studynotion.webapp@gmail.com</a>
           </div>
       </div>
   </body>
