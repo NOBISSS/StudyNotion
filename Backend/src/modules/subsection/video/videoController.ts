@@ -224,11 +224,11 @@ export const getVideo = asyncHandler(async (req, res) => {
   // const end = Math.min(start + CHUNK_SIZE - 1, fileSize - 1);
   const command = new GetObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
-    Range: `bytes=${start}-${end}`,
+    // Range: `bytes=${start}-${end}`,
     Key: video.videoS3Key,
   });
   const commandResponse = await s3.send(command);
-  const signedUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
+  const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
   // video.link = signedUrl;
   // await video.save({ validateBeforeSave: false });
   res.json({ video, link: signedUrl });
