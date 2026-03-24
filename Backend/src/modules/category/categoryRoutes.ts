@@ -15,9 +15,9 @@ import { ROLES } from "../../shared/constants.js";
 
 const categoryRouter = Router();
 
-categoryRouter.use(userMiddleware);
 categoryRouter.route("/getall").get(getAllCategory);
 categoryRouter.route("/pagedetails/:categoryId").get(categoryPageDetails);
+categoryRouter.use(userMiddleware);
 
 categoryRouter.use(authorizeRoles(ROLES.ADMIN));
 categoryRouter.route("/create").post(createCategory);
