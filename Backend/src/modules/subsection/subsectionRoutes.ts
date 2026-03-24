@@ -7,8 +7,8 @@ import videoRouter from "./video/videoRoutes.js";
 
 const subsectionRouter = Router();
 
-subsectionRouter.use(userMiddleware);
 subsectionRouter.route("/getall/:sectionId").get(getAllSubsections);
+subsectionRouter.use(userMiddleware);
 subsectionRouter.use("/quiz", QuizRouter);
 subsectionRouter.use("/material", materialRouter);
 subsectionRouter.use("/video", videoRouter);
