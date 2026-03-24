@@ -313,7 +313,7 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
   if (courseId && !Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID");
   }
-  const course = await Course.findById(courseId);
+  const course = await Course.findById(courseId).populate("categoryId", "name");
   if (!course) {
     throw AppError.notFound("Course not found");
   }
