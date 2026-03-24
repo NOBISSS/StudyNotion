@@ -37,6 +37,7 @@ const VideoSchema = new Schema(
     URLExpiration: Date,
     videoSize: Number,
     subsectionId: { type: Schema.Types.ObjectId, ref: "SubSection" },
+    courseId: { type: Schema.Types.ObjectId, ref: "Course" },
   },
   {
     timestamps: true,

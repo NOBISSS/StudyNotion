@@ -3,6 +3,7 @@ import { model, Schema, Types } from "mongoose";
 const MaterialSchema = new Schema(
   {
     materialName: { type: String },
+    courseId: { type: Types.ObjectId, ref: "Course", required: true },
     contentUrl: { type: String, required: true },
     materialType: { type: String, required: true },
     materialSize: { type: Number },

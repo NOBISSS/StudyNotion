@@ -13,6 +13,7 @@ import { Section } from "../../section/SectionModel.js";
 import { SubSection } from "../SubSectionModel.js";
 import { Material } from "./MaterialModel.js";
 import { materialSchema } from "./materialValidation.js";
+import { isEnrolled } from "../subsection.utils.js";
 
 export const isValidInstructor = async (
   courseId: Types.ObjectId,
@@ -96,6 +97,12 @@ export const getMaterial = asyncHandler(async (req, res) => {
   if (!material) {
     throw AppError.notFound("Material not found");
   }
+  const userId = new Types.ObjectId(req.userId);
+  if(!(await isEnrolled(userId.toString(), material.courseId.toString()))) {
+    throw AppError.unauthorized(
+      "You are not enrolled in the course for this material.",
+    );
+  }
   let materialURL = material.contentUrl;
   if (material.URLExpiration && material.URLExpiration < new Date()) {
     materialURL = await generateSignedUrl(material.materialS3Key);
@@ -113,7 +120,6 @@ export const getMaterial = asyncHandler(async (req, res) => {
 });
 export const deleteMaterial = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
-
   const subsection = await SubSection.findById(subsectionId);
   if (!subsection) {
     throw AppError.notFound("Subsection not found");
