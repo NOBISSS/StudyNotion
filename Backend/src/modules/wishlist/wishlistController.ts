@@ -14,31 +14,59 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
     select: "title description price",
   });
   if (!wishlist) {
-    ApiResponse.success(res, { wishlist: { userId, courseIds: [] } }, "Wishlist fetched successfully");
+    ApiResponse.success(
+      res,
+      { wishlist: { userId, courseIds: [] } },
+      "Wishlist fetched successfully",
+    );
     return;
   }
   ApiResponse.success(res, { wishlist }, "Wishlist fetched successfully");
 });
 
 export const addToWishlist: Handler = asyncHandler(async (req, res) => {
-    const userId = req.userId;
-    const { courseId } = req.body;
-    if (!userId) {
-      throw AppError.unauthorized("User ID is required to add to wishlist");
-    }
-    if (!courseId) {
-      throw AppError.badRequest("Course ID is required to add to wishlist");
-    }
-    let wishlist = await Wishlist.findOne({ userId });
-    if (!wishlist) {
-      wishlist = new Wishlist({ userId, courseIds: [courseId] });
-    } else {
-      if (wishlist.courseIds.includes(courseId)) {
-        throw AppError.conflict("Course is already in wishlist");
-      }
-      wishlist.courseIds.push(courseId);
-    }
-    await wishlist.save();
-    ApiResponse.success(res, { wishlist }, "Course added to wishlist successfully");
+  const userId = req.userId;
+  const { courseId } = req.body;
+  if (!userId) {
+    throw AppError.unauthorized("User ID is required to add to wishlist");
   }
-);
+  if (!courseId) {
+    throw AppError.badRequest("Course ID is required to add to wishlist");
+  }
+  let wishlist = await Wishlist.findOne({ userId });
+  if (!wishlist) {
+    wishlist = new Wishlist({ userId, courseIds: [courseId] });
+  } else {
+    if (wishlist.courseIds.includes(courseId)) {
+      throw AppError.conflict("Course is already in wishlist");
+    }
+    wishlist.courseIds.push(courseId);
+  }
+  await wishlist.save();
+  ApiResponse.success(
+    res,
+    { wishlist },
+    "Course added to wishlist successfully",
+  );
+});
+export const removeFromWishlist: Handler = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const { courseId } = req.body;
+  if (!userId) {
+    throw AppError.unauthorized("User ID is required to remove from wishlist");
+  }
+  if (!courseId) {
+    throw AppError.badRequest("Course ID is required to remove from wishlist");
+  }
+  const wishlist = await Wishlist.findOne({ userId });
+  if (!wishlist) {
+    throw AppError.notFound("Wishlist not found for user");
+  }
+  wishlist.courseIds = wishlist.courseIds.filter((id) => id !== courseId);
+  await wishlist.save();
+  ApiResponse.success(
+    res,
+    { wishlist },
+    "Course removed from wishlist successfully",
+  );
+});
