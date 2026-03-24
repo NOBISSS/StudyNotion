@@ -24,6 +24,7 @@ import Cart from './components/core/Auth/Cart';
 import MyCourses from './components/Instructor/MyCourses';
 import AddCourse from './components/core/Dashboard/Add-Course/AddCourse';
 import { ACCOUNT_TYPE } from './utils/constants';
+import VideoDetail from './components/Video/VideoDetail';
 
 function App() {
   const { user } = useSelector((state) => state.profile);
@@ -56,7 +57,10 @@ function App() {
 
           {/* Student-only routes */}
           {user?.accountType === ACCOUNT_TYPE.STUDENT && (
+            <>
             <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses />} />
+            <Route path="/watch/:videoId" element={<VideoDetail />} />
+            </>
           )}
 
           {/* Instructor-only routes */}
