@@ -48,7 +48,6 @@ export const deleteCourse=async(data,token)=>{
     }
 }
 
-
 export const fetchInstructorCourses=async(token)=>{
     let result=[];
     const toastId=toast.loading("Loading...");
