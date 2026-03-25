@@ -8,7 +8,7 @@ const RenderCartCourses = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
-
+  
   if (!cart?.length) {
     return <p className="text-[#6E727F]">Nothing in Wishlist</p>;
   }
@@ -41,9 +41,9 @@ const RenderCartCourses = () => {
 
               {/* Left: Thumbnail + Info */}
               <div className="flex gap-4 flex-1">
-                {course?.thumbnail ? (
+                {course?.thumbnailUrl ? (
                   <img
-                    src={course.thumbnail}
+                    src={course?.thumbnailUrl || course.thumbnail}
                     alt={course?.courseName}
                     className="w-[220px] h-[130px] object-cover rounded-lg shrink-0"
                   />

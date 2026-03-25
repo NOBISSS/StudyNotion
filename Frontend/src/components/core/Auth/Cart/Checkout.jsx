@@ -123,7 +123,7 @@ const Checkout = () => {
                           {course?.courseName}
                         </p>
                         <p className="text-[#999DAA] text-sm">
-                          {course?.category?.name ?? course?.categoryId ?? ""}
+                          {course.description ?? course?.categoryId ?? ""}
                         </p>
 
                         {/* Stars */}
