@@ -14,6 +14,8 @@ import { AppError } from "../../../shared/lib/AppError.js";
 import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
 import Video from "./VideoModel.js";
+import { Types } from "mongoose";
+import { SubSection } from "../SubSectionModel.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
@@ -24,11 +26,20 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
   if (!filename) throw AppError.badRequest("Filename is required");
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
+  const subsection = await SubSection.create({
+    title: "Course Introducton",
+    isPreview: true,
+    contentType: "video",
+    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
+    sectionId: new Types.ObjectId("69c3a5f9e02a4bedf94606e0"),
+  });
   const newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
     // videoURL,
     status: "uploaded",
+    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
+    subsectionId: subsection._id,
   });
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,

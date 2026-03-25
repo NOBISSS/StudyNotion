@@ -30,3 +30,5 @@ announcementRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 announcementRouter.post("/announce", makeAnnouncement);
 announcementRouter.put("/update/:annoucementId", updateAnnouncement);
 announcementRouter.delete("/delete/:annoucementId", deleteAnnouncement);
+
+export default announcementRouter;

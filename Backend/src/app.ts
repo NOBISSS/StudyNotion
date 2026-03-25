@@ -16,6 +16,7 @@ import multipartUploadRoute from "./modules/subsection/video/MultipartUploadRout
 import userRouter from "./modules/user/userRoutes.js";
 import wishlistRouter from "./modules/wishlist/wishlistRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
+import announcementRouter from "./modules/announcement/announcementRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -59,6 +60,7 @@ app.use(`${baseRoute}/subsections`, subsectionRouter);
 app.use(`${baseRoute}/upload/s3`, multipartUploadRoute);
 app.use(`${baseRoute}/comments`, CommentRouter);
 app.use(`${baseRoute}/wishlists`, wishlistRouter);
+app.use(`${baseRoute}/announcements`,announcementRouter);
 app.use(`${baseRoute}/signatures`, SignatureGenerationRouter);
 
 app.use(globalErrorHandler);

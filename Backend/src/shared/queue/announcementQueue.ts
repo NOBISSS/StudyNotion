@@ -16,8 +16,8 @@ export const announcementQueue = new Queue("announcement-queue", {
 new Worker(
   "announcement-queue",
   async (job) => {
-    const { email, title, message } = job.data;
-    const html = AnnouncementTemp(title as string, message as string);
+    const { email, title, message, instructorName } = job.data;
+    const html = AnnouncementTemp(title as string, message as string,instructorName as string);
     await sendMail(email, title as string, html);
   },
   {

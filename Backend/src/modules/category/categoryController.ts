@@ -125,6 +125,7 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
       differenceCourses: differenceCourses,
       mostSellingCourses: mostSellingCourses,
       category: {
+        _id: selectedCategory._id,
         name: selectedCategory.name,
         description: selectedCategory.description,
       },

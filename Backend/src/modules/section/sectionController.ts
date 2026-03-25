@@ -26,7 +26,7 @@ export const createSection = asyncHandler(async (req, res): Promise<void> => {
   }
   const existingCourse = await Course.findOne({ _id: courseId });
 
-  if (existingCourse?.instructorId.toString() != instructorId) {
+  if (existingCourse?.instructorId.toString() != instructorId && req.accountType !== "admin") {
     throw AppError.unauthorized(
       "You are not authorized to add sections to this course",
     );

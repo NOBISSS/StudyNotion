@@ -15,7 +15,7 @@ export async function sendMail(
 ) {
   try {
     let mailOptions = {
-      from: "secondbrain.services <noreply>",
+      from: "studyNotion <noreply>",
       to: email,
       subject: subject,
       html: html,

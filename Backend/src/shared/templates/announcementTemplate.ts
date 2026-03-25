@@ -1,6 +1,6 @@
 export const studyNotionLogo =
   "https://res.cloudinary.com/djjqvm5wn/image/upload/v1774373011/logo_hgz270.png";
-export const AnnouncementTemp = (title:string,message:string) => {
+export const AnnouncementTemp = (title:string,message:string,instructorName:string) => {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -65,6 +65,7 @@ export const AnnouncementTemp = (title:string,message:string) => {
 
           <div class="body">
               <p>${message}</p>
+              <p><strong>Instructor:</strong> ${instructorName}</p>
           </div>
 
           <div class="support">

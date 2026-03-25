@@ -38,7 +38,8 @@ export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
   await announcementQueue.add("send-announcement", {
     title,
     message,
-    email: req.user.email
+    email: req.user.email,
+    instructorName: req.user.firstName + " " + req.user.lastName,
   });
 
   ApiResponse.success(
@@ -68,6 +69,8 @@ export const getAnnouncements: Handler = asyncHandler(async (req, res) => {
     isDeleted: false,
   }).sort({ createdAt: -1 });
   let announcementsWithReadStatus = announcements.map((announcement) => {
+    console.log(announcement.readedBy.some((readerId) => readerId == userId));
+    console.log(announcement.readedBy, userId);
     return {
       ...announcement.toObject(),
       isReaded: announcement.readedBy.some((readerId) => readerId === userId),
