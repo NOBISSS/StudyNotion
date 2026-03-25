@@ -107,8 +107,8 @@ export const categories={
     CATEGORIES_API:BASE_URL+"/categories/getall",
 }
 
-export const catalogData={
-    CATALOGPAGEDATA_API:BASE_URL + "/categories/getall"
+export const catalogEndPoints={
+    CATALOGPAGEDATA_API:BASE_URL + "/categories/pagedetails/"
 }
 
 export const contactusEndpoint={

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Footer from "./Footer";
+import { useDispatch } from "react-redux";
+import { addCourseToWishList } from "../../services/operations/cartAPI";
 
 // ─── API base URL ─────────────────────────────────────────────────────────────
 const BASE_URL = "http://localhost:3000/api/v1";
@@ -23,7 +25,7 @@ function StarRating({ rating = 0, size = 14 }) {
     <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
       {[1, 2, 3, 4, 5].map((s) => {
         const filled = clamped >= s;
-        const half   = !filled && clamped >= s - 0.5;
+        const half = !filled && clamped >= s - 0.5;
         const gradId = `sg-${size}-${s}`;
         return (
           <svg key={s} width={size} height={size} viewBox="0 0 20 20"
@@ -56,74 +58,14 @@ function PageLoader() {
   );
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar() {
-  const navigate = useNavigate();
-  return (
-    <nav style={{
-      background: "#161D29", borderBottom: "1px solid #2C3244",
-      position: "sticky", top: 0, zIndex: 100,
-      height: 56, display: "flex", alignItems: "center", padding: "0 40px",
-    }}>
-      <div style={{ maxWidth: 1200, width: "100%", margin: "0 auto", display: "flex", alignItems: "center", gap: 32 }}>
-        {/* Logo */}
-        <div onClick={() => navigate("/")} style={{
-          display: "flex", alignItems: "center", gap: 8,
-          fontWeight: 800, fontSize: 16, color: "#F1F2FF", cursor: "pointer",
-        }}>
-          <div style={{ width: 30, height: 30, background: "#FFD60A", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path d="M10 2L3 7v11h14V7L10 2z" fill="#000" />
-              <rect x="7" y="11" width="6" height="7" fill="#FFD60A" />
-            </svg>
-          </div>
-          StudyNotion
-        </div>
 
-        {/* Links */}
-        <div style={{ display: "flex", gap: 28, alignItems: "center", marginLeft: 16 }}>
-          {[
-            { label: "Home", path: "/" },
-            { label: "Catalog ▾", path: "/catalog" },
-            { label: "About us", path: "/about" },
-            { label: "Contact us", path: "/contact" },
-          ].map((link, i) => (
-            <span key={link.label} onClick={() => navigate(link.path)} style={{
-              color: i === 1 ? "#FFD60A" : "#AFB2BF", fontSize: 14, fontWeight: 500, cursor: "pointer",
-            }}>{link.label}</span>
-          ))}
-        </div>
-
-        {/* Right */}
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 18 }}>
-          <button style={{ background: "none", border: "none", color: "#AFB2BF", display: "flex", cursor: "pointer" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </button>
-          <button style={{ background: "none", border: "none", color: "#AFB2BF", display: "flex", cursor: "pointer" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </button>
-          <div style={{
-            width: 32, height: 32, borderRadius: "50%", background: "#FFD60A",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 700, fontSize: 13, color: "#000",
-          }}>U</div>
-        </div>
-      </div>
-    </nav>
-  );
-}
 
 // ─── Purchase Card ─────────────────────────────────────────────────────────────
 // All props come directly from courseObj fields in the API response
-function PurchaseCard({ thumbnailUrl, courseName, originalPrice, discountPrice, typeOfCourse, totalDuration }) {
+function PurchaseCard({ thumbnailUrl, courseName, originalPrice, discountPrice, typeOfCourse, totalDuration,HandleAddToCart }) {
   const [addedToCart, setAddedToCart] = useState(false);
 
-  const isFree      = typeOfCourse === "Free" || (!originalPrice && !discountPrice);
+  const isFree = typeOfCourse === "Free" || (!originalPrice && !discountPrice);
   const hasDiscount = !isFree && discountPrice > 0 && discountPrice < originalPrice;
   const displayPrice = isFree ? 0 : (discountPrice > 0 ? discountPrice : originalPrice);
 
@@ -178,7 +120,7 @@ function PurchaseCard({ thumbnailUrl, courseName, originalPrice, discountPrice, 
 
           {/* CTA Button */}
           <button
-            onClick={() => setAddedToCart(true)}
+            onClick={(e)=>HandleAddToCart(e)}
             style={{
               width: "100%", padding: 13, borderRadius: 6, border: "none",
               background: addedToCart ? "#47A992" : "#FFD60A",
@@ -249,11 +191,11 @@ function PurchaseCard({ thumbnailUrl, courseName, originalPrice, discountPrice, 
 // SubSections fetched lazily from: GET /sections/:sectionId/subSections
 function AccordionSection({ section, forceOpen }) {
   // Open by default if it's order=1 (first section)
-  const [open, setOpen]               = useState(section.order === 1);
+  const [open, setOpen] = useState(section.order === 1);
   const [subSections, setSubSections] = useState(null); // null = not yet fetched
-  const [loading, setLoading]         = useState(false);
-  const [fetchError, setFetchError]   = useState(null);
-  const prevForce                     = useRef(undefined);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+  const prevForce = useRef(undefined);
 
   // Sync with Collapse/Expand all
   useEffect(() => {
@@ -417,14 +359,14 @@ function ReviewCard({ review }) {
   const [hovered, setHovered] = useState(false);
 
   const firstName = review?.user?.firstName || "";
-  const lastName  = review?.user?.lastName  || "";
-  const name      = `${firstName} ${lastName}`.trim() || "Student";
-  const avatar    = review?.user?.image || null;
-  const initial   = name.charAt(0).toUpperCase();
-  const text      = review?.review || review?.comment || "";
-  const rating    = Number(review?.rating) || 0;
-  const palette   = ["#E67E22", "#8E44AD", "#27AE60", "#2980B9", "#C0392B", "#16A085"];
-  const color     = palette[name.charCodeAt(0) % palette.length];
+  const lastName = review?.user?.lastName || "";
+  const name = `${firstName} ${lastName}`.trim() || "Student";
+  const avatar = review?.user?.image || null;
+  const initial = name.charAt(0).toUpperCase();
+  const text = review?.review || review?.comment || "";
+  const rating = Number(review?.rating) || 0;
+  const palette = ["#E67E22", "#8E44AD", "#27AE60", "#2980B9", "#C0392B", "#16A085"];
+  const color = palette[name.charCodeAt(0) % palette.length];
 
   return (
     <div
@@ -469,15 +411,14 @@ function ReviewCard({ review }) {
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function CourseDetail() {
   const { courseId } = useParams();
-  const navigate     = useNavigate();
-
-  const [apiData, setApiData]     = useState(null);
+  const navigate = useNavigate();
+  const dispatch=useDispatch();
+  const [apiData, setApiData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError]         = useState(null);
-  const [allOpen, setAllOpen]     = useState(true);
+  const [error, setError] = useState(null);
+  const [allOpen, setAllOpen] = useState(true);
   const [forceOpen, setForceOpen] = useState(undefined);
 
-  // ── Fetch: GET /courses/getDetails/:courseId ──────────────────────────────
   useEffect(() => {
     if (!courseId) return;
     let cancelled = false;
@@ -501,27 +442,34 @@ export default function CourseDetail() {
     return () => { cancelled = true; };
   }, [courseId]);
 
+  const HandleAddToCart=(e)=>{
+    e.preventDefault();
+    console.log("ADDED TO CART",apiData);
+    //dispatch(addCourseToWishList())
+  }
+
+
   // ── Map API response fields ───────────────────────────────────────────────
   // Top-level keys: course, sections, enrollmentsCount, reviews
-  const courseObj  = apiData?.course           ?? {};
-  const sections   = apiData?.sections         ?? [];
+  const courseObj = apiData?.course ?? {};
+  const sections = apiData?.sections ?? [];
   const enrollments = apiData?.enrollmentsCount ?? 0;
-  const reviews    = apiData?.reviews          ?? [];
+  const reviews = apiData?.reviews ?? [];
 
   // courseObj fields (exact field names from your API)
-  const courseName     = courseObj.courseName     || "";
-  const description    = courseObj.description    || "";
+  const courseName = courseObj.courseName || "";
+  const description = courseObj.description || "";
   const instructorName = courseObj.instructorName || "";
-  const thumbnailUrl   = courseObj.thumbnailUrl   || "";
-  const originalPrice  = courseObj.originalPrice  ?? 0;
-  const discountPrice  = courseObj.discountPrice  ?? 0;
-  const typeOfCourse   = courseObj.typeOfCourse   || "";
-  const totalDuration  = courseObj.totalDuration  || 0;
-  const level          = courseObj.level          || "";
-  const language       = courseObj.language       || "";
-  const tag            = courseObj.tag            || [];
-  const categoryName   = courseObj.categoryId?.name || "";
-  const createdAt      = courseObj.createdAt
+  const thumbnailUrl = courseObj.thumbnailUrl || "";
+  const originalPrice = courseObj.originalPrice ?? 0;
+  const discountPrice = courseObj.discountPrice ?? 0;
+  const typeOfCourse = courseObj.typeOfCourse || "";
+  const totalDuration = courseObj.totalDuration || 0;
+  const level = courseObj.level || "";
+  const language = courseObj.language || "";
+  const tag = courseObj.tag || [];
+  const categoryName = courseObj.categoryId?.name || "";
+  const createdAt = courseObj.createdAt
     ? new Date(courseObj.createdAt).toLocaleDateString("en-US", { month: "2-digit", year: "numeric" })
     : "";
 
@@ -565,7 +513,6 @@ export default function CourseDetail() {
     <>
       <style>{globalStyles}</style>
       <div style={{ background: "#0A0F1C", minHeight: "100vh" }}>
-        <Navbar />
         <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
           <p style={{ color: "#FC8181", fontSize: 15 }}>{error}</p>
           <button
@@ -583,7 +530,6 @@ export default function CourseDetail() {
       <style>{globalStyles}</style>
       <div style={{ background: "#0A0F1C", minHeight: "100vh", fontFamily: "'Inter','Segoe UI',system-ui,sans-serif", color: "#F1F2FF" }}>
 
-        <Navbar />
 
         {/* ── Hero Header ── */}
         <div style={{ background: "#161D29", borderBottom: "1px solid #2C3244" }}>
@@ -680,6 +626,7 @@ export default function CourseDetail() {
               discountPrice={discountPrice}
               typeOfCourse={typeOfCourse}
               totalDuration={totalDuration}
+              HandleAddToCart={HandleAddToCart}
             />
           </div>
         </div>

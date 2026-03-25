@@ -1,10 +1,13 @@
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { BACKEND_URL } from '../../utils/constants';
 import CourseCard from '../Course/CourseCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCatalogData } from '../../services/operations/CatalogAPI';
 
 const CatalogItem = () => {
+    const catalogData=useSelector((store)=>store.catalog?.catalogData || null);
     const { catalogId } = useParams();
     const [allCourses, setAllCourses] = useState([]);
     const [mostSelling, setMostSelling] = useState([]);
@@ -13,31 +16,39 @@ const CatalogItem = () => {
     const [activeTab, setActiveTab] = useState('all'); // "all" | "mostSelling"
 
     // Wrapped in useCallback so it can be safely listed in useEffect deps
-    const fetchCatalogData = useCallback(async () => {
-        if (!catalogId) return;
-        try {
-            setIsLoading(true);
-            setError(null);
+    // const fetchCatalogData = useCallback(async () => {
+    //     if (!catalogId) return;
+    //     try {
+    //         setIsLoading(true);
+    //         setError(null);
 
-            const response = await axios.get(
-                `${BACKEND_URL}/categories/pagedetails/${catalogId}`
-            );
+    //         const response = await axios.get(
+    //             `${BACKEND_URL}/categories/pagedetails/${catalogId}`
+    //         );
 
-            const data = response.data?.data;
-            setAllCourses(data?.selectedCategory ?? []);
-            setMostSelling(data?.mostSellingCourses ?? []);
-        } catch (err) {
-            console.error('Failed to fetch catalog data:', err);
-            setError('Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [catalogId]);
-
+    //         const data = response.data?.data;
+    //         setAllCourses(data?.selectedCategory ?? []);
+    //         setMostSelling(data?.mostSellingCourses ?? []);
+    //     } catch (err) {
+    //         console.error('Failed to fetch catalog data:', err);
+    //         setError('Something went wrong. Please try again.');
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // }, [catalogId]);
+    const dispatch=useDispatch();
     // fetchCatalogData is now stable and safe to include as a dependency
     useEffect(() => {
-        fetchCatalogData();
-    }, [fetchCatalogData]);
+        if(!catalogData){
+            dispatch(
+                fetchCatalogData(
+                catalogId,
+                setError,
+                setAllCourses,
+                setMostSelling,
+                setIsLoading
+        ));}
+    }, []);
 
     const displayedCourses = activeTab === 'all' ? allCourses : mostSelling;
 
@@ -59,7 +70,17 @@ const CatalogItem = () => {
             <div className="min-h-screen bg-[#000814] flex flex-col items-center justify-center gap-4">
                 <p className="text-red-400 text-base">{error}</p>
                 <button
-                    onClick={fetchCatalogData}
+                    onClick={()=>{
+                        dispatch(
+      fetchCatalogData(
+        catalogId,
+        setError,
+        setAllCourses,
+        setMostSelling,
+        setIsLoading
+      )
+    )
+                    }}
                     className="px-5 py-2 rounded-lg bg-[#FFD60A] text-black font-semibold text-sm
                                hover:bg-yellow-300 transition-colors"
                 >
