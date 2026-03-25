@@ -11,8 +11,8 @@ import { ROLES } from "../../shared/constants.js";
 
 const reviewRouter = Router();
 
-reviewRouter.use(userMiddleware);
 reviewRouter.route("/getall/:courseId").get(getAllReviews);
+reviewRouter.use(userMiddleware);
 
 reviewRouter.use(authorizeRoles(ROLES.STUDENT));
 reviewRouter.route("/review").post(rateAndReviewCourse);

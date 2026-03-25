@@ -11,12 +11,11 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
   if (!userId) {
     throw AppError.unauthorized("User ID is required to fetch wishlist");
   }
-  const wishlist = await Wishlist.findOne({ userId }).populate({
+  const wishlist = await Wishlist.findOne({userId}).populate({
     path: "courseIds",
     select:
       "courseName description originalPrice discountPrice thumbnailUrl typeOfCourse categoryId",
   });
-
   if (!wishlist) {
     ApiResponse.success(
       res,
@@ -47,6 +46,7 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
         averageRating,
         reviewCount,
         ratings: courseRatings,
+
       };
     }),
   );
@@ -58,7 +58,10 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
   // };
   ApiResponse.success(
     res,
-    { wishlist: wishlistWithCourseRatings },
+    { wishlist: {
+      ...wishlist.toObject(),
+      courseIds: wishlistWithCourseRatings,
+    } },
     "Wishlist fetched successfully",
   );
 });

@@ -69,11 +69,9 @@ export const getAnnouncements: Handler = asyncHandler(async (req, res) => {
     isDeleted: false,
   }).sort({ createdAt: -1 });
   let announcementsWithReadStatus = announcements.map((announcement) => {
-    console.log(announcement.readedBy.some((readerId) => readerId == userId));
-    console.log(announcement.readedBy, userId);
     return {
       ...announcement.toObject(),
-      isReaded: announcement.readedBy.some((readerId) => readerId === userId),
+      isReaded: announcement.readedBy.some((readerId) => readerId.toString() === userId.toString()),
     };
   });
   if (req.path.includes("getread")) {
@@ -107,7 +105,7 @@ export const markAnnouncementReadOrUnread: Handler = asyncHandler(async (req, re
     throw AppError.notFound("Announcement not found");
   }
   if(req.path.includes("markunread")){
-    announcement.readedBy = announcement.readedBy.filter((readerId) => readerId !== userId);
+    announcement.readedBy = announcement.readedBy.filter((readerId) => readerId.toString() !== userId.toString());
     await announcement.save();
     return ApiResponse.success(res, null, "Announcement marked as unread");
   }

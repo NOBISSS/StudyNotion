@@ -62,7 +62,8 @@ export const getAllReviews = asyncHandler(async (req, res) => {
     courseId: new Types.ObjectId(courseId),
     isActive: true,
   })
-    .populate("userId")
+    .populate("userId","firstName lastName")
+    .populate("courseId","courseName")
     .sort({ createdAt: -1 });
   const reviewCount = courseReviews.length;
   const averageRating =
