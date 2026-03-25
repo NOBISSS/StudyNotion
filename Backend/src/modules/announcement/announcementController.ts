@@ -7,7 +7,7 @@ import type { Handler } from "../../shared/types.js";
 import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
 import Announcement from "./announcementModel.js";
-import { announcementValidation } from "./announcementValidation.js";
+import { announcementValidation, updateAnnouncementValidation } from "./announcementValidation.js";
 
 export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
   const parsedData = announcementValidation.safeParse(req.body);
@@ -33,12 +33,12 @@ export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
       "Only instructors can make announcements for their courses",
     );
   }
-  const announcement = await Announcement.create({ title, message, courseId });
+  const announcement = await Announcement.create({ title, message, courseId, createdBy: userId });
 
   await announcementQueue.add("send-announcement", {
     title,
     message,
-    email: req.user.email,
+    email: req.user.email
   });
 
   ApiResponse.success(
@@ -112,4 +112,31 @@ export const markAnnouncementReadOrUnread: Handler = asyncHandler(async (req, re
     await announcement.save();
   }
   ApiResponse.success(res, null, "Announcement marked as read");
+});
+export const updateAnnouncement:Handler = asyncHandler(async (req,res) => {
+  const parsedData = updateAnnouncementValidation.safeParse(req.body);
+  if (!parsedData.success) {
+    throw AppError.badRequest(
+      parsedData?.error?.issues[0]?.message || "Invalid input",
+    );
+  }
+  const { title, message } = parsedData.data;
+  const { announcementId } = req.params;
+  if (!announcementId || typeof announcementId !== "string") {
+    throw AppError.badRequest("Announcement ID is required");
+  }
+  const userId = req.userId;
+  if (!userId) {
+    throw AppError.badRequest("User ID is required to update announcement");
+  }
+  const announcement = await Announcement.findById(announcementId);
+  if (!announcement) {
+    throw AppError.notFound("Announcement not found");
+  }
+  if (announcement.createdBy !== userId) {
+    throw AppError.forbidden("You are not the owner of this announcement");
+  }
+  Object.assign(announcement, { title, message });
+  await announcement.save();
+  ApiResponse.success(res, { announcement }, "Announcement updated successfully");
 });

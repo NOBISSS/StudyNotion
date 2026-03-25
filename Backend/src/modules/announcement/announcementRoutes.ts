@@ -6,6 +6,7 @@ import {
   getAnnouncements,
   makeAnnouncement,
   markAnnouncementReadOrUnread,
+  updateAnnouncement,
 } from "./announcementController.js";
 
 const announcementRouter = Router();
@@ -26,5 +27,5 @@ announcementRouter.post(
 
 announcementRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 announcementRouter.post("/announce", makeAnnouncement);
-announcementRouter.put("/update/:annoucementId", makeAnnouncement);
+announcementRouter.put("/update/:annoucementId", updateAnnouncement);
 announcementRouter.delete("/delete/:annoucementId", makeAnnouncement);
