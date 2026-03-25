@@ -57,7 +57,10 @@ const cartSlice=createSlice({
             state.loading=value.payload
         },
         setAddToCart(state,value){
-            state.addToCart=value.payload
+            if(state.cart.includes(value.payload._id)){
+                return null;
+            }
+            state.addToCart=value.payload;
         },
         //H.W FUNCTIONS: ADD TO CART, REMOVE FROM CART, RESET CART
     },

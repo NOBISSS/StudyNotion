@@ -1,10 +1,14 @@
 import { useSelector } from "react-redux";
 import RenderCartCourses from "./RenderCartCourses";
 import RenderTotalAmount from "./RenderTotalAmount";
+import { useEffect } from "react";
 
 
 export default function Cart() {
     const { total, totalItems } = useSelector((state) => state.cart);
+    useEffect(()=>{
+        
+    },[])
     return (
         <div className="text-white">
             <h1>Your Cart</h1>

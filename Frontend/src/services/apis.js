@@ -18,7 +18,7 @@ export const profileEndpoints={
     GET_USER_ENROLLED_COURSE_API:BASE_URL+"/enrollments/getmy",
     DELETE_ACCOUNT:BASE_URL+"/profile/deleteaccount",
     CHANGE_PASSWORD:BASE_URL+"/profile/changepassword",
-
+    WISHLIST_API:BASE_URL+""
 }
 
 export const studentEndpoints={
