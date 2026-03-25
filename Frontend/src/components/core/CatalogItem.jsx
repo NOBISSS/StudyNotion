@@ -7,48 +7,27 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchCatalogData } from '../../services/operations/CatalogAPI';
 
 const CatalogItem = () => {
-    const catalogData=useSelector((store)=>store.catalog?.catalogData || null);
     const { catalogId } = useParams();
     const [allCourses, setAllCourses] = useState([]);
     const [mostSelling, setMostSelling] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('all'); // "all" | "mostSelling"
+    const [activeTab, setActiveTab] = useState('all');
+    const dispatch = useDispatch();
 
-    // Wrapped in useCallback so it can be safely listed in useEffect deps
-    // const fetchCatalogData = useCallback(async () => {
-    //     if (!catalogId) return;
-    //     try {
-    //         setIsLoading(true);
-    //         setError(null);
-
-    //         const response = await axios.get(
-    //             `${BACKEND_URL}/categories/pagedetails/${catalogId}`
-    //         );
-
-    //         const data = response.data?.data;
-    //         setAllCourses(data?.selectedCategory ?? []);
-    //         setMostSelling(data?.mostSellingCourses ?? []);
-    //     } catch (err) {
-    //         console.error('Failed to fetch catalog data:', err);
-    //         setError('Something went wrong. Please try again.');
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // }, [catalogId]);
-    const dispatch=useDispatch();
-    // fetchCatalogData is now stable and safe to include as a dependency
     useEffect(() => {
-        if(!catalogData){
+        if (catalogId) {
             dispatch(
                 fetchCatalogData(
-                catalogId,
-                setError,
-                setAllCourses,
-                setMostSelling,
-                setIsLoading
-        ));}
-    }, []);
+                    catalogId,
+                    setError,
+                    setAllCourses,
+                    setMostSelling,
+                    setIsLoading
+                )
+            );
+        }
+    }, [catalogId]);
 
     const displayedCourses = activeTab === 'all' ? allCourses : mostSelling;
 
@@ -70,16 +49,16 @@ const CatalogItem = () => {
             <div className="min-h-screen bg-[#000814] flex flex-col items-center justify-center gap-4">
                 <p className="text-red-400 text-base">{error}</p>
                 <button
-                    onClick={()=>{
+                    onClick={() => {
                         dispatch(
-      fetchCatalogData(
-        catalogId,
-        setError,
-        setAllCourses,
-        setMostSelling,
-        setIsLoading
-      )
-    )
+                            fetchCatalogData(
+                                catalogId,
+                                setError,
+                                setAllCourses,
+                                setMostSelling,
+                                setIsLoading
+                            )
+                        )
                     }}
                     className="px-5 py-2 rounded-lg bg-[#FFD60A] text-black font-semibold text-sm
                                hover:bg-yellow-300 transition-colors"
@@ -141,11 +120,10 @@ function TabButton({ label, active, onClick }) {
     return (
         <button
             onClick={onClick}
-            className={`pb-3 text-sm font-medium transition-all ${
-                active
+            className={`pb-3 text-sm font-medium transition-all ${active
                     ? 'text-[#FFD60A] border-b-2 border-[#FFD60A]'
                     : 'text-[#6B7280] hover:text-[#AFB2BF]'
-            }`}
+                }`}
         >
             {label}
         </button>

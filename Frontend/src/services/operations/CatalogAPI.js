@@ -43,6 +43,19 @@ export function fetchCatalogData(
     const toastId = toast.loading("Loading...");
 
     try {
+      const state = getState();
+      const existingData = state.catalog.catalogData[catalogId];
+
+      // 🔥 CACHE HIT → DO NOT CALL API
+      if (existingData) {
+        console.log("Using cached data");
+
+        setAllCourses(existingData?.selectedCategory ?? []);
+        setMostSelling(existingData?.mostSellingCourses ?? []);
+        return;
+      }
+
+      // 🔥 API CALL (only if not cached)
       setLoading(true);
 
       const response = await apiConnector(
@@ -54,9 +67,15 @@ export function fetchCatalogData(
         throw new Error(response.data.message);
       }
 
-      dispatch(setCatalogData(response.data));
-
       const data = response.data?.data;
+
+      // 🔥 Store in Redux with ID
+      dispatch(
+        setCatalogData({
+          catalogId,
+          data,
+        })
+      );
 
       setAllCourses(data?.selectedCategory ?? []);
       setMostSelling(data?.mostSellingCourses ?? []);
