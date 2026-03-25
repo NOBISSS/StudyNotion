@@ -66,17 +66,50 @@ export const getAnnouncements: Handler = asyncHandler(async (req, res) => {
   const announcements = await Announcement.find({
     courseId: new Types.ObjectId(courseId),
   }).sort({ createdAt: -1 });
-  const announcementsWithReadStatus = announcements.map((announcement) => {
+  let announcementsWithReadStatus = announcements.map((announcement) => {
     return {
       ...announcement.toObject(),
-      isReaded: announcement.readedBy.some(
-        (readerId) => readerId === userId,
-      ),
+      isReaded: announcement.readedBy.some((readerId) => readerId === userId),
     };
   });
+  if (req.path.includes("getread")) {
+    // Filter only read announcements
+    announcementsWithReadStatus = announcementsWithReadStatus.filter(
+      (ann) => ann.isReaded,
+    );
+  } else if (req.path.includes("getunread")) {
+    // Filter only unread announcements
+    announcementsWithReadStatus = announcementsWithReadStatus.filter(
+      (ann) => !ann.isReaded,
+    );
+  }
   ApiResponse.success(
     res,
     { announcements: announcementsWithReadStatus },
     "Announcements retrieved successfully",
   );
+});
+export const markAnnouncementReadOrUnread: Handler = asyncHandler(async (req, res) => {
+  const { announcementId } = req.params;
+  if (!announcementId || typeof announcementId !== "string") {
+    throw AppError.badRequest("Announcement ID is required");
+  }
+  const userId = req.userId;
+  if (!userId) {
+    throw AppError.badRequest("User ID is required to mark announcement as read");
+  }
+  const announcement = await Announcement.findById(announcementId);
+  if (!announcement) {
+    throw AppError.notFound("Announcement not found");
+  }
+  if(req.path.includes("markunread")){
+    announcement.readedBy = announcement.readedBy.filter((readerId) => readerId !== userId);
+    await announcement.save();
+    return ApiResponse.success(res, null, "Announcement marked as unread");
+  }
+  if (!announcement.readedBy.includes(userId)) {
+    announcement.readedBy.push(userId);
+    await announcement.save();
+  }
+  ApiResponse.success(res, null, "Announcement marked as read");
 });
