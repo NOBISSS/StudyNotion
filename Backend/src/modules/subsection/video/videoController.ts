@@ -27,7 +27,7 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
   const subsection = await SubSection.create({
-    title: "Course Introducton",
+    title: "What is Node.js?",
     isPreview: true,
     contentType: "video",
     courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
