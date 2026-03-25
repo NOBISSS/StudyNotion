@@ -1,15 +1,3 @@
-// wishlist{
-//     wishlistId string pk
-//     userId string fk
-//     courseIds [objectId] fk
-//     bundleIds [objectId] fk
-//     notes text
-//     status enum("active","purchased")
-//     priority number
-//     createdAt timestamp
-//     updatedAt timestamp
-//   }
-
 import { Schema, Types, model } from "mongoose";
 
 const wishlistSchema = new Schema({

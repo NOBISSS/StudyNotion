@@ -28,6 +28,7 @@ export const courseInputSchema = z.object({
         "Level must be one of Beginner, Intermediate, Advance, or Beginner-to-Advance",
     }
   ),
+  whatYouWillLearn: z.array(z.string()).optional(),
   tag: z.array(z.string()).optional(),
   instructorId: z.string().optional(),
 });

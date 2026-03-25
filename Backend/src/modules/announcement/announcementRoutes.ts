@@ -3,6 +3,7 @@ import { ROLES } from "../../shared/constants.js";
 import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
+  deleteAnnouncement,
   getAnnouncements,
   makeAnnouncement,
   markAnnouncementReadOrUnread,
@@ -28,4 +29,4 @@ announcementRouter.post(
 announcementRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 announcementRouter.post("/announce", makeAnnouncement);
 announcementRouter.put("/update/:annoucementId", updateAnnouncement);
-announcementRouter.delete("/delete/:annoucementId", makeAnnouncement);
+announcementRouter.delete("/delete/:annoucementId", deleteAnnouncement);

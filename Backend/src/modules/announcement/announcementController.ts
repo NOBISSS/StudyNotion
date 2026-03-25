@@ -65,6 +65,7 @@ export const getAnnouncements: Handler = asyncHandler(async (req, res) => {
   }
   const announcements = await Announcement.find({
     courseId: new Types.ObjectId(courseId),
+    isDeleted: false,
   }).sort({ createdAt: -1 });
   let announcementsWithReadStatus = announcements.map((announcement) => {
     return {
@@ -139,4 +140,23 @@ export const updateAnnouncement:Handler = asyncHandler(async (req,res) => {
   Object.assign(announcement, { title, message });
   await announcement.save();
   ApiResponse.success(res, { announcement }, "Announcement updated successfully");
+});
+export const deleteAnnouncement: Handler = asyncHandler(async (req, res) => {
+  const { announcementId } = req.params;
+  if (!announcementId || typeof announcementId !== "string") {
+    throw AppError.badRequest("Announcement ID is required");
+  }
+  const userId = req.userId;
+  if (!userId) {
+    throw AppError.badRequest("User ID is required to delete announcement");
+  }
+  const announcement = await Announcement.findById(announcementId);
+  if (!announcement) {
+    throw AppError.notFound("Announcement not found");
+  }
+  if (announcement.createdBy !== userId) {
+    throw AppError.forbidden("You are not the owner of this announcement");
+  }
+  await Announcement.findByIdAndUpdate(announcementId, { isDeleted: true });
+  ApiResponse.success(res, null, "Announcement deleted successfully");
 });
