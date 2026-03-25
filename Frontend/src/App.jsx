@@ -25,6 +25,7 @@ import MyCourses from './components/Instructor/MyCourses';
 import AddCourse from './components/core/Dashboard/Add-Course/AddCourse';
 import { ACCOUNT_TYPE } from './utils/constants';
 import VideoDetail from './components/Video/VideoDetail';
+import Checkout from './components/core/Auth/Cart/Checkout';
 
 function App() {
   const { user } = useSelector((state) => state.profile);
@@ -53,6 +54,7 @@ function App() {
           {/* Available to all authenticated users */}
           <Route path="/dashboard/my-profile"     element={<MyProfile />} />
           <Route path="/dashboard/cart"           element={<Cart />} />
+          <Route path="/dashboard/checkout"           element={<Checkout />} />
           <Route path="/dashboard/settings"       element={<Settings />} />
 
           {/* Student-only routes */}

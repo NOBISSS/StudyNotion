@@ -18,7 +18,14 @@ export const profileEndpoints={
     GET_USER_ENROLLED_COURSE_API:BASE_URL+"/enrollments/getmy",
     DELETE_ACCOUNT:BASE_URL+"/profile/deleteaccount",
     CHANGE_PASSWORD:BASE_URL+"/profile/changepassword",
-    WISHLIST_API:BASE_URL+""
+    //TODO-ADD CLEAR WISHLIST API
+}
+
+export const cartEndPoints={
+    ADD_WISHLIST_API:BASE_URL+"/wishlists/add",
+    GET_WISHLIST_API:BASE_URL+"/wishlists/get",
+    REMOVE_WISHLIST_API:BASE_URL+"/wishlists/remove/",
+    REMOVE_ALL_WISHLIST_API:BASE_URL+"/wishlists/removeall",
 }
 
 export const studentEndpoints={

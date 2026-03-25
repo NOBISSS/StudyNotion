@@ -7,6 +7,30 @@ import { logout } from "./authAPI";
 
 const {GET_USER_DETAILS_API,GET_USER_ENROLLED_COURSE_API}=profileEndpoints;
 
+
+
+export async function getMe(token){
+    const toastId=toast.loading("Loading....");
+    let result=[];
+    try{
+        const response=await apiConnector("GET",
+            GET_USER_DETAILS_API,
+            null,
+        )
+        console.log("GET_USER_DETAILS_API RESPONSE>>>>>>>>>",response);
+        if(!response.data.success){
+            throw new Error(response.data.message);
+        }
+        result=response.data.data;
+    }catch(error){
+        console.log("ERROR ",error);
+        toast.error(error.response.data.message || "PLEASE REFRESH THE PAGE");
+    }finally{
+        toast.dismiss(toastId);
+    }
+    return result;
+}
+
 export async function getUserEnrolledCourses(token){
     const toastId=toast.loading("Loading....");
     let result=[];
