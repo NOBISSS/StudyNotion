@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
@@ -5,17 +6,20 @@ import { announcementQueue } from "../../shared/queue/announcementQueue.js";
 import type { Handler } from "../../shared/types.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
 import Announcement from "./announcementModel.js";
+import { announcementValidation } from "./announcementValidation.js";
 
 export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
-  const { title, message, courseId } = req.body;
+  const parsedData = announcementValidation.safeParse(req.body);
+  if (!parsedData.success) {
+    throw AppError.badRequest(parsedData?.error?.issues[0]?.message || "Invalid input");
+  }
+  const { title, message, courseId } = parsedData.data;
   const userId = req.userId;
   // Validate input
-  if (!title || !message || !courseId || !userId) {
-    throw AppError.badRequest(
-      "Title, message, and courseId are required to make an announcement",
-    );
+  if (!userId) {
+    throw AppError.badRequest("User ID is required to make an announcement",);
   }
-  if (!(await isValidInstructor(courseId, userId, req.accountType))) {
+  if (!(await isValidInstructor(new Types.ObjectId(courseId), userId, req.accountType))) {
     throw AppError.forbidden(
       "Only instructors can make announcements for their courses",
     );
