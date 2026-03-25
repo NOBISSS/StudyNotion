@@ -72,3 +72,16 @@ export const removeFromWishlist: Handler = asyncHandler(async (req, res) => {
     "Course removed from wishlist successfully",
   );
 });
+export const clearWishlist: Handler = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  if (!userId) {
+    throw AppError.unauthorized("User ID is required to clear wishlist");
+  }
+  const wishlist = await Wishlist.findOne({ userId });
+  if (!wishlist) {
+    throw AppError.notFound("Wishlist not found for user");
+  }
+  wishlist.courseIds = [];
+  await wishlist.save();
+  ApiResponse.success(res, { wishlist }, "Wishlist cleared successfully");
+});
