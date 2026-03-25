@@ -4,87 +4,19 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
 import Wishlist from "./wishlistModel.js";
+import { RatingAndReview } from "../rating/RatingAndReview.js";
 
 export const getWishlist: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
   if (!userId) {
     throw AppError.unauthorized("User ID is required to fetch wishlist");
   }
-  const wishlist = await Wishlist.aggregate([
-    // Match the user's wishlist
-    { $match: { userId: new Types.ObjectId(userId) } },
+  const wishlist = await Wishlist.findOne({ userId }).populate({
+    path: "courseIds",
+    select:
+      "courseName description originalPrice discountPrice thumbnailUrl typeOfCourse categoryId",
+  });
 
-    // Lookup course details
-    {
-      $lookup: {
-        from: "courses",
-        localField: "courseIds",
-        foreignField: "_id",
-        as: "courses",
-        pipeline: [
-          {
-            $project: {
-              courseName: 1,
-              description: 1,
-              originalPrice: 1,
-              discountPrice: 1,
-              thumbnailUrl: 1,
-              typeOfCourse: 1,
-              categoryId: 1,
-            },
-          },
-        ],
-      },
-    },
-
-    // Unwind courses to process each one individually
-    { $unwind: { path: "$courses", preserveNullAndEmptyArrays: true } },
-
-    // Lookup ratings for each course
-    {
-      $lookup: {
-        from: "ratingandreviews",
-        localField: "courses._id",
-        foreignField: "courseId",
-        as: "courseRatings",
-        pipeline: [
-          {
-            $lookup: {
-              from: "users",
-              localField: "userId",
-              foreignField: "_id",
-              as: "userId",
-            },
-          },
-          { $unwind: { path: "$userId", preserveNullAndEmptyArrays: true } },
-        ],
-      },
-    },
-
-    // Add averageRating and reviewCount to each course
-    {
-      $addFields: {
-        "courses.reviewCount": { $size: "$courseRatings" },
-        "courses.averageRating": {
-          $cond: {
-            if: { $gt: [{ $size: "$courseRatings" }, 0] },
-            then: { $avg: "$courseRatings.rating" },
-            else: 0,
-          },
-        },
-        "courses.ratings": "$courseRatings",
-      },
-    },
-
-    // Group back to reassemble wishlist with all courses
-    {
-      $group: {
-        _id: "$_id",
-        userId: { $first: "$userId" },
-        courses: { $push: "$courses" },
-      },
-    },
-  ]);
   if (!wishlist) {
     ApiResponse.success(
       res,
@@ -93,7 +25,42 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
     );
     return;
   }
-  ApiResponse.success(res, { wishlist }, "Wishlist fetched successfully");
+
+  const wishlistWithCourseRatings = await Promise.all(
+    wishlist.courseIds.map(async (course) => {
+      // @ts-ignore
+      const courseObj = course.toObject();
+
+      const courseRatings = await RatingAndReview.find({
+        courseId: course._id,
+      }).populate("userId");
+
+      const reviewCount = courseRatings.length;
+      const averageRating =
+        reviewCount > 0
+          ? courseRatings.reduce((acc, review) => acc + review.rating, 0) /
+            reviewCount
+          : 0;
+
+      return {
+        ...courseObj,
+        averageRating,
+        reviewCount,
+        ratings: courseRatings,
+      };
+    }),
+  );
+
+  // return {
+  //   _id: wishlist._id,
+  //   userId: wishlist.userId,
+  //   courses: wishlistWithCourseRatings,
+  // };
+  ApiResponse.success(
+    res,
+    { wishlist: wishlistWithCourseRatings },
+    "Wishlist fetched successfully",
+  );
 });
 export const addToWishlist: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
