@@ -1,17 +1,16 @@
-import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
-import Wishlist from "./wishlistModel.js";
 import { RatingAndReview } from "../rating/RatingAndReview.js";
+import Wishlist from "./wishlistModel.js";
 
 export const getWishlist: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
   if (!userId) {
     throw AppError.unauthorized("User ID is required to fetch wishlist");
   }
-  const wishlist = await Wishlist.findOne({userId}).populate({
+  const wishlist = await Wishlist.findOne({ userId }).populate({
     path: "courseIds",
     select:
       "courseName description originalPrice discountPrice thumbnailUrl typeOfCourse categoryId",
@@ -46,7 +45,6 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
         averageRating,
         reviewCount,
         ratings: courseRatings,
-
       };
     }),
   );
@@ -58,10 +56,12 @@ export const getWishlist: Handler = asyncHandler(async (req, res) => {
   // };
   ApiResponse.success(
     res,
-    { wishlist: {
-      ...wishlist.toObject(),
-      courseIds: wishlistWithCourseRatings,
-    } },
+    {
+      wishlist: {
+        ...wishlist.toObject(),
+        courseIds: wishlistWithCourseRatings,
+      },
+    },
     "Wishlist fetched successfully",
   );
 });

@@ -4,12 +4,46 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { announcementQueue } from "../../shared/queue/announcementQueue.js";
 import type { Handler } from "../../shared/types.js";
+import type { Request, Response } from "express";
 import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
 import Announcement from "./announcementModel.js";
 import { announcementValidation, updateAnnouncementValidation } from "./announcementValidation.js";
 
-export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
+const WS_INTERNAL_URL =
+  process.env.WS_INTERNAL_URL || "http://127.0.0.1:3002/announce";
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET as string;
+
+/**
+ * Notifies the WebSocket server to broadcast the announcement
+ * to all enrolled students currently connected.
+ * Non-blocking — a failure here won't break the HTTP response.
+ */
+async function notifyWebSocketServer(
+  courseId: string,
+  instructorId: string,
+  announcement: object,
+): Promise<void> {
+  try {
+    const res = await fetch(WS_INTERNAL_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-secret": INTERNAL_SECRET,
+      },
+      body: JSON.stringify({ courseId, instructorId, announcement }),
+    });
+
+    if (!res.ok) {
+      console.error("WS server returned error:", res.status, await res.text());
+    }
+  } catch (err) {
+    // Don't throw — WS broadcast failing should not fail the announcement creation
+    console.error("Failed to notify WebSocket server:", err);
+  }
+}
+
+export const makeAnnouncement: Handler = asyncHandler(async (req:Request, res:Response) => {
   const parsedData = announcementValidation.safeParse(req.body);
   if (!parsedData.success) {
     throw AppError.badRequest(
@@ -41,7 +75,12 @@ export const makeAnnouncement: Handler = asyncHandler(async (req, res) => {
     email: req.user.email,
     instructorName: req.user.firstName + " " + req.user.lastName,
   });
-
+  notifyWebSocketServer(courseId, userId.toString(), {
+    title,
+    message,
+    courseId,
+    announcementId: announcement._id,
+  });
   ApiResponse.success(
     res,
     { announcement },
