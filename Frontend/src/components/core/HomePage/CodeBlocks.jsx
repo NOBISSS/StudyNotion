@@ -4,7 +4,7 @@ import { HighlightText } from './HighlightText'
 import { FaArrowRight } from 'react-icons/fa'
 import { TypeAnimation } from 'react-type-animation'
 export const CodeBlocks = ({
-    position,heading,subheading,ctabtn1,ctabtn2,codeblock,backgroundGradient,codecolor
+    user,position,heading,subheading,ctabtn1,ctabtn2,codeblock,backgroundGradient,codecolor
 }) => {
   return (
     <div className={`flex ${position} my-20 justify-between gap-10`}>
@@ -15,6 +15,7 @@ export const CodeBlocks = ({
         <div className='text-[#838894] font-bold'>
             {subheading}
         </div>
+        {!user &&
         <div className='flex gap-7 mt-7'>
             <CTAButton active={ctabtn1.active} linkto={ctabtn1.linkto}>
                 <div className='flex gap-2 items-center'>
@@ -28,6 +29,7 @@ export const CodeBlocks = ({
                 
             </CTAButton>
         </div>
+        }
     </div>
     {/*Section 2*/}
     <div className='h-fit code-border relative text-10[px] w-[100%] py-4 flex flex-row lg:w-[500px] bg-[#0E1A2D3D]'>
