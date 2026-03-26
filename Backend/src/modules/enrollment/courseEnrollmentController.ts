@@ -5,8 +5,9 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { Course } from "../course/CourseModel.js";
 import { CourseEnrollment } from "./CourseEnrollment.js";
+import type { Handler } from "../../shared/types.js";
 
-export const EnrollInCourse = asyncHandler(async (req, res) => {
+export const EnrollInCourse:Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const user = req.user;
   const parsedCourseData = z.string().safeParse(req.body.courseId);
@@ -38,7 +39,7 @@ export const EnrollInCourse = asyncHandler(async (req, res) => {
     "Course enrollment created successfully",
   );
 });
-export const getUserEnrollments = asyncHandler(async (req, res) => {
+export const getUserEnrollments:Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
 
   const courseEnrollments = await CourseEnrollment.find({
@@ -46,10 +47,28 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
   })
     .populate("courseId")
     .sort({ createdAt: -1 });
+  const courseEnrollmentsWithProgress = courseEnrollments.map((enrollment) => {
+    const enrollmentObj = enrollment.toObject();
+    const course = enrollmentObj.courseId as any;
+    return {
+      ...enrollmentObj,
+      courseId:
+        typeof course === "object"
+          ? {
+              _id: course?._id || "",
+              courseName: course?.courseName || "",
+              thumbnailUrl: course?.thumbnailUrl || "",
+              instructorId: course?.instructorId || "",
+              progress: "0",
+              totalDuration: "2:30:00",
+            }
+          : enrollmentObj.courseId,
+    };
+  });
   ApiResponse.success(
     res,
     {
-      courseEnrollments,
+      courseEnrollments: courseEnrollmentsWithProgress,
     },
     "Course enrollments retrieved successfully",
   );
