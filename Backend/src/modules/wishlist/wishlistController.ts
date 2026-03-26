@@ -2,6 +2,7 @@ import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { RatingAndReview } from "../rating/RatingAndReview.js";
 import Wishlist from "./wishlistModel.js";
 
@@ -80,6 +81,10 @@ export const addToWishlist: Handler = asyncHandler(async (req, res) => {
   } else {
     if (wishlist.courseIds.includes(courseId)) {
       throw AppError.conflict("Course is already in wishlist");
+    }
+    const isEnrolled = await CourseEnrollment.findOne({ userId, courseId });
+    if (isEnrolled) {
+      throw AppError.conflict("Course is already enrolled, cannot add to wishlist");
     }
     wishlist.courseIds.push(courseId);
   }

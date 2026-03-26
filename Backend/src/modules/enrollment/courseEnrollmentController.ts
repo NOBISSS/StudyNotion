@@ -3,17 +3,20 @@ import z from "zod";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
-import { Course } from "../course/CourseModel.js";
-import { CourseEnrollment } from "./CourseEnrollment.js";
 import type { Handler } from "../../shared/types.js";
+import { Course } from "../course/CourseModel.js";
+import Wishlist from "../wishlist/wishlistModel.js";
+import { CourseEnrollment } from "./CourseEnrollment.js";
 
-export const EnrollInCourse:Handler = asyncHandler(async (req, res) => {
+export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const user = req.user;
   const parsedCourseData = z.string().safeParse(req.body.courseId);
   if (!parsedCourseData.success) {
     throw AppError.badRequest("Invalid course ID");
   }
+  if (!userId)
+    throw AppError.unauthorized("User ID is required to enroll in course");
   const courseId = parsedCourseData.data;
   const existingEnrollment = await CourseEnrollment.findOne({
     userId: new Types.ObjectId(userId),
@@ -31,6 +34,11 @@ export const EnrollInCourse:Handler = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     courseId: new Types.ObjectId(courseId),
   });
+  await Wishlist.findOneAndUpdate(
+    { userId },
+    { $pull: { courseIds: courseId } },
+    { new: true },
+  );
   ApiResponse.success(
     res,
     {
@@ -39,7 +47,7 @@ export const EnrollInCourse:Handler = asyncHandler(async (req, res) => {
     "Course enrollment created successfully",
   );
 });
-export const getUserEnrollments:Handler = asyncHandler(async (req, res) => {
+export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
 
   const courseEnrollments = await CourseEnrollment.find({
