@@ -78,12 +78,12 @@ export const createCourse = asyncHandler(async (req, res) => {
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
   });
-  await Section.create({
-    name: "Introduction",
-    courseId: course._id,
-    order: 1,
-    subSectionIds: [],
-  });
+  // await Section.create({
+  //   name: "Introduction",
+  //   courseId: course._id,
+  //   order: 1,
+  //   subSectionIds: [],
+  // });
   ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
