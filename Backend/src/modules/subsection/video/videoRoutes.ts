@@ -8,6 +8,7 @@ const videoRouter = Router();
 // videoRouter.route("/multipart/:uploadId/complete").post(completeVideoUpload);
 // videoRouter.route("/multipart/:uploadId/abort").post(abortVideoUpload);
 // videoRouter.route("/multipart/:uploadId/batch").get(videoBatchHandler);
-videoRouter.route("/getone/:videoId").get(getVideo);
+
+videoRouter.route("/getone/:subsectionId").get(getVideo);
 
 export default videoRouter;

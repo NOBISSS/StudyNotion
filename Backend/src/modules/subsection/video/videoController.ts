@@ -7,15 +7,16 @@ import {
   UploadPartCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Types } from "mongoose";
 import path from "path";
 import querystring from "querystring";
 import { s3 } from "../../../shared/config/s3Config.js";
+import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
 import { AppError } from "../../../shared/lib/AppError.js";
 import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
-import Video from "./VideoModel.js";
-import { Types } from "mongoose";
 import { SubSection } from "../SubSectionModel.js";
+import Video from "./VideoModel.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
@@ -211,13 +212,17 @@ export const abortVideoUpload = asyncHandler(async (req, res) => {
 });
 export const getVideo = asyncHandler(async (req, res) => {
   // const { start, end } = req.query;
-  const { videoId } = req.params;
+  const { subsectionId } = req.params;
   // if (start === undefined || end === undefined) {
   //   return res
   //     .status(400)
   //     .json({ message: "start and end query params are required" });
   // }
-  const video = await Video.findById(videoId);
+  const subsection = await SubSection.findById(subsectionId);
+  if (!subsection) {
+    return res.status(404).json({ message: "Subsection not found!" });
+  }
+  const video = await Video.findOne({ subsectionId: new Types.ObjectId(subsectionId) });
   if (!video) {
     return res.status(404).json({ message: "Video not found!" });
   }
@@ -242,5 +247,10 @@ export const getVideo = asyncHandler(async (req, res) => {
   const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
   // video.link = signedUrl;
   // await video.save({ validateBeforeSave: false });
-  res.json({ video, link: signedUrl });
+  ApiResponse.success(
+    res,
+    { video, link: signedUrl,subsection },
+    "Video fetched successfully",
+  );
+  // res.json({ video, link: signedUrl,subsection });
 });

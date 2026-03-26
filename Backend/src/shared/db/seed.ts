@@ -10,113 +10,133 @@ dotenv.config();
 
 async function seedData() {
   await connectDB(process.env.MONGODB_URI!);
-  const courses = await Course.insertMany([
-    {
-      courseName: "Complete MERN Stack Development",
-      instructorName: "Arafat Mansuri",
-      description:
-        "A practical, project-based course covering MongoDB, Express.js, React, and Node.js with real-world use cases.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Paid",
-      originalPrice: 4999,
-      discountPrice: 1999,
-      thumbnailUrl: "https://example.com/thumbnails/mern-course.png",
-      tag: ["MERN", "Full Stack", "Web Development"],
-      slug: "complete-mern-stack-development2",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Beginner-to-Advance",
-      status: "Published",
-      isBoosted: true,
-    },
-    {
-      courseName: "JavaScript Fundamentals",
-      instructorName: "Arafat Mansuri",
-      description:
-        "Learn core JavaScript concepts including variables, functions, loops, and basic DOM manipulation.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Free",
-      originalPrice: 0,
-      discountPrice: 0,
-      thumbnailUrl: "https://example.com/thumbnails/js-fundamentals.png",
-      tag: ["JavaScript", "Frontend", "Programming"],
-      slug: "javascript-fundamentals",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Beginner",
-      status: "Published",
-      isBoosted: false,
-    },
-    {
-      courseName: "Node.js & Express Backend Mastery",
-      instructorName: "Arafat Mansuri",
-      description:
-        "Build scalable backend applications using Node.js, Express, MongoDB, authentication, and best practices.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Paid",
-      originalPrice: 3999,
-      discountPrice: 1499,
-      thumbnailUrl: "https://example.com/thumbnails/node-express.png",
-      tag: ["Node.js", "Express", "Backend", "API"],
-      slug: "nodejs-express-backend-mastery",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Intermediate",
-      status: "Published",
-      isBoosted: true,
-    },
-    {
-      courseName: "MongoDB for Developers",
-      instructorName: "Arafat Mansuri",
-      description:
-        "Understand MongoDB deeply including schema design, aggregation pipeline, indexing, and performance optimization.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Paid",
-      originalPrice: 2999,
-      discountPrice: 999,
-      thumbnailUrl: "https://example.com/thumbnails/mongodb-course.png",
-      tag: ["MongoDB", "Database", "NoSQL"],
-      slug: "mongodb-for-developers",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Intermediate",
-      status: "Draft",
-      isBoosted: false,
-    },
-    {
-      courseName: "React.js from Scratch",
-      instructorName: "Arafat Mansuri",
-      description:
-        "Learn React from the ground up including hooks, state management, component design, and performance optimization.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Paid",
-      originalPrice: 4499,
-      discountPrice: 1799,
-      thumbnailUrl: "https://example.com/thumbnails/react-course.png",
-      tag: ["React", "Frontend", "SPA"],
-      slug: "react-js-from-scratch",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Beginner-to-Advance",
-      status: "Published",
-      isBoosted: true,
-    },
-    {
-      courseName: "DevOps Basics for Web Developers",
-      instructorName: "Arafat Mansuri",
-      description:
-        "Learn deployment, CI/CD pipelines, Docker, Nginx, and cloud basics tailored for web developers.",
-      instructorId: "69555b6aed5633e6e7cba60e",
-      typeOfCourse: "Paid",
-      originalPrice: 3499,
-      discountPrice: 1299,
-      thumbnailUrl: "https://example.com/thumbnails/devops-course.png",
-      tag: ["DevOps", "Docker", "CI/CD", "Deployment"],
-      slug: "devops-basics-for-web-developers",
-      categoryId: "69555c1aed5633e6e7cba61b",
-      level: "Advance",
-      status: "Draft",
-      isBoosted: false,
-    },
-  ]);
-  await Category.findByIdAndUpdate("69555c1aed5633e6e7cba61b", {
-    $push: { courses: courses.map((course) => course._id) },
-  });
+    try {
+      const courses = [
+        {
+          courseName: "Complete MERN Stack Bootcamp",
+          instructorName: "Priya Desai",
+          instructorId: new mongoose.Types.ObjectId("699bfb0dda0b668afc6b7515"),
+          description:
+            "Master full stack development using MongoDB, Express, React and Node.js with real-world projects.",
+          typeOfCourse: "Paid",
+          originalPrice: 4999,
+          discountPrice: 1999,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+          whatYouWillLearn: ["REST APIs", "React", "MongoDB", "JWT"],
+          tag: ["mern", "fullstack"],
+          slug: "complete-mern-stack-bootcamp-v3",
+          categoryId: new mongoose.Types.ObjectId("69555c1aed5633e6e7cba61b"), // Fullstack Development
+          level: "Beginner-to-Advance",
+          status: "Published",
+          isBoosted: true,
+        },
+
+        {
+          courseName: "React Advanced Concepts",
+          instructorName: "Mehul Joshi",
+          instructorId: new mongoose.Types.ObjectId("699bfb1fda0b668afc6b751d"),
+          description:
+            "Learn advanced React including hooks, performance, and architecture.",
+          typeOfCourse: "Paid",
+          originalPrice: 2999,
+          discountPrice: 1299,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1633356122544-f134324a6cee",
+          whatYouWillLearn: ["Hooks", "Context API", "Optimization"],
+          tag: ["react", "frontend"],
+          slug: "react-advanced-concepts-v2",
+          categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d1"), // Frontend
+          level: "Intermediate",
+          status: "Published",
+        },
+
+        {
+          courseName: "Node.js Backend Engineering",
+          instructorName: "Neha Patel",
+          instructorId: new mongoose.Types.ObjectId("699bfb3ada0b668afc6b7525"),
+          description:
+            "Build scalable backend systems with Node.js and Express.",
+          typeOfCourse: "Paid",
+          originalPrice: 3999,
+          discountPrice: 1799,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
+          whatYouWillLearn: ["APIs", "Auth", "Scalability"],
+          tag: ["nodejs", "backend"],
+          slug: "nodejs-backend-engineering-v2",
+          categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d2"), // Backend
+          level: "Advance",
+          status: "Published",
+          isBoosted: true,
+        },
+
+        {
+          courseName: "JavaScript Basics",
+          instructorName: "Priya Desai",
+          instructorId: new mongoose.Types.ObjectId("699bfb0dda0b668afc6b7515"),
+          description: "Start coding with JavaScript fundamentals.",
+          typeOfCourse: "Free",
+          originalPrice: 0,
+          discountPrice: 0,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1518770660439-4636190af475",
+          whatYouWillLearn: ["Variables", "Loops", "Functions"],
+          tag: ["javascript"],
+          slug: "javascript-basics-v2",
+          categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d5"), // Programming
+          level: "Beginner",
+          status: "Published",
+        },
+
+        {
+          courseName: "MongoDB Mastery",
+          instructorName: "Mehul Joshi",
+          instructorId: new mongoose.Types.ObjectId("699bfb1fda0b668afc6b751d"),
+          description:
+            "Advanced MongoDB concepts including aggregation and indexing.",
+          typeOfCourse: "Paid",
+          originalPrice: 2499,
+          discountPrice: 999,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1542831371-d531d36971e6",
+          whatYouWillLearn: ["Aggregation", "Indexes", "Schema"],
+          tag: ["mongodb"],
+          slug: "mongodb-mastery-v2",
+          categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d3"), // Database
+          level: "Intermediate",
+          status: "Draft",
+        },
+
+        {
+          courseName: "DevOps Crash Course",
+          instructorName: "Neha Patel",
+          instructorId: new mongoose.Types.ObjectId("699bfb3ada0b668afc6b7525"),
+          description: "Learn Docker, CI/CD, and deployment strategies.",
+          typeOfCourse: "Paid",
+          originalPrice: 3499,
+          discountPrice: 1499,
+          thumbnailUrl:
+            "https://images.unsplash.com/photo-1607743386760-88ac62b89b8a",
+          whatYouWillLearn: ["Docker", "CI/CD", "Deployment"],
+          tag: ["devops"],
+          slug: "devops-crash-course-v2",
+          categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d4"), // DevOps
+          level: "Advance",
+          status: "Published",
+          isBoosted: true,
+        },
+      ];
+
+      const createdCourses = await Course.insertMany(courses);
+
+      await Category.findByIdAndUpdate("69555c1aed5633e6e7cba61b", {
+        $push: { courses: createdCourses.map((course) => course._id) },
+      });
+      console.log("✅ Courses seeded successfully");
+    } catch (error) {
+      console.error("❌ Error seeding courses:", error);
+    }
 }
 
 export const seedCourseEnrollments = async () => {
@@ -230,7 +250,7 @@ export const updateCourseSlugs = async () => {
     console.error("❌ Error updating course slugs:", error);
   }
 };
-updateCourseSlugs()
+seedData()
   .then(() => {
     console.log("Seeding completed");
     process.exit(0);
