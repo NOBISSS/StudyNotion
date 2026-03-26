@@ -3,36 +3,48 @@ import Plyr from "plyr";
 import "plyr/dist/plyr.css";
 
 export default function PlyrPlayer({ src }) {
-  const videoRef = useRef(null);
+  const containerRef = useRef(null);
   const playerRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      playerRef.current = new Plyr(videoRef.current, {
-        controls: [
-          "play",
-          "progress",
-          "current-time",
-          "duration",
-          "mute",
-          "volume",
-          "settings",
-          "fullscreen",
-        ],
-        settings: ["speed"],
-      });
-    }
+    if (!containerRef.current) return;
+
+    // 🔥 clear container manually (React won't touch inside)
+    containerRef.current.innerHTML = `
+      <video class="plyr">
+        <source src="${src || ""}" type="video/mp4" />
+      </video>
+    `;
+
+    const video = containerRef.current.querySelector("video");
+
+    playerRef.current = new Plyr(video, {
+      controls: [
+        "play",
+        "progress",
+        "current-time",
+        "duration",
+        "mute",
+        "volume",
+        "settings",
+        "fullscreen",
+      ],
+    });
 
     return () => {
       if (playerRef.current) {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
       }
     };
-  }, []);
+  }, [src]);
 
   return (
-    <video ref={videoRef} className="plyr-react plyr" controls>
-      <source src={src} type="video/mp4" />
-    </video>
+    <div
+      ref={containerRef}
+      className="w-full h-full"
+    />
   );
 }
