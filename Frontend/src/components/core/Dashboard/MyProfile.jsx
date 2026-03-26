@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import { IconBtn } from '../../common/IconBtn';
+import { getMe } from '../../../services/operations/profileAPI';
 
 const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
     const navigate = useNavigate(); 
+    console.log(user);
+    const dispatch=useDispatch();
+
     useEffect(()=>{
-        
+        // dispatch(getMe())
     },[])
     return (
         <div className='OUTTER DIV text-white py-5 px-7 md:px-10 lg:w-[80vw] '>
@@ -18,7 +22,7 @@ const MyProfile = () => {
 
                 <div className='flex gap-10 p-8 justify-between h-1/2 bg-[#161D29] rounded-md items-center'>
                     <div className='ml-5 flex gap-3 items-center'>
-                        <img src={user?.image} alt={`profile-${user?.firstName}`}
+                        <img src={user?.additionalDetails?.profilePicture} alt={`profile-${user?.firstName}`}
                             className='aspect-square w-[75px] rounded-full object-cover'
                         />
                         <div>
