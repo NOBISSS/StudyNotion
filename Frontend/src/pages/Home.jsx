@@ -10,8 +10,11 @@ import { LearningLanguageSection } from '../components/core/HomePage/LearningLan
 import { InstructorSection } from '../components/core/HomePage/InstructorSection';
 import { ExploreMore } from '../components/core/HomePage/ExploreMore';
 import Navbar from '../components/core/Navbar';
+import { useSelector } from 'react-redux';
 
 export const Home = () => {
+  const user=useSelector((store)=>store.profile.user);
+  console.log(user);
   return (
     <div className="">
       
@@ -36,10 +39,12 @@ export const Home = () => {
         <div className='w-[80%] text-center text-lg font-bold text-[#999DAA] mt-4'>
           With our online coding courses, you can learn at your own pace, from anywhere in the world, and get access to a wealth of resources, including hands-on projects, quizzes, and personalized feedback from instructors. 
         </div>
+        {!user &&
         <div className='flex flex-row gap-7 mt-8'>
             <CTAButton active={true} linkto={"/signup"}>Learn More</CTAButton>
             <CTAButton active={false} linkto={"/login"}>Book Demo</CTAButton>
         </div>
+        }
 
         <div className=' shadow-[10px_-5px_50px_-5px] shadow-blue-200 my-12 '>
           <video className='shadow-[20px_20px_rgba(255,255,255)]'
@@ -53,6 +58,7 @@ export const Home = () => {
         {/*Code Section 1*/}
         <div className=' flex flex-row'>
               <CodeBlocks 
+              user={user}
               backgroundGradient={"codeblock1"}
               position={"lg:flex-row"}
               heading={
@@ -85,7 +91,8 @@ export const Home = () => {
         </div>
          {/*Code Section 2*/}
         <div className=' flex flex-row'>
-              <CodeBlocks 
+              <CodeBlocks
+              user={user}
               backgroundGradient={"codeblock2"}
               position={"flex-row-reverse"}
               heading={
