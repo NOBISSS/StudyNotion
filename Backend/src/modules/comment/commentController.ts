@@ -33,7 +33,7 @@ export const createComment = asyncHandler(async (req, res) => {
 export const getCommentsBySubSectionId = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
   const userId = req.userId;
-  const comments = await Comment.find({ subsectionId }).populate(
+  const comments = await Comment.find({ subsectionId, isDeleted: false }).populate(
     "userId",
     "name email",
   );

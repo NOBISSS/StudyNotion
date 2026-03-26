@@ -39,6 +39,7 @@ const VideoSchema = new Schema(
     videoSize: Number,
     subsectionId: { type: Schema.Types.ObjectId, ref: "SubSection" },
     courseId: { type: Schema.Types.ObjectId, ref: "Course" },
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,
