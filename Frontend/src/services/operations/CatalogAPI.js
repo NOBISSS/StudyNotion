@@ -32,13 +32,9 @@ const {
 //         }
 //     }, [catalogId]);
 
-export function fetchCatalogData(
-  catalogId,
-  setError,
-  setAllCourses,
-  setMostSelling,
-  setLoading
-) {
+// CatalogAPI.js
+
+export function fetchCatalogData(catalogId) {
   return async (dispatch, getState) => {
     const toastId = toast.loading("Loading...");
 
@@ -46,17 +42,11 @@ export function fetchCatalogData(
       const state = getState();
       const existingData = state.catalog.catalogData[catalogId];
 
-      // 🔥 CACHE HIT → DO NOT CALL API
       if (existingData) {
         console.log("Using cached data");
-
-        setAllCourses(existingData?.selectedCategory ?? []);
-        setMostSelling(existingData?.mostSellingCourses ?? []);
+        toast.dismiss(toastId);
         return;
       }
-
-      // 🔥 API CALL (only if not cached)
-      setLoading(true);
 
       const response = await apiConnector(
         "GET",
@@ -69,22 +59,16 @@ export function fetchCatalogData(
 
       const data = response.data?.data;
 
-      // 🔥 Store in Redux with ID
       dispatch(
         setCatalogData({
           catalogId,
           data,
         })
       );
-
-      setAllCourses(data?.selectedCategory ?? []);
-      setMostSelling(data?.mostSellingCourses ?? []);
     } catch (error) {
       console.log("GET CATALOG DATA API ERROR", error);
-      setError(error?.message || error);
-      toast.error("GET CATALOG DATA Failed");
+      toast.error(error?.message || "Failed to load catalog");
     } finally {
-      setLoading(false);
       toast.dismiss(toastId);
     }
   };
