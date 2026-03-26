@@ -80,8 +80,58 @@ export const seedCategories = async () => {
     console.error("❌ Error seeding categories:", error);
   }
 };
-seedCategories()
+export const attachCoursesToCategories = async () => {
+  try {
+    await connectDB(process.env.MONGODB_URI!);
+    // Fullstack
+    await Category.findByIdAndUpdate("69555c1aed5633e6e7cba61b", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9563"),
+      },
+    });
+
+    // Frontend
+    await Category.findByIdAndUpdate("69c505811dec52581649e6d1", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9564"),
+      },
+    });
+
+    // Backend
+    await Category.findByIdAndUpdate("69c505811dec52581649e6d2", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9565"),
+      },
+    });
+
+    // Programming
+    await Category.findByIdAndUpdate("69c505811dec52581649e6d5", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9566"),
+      },
+    });
+
+    // Database
+    await Category.findByIdAndUpdate("69c505811dec52581649e6d3", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9567"),
+      },
+    });
+
+    // DevOps
+    await Category.findByIdAndUpdate("69c505811dec52581649e6d4", {
+      $addToSet: {
+        courses: new mongoose.Types.ObjectId("69c5124874ca6cacf3eb9568"),
+      },
+    });
+
+    console.log("✅ Courses correctly attached to categories");
+  } catch (error) {
+    console.error("❌ Error attaching courses:", error);
+  }
+};
+attachCoursesToCategories()
   .then(() => {
-    console.log("categories seeded successfully");
+    console.log("courses attached to categories successfully");
   })
   .catch((error) => console.log("error", error));

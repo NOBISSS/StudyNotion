@@ -94,12 +94,6 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
     throw AppError.notFound("Category is not found");
   }
   //handle the case when there are no courses
-  if (selectedCategory.courses.length === 0) {
-    console.log("No courses found for the selected Category");
-    throw AppError.notFound("No courses found for the selected Category");
-  }
-
-  const selectedCourse = selectedCategory.courses;
 
   //get courses for other categories
   const categoriesExceptSelected = await Category.find({
@@ -118,10 +112,12 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
     //   .sort((a, b) => b.sold - a.sold)
     .slice(0, 10);
 
+  const selectedCourse = selectedCategory.courses;
+
   ApiResponse.success(
     res,
     {
-      selectedCategory: selectedCourse,
+      selectedCategory: selectedCourse.length > 0 ? selectedCourse : [],
       differenceCourses: differenceCourses,
       mostSellingCourses: mostSellingCourses,
       category: {

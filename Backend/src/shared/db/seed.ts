@@ -25,8 +25,8 @@ async function seedData() {
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
           whatYouWillLearn: ["REST APIs", "React", "MongoDB", "JWT"],
           tag: ["mern", "fullstack"],
-          slug: "complete-mern-stack-bootcamp-v3",
-          categoryId: new mongoose.Types.ObjectId("69555c1aed5633e6e7cba61b"), // Fullstack Development
+          slug: "complete-mern-stack-bootcamp-v4",
+          categoryId: new mongoose.Types.ObjectId("69555c1aed5633e6e7cba61b"), // Fullstack
           level: "Beginner-to-Advance",
           status: "Published",
           isBoosted: true,
@@ -45,7 +45,7 @@ async function seedData() {
             "https://images.unsplash.com/photo-1633356122544-f134324a6cee",
           whatYouWillLearn: ["Hooks", "Context API", "Optimization"],
           tag: ["react", "frontend"],
-          slug: "react-advanced-concepts-v2",
+          slug: "react-advanced-concepts-v3",
           categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d1"), // Frontend
           level: "Intermediate",
           status: "Published",
@@ -64,7 +64,7 @@ async function seedData() {
             "https://images.unsplash.com/photo-1555066931-4365d14bab8c",
           whatYouWillLearn: ["APIs", "Auth", "Scalability"],
           tag: ["nodejs", "backend"],
-          slug: "nodejs-backend-engineering-v2",
+          slug: "nodejs-backend-engineering-v3",
           categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d2"), // Backend
           level: "Advance",
           status: "Published",
@@ -83,7 +83,7 @@ async function seedData() {
             "https://images.unsplash.com/photo-1518770660439-4636190af475",
           whatYouWillLearn: ["Variables", "Loops", "Functions"],
           tag: ["javascript"],
-          slug: "javascript-basics-v2",
+          slug: "javascript-basics-v3",
           categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d5"), // Programming
           level: "Beginner",
           status: "Published",
@@ -101,8 +101,8 @@ async function seedData() {
           thumbnailUrl:
             "https://images.unsplash.com/photo-1542831371-d531d36971e6",
           whatYouWillLearn: ["Aggregation", "Indexes", "Schema"],
-          tag: ["mongodb"],
-          slug: "mongodb-mastery-v2",
+          tag: ["mongodb", "database"],
+          slug: "mongodb-mastery-v3",
           categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d3"), // Database
           level: "Intermediate",
           status: "Draft",
@@ -120,7 +120,7 @@ async function seedData() {
             "https://images.unsplash.com/photo-1607743386760-88ac62b89b8a",
           whatYouWillLearn: ["Docker", "CI/CD", "Deployment"],
           tag: ["devops"],
-          slug: "devops-crash-course-v2",
+          slug: "devops-crash-course-v3",
           categoryId: new mongoose.Types.ObjectId("69c505811dec52581649e6d4"), // DevOps
           level: "Advance",
           status: "Published",
@@ -130,13 +130,41 @@ async function seedData() {
 
       const createdCourses = await Course.insertMany(courses);
 
-      await Category.findByIdAndUpdate("69555c1aed5633e6e7cba61b", {
-        $push: { courses: createdCourses.map((course) => course._id) },
-      });
+      // await Category.findByIdAndUpdate(categoryId, {
+      //   $push: {
+      //     courses: { $each: createdCourses.map((c) => c._id) },
+      //   },
+      // });
       console.log("✅ Courses seeded successfully");
     } catch (error) {
       console.error("❌ Error seeding courses:", error);
     }
+}
+async function unseedData() {
+  await connectDB(process.env.MONGODB_URI!);
+  await Course.deleteMany({
+    _id: {
+      $in: [
+        "69c506848b3277d5c9bf78c8",
+        "69c506848b3277d5c9bf78c9",
+        "69c506848b3277d5c9bf78ca",
+        "69c506848b3277d5c9bf78cb",
+        "69c506848b3277d5c9bf78cc",
+        "69c506848b3277d5c9bf78cd",
+      ].map((id) => new mongoose.Types.ObjectId(id)),
+    },
+  });
+  await Category.updateMany(
+  {},
+  { $pull: { courses: { $in: [
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78c8"),
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78c9"),
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78ca"),
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78cb"),
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78cc"),
+    new mongoose.Types.ObjectId("69c506848b3277d5c9bf78cd")
+  ] } } }
+);
 }
 
 export const seedCourseEnrollments = async () => {
@@ -252,7 +280,7 @@ export const updateCourseSlugs = async () => {
 };
 seedData()
   .then(() => {
-    console.log("Seeding completed");
+    console.log("Unseeding completed");
     process.exit(0);
   })
   .catch((error) => {
