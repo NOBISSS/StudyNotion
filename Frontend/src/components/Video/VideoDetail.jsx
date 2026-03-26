@@ -17,12 +17,14 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import Footer from "../core/Footer";
 import { addCourseReview } from "../../services/operations/progressAPI";
+import PlyrPlayer from "./PlyrPlayer";
+
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const COURSE_DETAIL_API  = (id) => `${BASE_URL}/courses/getdetails/${id}`;
-const SUBSECTIONS_API    = (id) => `${BASE_URL}/subsections/getall/${id}`;
-const VIDEO_API          = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
+const COURSE_DETAIL_API = (id) => `${BASE_URL}/courses/getdetails/${id}`;
+const SUBSECTIONS_API = (id) => `${BASE_URL}/subsections/getall/${id}`;
+const VIDEO_API = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
 
 // ─── Interactive Star Input ───────────────────────────────────────────────────
 function StarInput({ value, onChange }) {
@@ -49,9 +51,9 @@ function StarInput({ value, onChange }) {
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 function ReviewModal({ courseId, user, token, onClose }) {
-  const [rating, setRating]   = useState(4);
-  const [review, setReview]   = useState("");
-  const [saving, setSaving]   = useState(false);
+  const [rating, setRating] = useState(4);
+  const [review, setReview] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!review.trim()) return;
@@ -96,14 +98,14 @@ function ReviewModal({ courseId, user, token, onClose }) {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 20 }}>
             {user?.additionalDetails?.profilePicture
               ? <img src={user.additionalDetails.profilePicture} alt={user.firstName}
-                  style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} />
+                style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} />
               : <div style={{
-                    width: 48, height: 48, borderRadius: "50%", background: "#FFD60A",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 20, color: "#000",
-                  }}>
-                    {user?.firstName?.charAt(0).toUpperCase() || "U"}
-                  </div>
+                width: 48, height: 48, borderRadius: "50%", background: "#FFD60A",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: 700, fontSize: 20, color: "#000",
+              }}>
+                {user?.firstName?.charAt(0).toUpperCase() || "U"}
+              </div>
             }
             <div style={{ textAlign: "center" }}>
               <p style={{ color: "#F1F2FF", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>
@@ -169,10 +171,10 @@ function ReviewModal({ courseId, user, token, onClose }) {
 
 // ─── Sidebar Section (lazy subsection fetch, cached) ─────────────────────────
 function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defaultOpen, token }) {
-  const [open, setOpen]         = useState(defaultOpen);
-  const [subs, setSubs]         = useState(null);   // null = not yet fetched
-  const [loading, setLoading]   = useState(false);
-  const fetchedRef              = useRef(false);     // cache flag — never re-fetches
+  const [open, setOpen] = useState(defaultOpen);
+  const [subs, setSubs] = useState(null);   // null = not yet fetched
+  const [loading, setLoading] = useState(false);
+  const fetchedRef = useRef(false);     // cache flag — never re-fetches
 
   const toggle = () => setOpen(o => !o);
 
@@ -256,7 +258,7 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
 
           {/* Subsection rows */}
           {!loading && subs?.map((sub) => {
-            const isActive    = sub._id === activeSubId;
+            const isActive = sub._id === activeSubId;
             const isCompleted = completedIds.has(sub._id);
             return (
               <div
@@ -321,19 +323,19 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function VideoDetail() {
   const { courseId, subSectionId: paramSubId } = useParams();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const { token } = useSelector(state => state.auth);
-  const { user }  = useSelector(state => state.profile);
+  const { user } = useSelector(state => state.profile);
 
-  const [course, setCourse]             = useState(null);
-  const [sections, setSections]         = useState([]);
-  const [activeSub, setActiveSub]       = useState(null);
-  const [videoSrc, setVideoSrc]         = useState(null);
-  const [completedIds]                  = useState(new Set()); // future: load from backend
+  const [course, setCourse] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [activeSub, setActiveSub] = useState(null);
+  const [videoSrc, setVideoSrc] = useState(null);
+  const [completedIds] = useState(new Set()); // future: load from backend
   const [loadingCourse, setLoadingCourse] = useState(true);
   const [loadingVideo, setLoadingVideo] = useState(false);
-  const [showModal, setShowModal]       = useState(false);
-  const [totalSubs, setTotalSubs]       = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [totalSubs, setTotalSubs] = useState(0);
 
   // ── 1. Fetch course details (sections come with it) ───────────────────────
   useEffect(() => {
@@ -348,9 +350,9 @@ export default function VideoDetail() {
         });
         if (cancelled) return;
 
-        const data     = res.data?.data ?? res.data;
+        const data = res.data?.data ?? res.data;
         const courseObj = data?.course ?? {};
-        const secs     = data?.sections ?? [];
+        const secs = data?.sections ?? [];
 
         setCourse(courseObj);
 
@@ -387,7 +389,7 @@ export default function VideoDetail() {
   const loadVideoById = useCallback(async (sub) => {
     // sub can be a subsection object OR just an ID string
     const subObj = typeof sub === "object" ? sub : { _id: sub };
-    const subId  = subObj._id;
+    const subId = subObj._id;
 
     setActiveSub(subObj);
     setVideoSrc(null);
@@ -397,7 +399,7 @@ export default function VideoDetail() {
 
     try {
       const res = await axios.get(VIDEO_API(subId), {
-        withCredentials:true
+        withCredentials: true
       });
       // Normalize: { data: { link } } | { link } | { video: { link } }
       const link =
@@ -420,11 +422,11 @@ export default function VideoDetail() {
   }, [courseId, navigate, token]);
 
   const completedCount = completedIds.size;
-  const allDone        = totalSubs > 0 && completedCount >= totalSubs;
-  const dateStr        = activeSub?.createdAt
+  const allDone = totalSubs > 0 && completedCount >= totalSubs;
+  const dateStr = activeSub?.createdAt
     ? new Date(activeSub.createdAt).toLocaleDateString("en-US", {
-        month: "long", day: "numeric", year: "numeric",
-      })
+      month: "long", day: "numeric", year: "numeric",
+    })
     : "";
 
   return (
@@ -524,9 +526,12 @@ export default function VideoDetail() {
 
           {/* Video */}
           <div style={{
-            background: "#000", width: "100%",
-            aspectRatio: "16/9", position: "relative",
-            maxHeight: "calc(100vh - 56px - 180px)",
+            width: "100%",            // 👈 controls width
+            maxWidth: "900px",       // 👈 max size
+            aspectRatio: "16/9",
+            position: "relative",
+            padding:"20px",
+            margin:"0 auto"
           }}>
             {loadingVideo && (
               <div style={{
@@ -543,17 +548,12 @@ export default function VideoDetail() {
             )}
 
             {!loadingVideo && videoSrc && (
-              /* key={videoSrc} forces browser to remount video on URL change     */
-              /* Browser auto-handles Range requests — no extra config needed     */
-              <video
-                key={videoSrc}
-                controls
-                preload="metadata"
-                style={{ width: "100%", height: "100%", display: "block", background: "#000" }}
-              >
-                <source src={videoSrc} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <div className="">
+                <PlyrPlayer
+                  key={videoSrc} // important: reload on video change
+                  src={videoSrc}
+                />
+              </div>
             )}
 
             {!loadingVideo && !videoSrc && (
@@ -574,10 +574,10 @@ export default function VideoDetail() {
           </div>
 
           {/* Subsection info */}
-          <div style={{ padding: "20px 28px 32px" }}>
+          <div style={{ padding: "20px 28px 32px" }} className="">
             {activeSub && (
               <>
-                <h2 style={{ color: "#F1F2FF", fontSize: 20, fontWeight: 700, marginBottom: 12, lineHeight: 1.3 }}>
+                <h2 style={{ color: "#F1F2FF", fontSize: 20, fontWeight: 700, marginBottom: 12, lineHeight: 1.3 }} className="">
                   {activeSub.title || activeSub.subSectionName}
                 </h2>
                 {activeSub.description && (

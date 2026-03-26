@@ -51,7 +51,7 @@ export const Home = () => {
           loop
           autoPlay
           >
-            <source src={Banner} type='video/mp4'/>
+            <source src="/banner.mp4" type='video/mp4'/>
           </video>
         </div>
         {/*Code Section 1*/}
