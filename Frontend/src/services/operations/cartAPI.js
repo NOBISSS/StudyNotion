@@ -44,14 +44,13 @@ export const getWishListData = async (token, dispatch) => {
 // 2. ADD — add course to wishlist on server + push to Redux
 //    Pass the full course object so Redux/localStorage has all fields
 // ─────────────────────────────────────────────────────────────────────────────
-export const addCourseToWishList = async (token, course, dispatch) => {
+export const addCourseToWishList = async (course, dispatch) => {
   const toastId = toast.loading("Adding to wishlist...");
   try {
     const response = await apiConnector(
       "POST",
       ADD_WISHLIST_API,
-      { courseId: course._id },
-      { Authorization: `Bearer ${token}` }
+      { courseId: course },
     );
 
     console.log("ADD_WISHLIST API RESPONSE:", response);

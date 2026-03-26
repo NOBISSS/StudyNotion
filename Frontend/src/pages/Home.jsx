@@ -14,7 +14,6 @@ import { useSelector } from 'react-redux';
 
 export const Home = () => {
   const user=useSelector((store)=>store.profile.user);
-  console.log(user);
   return (
     <div className="">
       
