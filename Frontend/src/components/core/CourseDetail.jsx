@@ -11,9 +11,6 @@ import {
 import { BACKEND_URL } from "../../utils/constants";
 import { addCourseToWishList } from "../../services/operations/cartAPI";
 
-// ─── API base URL ─────────────────────────────────────────────────────────────
-
-// ─── Global Styles ─────────────────────────────────────────────────────────────
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,7 +20,6 @@ const globalStyles = `
   @keyframes sectionSpin { to { transform: rotate(360deg); } }
 `;
 
-// ─── Star Rating ───────────────────────────────────────────────────────────────
 function StarRating({ rating = 0, size = 14 }) {
   const clamped = Math.min(5, Math.max(0, rating));
   return (
@@ -125,8 +121,6 @@ function Navbar() {
   );
 }
 
-// ─── Purchase Card ─────────────────────────────────────────────────────────────
-// Props from courseObj API fields + enrollment state from Redux
 function PurchaseCard({
   courseId,
   thumbnailUrl, courseName, originalPrice, discountPrice,
@@ -147,10 +141,7 @@ function PurchaseCard({
     { icon: "🏆", text: "Certificate of completion" },
   ];
 
-  // ── CTA logic ──────────────────────────────────────────────────────────────
-  // Already enrolled → "Go to Course"
-  // Free course not enrolled → "Enroll for Free" → calls onEnroll
-  // Paid course not enrolled → "Add to Cart" (local) + "Buy now" → calls onEnroll
+
   const dispatch=useDispatch();
   const handleCartClick = () => {
     
@@ -329,11 +320,12 @@ function AccordionSection({ section, forceOpen }) {
       setLoading(true);
       setFetchError(null);
       try {
-        const res = await axios.get(`${BACKEND_URL}/sections/${section._id}/subSections`);
-
+        const res = await axios.get(`${BACKEND_URL}/subSections/getall/${section._id}/`);
+        console.log(res.data);
         if (!cancelled) {
-          const data = res.data?.data ?? res.data;
+          const data = res?.data?.data?.subsections ?? res?.data?.subsections;
           setSubSections(Array.isArray(data) ? data : []);
+          console.log("SUB SECTION DATA",subSections);
         }
       } catch {
         if (!cancelled) setFetchError("Failed to load lectures.");
