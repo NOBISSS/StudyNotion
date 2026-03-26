@@ -164,7 +164,7 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
                 onClick={() => navigate(`/courses/${course._id}`)}
             >
                 <img
-                    src={course.thumbnailUrl}
+                    src={course?.thumbnailUrl}
                     alt={course.courseName}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     onError={e => {
@@ -176,7 +176,7 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
 
             {/* Course name + description */}
             <div style={{ flex: 1, minWidth: 0 }}
-                onClick={() => navigate(`/courses/${course._id}`)}
+                onClick={() => navigate(`/courses/${course._id}/learn`)}
             >
                 <p style={{
                     color: '#F1F2FF', fontWeight: 600, fontSize: 14,

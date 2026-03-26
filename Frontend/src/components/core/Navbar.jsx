@@ -1,3 +1,4 @@
+// components/core/Navbar.jsx
 import React, { useEffect, useRef, useState } from "react";
 import logo from "../../assets/logo.png";
 import { Link, matchPath, useNavigate } from "react-router-dom";
@@ -12,14 +13,14 @@ import axios from "axios";
 import { BACKEND_URL } from "../../utils/constants";
 
 const Navbar = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const navigate  = useNavigate();
+  const dispatch  = useDispatch();
+  const location  = useLocation();
 
   const [openProfile, setOpenProfile] = useState(false);
-  const { token } = useSelector((state) => state.auth);
-  const { user } = useSelector((state) => state.profile);
-  const { totalItems } = useSelector((state) => state.cart);
-  const location = useLocation();
+  const { token }      = useSelector(state => state.auth);
+  const { user }       = useSelector(state => state.profile);
+  const { totalItems } = useSelector(state => state.cart);
 
   const [subLinks, setSubLinks] = useState([]);
   const profileRef = useRef(null);
@@ -37,39 +38,40 @@ const Navbar = () => {
   const fetchSubLinks = async () => {
     try {
       const result = await axios.get(BACKEND_URL + "/categories/getall");
-      setSubLinks(result.data.data.category || []);
-    } catch (error) {
+      setSubLinks(result.data?.data?.category || []);
+    } catch {
       console.log("COULD NOT FETCH THE CATEGORY LIST");
     }
   };
 
-  useEffect(() => {
-    fetchSubLinks();
-  }, []);
+  useEffect(() => { fetchSubLinks(); }, []);
 
   const matchRoute = (route) => matchPath({ path: route }, location.pathname);
 
-  // Decide how many columns based on count
   const getColumnCount = (count) => {
-    if (count <= 5) return 1;
+    if (count <= 5)  return 1;
     if (count <= 10) return 2;
     if (count <= 15) return 3;
     return 4;
   };
   const colCount = getColumnCount(subLinks.length);
 
+  // ── Resolve profile picture ───────────────────────────────────────────────
+  // API returns additionalDetails.profilePicture — handle both shapes
+  const profilePic =
+    user?.additionalDetails?.profilePicture ||
+    user?.image ||
+    null;
+
+  const userInitial = user?.firstName?.charAt(0).toUpperCase() || "U";
+
   return (
     <div className="sticky top-0 z-50 flex h-14 items-center justify-center border-b border-[#2C333F] bg-[#161D29] px-[8.5vw]">
-      <div className="flex w-full max-w-maxContent items-center justify-between">
+      <div className="flex w-full items-center justify-between">
 
         {/* ── Logo ── */}
         <Link to="/">
-          <img
-            src={logo}
-            loading="lazy"
-            alt="StudyNotion Logo"
-            className="h-8 w-auto object-contain"
-          />
+          <img src={logo} loading="lazy" alt="StudyNotion Logo" className="h-8 w-auto object-contain" />
         </Link>
 
         {/* ── Nav Links ── */}
@@ -79,52 +81,27 @@ const Navbar = () => {
               <li key={index} className="relative">
                 {link.title === "Catalog" ? (
 
-                  /* ── Catalog with Mega Dropdown ── */
                   <div className="group relative flex cursor-pointer items-center gap-1 py-4">
-
                     <span className={`text-sm font-medium transition-colors group-hover:text-[#FFD60A] ${
                       matchRoute("/catalog/:catalogName/:catalogId") ? "text-[#FFD60A]" : "text-[#DBDDEA]"
                     }`}>
                       {link.title}
                     </span>
-
                     <TiArrowSortedDown className={`text-xs transition-all duration-200 group-hover:rotate-180 group-hover:text-[#FFD60A] ${
                       matchRoute("/catalog/:catalogName/:catalogId") ? "text-[#FFD60A]" : "text-[#DBDDEA]"
                     }`} />
 
-                    {/* Mega Menu Panel */}
-                    <div className="
-                      pointer-events-none invisible absolute left-1/2 top-full
-                      z-50 -translate-x-1/2 translate-y-3 opacity-0
-                      transition-all duration-200 ease-out
-                      group-hover:pointer-events-auto group-hover:visible
-                      group-hover:translate-y-0 group-hover:opacity-100
-                    ">
-                      {/* Caret tip */}
+                    {/* Mega Menu */}
+                    <div className="pointer-events-none invisible absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-3 opacity-0 transition-all duration-200 ease-out group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                       <div className="relative mx-auto h-0 w-0"
-                        style={{
-                          borderLeft: "8px solid transparent",
-                          borderRight: "8px solid transparent",
-                          borderBottom: "8px solid #2C333F",
-                          left: "calc(50% - 8px)",
-                        }}
-                      />
-                      <div className="relative mx-auto h-0 w-0 -mt-[7px]"
-                        style={{
-                          borderLeft: "7px solid transparent",
-                          borderRight: "7px solid transparent",
-                          borderBottom: "7px solid #1F2937",
-                          left: "calc(50% - 7px)",
-                        }}
-                      />
+                        style={{ borderLeft:"8px solid transparent", borderRight:"8px solid transparent", borderBottom:"8px solid #2C333F", left:"calc(50% - 8px)" }} />
+                      <div className="relative mx-auto -mt-[7px] h-0 w-0"
+                        style={{ borderLeft:"7px solid transparent", borderRight:"7px solid transparent", borderBottom:"7px solid #1F2937", left:"calc(50% - 7px)" }} />
 
-                      {/* Panel */}
                       <div
                         className="rounded-xl border border-[#2C333F] bg-[#1F2937] shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
                         style={{ width: colCount === 1 ? 220 : colCount === 2 ? 380 : colCount === 3 ? 520 : 640 }}
                       >
-
-                        {/* Panel header */}
                         <div className="flex items-center justify-between border-b border-[#2C333F] px-5 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6B7280]">
                             Browse Categories
@@ -134,26 +111,16 @@ const Navbar = () => {
                           </span>
                         </div>
 
-                        {/* Category grid */}
                         {subLinks.length > 0 ? (
-                          <div
-                            className="p-3"
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: `repeat(${colCount}, 1fr)`,
-                              gap: "2px",
-                            }}
-                          >
+                          <div className="p-3" style={{
+                            display: "grid",
+                            gridTemplateColumns: `repeat(${colCount}, 1fr)`,
+                            gap: "2px",
+                          }}>
                             {subLinks.map((subLink, i) => (
-                              <Link
-                                to={`/catalog/${subLink?.name}/${subLink?._id}`}
-                                key={subLink._id || i}
-                              >
+                              <Link to={`/catalog/${subLink?.name}/${subLink?._id}`} key={subLink._id || i}>
                                 <div className="group/row flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-all duration-150 hover:bg-[#2C333F]">
-                                  {/* Colored dot */}
-                                  <span
-                                    className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#374151] transition-colors duration-150 group-hover/row:bg-[#FFD60A]"
-                                  />
+                                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#374151] transition-colors duration-150 group-hover/row:bg-[#FFD60A]" />
                                   <span className="truncate text-sm text-[#9CA3AF] transition-colors duration-150 group-hover/row:text-[#F9FAFB]">
                                     {subLink.name}
                                   </span>
@@ -167,7 +134,6 @@ const Navbar = () => {
                           </div>
                         )}
 
-                        {/* Panel footer */}
                         <div className="border-t border-[#2C333F] px-5 py-3">
                           <Link to="/catalog">
                             <p className="text-xs font-semibold text-[#FFD60A] transition-opacity hover:opacity-80">
@@ -175,7 +141,6 @@ const Navbar = () => {
                             </p>
                           </Link>
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -204,10 +169,8 @@ const Navbar = () => {
 
           {/* Cart */}
           {user && user?.accountType !== "Instructor" && (
-            <Link
-              to="/dashboard/cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white"
-            >
+            <Link to="/dashboard/cart"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white">
               <AiOutlineShoppingCart className="text-xl" />
               {totalItems > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-[17px] w-[17px] items-center justify-center rounded-full bg-[#FFD60A] text-[9px] font-bold leading-none text-black">
@@ -217,10 +180,7 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* Divider when no auth */}
-          {token === null && (
-            <div className="mx-2 h-5 w-px bg-[#2C333F]" />
-          )}
+          {token === null && <div className="mx-2 h-5 w-px bg-[#2C333F]" />}
 
           {/* Auth Buttons */}
           {token === null && (
@@ -238,21 +198,30 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Profile */}
+          {/* Profile Avatar + Dropdown */}
           {token !== null && (
             <div className="relative ml-1" ref={profileRef}>
               <button
-                onClick={() => setOpenProfile((prev) => !prev)}
-                className="relative ml-1 h-9 w-9 overflow-hidden rounded-full ring-2 ring-[#2C333F] transition-all hover:ring-[#FFD60A]"
+                onClick={() => setOpenProfile(prev => !prev)}
+                className="relative ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full ring-2 ring-[#2C333F] transition-all hover:ring-[#FFD60A]"
               >
-                <img
-                  src={user?.image}
-                  alt={`profile-${user?.firstName}`}
-                  className="h-full w-full object-cover"
-                />
+                {profilePic ? (
+                  <img
+                    src={profilePic}
+                    alt={`profile-${user?.firstName}`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  /* Fallback: coloured initial */
+                  <div className="flex h-full w-full items-center justify-center bg-[#FFD60A] text-sm font-bold text-black">
+                    {userInitial}
+                  </div>
+                )}
               </button>
+
+              {/* Dropdown — right-aligned, appears below with gap */}
               {openProfile && (
-                <div className="absolute right-0 top-full mt-2 z-50">
+                <div className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[180px]">
                   <ProfileDropDown />
                 </div>
               )}

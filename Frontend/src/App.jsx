@@ -36,32 +36,36 @@ function App() {
 
       <Routes>
         {/* ── Public routes ──────────────────────────────────────── */}
-        <Route path="/"                       element={<Home />} />
-        <Route path="/about"                  element={<About />} />
-        <Route path="/contact"                element={<ContactUs />} />
-        <Route path="/verifyemail"            element={<VerifyEmail />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/verifyemail" element={<VerifyEmail />} />
         <Route path="/catalog/:catalogName/:catalogId" element={<CatalogItem />} />
-        <Route path="/courses/:courseId"      element={<CourseDetail />} />
+        <Route path="/courses/:courseId" element={<CourseDetail />} />
 
         {/* ── Auth-only routes (redirect to dashboard if logged in) ─ */}
-        <Route path="/login"            element={<OpenRoute><Login /></OpenRoute>} />
-        <Route path="/signup"           element={<OpenRoute><Signup /></OpenRoute>} />
-        <Route path="/forgotpassword"   element={<OpenRoute><ForgotPassword /></OpenRoute>} />
+        <Route path="/login" element={<OpenRoute><Login /></OpenRoute>} />
+        <Route path="/signup" element={<OpenRoute><Signup /></OpenRoute>} />
+        <Route path="/forgotpassword" element={<OpenRoute><ForgotPassword /></OpenRoute>} />
         <Route path="/update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>} />
 
         {/* ── Protected dashboard routes ─────────────────────────── */}
         <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
           {/* Available to all authenticated users */}
-          <Route path="/dashboard/my-profile"     element={<MyProfile />} />
-          <Route path="/dashboard/cart"           element={<Cart />} />
-          <Route path="/dashboard/checkout"           element={<Checkout />} />
-          <Route path="/dashboard/settings"       element={<Settings />} />
+          <Route path="/dashboard/my-profile" element={<MyProfile />} />
+          <Route path="/dashboard/cart" element={<Cart />} />
+          <Route path="/dashboard/checkout" element={<Checkout />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
 
           {/* Student-only routes */}
           {user?.accountType === ACCOUNT_TYPE.STUDENT && (
             <>
-            <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses />} />
-            <Route path="/watch/:videoId" element={<VideoDetail />} />
+              <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses />} />
+              import VideoDetail from "../Video/VideoDetail";
+
+              <Route path="/courses/:courseId/learn" element={<VideoDetail />} />
+              <Route path="/courses/:courseId/learn/:subSectionId" element={<VideoDetail />} />
+              {/* <Route path="/watch/:videoId" element={<VideoDetail />} /> */}
             </>
           )}
 
