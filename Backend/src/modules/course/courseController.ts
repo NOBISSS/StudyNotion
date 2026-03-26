@@ -336,3 +336,20 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
     "Course details retrieved successfully",
   );
 });
+export const searchCourses = asyncHandler(async (req, res) => {
+  const { search } = req.query;
+  if (!search || typeof search !== "string") {
+    throw AppError.badRequest("Search search is required");
+  }
+  const courses = await Course.find({
+    courseName: { $regex: search, $options: "i" },
+    isActive: true,
+  });
+  ApiResponse.success(
+    res,
+    {
+      courses,
+    },
+    "Search results retrieved successfully",
+  );
+});

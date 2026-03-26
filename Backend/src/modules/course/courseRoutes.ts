@@ -11,6 +11,7 @@ import {
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
   getCourseDetails,
+  searchCourses,
   updateCourse,
 } from "./courseController.js";
 
@@ -22,6 +23,7 @@ courseRouter
   .route("/get-top/:categoryId")
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
+courseRouter.route("/search").get(searchCourses); 
 courseRouter.use(userMiddleware);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
