@@ -345,35 +345,59 @@ export const updateCourse:Handler = asyncHandler(async (req, res) => {
     "Course updated successfully",
   );
 });
-export const getCourseDetails:Handler = asyncHandler(async (req, res) => {
-  const courseId = req.params.courseId;
-  const userId = req.userId;
-  if (courseId && !Types.ObjectId.isValid(courseId as string)) {
+export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { userId } = req;
+
+  if (!courseId || !Types.ObjectId.isValid(courseId)) {
     throw AppError.badRequest("Invalid course ID");
   }
-  const course = await Course.findOne({ _id: new Types.ObjectId(courseId), isActive: true }).populate("categoryId", "name");
+
+  const courseObjectId = new Types.ObjectId(courseId);
+
+  const course = await Course.findOne({
+    _id: courseObjectId,
+    isActive: true,
+  }).populate("categoryId", "name");
+
   if (!course) {
     throw AppError.notFound("Course not found");
   }
+
   const sections = await Section.find({
-    courseId: new Types.ObjectId(courseId),
+    courseId: courseObjectId,
     isRemoved: false,
   });
+
   const enrollmentsCount = await CourseEnrollment.countDocuments({
-    courseId: new Types.ObjectId(courseId),
+    courseId: courseObjectId,
   });
+
   const reviews = await RatingAndReview.find({
-    courseId: new Types.ObjectId(courseId),
+    courseId: courseObjectId,
     isActive: true,
   }).populate("userId", "firstName lastName profilePicture");
-  const isUserEnrolled = await CourseEnrollment.findOne({
-    courseId: new Types.ObjectId(courseId),
-    userId: new Types.ObjectId(userId || ""),
-  });
+
+  let isUserEnrolled = false;
+
+  if (userId && Types.ObjectId.isValid(userId)) {
+    const enrollment = await CourseEnrollment.findOne({
+      courseId: courseObjectId,
+      userId: new Types.ObjectId(userId),
+    });
+    isUserEnrolled = !!enrollment;
+  }
+
   ApiResponse.success(
     res,
-    { course, sections, enrollmentsCount, reviews, isUserEnrolled: !!isUserEnrolled },
-    "Course details retrieved successfully",
+    {
+      course,
+      sections,
+      enrollmentsCount,
+      reviews,
+      isUserEnrolled,
+    },
+    "Course details retrieved successfully"
   );
 });
 export const searchCourses:Handler = asyncHandler(async (req, res) => {
