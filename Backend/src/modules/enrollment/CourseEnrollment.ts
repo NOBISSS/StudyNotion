@@ -12,6 +12,10 @@ const CourseEnrollmentSchema = new Schema(
       required: true,
       ref: "Course",
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

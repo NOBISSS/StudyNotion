@@ -10,6 +10,7 @@ const MaterialSchema = new Schema(
     materialS3Key: { type: String, required: true },
     URLExpiration: { type: Date },
     subsectionId: { type: Types.ObjectId, ref: "SubSection", required: true },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true },
 );

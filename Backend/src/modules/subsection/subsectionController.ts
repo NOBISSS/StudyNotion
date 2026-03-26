@@ -8,7 +8,7 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
   if (!sectionId) {
     throw AppError.badRequest("Section ID is required");
   }
-  const subsections = await SubSection.find({ sectionId, isActive: true });
+  const subsections = await SubSection.find({ sectionId, isActive: true }).sort({ createdAt: 1 });
   if (!subsections) {
     throw AppError.notFound("SubSections not found");
   }

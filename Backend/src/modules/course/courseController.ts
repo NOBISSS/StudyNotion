@@ -11,6 +11,11 @@ import { Section } from "../section/SectionModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
+import type { Handler } from "../../shared/types.js";
+import { SubSection } from "../subsection/SubSectionModel.js";
+import { Material } from "../subsection/material/MaterialModel.js";
+import { Quiz } from "../subsection/quiz/QuizModel.js";
+import Video from "../subsection/video/VideoModel.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -78,12 +83,12 @@ export const createCourse = asyncHandler(async (req, res) => {
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
   });
-  await Section.create({
-    name: "Introduction",
-    courseId: course._id,
-    order: 1,
-    subSectionIds: [],
-  });
+  // await Section.create({
+  //   name: "Introduction",
+  //   courseId: course._id,
+  //   order: 1,
+  //   subSectionIds: [],
+  // });
   ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
@@ -142,16 +147,16 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
   });
-  await Section.create({
-    name: "Introduction",
-    courseId: course._id,
-    order: 1,
-    subSectionIds: [],
-  });
+  // await Section.create({
+  //   name: "Introduction",
+  //   courseId: course._id,
+  //   order: 1,
+  //   subSectionIds: [],
+  // });
   ApiResponse.created(res, { course }, "Course created successfully");
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
-  const courses = await Course.find();
+  const courses = await Course.find({ isActive: true });
   ApiResponse.success(
     res,
     {
@@ -163,7 +168,7 @@ export const getAllCourse = asyncHandler(async (req, res) => {
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
     const userId = req.userId;
-    const courses = await Course.find();
+    const courses = await Course.find({ isActive: true }).populate("categoryId", "name");
     const coursesWithEnrollmentCount = await Promise.all(
       courses.map(async (c) => ({
         ...c.toObject(),
@@ -204,12 +209,13 @@ export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
     );
   },
 );
-export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(
+export const getAllCourseByEnrollmentsAndRatingsAndCategory:Handler = asyncHandler(
   async (req, res) => {
     const userId = req.userId;
     const categoryId = req.params.categoryId;
     const courses = await Course.find({
       categoryId: new Types.ObjectId(categoryId),
+      isActive: true,
     });
     const coursesWithEnrollmentCount = await Promise.all(
       courses.map(async (c) => ({
@@ -251,7 +257,7 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(
     );
   },
 );
-export const deleteCourse = asyncHandler(async (req, res) => {
+export const deleteCourse:Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   const course = await Course.findById(courseId);
   if (!course) {
@@ -266,9 +272,36 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     { courseId: new Types.ObjectId(courseId) },
     { isActive: false },
   );
+  await CourseEnrollment.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isActive: false },
+  );
+  await Section.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isRemoved: true },
+  );
+  await Category.findByIdAndUpdate(course.categoryId, {
+    $pull: { courses: course._id },
+  });
+  await SubSection.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isActive: false },
+  );
+  await Material.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isActive: false },
+  );
+  await Quiz.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isActive: false },
+  );
+  await Video.updateMany(
+    { courseId: new Types.ObjectId(courseId) },
+    { isActive: false },
+  );
   ApiResponse.success(res, {}, "Course deleted successfully");
 });
-export const updateCourse = asyncHandler(async (req, res) => {
+export const updateCourse:Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   if (courseId && !Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID");
@@ -286,7 +319,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     level,
     tag,
   } = parsedCourseData.data;
-  const course = await Course.findById(courseId);
+  const course = await Course.findOne({ _id: new Types.ObjectId(courseId), isActive: true });
   if (!course) {
     throw AppError.notFound("Course not found");
   }
@@ -312,31 +345,38 @@ export const updateCourse = asyncHandler(async (req, res) => {
     "Course updated successfully",
   );
 });
-export const getCourseDetails = asyncHandler(async (req, res) => {
+export const getCourseDetails:Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
+  const userId = req.userId;
   if (courseId && !Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID");
   }
-  const course = await Course.findById(courseId).populate("categoryId", "name");
+  const course = await Course.findOne({ _id: new Types.ObjectId(courseId), isActive: true }).populate("categoryId", "name");
   if (!course) {
     throw AppError.notFound("Course not found");
   }
   const sections = await Section.find({
     courseId: new Types.ObjectId(courseId),
+    isRemoved: false,
   });
   const enrollmentsCount = await CourseEnrollment.countDocuments({
     courseId: new Types.ObjectId(courseId),
   });
   const reviews = await RatingAndReview.find({
     courseId: new Types.ObjectId(courseId),
+    isActive: true,
   }).populate("userId", "firstName lastName profilePicture");
+  const isUserEnrolled = await CourseEnrollment.findOne({
+    courseId: new Types.ObjectId(courseId),
+    userId: new Types.ObjectId(userId || ""),
+  });
   ApiResponse.success(
     res,
-    { course, sections, enrollmentsCount, reviews },
+    { course, sections, enrollmentsCount, reviews, isUserEnrolled: !!isUserEnrolled },
     "Course details retrieved successfully",
   );
 });
-export const searchCourses = asyncHandler(async (req, res) => {
+export const searchCourses:Handler = asyncHandler(async (req, res) => {
   const { search } = req.query;
   if (!search || typeof search !== "string") {
     throw AppError.badRequest("Search search is required");

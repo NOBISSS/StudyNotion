@@ -1,6 +1,7 @@
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { Course } from "../course/CourseModel.js";
 import { Category } from "./CategoryModel.js";
 
 export const createCategory = asyncHandler(async (req, res) => {
@@ -60,6 +61,17 @@ export const deleteCategory = asyncHandler(async (req, res) => {
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");
   }
+  const generateCategory = await Category.findOne({name: "Uncategorized"});
+
+  if(!generateCategory){
+    throw AppError.internal("Something went wrong from our end. Please try again later.");
+  }
+  await Course.updateMany(
+    { categoryId: categoryId },
+    { $set: { categoryId: generateCategory._id } }
+  );
+  generateCategory.courses.push(...categoryDetails.courses);
+  await generateCategory.save();
   ApiResponse.success(
     res,
     {
@@ -87,13 +99,9 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
     .populate("courses")
     .exec();
 
-  // console.log(selectedCategory);
-  //handle the case when category is not found
   if (!selectedCategory) {
-    // console.log("Category is not found");
     throw AppError.notFound("Category is not found");
   }
-  //handle the case when there are no courses
 
   //get courses for other categories
   const categoriesExceptSelected = await Category.find({

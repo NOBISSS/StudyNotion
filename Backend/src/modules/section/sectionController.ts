@@ -26,23 +26,30 @@ export const createSection = asyncHandler(async (req, res): Promise<void> => {
   }
   const existingCourse = await Course.findOne({ _id: courseId });
 
-  if (existingCourse?.instructorId.toString() != instructorId && req.accountType !== "admin") {
+  if (
+    existingCourse?.instructorId.toString() != instructorId &&
+    req.accountType !== "admin"
+  ) {
     throw AppError.unauthorized(
       "You are not authorized to add sections to this course",
     );
   }
+  await Section.updateMany(
+    { courseId, order: { $gte: order } },
+    { $inc: { order: 1 } },
+  );
   const section = await Section.create({
     name,
     courseId,
     order,
   });
-  await Section.updateMany(
-    { courseId, _id: { $ne: section._id }, order: { $gte: order } },
-    { $inc: { order: 1 } },
+  ApiResponse.created(
+    res,
+    {
+      section,
+    },
+    "Section created successfully",
   );
-  ApiResponse.created(res, {
-    section,
-  }, "Section created successfully");
 });
 export const removeSection = asyncHandler(async (req, res): Promise<void> => {
   const instructorId = req.userId;
@@ -73,9 +80,13 @@ export const removeSection = asyncHandler(async (req, res): Promise<void> => {
     { _id: sectionId },
     { isRemoved: true, order: -1, lastOrder: existingSection.order },
   );
-  ApiResponse.success(res, {
-    section,
-  }, "Section removed successfully");
+  ApiResponse.success(
+    res,
+    {
+      section,
+    },
+    "Section removed successfully",
+  );
 });
 export const changeSectionOrder = asyncHandler(
   async (req, res): Promise<void> => {
@@ -162,9 +173,13 @@ export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   }
   currentSection.name = name || currentSection.name;
   await currentSection.save();
-  ApiResponse.success(res, {
-    section: currentSection,
-  }, "Section updated successfully");
+  ApiResponse.success(
+    res,
+    {
+      section: currentSection,
+    },
+    "Section updated successfully",
+  );
 });
 export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
   const instructorId = req.userId;
@@ -173,9 +188,13 @@ export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
     courseId: new Types.ObjectId(courseId),
     isRemoved: false,
   }).sort({ order: 1 });
-  ApiResponse.success(res, {
-    sections,
-  }, "Sections retrieved successfully");
+  ApiResponse.success(
+    res,
+    {
+      sections,
+    },
+    "Sections retrieved successfully",
+  );
 });
 export const getRemovedSections = asyncHandler(
   async (req, res): Promise<void> => {
@@ -194,9 +213,13 @@ export const getRemovedSections = asyncHandler(
         "You are not authorized to view removed sections of this course",
       );
     }
-    ApiResponse.success(res, {
-      sections,
-    }, "Removed sections retrieved successfully");
+    ApiResponse.success(
+      res,
+      {
+        sections,
+      },
+      "Removed sections retrieved successfully",
+    );
   },
 );
 export const undoRemoveSection = asyncHandler(
