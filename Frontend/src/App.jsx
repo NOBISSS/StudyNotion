@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { Home } from './pages/Home';
 import { Login } from './components/core/Login';
-import { Signup } from './components/core/signup';
+import { Signup } from './components/core/Signup';
 import Navbar from './components/core/Navbar';
 import CatalogItem from './components/core/CatalogItem';
 import CourseDetail from './components/core/CourseDetail';
@@ -61,7 +61,6 @@ function App() {
           {user?.accountType === ACCOUNT_TYPE.STUDENT && (
             <>
               <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses />} />
-              import VideoDetail from "../Video/VideoDetail";
 
               <Route path="/courses/:courseId/learn" element={<VideoDetail />} />
               <Route path="/courses/:courseId/learn/:subSectionId" element={<VideoDetail />} />
