@@ -104,7 +104,7 @@ async function startServer(): Promise<void> {
         }
         for (const connectedUser of connectedUsers) {
           if (connectedUser.userId === userId) continue;
-          
+
           const isEnrolled = await courseEnrollmentsCollection.findOne({
             userId: new ObjectId(connectedUser.userId),
             courseId: new ObjectId(courseId),
