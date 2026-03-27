@@ -18,6 +18,7 @@ import { videoQueue } from "../../../shared/queue/videoQueue.js";
 import { Section } from "../../section/SectionModel.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
+import VideoProgress from "./VideoProgressModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
@@ -232,13 +233,30 @@ export const getVideo = asyncHandler(async (req, res) => {
   // }
   const subsection = await SubSection.findById(subsectionId);
   if (!subsection) {
-    return res.status(404).json({ message: "Subsection not found!" });
+    throw AppError.notFound("Subsection not found");
   }
   const video = await Video.findOne({
     subsectionId: new Types.ObjectId(subsectionId),
   });
   if (!video) {
-    return res.status(404).json({ message: "Video not found!" });
+    throw AppError.notFound("Video not found for this subsection");
+  }
+  let videoProgress = await VideoProgress.findOne({
+    videoId: video._id,
+    userId: req.user._id,
+    subSectionId: new Types.ObjectId(subsectionId),
+  });
+  if (!videoProgress) {
+    videoProgress = await VideoProgress.create({
+      videoId: video._id,
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      courseId: subsection.courseId,
+      currentTime: 0,
+      watchedPercentage: 0,
+      isCompleted: false,
+      duration: video.duration || 0,
+    });
   }
   const headData = await s3.send(
     new HeadObjectCommand({
@@ -263,8 +281,50 @@ export const getVideo = asyncHandler(async (req, res) => {
   // await video.save({ validateBeforeSave: false });
   ApiResponse.success(
     res,
-    { video, link: signedUrl, subsection },
+    { video, link: signedUrl, subsection, videoProgress },
     "Video fetched successfully",
   );
   // res.json({ video, link: signedUrl,subsection });
+});
+export const saveVideoProgress = asyncHandler(async (req, res) => {
+  const { currentTime, subsectionId } = req.body;
+  const video = await Video.findOne({
+    subsectionId: new Types.ObjectId(subsectionId),
+  });
+  if (!video) {
+    throw AppError.notFound("Video not found for this subsection");
+  }
+  const isCompleted = currentTime / (video?.duration || 0) >= 0.9;
+  let videoProgress = await VideoProgress.findOneAndUpdate(
+    {
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      videoId: video._id,
+      courseId: video.courseId,
+    },
+    {
+      currentTime,
+      isCompleted,
+      watchedPercentage: Math.floor(
+        (currentTime / (video?.duration || 0)) * 100,
+      ),
+    },
+    {
+      new: true,
+    },
+  );
+  if (!videoProgress) {
+    videoProgress = await VideoProgress.create({
+      videoId: video._id,
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      courseId: video.courseId,
+      currentTime,
+      watchedPercentage: Math.floor((currentTime / (video?.duration || 0)) * 100),
+      isCompleted,
+      duration: video.duration || 0,
+    });
+  }
+
+  ApiResponse.success(res, videoProgress, "Video progress updated");
 });

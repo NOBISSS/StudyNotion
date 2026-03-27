@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getVideo } from "./videoController.js";
+import { getVideo, saveVideoProgress } from "./videoController.js";
 
 const videoRouter = Router();
 
@@ -10,5 +10,6 @@ const videoRouter = Router();
 // videoRouter.route("/multipart/:uploadId/batch").get(videoBatchHandler);
 
 videoRouter.route("/getone/:subsectionId").get(getVideo);
+videoRouter.route("/saveprogress/:subsectionId").post(saveVideoProgress);
 
 export default videoRouter;
