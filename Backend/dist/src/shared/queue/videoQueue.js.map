@@ -1,0 +1,1 @@
+{"version":3,"file":"videoQueue.js","sourceRoot":"","sources":["../../../../src/shared/queue/videoQueue.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,QAAQ,CAAC;AAC/B,OAAO,MAAM,MAAM,QAAQ,CAAC;AAC5B,OAAO,KAAK,MAAM,oBAAoB,CAAC;AACvC,MAAM,CAAC,MAAM,EAAE,CAAC;AAEhB,MAAM,CAAC,MAAM,UAAU,GAAG,IAAI,KAAK,CAAC,kBAAkB,EAAE;IACtD,UAAU,EAAE,KAAK;CAClB,CAAC,CAAC"}
