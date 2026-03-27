@@ -34,3 +34,10 @@ export async function vectorSearchCourses(queryText: string) {
 
   return results;
 }
+
+// vectorSearchCourses("Learn JavaScript basics")
+//   .then((results) => {
+//     console.log("Search results:", results);
+//     })  .catch((error) => {
+//     console.error("Error during vector search:", error);
+//   });

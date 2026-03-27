@@ -16,6 +16,7 @@
     "@aws-sdk/client-s3": "^3.988.0",
     "@aws-sdk/s3-request-presigner": "^3.988.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@google/genai": "^1.46.0",
     "@types/dotenv": "^6.1.1",
     "@xenova/transformers": "^2.17.2",
     "axios": "^1.13.6",

@@ -18,6 +18,7 @@ import Video from "../subsection/video/VideoModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
+import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -427,10 +428,31 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
     _id: { $in: vecotorSearchResults.map((result) => result.courseId) },
     isActive: true,
   }).populate("categoryId", "name");
+  const reviews = await RatingAndReview.find({
+    courseId: { $in: courses.map((course) => course._id) },
+    isActive: true,
+  });
+  const coursesWithRatingsAndScores = courses.map((course) => {
+    const courseReviews = reviews.filter(
+      (review) => review.courseId.toString() === course._id.toString(),
+    );
+    const averageRating =
+      courseReviews.reduce((sum, review) => sum + review.rating, 0) / courseReviews.length || 0;
+    const vectorSearchResult = vecotorSearchResults.find(
+      (result) => result.courseId.toString() === course._id.toString(),
+    );
+    return {
+      ...course.toObject(),
+      averageRating,
+      vectorScore: vectorSearchResult ? vectorSearchResult.score : 0,
+    };
+  });
+  const AIFilteredCourses = await filterCoursesByAI(coursesWithRatingsAndScores, query);
   ApiResponse.success(
     res,
     {
-      courses,
+      courses: coursesWithRatingsAndScores.sort((a, b) => b.vectorScore - a.vectorScore),
+      AIFilteredCourses,
     },
     "Search results retrieved successfully",
   );
