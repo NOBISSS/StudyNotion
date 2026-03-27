@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { Home } from './pages/Home';
 import { Login } from './components/core/Login';
-import { Signup } from './components/core/signup';
+import { Signup } from './components/core/Signup';
 import Navbar from './components/core/Navbar';
 import CatalogItem from './components/core/CatalogItem';
 import CourseDetail from './components/core/CourseDetail';
