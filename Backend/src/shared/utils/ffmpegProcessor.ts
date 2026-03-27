@@ -80,7 +80,7 @@ export async function processVideo({
 
     async function getVideoDuration(filePath: string): Promise<number> {
       return new Promise((resolve, reject) => {
-        ffmpeg.ffprobe(filePath, (err, metadata) => {
+        ffmpeg.ffprobe(filePath, (err:any, metadata:any) => {
           if (err) return reject(err);
           const duration = metadata.format.duration;
           if (typeof duration === "number") resolve(duration);
