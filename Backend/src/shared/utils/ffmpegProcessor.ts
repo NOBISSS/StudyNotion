@@ -78,7 +78,6 @@ export async function processVideo({
     });
     const s = await s3.send(putCmd);
 
-    // 4) Optional: update DB here if needed (worker shouldn't directly import Video model to keep separation)
     async function getVideoDuration(filePath: string): Promise<number> {
       return new Promise((resolve, reject) => {
         ffmpeg.ffprobe(filePath, (err, metadata) => {
@@ -91,12 +90,7 @@ export async function processVideo({
     }
     try {
       await mongoose.connect(`${process.env.MONGODB_URI}`);
-      // const subsection = await SubSection.create({
-      //   title: videoName,
-      //   contentType: "video",
-      // });
-      console.log("video size:", s.Size);
-      console.log("video size:", fs.readFileSync(outputPath).byteLength);
+
       const video = await Video.updateOne(
         { videoS3Key: key },
         {
@@ -115,7 +109,6 @@ export async function processVideo({
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
 
-    console.log("Compression complete for", key);
     return { compressedKey: `compressed/${path.basename(outputPath)}` };
   } catch (err) {
     console.error("processVideo error:", err);

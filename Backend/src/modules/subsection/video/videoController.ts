@@ -15,6 +15,7 @@ import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
 import { AppError } from "../../../shared/lib/AppError.js";
 import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
+import { Section } from "../../section/SectionModel.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
@@ -22,30 +23,22 @@ import { videoUploadSchema } from "./videoValidation.js";
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 export const addVideo = asyncHandler(async (req, res) => {});
-const demoBody = {
-  filename: "what-were-they-discussing-1080-publer.io.mp4",
-  type: "video/mp4",
-  metadata: {
-    title: "Hello World NodeJS",
-    courseId: "69c3a5205b2f3dcdfcd16bf0",
-    sectionId: "69c3a61ae02a4bedf94606e7",
-    isPreview: false,
-  },
-};
+
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
   const parsedVideoData = videoUploadSchema.safeParse(req.body);
   if (!parsedVideoData.success) {
-    throw AppError.badRequest( parsedVideoData.error.issues[0]?.message ||"Invalid video upload data");
+    throw AppError.badRequest(
+      parsedVideoData.error.issues[0]?.message || "Invalid video upload data",
+    );
   }
 
   const { filename, type, metadata } = parsedVideoData.data;
-  console.log(parsedVideoData.data);
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
   const subsection = await SubSection.create({
     title: metadata.title,
     isPreview: metadata.isPreview,
-    contentType: type,
+    contentType: "video",
     courseId: new Types.ObjectId(metadata.courseId),
     sectionId: new Types.ObjectId(metadata.sectionId),
   });
@@ -53,10 +46,15 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     videoName: filename,
     videoS3Key: key,
     // videoURL,
+    type,
     status: "uploaded",
     courseId: new Types.ObjectId(metadata.courseId),
     subsectionId: subsection._id,
   });
+  await Section.findByIdAndUpdate(metadata.sectionId, {
+    $push: { subsections: subsection._id },
+  });
+
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
@@ -236,7 +234,9 @@ export const getVideo = asyncHandler(async (req, res) => {
   if (!subsection) {
     return res.status(404).json({ message: "Subsection not found!" });
   }
-  const video = await Video.findOne({ subsectionId: new Types.ObjectId(subsectionId) });
+  const video = await Video.findOne({
+    subsectionId: new Types.ObjectId(subsectionId),
+  });
   if (!video) {
     return res.status(404).json({ message: "Video not found!" });
   }
@@ -263,7 +263,7 @@ export const getVideo = asyncHandler(async (req, res) => {
   // await video.save({ validateBeforeSave: false });
   ApiResponse.success(
     res,
-    { video, link: signedUrl,subsection },
+    { video, link: signedUrl, subsection },
     "Video fetched successfully",
   );
   // res.json({ video, link: signedUrl,subsection });
