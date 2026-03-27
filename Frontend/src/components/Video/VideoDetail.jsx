@@ -17,12 +17,14 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import Footer from "../core/Footer";
 import { addCourseReview } from "../../services/operations/progressAPI";
+import PlyrPlayer from "./PlyrPlayer";
+
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const COURSE_DETAIL_API  = (id) => `${BASE_URL}/courses/getdetails/${id}`;
-const SUBSECTIONS_API    = (id) => `${BASE_URL}/subsections/getall/${id}`;
-const VIDEO_API          = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
+const COURSE_DETAIL_API = (id) => `${BASE_URL}/courses/getdetails/${id}`;
+const SUBSECTIONS_API = (id) => `${BASE_URL}/subsections/getall/${id}`;
+const VIDEO_API = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
 
 // ─── Interactive Star Input ───────────────────────────────────────────────────
 function StarInput({ value, onChange }) {
@@ -49,9 +51,9 @@ function StarInput({ value, onChange }) {
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
 function ReviewModal({ courseId, user, token, onClose }) {
-  const [rating, setRating]   = useState(4);
-  const [review, setReview]   = useState("");
-  const [saving, setSaving]   = useState(false);
+  const [rating, setRating] = useState(4);
+  const [review, setReview] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!review.trim()) return;
@@ -96,14 +98,14 @@ function ReviewModal({ courseId, user, token, onClose }) {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 20 }}>
             {user?.additionalDetails?.profilePicture
               ? <img src={user.additionalDetails.profilePicture} alt={user.firstName}
-                  style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} />
+                style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} />
               : <div style={{
-                    width: 48, height: 48, borderRadius: "50%", background: "#FFD60A",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 20, color: "#000",
-                  }}>
-                    {user?.firstName?.charAt(0).toUpperCase() || "U"}
-                  </div>
+                width: 48, height: 48, borderRadius: "50%", background: "#FFD60A",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: 700, fontSize: 20, color: "#000",
+              }}>
+                {user?.firstName?.charAt(0).toUpperCase() || "U"}
+              </div>
             }
             <div style={{ textAlign: "center" }}>
               <p style={{ color: "#F1F2FF", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>
@@ -169,10 +171,10 @@ function ReviewModal({ courseId, user, token, onClose }) {
 
 // ─── Sidebar Section (lazy subsection fetch, cached) ─────────────────────────
 function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defaultOpen, token }) {
-  const [open, setOpen]         = useState(defaultOpen);
-  const [subs, setSubs]         = useState(null);   // null = not yet fetched
-  const [loading, setLoading]   = useState(false);
-  const fetchedRef              = useRef(false);     // cache flag — never re-fetches
+  const [open, setOpen] = useState(defaultOpen);
+  const [subs, setSubs] = useState(null);   // null = not yet fetched
+  const [loading, setLoading] = useState(false);
+  const fetchedRef = useRef(false);     // cache flag — never re-fetches
 
   const toggle = () => setOpen(o => !o);
 
@@ -256,7 +258,7 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
 
           {/* Subsection rows */}
           {!loading && subs?.map((sub) => {
-            const isActive    = sub._id === activeSubId;
+            const isActive = sub._id === activeSubId;
             const isCompleted = completedIds.has(sub._id);
             return (
               <div
@@ -321,19 +323,19 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function VideoDetail() {
   const { courseId, subSectionId: paramSubId } = useParams();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const { token } = useSelector(state => state.auth);
-  const { user }  = useSelector(state => state.profile);
+  const { user } = useSelector(state => state.profile);
 
-  const [course, setCourse]             = useState(null);
-  const [sections, setSections]         = useState([]);
-  const [activeSub, setActiveSub]       = useState(null);
-  const [videoSrc, setVideoSrc]         = useState(null);
-  const [completedIds]                  = useState(new Set()); // future: load from backend
+  const [course, setCourse] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [activeSub, setActiveSub] = useState(null);
+  const [videoSrc, setVideoSrc] = useState(null);
+  const [completedIds] = useState(new Set()); // future: load from backend
   const [loadingCourse, setLoadingCourse] = useState(true);
   const [loadingVideo, setLoadingVideo] = useState(false);
-  const [showModal, setShowModal]       = useState(false);
-  const [totalSubs, setTotalSubs]       = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [totalSubs, setTotalSubs] = useState(0);
 
   // ── 1. Fetch course details (sections come with it) ───────────────────────
   useEffect(() => {
@@ -348,9 +350,9 @@ export default function VideoDetail() {
         });
         if (cancelled) return;
 
-        const data     = res.data?.data ?? res.data;
+        const data = res.data?.data ?? res.data;
         const courseObj = data?.course ?? {};
-        const secs     = data?.sections ?? [];
+        const secs = data?.sections ?? [];
 
         setCourse(courseObj);
 
@@ -387,7 +389,7 @@ export default function VideoDetail() {
   const loadVideoById = useCallback(async (sub) => {
     // sub can be a subsection object OR just an ID string
     const subObj = typeof sub === "object" ? sub : { _id: sub };
-    const subId  = subObj._id;
+    const subId = subObj._id;
 
     setActiveSub(subObj);
     setVideoSrc(null);
@@ -397,7 +399,7 @@ export default function VideoDetail() {
 
     try {
       const res = await axios.get(VIDEO_API(subId), {
-        withCredentials:true
+        withCredentials: true
       });
       // Normalize: { data: { link } } | { link } | { video: { link } }
       const link =
@@ -418,196 +420,169 @@ export default function VideoDetail() {
       setLoadingVideo(false);
     }
   }, [courseId, navigate, token]);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const completedCount = completedIds.size;
-  const allDone        = totalSubs > 0 && completedCount >= totalSubs;
-  const dateStr        = activeSub?.createdAt
+  const allDone = totalSubs > 0 && completedCount >= totalSubs;
+  const dateStr = activeSub?.createdAt
     ? new Date(activeSub.createdAt).toLocaleDateString("en-US", {
-        month: "long", day: "numeric", year: "numeric",
-      })
+      month: "long", day: "numeric", year: "numeric",
+    })
     : "";
 
   return (
-    <div style={{
-      background: "#0A0F1C", minHeight: "100vh",
-      display: "flex", flexDirection: "column",
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
-    }}>
+  <div className="bg-[#0A0F1C] min-h-screen flex flex-col">
 
-      <div style={{ display: "flex", flex: 1 }}>
+    {/* MAIN LAYOUT */}
+    <div className="flex flex-1 flex-col lg:flex-row">
 
-        <aside style={{
-          width: 185, flexShrink: 0,
-          background: "#161D29",
-          borderRight: "1px solid #1C2333",
-          height: "calc(100vh - 56px)",
-          position: "sticky", top: 56,
-          overflowY: "auto", display: "flex", flexDirection: "column",
-          scrollbarWidth: "thin", scrollbarColor: "#2C333F #161D29",
-        }}>
+  {/* ───────── MOBILE OVERLAY ───────── */}
+  {isSidebarOpen && (
+    <div
+      className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+      onClick={() => setIsSidebarOpen(false)}
+    />
+  )}
 
-          {/* Course title + progress */}
-          <div style={{ padding: "16px 14px 12px", borderBottom: "1px solid #1C2333", flexShrink: 0 }}>
-            {loadingCourse ? (
-              <>
-                <div style={{ height: 13, width: "80%", borderRadius: 3, background: "#1C2333", marginBottom: 6 }} />
-                <div style={{ height: 10, width: "30%", borderRadius: 3, background: "#161D29" }} />
-              </>
-            ) : (
-              <>
-                <p style={{ color: "#F1F2FF", fontWeight: 700, fontSize: 13, marginBottom: 4, lineHeight: 1.4 }}>
-                  Learn {course?.courseName || "Course"}
-                </p>
-                <p style={{ fontSize: 11, fontWeight: 600, color: allDone ? "#06B6D4" : "#6B7280" }}>
-                  {completedCount}/{totalSubs}
-                </p>
-              </>
-            )}
-          </div>
+  {/* ───────── SIDEBAR ───────── */}
+  <aside
+    className={`
+      fixed lg:static
+      top-0 left-0
+      h-full lg:h-[calc(100vh-56px)]
+      w-[260px] lg:w-[185px]
+      bg-[#161D29]
+      border-r border-[#1C2333]
+      z-50
+      transform transition-transform duration-300 ease-in-out
 
-          {/* Add Review — only when 100% complete */}
-          {allDone && (
-            <div style={{ padding: "12px 14px", borderBottom: "1px solid #1C2333", flexShrink: 0 }}>
-              <button
-                onClick={() => setShowModal(true)}
-                style={{
-                  width: "100%", padding: "8px 0",
-                  background: "#FFD60A", color: "#000",
-                  fontWeight: 700, fontSize: 13,
-                  borderRadius: 6, border: "none", cursor: "pointer",
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "#f5cc00"}
-                onMouseLeave={e => e.currentTarget.style.background = "#FFD60A"}
-              >
-                Add Review
-              </button>
+      ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      lg:translate-x-0
+
+      flex flex-col
+      overflow-y-auto
+    `}
+  >
+
+    {/* CLOSE BUTTON (MOBILE) */}
+    <div className="lg:hidden flex justify-between items-center px-4 py-3 border-b border-[#1C2333]">
+      <p className="text-white text-sm font-semibold">Course Content</p>
+      <button
+        onClick={() => setIsSidebarOpen(false)}
+        className="text-white text-lg"
+      >
+        ✕
+      </button>
+    </div>
+
+    {/* YOUR EXISTING SIDEBAR CONTENT */}
+    <div className="flex-1 overflow-y-auto">
+      {loadingCourse ? (
+        <div className="px-[14px] py-[12px]">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="mb-[16px]">
+              <div className="h-[12px] bg-[#1C2333] rounded mb-[8px] w-[70%]" />
+              <div className="h-[9px] bg-[#161D29] rounded mb-[6px] w-[80%]" />
             </div>
-          )}
-
-          {/* Sections list */}
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {loadingCourse ? (
-              <div style={{ padding: "12px 14px" }}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} style={{ marginBottom: 16 }}>
-                    <div style={{ height: 12, borderRadius: 3, background: "#1C2333", marginBottom: 8, width: `${55 + i * 8}%` }} />
-                    {[1, 2].map(j => (
-                      <div key={j} style={{ height: 9, borderRadius: 3, background: "#161D29", marginBottom: 6, marginLeft: 8, width: `${70 + j * 10}%` }} />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            ) : sections.length === 0 ? (
-              <p style={{ padding: "20px 14px", color: "#4B5563", fontSize: 12, textAlign: "center" }}>
-                No content available.
-              </p>
-            ) : (
-              sections.map((section, i) => (
-                <SidebarSection
-                  key={section._id}
-                  section={section}
-                  activeSubId={activeSub?._id}
-                  completedIds={completedIds}
-                  onSelectSub={loadVideoById}
-                  defaultOpen={i === 0}
-                  token={token}
-                />
-              ))
-            )}
-          </div>
-        </aside>
-
-        {/* ════════════════════════════════════════════════════════
-            MAIN — Video + Info
-        ════════════════════════════════════════════════════════ */}
-        <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-
-          {/* Video */}
-          <div style={{
-            background: "#000", width: "100%",
-            aspectRatio: "16/9", position: "relative",
-            maxHeight: "calc(100vh - 56px - 180px)",
-          }}>
-            {loadingVideo && (
-              <div style={{
-                position: "absolute", inset: 0, background: "#000",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: "50%",
-                  border: "4px solid #2C3244", borderTop: "4px solid #FFD60A",
-                  animation: "vd-spin 0.8s linear infinite",
-                }} />
-                <style>{`@keyframes vd-spin { to { transform:rotate(360deg); } }`}</style>
-              </div>
-            )}
-
-            {!loadingVideo && videoSrc && (
-              /* key={videoSrc} forces browser to remount video on URL change     */
-              /* Browser auto-handles Range requests — no extra config needed     */
-              <video
-                key={videoSrc}
-                controls
-                preload="metadata"
-                style={{ width: "100%", height: "100%", display: "block", background: "#000" }}
-              >
-                <source src={videoSrc} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            )}
-
-            {!loadingVideo && !videoSrc && (
-              <div style={{
-                position: "absolute", inset: 0, background: "#0D1117",
-                display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center", gap: 14,
-              }}>
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2C333F" strokeWidth="1.2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polygon points="10,8 16,12 10,16" fill="#2C333F" stroke="none" />
-                </svg>
-                <p style={{ color: "#4B5563", fontSize: 13 }}>
-                  {loadingCourse ? "Loading..." : "Select a lecture from the sidebar"}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Subsection info */}
-          <div style={{ padding: "20px 28px 32px" }}>
-            {activeSub && (
-              <>
-                <h2 style={{ color: "#F1F2FF", fontSize: 20, fontWeight: 700, marginBottom: 12, lineHeight: 1.3 }}>
-                  {activeSub.title || activeSub.subSectionName}
-                </h2>
-                {activeSub.description && (
-                  <div style={{ marginBottom: 12 }}>
-                    {String(activeSub.description).split("\n").filter(Boolean).map((line, i) => (
-                      <p key={i} style={{ color: "#AFB2BF", fontSize: 13.5, lineHeight: 1.7, marginBottom: 3 }}>
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                )}
-                {dateStr && (
-                  <p style={{ color: "#6B7280", fontSize: 13, marginTop: 8 }}>{dateStr}</p>
-                )}
-              </>
-            )}
-          </div>
-        </main>
-      </div>
-
-      <Footer />
-
-      {showModal && (
-        <ReviewModal
-          courseId={courseId}
-          user={user}
-          token={token}
-          onClose={() => setShowModal(false)}
-        />
+          ))}
+        </div>
+      ) : (
+        sections.map((section, i) => (
+          <SidebarSection
+            key={section._id}
+            section={section}
+            activeSubId={activeSub?._id}
+            completedIds={completedIds}
+            onSelectSub={(id) => {
+              loadVideoById(id);
+              setIsSidebarOpen(false); // 🔥 auto close on mobile
+            }}
+            defaultOpen={i === 0}
+            token={token}
+          />
+        ))
       )}
     </div>
-  );
+  </aside>
+
+  {/* ───────── MAIN CONTENT ───────── */}
+  <main className="flex-1 min-w-0 flex flex-col">
+
+    {/* 🔥 MOBILE HEADER (TOGGLE BUTTON) */}
+    <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-[#1C2333] bg-[#0A0F1C]">
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="text-white text-xl"
+      >
+        ☰
+      </button>
+      <p className="text-sm text-[#AFB2BF]">Course Content</p>
+    </div>
+
+    {/* ───────── VIDEO SECTION ───────── */}
+    <div className="
+      w-full
+      max-w-[900px]
+      aspect-video
+      relative
+      mx-auto
+      p-[12px] sm:p-[16px] lg:p-[20px]
+    ">
+
+      {/* LOADER */}
+      {loadingVideo && (
+        <div className="absolute inset-0 bg-black flex items-center justify-center">
+          <div className="w-[40px] h-[40px] rounded-full border-[4px] border-[#2C3244] border-t-[#FFD60A] animate-spin"></div>
+        </div>
+      )}
+
+      {/* PLAYER */}
+        <PlyrPlayer src={videoSrc} />
+
+      {/* EMPTY */}
+      {!loadingVideo && !videoSrc && (
+        <div className="absolute inset-0 bg-[#0D1117] flex flex-col items-center justify-center gap-[14px]">
+          <p className="text-[#4B5563] text-sm text-center px-4">
+            Select a lecture from the sidebar
+          </p>
+        </div>
+      )}
+    </div>
+
+    {/* ───────── VIDEO INFO ───────── */}
+    <div className="px-[16px] sm:px-[24px] lg:px-[28px] pt-[20px] pb-[32px]">
+
+      {activeSub && (
+        <>
+          <h2 className="
+            text-[#F1F2FF]
+            text-[16px] sm:text-[18px] lg:text-[20px]
+            font-bold
+            mb-[12px]
+          ">
+            {activeSub.title || activeSub.subSectionName}
+          </h2>
+
+          {activeSub.description && (
+            <p className="text-[#AFB2BF] text-[13px] leading-[1.7]">
+              {activeSub.description}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  </main>
+</div>
+
+    <Footer />
+
+    {showModal && (
+      <ReviewModal
+        courseId={courseId}
+        user={user}
+        token={token}
+        onClose={() => setShowModal(false)}
+      />
+    )}
+  </div>
+);
 }
