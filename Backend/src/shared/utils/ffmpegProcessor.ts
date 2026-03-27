@@ -31,7 +31,11 @@ async function downloadFromS3(key: string, dest: string) {
 // We'll use @aws-sdk/client-s3 GetObjectCommand directly for streaming below
 
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Course } from "../../modules/course/CourseModel.js";
+import { Section } from "../../modules/section/SectionModel.js";
+import { SubSection } from "../../modules/subsection/SubSectionModel.js";
 import Video from "../../modules/subsection/video/VideoModel.js";
+import { convertSecondsToReadingTime } from "../../modules/subsection/video/videoUtils.js";
 
 export async function processVideo({
   key,
@@ -91,7 +95,7 @@ export async function processVideo({
     try {
       await mongoose.connect(`${process.env.MONGODB_URI}`);
 
-      const video = await Video.updateOne(
+      const video = await Video.findOneAndUpdate(
         { videoS3Key: key },
         {
           $set: {
@@ -99,9 +103,26 @@ export async function processVideo({
             URLExpiration: Date.now(),
             videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
             duration: await getVideoDuration(outputPath),
+            status: "ready",
           },
         },
       );
+      if (!video) {
+        throw new Error("Video not found");
+      }
+      await Section.findByIdAndUpdate(video.sectionId, {
+        $push: { subsections: video.subsectionId },
+      });
+      await SubSection.findByIdAndUpdate(video.subsectionId, {
+        $set: { isActive: true },
+      });
+      const course = await Course.findByIdAndUpdate(video.courseId, {
+        $set: { totalDuration: { $add: [video.duration, "$totalDuration"] } },
+      }, { new: true });
+      if (course) {
+      course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
+      await course.save();
+      }
     } catch (err) {
       console.log(err);
     }
