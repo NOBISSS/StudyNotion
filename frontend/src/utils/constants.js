@@ -9,4 +9,4 @@ export const COURSE_STATUS={
     PUBLISHED:"Published",
 }
 
-export const BACKEND_URL=import.meta.VITE_BASE_URL;
+export const BACKEND_URL="/api/v1";
