@@ -5,20 +5,19 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mongoose from "mongoose";
 import path from "path";
-import { s3 } from "./config/s3Config.js";
+import { s3 } from "../config/s3Config.js";
 dotenv.config();
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 // Download stream from S3 to local file
-async function downloadFromS3(key, dest) {
+async function downloadFromS3(key: string, dest: string) {
   return new Promise((resolve, reject) => {
-    const params = { Bucket: BUCKET, Key: key };
-    const stream = s3
-      .send(new (require("@aws-sdk/client-s3").GetObjectCommand)(params))
+    const getCmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
+    s3.send(getCmd)
       .then((resp) => {
-        const body = resp.Body;
+        const body = resp.Body as NodeJS.ReadableStream;
         const ws = fs.createWriteStream(dest);
         body.pipe(ws);
         ws.on("finish", resolve);
@@ -32,10 +31,15 @@ async function downloadFromS3(key, dest) {
 // We'll use @aws-sdk/client-s3 GetObjectCommand directly for streaming below
 
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { Video } from "./models/videoModel.js";
-import { SubSection } from "../models/SubSectionModel.js";
+import Video from "../../modules/subsection/video/VideoModel.js";
 
-export async function processVideo({ key, videoName }) {
+export async function processVideo({
+  key,
+  videoName,
+}: {
+  key: string;
+  videoName: string;
+}) {
   const tempDir = path.resolve("./temp");
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
@@ -48,7 +52,7 @@ export async function processVideo({ key, videoName }) {
     const data = await s3.send(getCmd);
     await new Promise((resolve, reject) => {
       const writeStream = fs.createWriteStream(inputPath);
-      data.Body.pipe(writeStream);
+      (data.Body as NodeJS.ReadableStream).pipe(writeStream);
       writeStream.on("finish", resolve);
       writeStream.on("error", reject);
     });
@@ -58,7 +62,7 @@ export async function processVideo({ key, videoName }) {
       ffmpeg(inputPath)
         .videoCodec("libx264")
         .size("1280x?") // maintain aspect ratio, width 1280
-        .outputOptions(["-movflags faststart","-preset veryfast", "-crf 28"])
+        .outputOptions(["-movflags faststart", "-preset veryfast", "-crf 28"])
         .on("end", resolve)
         .on("error", reject)
         .save(outputPath);
@@ -74,22 +78,29 @@ export async function processVideo({ key, videoName }) {
     });
     const s = await s3.send(putCmd);
 
-    // 4) Optional: update DB here if needed (worker shouldn't directly import Video model to keep separation)
+    async function getVideoDuration(filePath: string): Promise<number> {
+      return new Promise((resolve, reject) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
+          if (err) return reject(err);
+          const duration = metadata.format.duration;
+          if (typeof duration === "number") resolve(duration);
+          else reject(new Error("Could not get duration"));
+        });
+      });
+    }
     try {
-      await mongoose.connect(`${process.env.DATABASE_URI}`);
-      // const subsection = await SubSection.create({
-      //   title: videoName,
-      //   contentType: "video",
-      // });
+      await mongoose.connect(`${process.env.MONGODB_URI}`);
+
       const video = await Video.updateOne(
-        { fileKey: key },
+        { videoS3Key: key },
         {
           $set: {
-            fileKey: `compressed/${path.basename(outputPath)}`,
-            expiry: Date.now(),
-            size:s.Size
+            videoS3Key: `compressed/${path.basename(outputPath)}`,
+            URLExpiration: Date.now(),
+            videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
+            duration: await getVideoDuration(outputPath),
           },
-        }
+        },
       );
     } catch (err) {
       console.log(err);
@@ -98,7 +109,6 @@ export async function processVideo({ key, videoName }) {
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
 
-    console.log("Compression complete for", key);
     return { compressedKey: `compressed/${path.basename(outputPath)}` };
   } catch (err) {
     console.error("processVideo error:", err);

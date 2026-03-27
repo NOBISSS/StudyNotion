@@ -15,39 +15,52 @@ import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
 import { AppError } from "../../../shared/lib/AppError.js";
 import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
+import { Section } from "../../section/SectionModel.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
+import VideoProgress from "./VideoProgressModel.js";
+import { videoUploadSchema } from "./videoValidation.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 export const addVideo = asyncHandler(async (req, res) => {});
+
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
-  const { filename, contentType } = req.body;
-  console.log(req.body);
-  if (!filename) throw AppError.badRequest("Filename is required");
+  const parsedVideoData = videoUploadSchema.safeParse(req.body);
+  if (!parsedVideoData.success) {
+    throw AppError.badRequest(
+      parsedVideoData.error.issues[0]?.message || "Invalid video upload data",
+    );
+  }
+
+  const { filename, type, metadata } = parsedVideoData.data;
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
   const subsection = await SubSection.create({
-    title: "What is Node.js?",
-    isPreview: true,
+    title: metadata.title,
+    isPreview: metadata.isPreview,
     contentType: "video",
-    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
-    sectionId: new Types.ObjectId("69c3a5f9e02a4bedf94606e0"),
+    courseId: new Types.ObjectId(metadata.courseId),
+    sectionId: new Types.ObjectId(metadata.sectionId),
   });
   const newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
     // videoURL,
+    type,
     status: "uploaded",
-    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
+    courseId: new Types.ObjectId(metadata.courseId),
     subsectionId: subsection._id,
   });
+  await Section.findByIdAndUpdate(metadata.sectionId, {
+    $push: { subsections: subsection._id },
+  });
+
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
-    ContentType: contentType || "application/octet-stream",
+    ContentType: type || "application/octet-stream",
   });
-
   const createResp = await s3.send(createCmd);
   const uploadId = createResp.UploadId;
 
@@ -123,7 +136,7 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
 
   const completeResp = await s3.send(completeCmd);
 
-  await videoQueue.add("compress-video", {
+  await videoQueue.add("video-processing", {
     key,
     videoName: key.split("/").pop(),
     s3Location: completeResp.Location,
@@ -218,13 +231,37 @@ export const getVideo = asyncHandler(async (req, res) => {
   //     .status(400)
   //     .json({ message: "start and end query params are required" });
   // }
-  const subsection = await SubSection.findById(subsectionId);
+  const subsection = await SubSection.findOne({
+    _id: new Types.ObjectId(subsectionId),
+    isActive: true,
+  });
   if (!subsection) {
-    return res.status(404).json({ message: "Subsection not found!" });
+    throw AppError.notFound("Subsection not found");
   }
-  const video = await Video.findOne({ subsectionId: new Types.ObjectId(subsectionId) });
+  const video = await Video.findOne({
+    subsectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
+  });
   if (!video) {
-    return res.status(404).json({ message: "Video not found!" });
+    throw AppError.notFound("Video not found for this subsection");
+  }
+  let videoProgress = await VideoProgress.findOne({
+    videoId: video._id,
+    userId: req.user._id,
+    subSectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
+  });
+  if (!videoProgress) {
+    videoProgress = await VideoProgress.create({
+      videoId: video._id,
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      courseId: subsection.courseId,
+      currentTime: 0,
+      watchedPercentage: 0,
+      isCompleted: false,
+      duration: video.duration || 0,
+    });
   }
   const headData = await s3.send(
     new HeadObjectCommand({
@@ -249,8 +286,54 @@ export const getVideo = asyncHandler(async (req, res) => {
   // await video.save({ validateBeforeSave: false });
   ApiResponse.success(
     res,
-    { video, link: signedUrl,subsection },
+    { video, link: signedUrl, subsection, videoProgress },
     "Video fetched successfully",
   );
   // res.json({ video, link: signedUrl,subsection });
+});
+export const saveVideoProgress = asyncHandler(async (req, res) => {
+  const { currentTime, subsectionId, duration } = req.body;
+  const video = await Video.findOne({
+    subsectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
+  });
+  if (!video) {
+    throw AppError.notFound("Video not found for this subsection");
+  }
+  const isCompleted = currentTime / (video?.duration || duration || 0) >= 0.95;
+  let videoProgress = await VideoProgress.findOneAndUpdate(
+    {
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      videoId: video._id,
+      courseId: video.courseId,
+      isActive: true,
+    },
+    {
+      currentTime,
+      isCompleted,
+      watchedPercentage: Math.floor(
+        (currentTime / (video?.duration || duration || 0)) * 100,
+      ),
+    },
+    {
+      new: true,
+    },
+  );
+  if (!videoProgress) {
+    videoProgress = await VideoProgress.create({
+      videoId: video._id,
+      userId: req.user._id,
+      subSectionId: new Types.ObjectId(subsectionId),
+      courseId: video.courseId,
+      currentTime,
+      watchedPercentage: Math.floor(
+        (currentTime / (video?.duration || duration || 0)) * 100,
+      ),
+      isCompleted,
+      duration: video.duration || duration || 0,
+    });
+  }
+
+  ApiResponse.success(res, videoProgress, "Video progress updated");
 });
