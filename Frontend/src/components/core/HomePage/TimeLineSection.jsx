@@ -5,7 +5,7 @@ import Logo2 from "../../../assets/Logo2.svg"
 import Logo3 from "../../../assets/Logo3.svg"
 import Logo4 from "../../../assets/Logo4.svg"
 import Line3 from "../../../assets/Line 3.png"
-import TimeLineImage from "../../../assets/TimeLineImage.png"
+import TimeLineImage from "../../../assets/TimelineImage.png"
 const timelineData=[
     {
         logo:Logo1,
