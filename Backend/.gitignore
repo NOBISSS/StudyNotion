@@ -2,7 +2,6 @@
 .env.local
 .env.test
 node_modules/
-dist/
 coverage/
 logs/
 *.log

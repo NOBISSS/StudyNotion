@@ -1,0 +1,3 @@
+export declare const generateCloudinarySignature: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
+export declare const generateS3UploadUrl: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
+//# sourceMappingURL=generateSignatures.controller.d.ts.map

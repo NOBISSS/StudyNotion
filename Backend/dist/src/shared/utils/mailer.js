@@ -1,0 +1,26 @@
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+dotenv.config();
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.MAILER_USER,
+        pass: process.env.MAILER_PASS,
+    },
+});
+export async function sendMail(email, subject, html) {
+    try {
+        let mailOptions = {
+            from: "studyNotion <noreply>",
+            to: email,
+            subject: subject,
+            html: html,
+        };
+        let info = await transporter.sendMail(mailOptions);
+    }
+    catch (err) {
+        console.log(err);
+        throw new Error("Something went wrong while generating otp");
+    }
+}
+//# sourceMappingURL=mailer.js.map

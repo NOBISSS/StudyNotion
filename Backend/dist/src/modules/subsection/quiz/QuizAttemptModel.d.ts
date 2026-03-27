@@ -1,0 +1,310 @@
+import { Schema } from "mongoose";
+declare const QuizAttempt: import("mongoose").Model<{
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps, {}, {}, {
+    id: string;
+}, import("mongoose").Document<unknown, {}, {
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps, {
+    id: string;
+}, {
+    timestamps: true;
+}> & Omit<{
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}, "id"> & {
+    id: string;
+}, Schema<any, import("mongoose").Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
+    timestamps: true;
+}, {
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps, {
+    id: string;
+}, import("mongoose").ResolveSchemaOptions<{
+    timestamps: true;
+}>> & Omit<{
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }> & {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    }>;
+} & import("mongoose").DefaultTimestampProps & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}, "id"> & {
+    id: string;
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        userId: import("mongoose").Types.ObjectId;
+        quizId: import("mongoose").Types.ObjectId;
+        score: number;
+        adaptiveData: any[];
+        attemptedAt: NativeDate;
+        answers: import("mongoose").Types.DocumentArray<{
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }> & {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }>;
+    } & import("mongoose").DefaultTimestampProps, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<{
+        timestamps: true;
+    }>> & Omit<{
+        userId: import("mongoose").Types.ObjectId;
+        quizId: import("mongoose").Types.ObjectId;
+        score: number;
+        adaptiveData: any[];
+        attemptedAt: NativeDate;
+        answers: import("mongoose").Types.DocumentArray<{
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }> & {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }>;
+    } & import("mongoose").DefaultTimestampProps & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }, import("mongoose").Types.Subdocument<string | import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }> & ({
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    })>;
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
+} & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}>, {
+    userId: import("mongoose").Types.ObjectId;
+    quizId: import("mongoose").Types.ObjectId;
+    score: number;
+    adaptiveData: any[];
+    attemptedAt: NativeDate;
+    answers: import("mongoose").Types.DocumentArray<{
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }, import("mongoose").Types.Subdocument<string | import("bson").ObjectId, unknown, {
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }> & ({
+        questionId: import("mongoose").Types.ObjectId;
+        answer: import("mongoose").Types.ObjectId;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    })>;
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
+} & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}>;
+export default QuizAttempt;
+//# sourceMappingURL=QuizAttemptModel.d.ts.map

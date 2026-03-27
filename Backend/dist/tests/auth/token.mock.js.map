@@ -1,0 +1,1 @@
+{"version":3,"file":"token.mock.js","sourceRoot":"","sources":["../../../tests/auth/token.mock.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,eAAe,CAAC;AAErC,IAAI,CAAC,mBAAmB,CAAC,wCAAwC,EAAE,GAAG,EAAE,CAAC,CAAC;IACxE,mBAAmB,EAAE,IAAI,CAAC,EAAE,EAAE,CAAC,eAAe,CAAC,mBAAmB,CAAC;IACnE,oBAAoB,EAAE,IAAI,CAAC,EAAE,EAAE,CAAC,eAAe,CAAC,oBAAoB,CAAC;CACtE,CAAC,CAAC,CAAC"}

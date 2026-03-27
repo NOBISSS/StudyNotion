@@ -1,0 +1,12 @@
+export const ACCOUNT_TYPE={
+    INSTRUCTOR:"instructor",
+    STUDENT:"student",
+    ADMIN:"admin",
+};
+
+export const COURSE_STATUS={
+    DRAFT:"Draft",
+    PUBLISHED:"Published",
+}
+
+export const BACKEND_URL="/api/v1";

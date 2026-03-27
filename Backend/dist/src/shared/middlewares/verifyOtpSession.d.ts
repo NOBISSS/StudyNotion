@@ -1,0 +1,2 @@
+export declare const verifyOtpSession: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
+//# sourceMappingURL=verifyOtpSession.d.ts.map
