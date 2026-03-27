@@ -20,7 +20,7 @@ const timelineData=[
     {
         logo:Logo3,
         heading:"Flexibility",
-        description:"The ability to switch is an important skills"
+        description:"The ability to switch is an important Skills"
     },
     {
         logo:Logo4,
