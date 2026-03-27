@@ -61,7 +61,6 @@ function App() {
           {user?.accountType === ACCOUNT_TYPE.STUDENT && (
             <>
               <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses />} />
-              import VideoDetail from "../Video/VideoDetail";
 
               <Route path="/courses/:courseId/learn" element={<VideoDetail />} />
               <Route path="/courses/:courseId/learn/:subSectionId" element={<VideoDetail />} />
