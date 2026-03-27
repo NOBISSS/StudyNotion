@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { BACKEND_URL } from "../../utils/constants";
 
 const VideoPlayer = ({ videoId }) => {
   const [videoUrl, setVideoUrl] = useState(null);
@@ -7,7 +8,7 @@ const VideoPlayer = ({ videoId }) => {
   useEffect(() => {
     const fetchVideo = async () => {
       const res = await axios.get(
-        `http://localhost:3000/api/v1/subsections/video/getone/${videoId}`,{
+        BACKEND_URL`/subsections/video/getone/${videoId}`,{
             withCredentials:true
         }
       );

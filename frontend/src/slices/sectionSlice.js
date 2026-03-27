@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BACKEND_URL } from '../utils/constants';
 
 // ─── Async thunk ──────────────────────────────────────────────────────────────
 // Fetches subsections for a single section by its _id.
@@ -13,7 +14,7 @@ export const fetchSubSections = createAsyncThunk(
 
         try {
             const response = await axios.get(
-                `http://localhost:3000/api/v1/subsections/getall/${sectionId}`
+                BACKEND_URL`/subsections/getall/${sectionId}`
             );
             // Expected response shape: { success: true, data: [ ...subSections ] }
             console.log(response);
