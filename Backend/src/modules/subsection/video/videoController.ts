@@ -17,7 +17,7 @@ import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
-import { title } from "process";
+import { videoUploadSchema } from "./videoValidation.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
@@ -33,25 +33,29 @@ const demoBody = {
   },
 };
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
-  const { filename, type } = req.body;
-  console.log(req.body);
-  if (!filename) throw AppError.badRequest("Filename is required");
+  const parsedVideoData = videoUploadSchema.safeParse(req.body);
+  if (!parsedVideoData.success) {
+    throw AppError.badRequest( parsedVideoData.error.issues[0]?.message ||"Invalid video upload data");
+  }
+
+  const { filename, type, metadata } = parsedVideoData.data;
+  console.log(parsedVideoData.data);
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
-  // const subsection = await SubSection.create({
-  //   title: "Hello World NodeJS",
-  //   isPreview: true,
-  //   contentType: "video",
-  //   courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
-  //   sectionId: new Types.ObjectId("69c3a61ae02a4bedf94606e7"),
-  // });
+  const subsection = await SubSection.create({
+    title: metadata.title,
+    isPreview: metadata.isPreview,
+    contentType: type,
+    courseId: new Types.ObjectId(metadata.courseId),
+    sectionId: new Types.ObjectId(metadata.sectionId),
+  });
   const newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
     // videoURL,
     status: "uploaded",
-    // courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
-    // subsectionId: subsection._id,
+    courseId: new Types.ObjectId(metadata.courseId),
+    subsectionId: subsection._id,
   });
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
