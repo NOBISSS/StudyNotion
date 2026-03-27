@@ -17,37 +17,47 @@ import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
+import { title } from "process";
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 
 export const addVideo = asyncHandler(async (req, res) => {});
+const demoBody = {
+  filename: "what-were-they-discussing-1080-publer.io.mp4",
+  type: "video/mp4",
+  metadata: {
+    title: "Hello World NodeJS",
+    courseId: "69c3a5205b2f3dcdfcd16bf0",
+    sectionId: "69c3a61ae02a4bedf94606e7",
+    isPreview: false,
+  },
+};
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
-  const { filename, contentType } = req.body;
+  const { filename, type } = req.body;
   console.log(req.body);
   if (!filename) throw AppError.badRequest("Filename is required");
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
-  const subsection = await SubSection.create({
-    title: "What is Node.js?",
-    isPreview: true,
-    contentType: "video",
-    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
-    sectionId: new Types.ObjectId("69c3a5f9e02a4bedf94606e0"),
-  });
+  // const subsection = await SubSection.create({
+  //   title: "Hello World NodeJS",
+  //   isPreview: true,
+  //   contentType: "video",
+  //   courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
+  //   sectionId: new Types.ObjectId("69c3a61ae02a4bedf94606e7"),
+  // });
   const newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
     // videoURL,
     status: "uploaded",
-    courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
-    subsectionId: subsection._id,
+    // courseId: new Types.ObjectId("69c3a5205b2f3dcdfcd16bf0"),
+    // subsectionId: subsection._id,
   });
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
-    ContentType: contentType || "application/octet-stream",
+    ContentType: type || "application/octet-stream",
   });
-
   const createResp = await s3.send(createCmd);
   const uploadId = createResp.UploadId;
 
@@ -123,7 +133,7 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
 
   const completeResp = await s3.send(completeCmd);
 
-  await videoQueue.add("compress-video", {
+  await videoQueue.add("video-processing", {
     key,
     videoName: key.split("/").pop(),
     s3Location: completeResp.Location,
