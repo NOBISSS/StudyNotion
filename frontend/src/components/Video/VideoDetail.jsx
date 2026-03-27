@@ -26,7 +26,6 @@ const COURSE_DETAIL_API = (id) => `${BASE_URL}/courses/getdetails/${id}`;
 const SUBSECTIONS_API = (id) => `${BASE_URL}/subsections/getall/${id}`;
 const VIDEO_API = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
 
-// ─── Interactive Star Input ───────────────────────────────────────────────────
 function StarInput({ value, onChange }) {
   const [hover, setHover] = useState(0);
   return (
@@ -49,7 +48,6 @@ function StarInput({ value, onChange }) {
   );
 }
 
-// ─── Review Modal ─────────────────────────────────────────────────────────────
 function ReviewModal({ courseId, user, token, onClose }) {
   const [rating, setRating] = useState(4);
   const [review, setReview] = useState("");
