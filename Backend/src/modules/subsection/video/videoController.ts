@@ -231,12 +231,16 @@ export const getVideo = asyncHandler(async (req, res) => {
   //     .status(400)
   //     .json({ message: "start and end query params are required" });
   // }
-  const subsection = await SubSection.findById(subsectionId);
+  const subsection = await SubSection.findOne({
+    _id: new Types.ObjectId(subsectionId),
+    isActive: true,
+  });
   if (!subsection) {
     throw AppError.notFound("Subsection not found");
   }
   const video = await Video.findOne({
     subsectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
   });
   if (!video) {
     throw AppError.notFound("Video not found for this subsection");
@@ -245,6 +249,7 @@ export const getVideo = asyncHandler(async (req, res) => {
     videoId: video._id,
     userId: req.user._id,
     subSectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
   });
   if (!videoProgress) {
     videoProgress = await VideoProgress.create({
@@ -287,26 +292,28 @@ export const getVideo = asyncHandler(async (req, res) => {
   // res.json({ video, link: signedUrl,subsection });
 });
 export const saveVideoProgress = asyncHandler(async (req, res) => {
-  const { currentTime, subsectionId } = req.body;
+  const { currentTime, subsectionId, duration } = req.body;
   const video = await Video.findOne({
     subsectionId: new Types.ObjectId(subsectionId),
+    isActive: true,
   });
   if (!video) {
     throw AppError.notFound("Video not found for this subsection");
   }
-  const isCompleted = currentTime / (video?.duration || 0) >= 0.9;
+  const isCompleted = currentTime / (video?.duration || duration || 0) >= 0.95;
   let videoProgress = await VideoProgress.findOneAndUpdate(
     {
       userId: req.user._id,
       subSectionId: new Types.ObjectId(subsectionId),
       videoId: video._id,
       courseId: video.courseId,
+      isActive: true,
     },
     {
       currentTime,
       isCompleted,
       watchedPercentage: Math.floor(
-        (currentTime / (video?.duration || 0)) * 100,
+        (currentTime / (video?.duration || duration || 0)) * 100,
       ),
     },
     {
@@ -320,9 +327,11 @@ export const saveVideoProgress = asyncHandler(async (req, res) => {
       subSectionId: new Types.ObjectId(subsectionId),
       courseId: video.courseId,
       currentTime,
-      watchedPercentage: Math.floor((currentTime / (video?.duration || 0)) * 100),
+      watchedPercentage: Math.floor(
+        (currentTime / (video?.duration || duration || 0)) * 100,
+      ),
       isCompleted,
-      duration: video.duration || 0,
+      duration: video.duration || duration || 0,
     });
   }
 
