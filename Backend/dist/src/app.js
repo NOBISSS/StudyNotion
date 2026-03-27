@@ -19,7 +19,7 @@ import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 import announcementRouter from "./modules/announcement/announcementRoutes.js";
 dotenv.config();
 const app = express();
-const allowedOrigins = ["http://localhost:5000", "127.0.0.1:5000", "http://localhost:5173", "http://127.0.0.1:5173"];
+const allowedOrigins = ["http://localhost:5000", "127.0.0.1:5000", "http://localhost:5173", "http://127.0.0.1:5173", "https://study-notion-two-taupe.vercel.app"];
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin)
