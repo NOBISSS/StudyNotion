@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+// components/core/Dashboard/AddCourse/CourseInformationForm.jsx
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
@@ -9,21 +10,79 @@ import {
   addCourseDetails,
   editCourseDetails,
   fetchCourseCategories,
-  UploadCourseThumbnail,
 } from '../../../../services/operations/courseDetailsAPI'
 import { setCourse, setStep } from '../../../../slices/courseSlice'
 import { COURSE_STATUS, LEVEL } from '../../../../utils/constants'
 import ChipInput from './ChipInput'
 import RequirementOfCourse from './RequirementOfCourse'
 
+// ─── Config ───────────────────────────────────────────────────────────────────
+const MAX_FILE_MB     = 2          // frontend validation limit (keep under multer limit)
+const MAX_FILE_BYTES  = MAX_FILE_MB * 1024 * 1024
+const COMPRESS_QUALITY = 0.75      // JPEG quality 0-1
+const COMPRESS_MAX_W  = 1280       // max width after compression
+
+// ─── Helper: append array to FormData (Zod z.array expects repeated keys) ─────
+const appendArray = (formData, key, arr = []) => {
+  if (!arr?.length) return
+  arr.forEach((item) => formData.append(key, item))
+}
+
+// ─── Helper: compress image via canvas ────────────────────────────────────────
+const compressImage = (file) =>
+  new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+
+      // Scale down if wider than COMPRESS_MAX_W
+      let { width, height } = img
+      if (width > COMPRESS_MAX_W) {
+        height = Math.round((height * COMPRESS_MAX_W) / width)
+        width  = COMPRESS_MAX_W
+      }
+
+      const canvas = document.createElement('canvas')
+      canvas.width  = width
+      canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error('Compression failed')); return }
+          // Preserve original filename
+          const compressed = new File([blob], file.name, { type: 'image/jpeg' })
+          resolve(compressed)
+        },
+        'image/jpeg',
+        COMPRESS_QUALITY
+      )
+    }
+    img.onerror = () => reject(new Error('Image load failed'))
+    img.src = url
+  })
+
 const CourseInformationForm = () => {
-  const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm()
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm()
+
   const dispatch = useDispatch()
   const { course, editCourse } = useSelector((state) => state.course)
-  const [loading, setLoading] = useState(false)
+
+  const [loading, setLoading]                   = useState(false)
   const [courseCategories, setCourseCategories] = useState([])
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
+  const [thumbnailFile, setThumbnailFile]       = useState(null)
+  const [compressing, setCompressing]           = useState(false)
+  const [fileInfo, setFileInfo]                 = useState(null) // { name, sizeMB }
 
+  // ── Fetch categories ─────────────────────────────────────────────────────
   useEffect(() => {
     const getCategories = async () => {
       const categories = await fetchCourseCategories()
@@ -32,77 +91,149 @@ const CourseInformationForm = () => {
     getCategories()
   }, [])
 
+  // ── Pre-fill for edit mode ───────────────────────────────────────────────
   useEffect(() => {
     if (editCourse && course) {
-      setValue('courseTitle', course.courseName)
-      setValue('courseShortDesc', course.courseDescription)
-      setValue('coursePrice', course.price)
-      setValue('courseTag', course.tag)
-      setValue('courseBenefits', course.whatYouWillLearn)
-      setValue('courseCategory', course.category?._id || course.category)
-      setValue('courseLevel', course.level || LEVEL[0])
-      setValue('courseRequirements', course.instructions || [])
+      setValue('courseTitle',        course.courseName)
+      setValue('courseShortDesc',    course.courseDescription)
+      setValue('coursePrice',        course.price)
+      setValue('courseTag',          course.tag ?? [])
+      setValue('courseBenefits',     course.whatYouWillLearn)
+      setValue('courseCategory',     course.category?._id || course.category)
+      setValue('courseLevel',        course.level || LEVEL[0])
+      setValue('courseRequirements', course.instructions ?? [])
       setThumbnailPreview(course.thumbnailUrl || course.thumbnail || null)
     }
   }, [editCourse, course])
 
+  // ── Handle thumbnail file selection with compression ─────────────────────
+  const handleThumbnailChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // Must be an image
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    setCompressing(true)
+    try {
+      let finalFile = file
+
+      // Compress if over limit
+      if (file.size > MAX_FILE_BYTES) {
+        toast.loading('Compressing image...', { id: 'compress' })
+        finalFile = await compressImage(file)
+        toast.dismiss('compress')
+
+        // If still too large after compression, reject
+        if (finalFile.size > MAX_FILE_BYTES) {
+          toast.error(`Image still too large after compression (${(finalFile.size / 1024 / 1024).toFixed(1)}MB). Please use a smaller image.`)
+          setCompressing(false)
+          return
+        }
+        toast.success(`Compressed to ${(finalFile.size / 1024 / 1024).toFixed(2)}MB`)
+      }
+
+      setThumbnailFile(finalFile)
+      setThumbnailPreview(URL.createObjectURL(finalFile))
+      setFileInfo({
+        name:   finalFile.name,
+        sizeMB: (finalFile.size / 1024 / 1024).toFixed(2),
+      })
+    } catch (err) {
+      toast.error('Failed to process image')
+      console.error(err)
+    } finally {
+      setCompressing(false)
+    }
+  }
+
+  // ── Detect changes for edit mode ─────────────────────────────────────────
   const isFormUpdated = () => {
     const v = getValues()
     return (
-      v.courseTitle !== course?.courseName ||
-      v.courseShortDesc !== course?.courseDescription ||
-      v.coursePrice !== course?.price ||
-      v.courseBenefits !== course?.whatYouWillLearn ||
-      v.courseLevel !== (course?.level || LEVEL[0]) ||
-      v.courseCategory !== (course?.category?._id || course?.category) ||
-      v.courseRequirements?.toString() !== course?.instructions?.toString()
+      v.courseTitle        !== course?.courseName                                     ||
+      v.courseShortDesc    !== course?.courseDescription                              ||
+      String(v.coursePrice) !== String(course?.price)                                ||
+      v.courseBenefits     !== course?.whatYouWillLearn                              ||
+      v.courseLevel        !== (course?.level || LEVEL[0])                           ||
+      v.courseCategory     !== (course?.category?._id || course?.category)           ||
+      JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions)  ||
+      thumbnailFile !== null
     )
   }
 
+  // ── Submit ───────────────────────────────────────────────────────────────
   const onSubmit = async (data) => {
+
+    // ── EDIT mode ──────────────────────────────────────────────────────────
     if (editCourse) {
-      if (!isFormUpdated()) { toast.error('No changes made to the form'); return }
-      const v = getValues()
+      if (!isFormUpdated()) {
+        toast.error('No changes made to the form')
+        return
+      }
+      const v        = getValues()
       const formData = new FormData()
       formData.append('courseId', course._id)
-      if (v.courseTitle !== course.courseName) formData.append('courseName', data.courseTitle)
-      if (v.courseShortDesc !== course.courseDescription) formData.append('courseDescription', data.courseShortDesc)
-      if (v.coursePrice !== course.price) formData.append('price', data.coursePrice)
-      if (v.courseBenefits !== course.whatYouWillLearn) formData.append('whatYouWillLearn', data.courseBenefits)
+
+      if (v.courseTitle !== course.courseName)
+        formData.append('courseName', data.courseTitle)
+      if (v.courseShortDesc !== course.courseDescription)
+        formData.append('courseDescription', data.courseShortDesc)
+      if (String(v.coursePrice) !== String(course.price))
+        formData.append('price', String(data.coursePrice))
+      if (v.courseBenefits !== course.whatYouWillLearn)
+        formData.append('whatYouWillLearn', data.courseBenefits)
+      if (v.courseCategory !== (course.category?._id || course.category))
+        formData.append('category', data.courseCategory)
       if (v.courseLevel !== (course.level || LEVEL[0]))
-      formData.append('level', data.courseLevel)
-      if (v.courseCategory !== (course.category?._id || course.category)) formData.append('category', data.courseCategory)
-      if (v.courseRequirements?.toString() !== course.instructions?.toString()) formData.append('instructions', JSON.stringify(data.courseRequirements))
+        formData.append('level', data.courseLevel)
+      if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course.instructions))
+        appendArray(formData, 'instructions', data.courseRequirements)
+      if (thumbnailFile)
+        formData.append('thumbnail', thumbnailFile)
+
       setLoading(true)
       const result = await editCourseDetails(formData)
       setLoading(false)
       if (result) { dispatch(setStep(2)); dispatch(setCourse(result)) }
       return
     }
+
+    // ── CREATE mode ────────────────────────────────────────────────────────
+    if (!thumbnailFile) {
+      toast.error('Please upload a course thumbnail')
+      return
+    }
+
     const formData = new FormData()
-    formData.append('courseName', data.courseTitle)
+    formData.append('courseName',        data.courseTitle)
     formData.append('courseDescription', data.courseShortDesc)
-    formData.append('price', data.coursePrice)
-    formData.append('whatYouWillLearn', data.courseBenefits)
-    formData.append('level', data.courseLevel)
-    formData.append('category', data.courseCategory)
-    formData.append('instructions', JSON.stringify(data.courseRequirements))
-    formData.append('thumbnail', data.courseImage[0])
-    formData.append('tag', JSON.stringify(data.courseTag))
-    formData.append('status', COURSE_STATUS.DRAFT)
+    formData.append('price',             String(data.coursePrice))
+    formData.append('whatYouWillLearn',  data.courseBenefits)
+    formData.append('level',             data.courseLevel)
+    formData.append('category',          data.courseCategory)
+    formData.append('status',            COURSE_STATUS.DRAFT)
+    formData.append('thumbnail',         thumbnailFile)
+    appendArray(formData, 'instructions', data.courseRequirements)
+    appendArray(formData, 'tag',          data.courseTag)
+
     setLoading(true)
-    //const uploadThumbnail=await UploadCourseThumbnail(formData.thumbnailImage);
-    
     const result = await addCourseDetails(formData)
     setLoading(false)
-    if (result?.success) { dispatch(setStep(2)); dispatch(setCourse(result.data || result)) }
+    if (result?.success) {
+      dispatch(setStep(2))
+      dispatch(setCourse(result.data || result))
+    }
   }
 
-  const inputCls = "w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors"
+  const inputCls =
+    'w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors'
 
   return (
     <>
-      {/* Form Card */}
       <div className="bg-[#161D29] rounded-xl p-6 flex flex-col gap-5">
 
         {/* Course Title */}
@@ -115,7 +246,7 @@ const CourseInformationForm = () => {
           {errors.courseTitle && <p className="text-pink-400 text-xs">{errors.courseTitle.message}</p>}
         </div>
 
-        {/* Course Short Description */}
+        {/* Short Description */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-white">
             Course Short Description <sup className="text-pink-400">*</sup>
@@ -133,11 +264,15 @@ const CourseInformationForm = () => {
           <div className="relative">
             <HiOutlineCurrencyRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-[#838894] text-lg" />
             <input type="number" placeholder="Enter Price" className={`${inputCls} pl-9`}
-              {...register('coursePrice', { required: 'Price is required', valueAsNumber: true, min: { value: 0, message: 'Cannot be negative' } })} />
+              {...register('coursePrice', {
+                required: 'Price is required',
+                min: { value: 0, message: 'Cannot be negative' },
+              })} />
           </div>
           {errors.coursePrice && <p className="text-pink-400 text-xs">{errors.coursePrice.message}</p>}
         </div>
 
+        {/* Level */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-white">
             Level <sup className="text-pink-400">*</sup>
@@ -146,7 +281,7 @@ const CourseInformationForm = () => {
             <select defaultValue="" className={`${inputCls} appearance-none pr-10 cursor-pointer`}
               {...register('courseLevel', { required: 'Level is required' })}>
               <option value="" disabled className="bg-[#2C333F]">Choose Level</option>
-              {LEVEL.map((level,index) => (
+              {LEVEL.map((level, index) => (
                 <option key={index} value={level} className="bg-[#2C333F]">{level}</option>
               ))}
             </select>
@@ -181,10 +316,21 @@ const CourseInformationForm = () => {
           <label className="text-sm font-medium text-white">
             Course Thumbnail <sup className="text-pink-400">*</sup>
           </label>
-          <label className="cursor-pointer">
+          <label className={`cursor-pointer ${compressing ? 'pointer-events-none opacity-60' : ''}`}>
             <div className="w-full rounded-xl border-2 border-dashed border-[#424854] bg-[#2C333F] flex flex-col items-center justify-center gap-3 py-10 hover:border-[#FFD60A] transition-colors">
-              {thumbnailPreview ? (
-                <img src={thumbnailPreview} alt="preview" className="max-h-48 object-cover rounded-lg" />
+              {compressing ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#FFD60A] border-t-transparent" />
+                  <p className="text-[#AFB2BF] text-sm">Compressing image...</p>
+                </div>
+              ) : thumbnailPreview ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={thumbnailPreview} alt="preview" className="max-h-48 object-cover rounded-lg" />
+                  {fileInfo && (
+                    <p className="text-[#6B7280] text-xs">{fileInfo.name} • {fileInfo.sizeMB}MB</p>
+                  )}
+                  <p className="text-[#FFD60A] text-xs font-medium">Click to change</p>
+                </div>
               ) : (
                 <>
                   <div className="w-14 h-14 rounded-full bg-[#1D2532] flex items-center justify-center">
@@ -195,23 +341,19 @@ const CourseInformationForm = () => {
                       Drag and drop an image, or{' '}
                       <span className="text-[#FFD60A] font-medium">Browse</span>
                     </p>
-                    <p className="text-[#838894] text-xs mt-1">Max 6MB each (12MB for videos)</p>
+                    <p className="text-[#838894] text-xs mt-1">
+                      Max {MAX_FILE_MB}MB · Auto-compressed if larger
+                    </p>
                   </div>
-                  <div className="flex gap-10 text-xs text-[#838894]">
+                  <div className="flex gap-6 text-xs text-[#838894]">
                     <span>• Aspect ratio 16:9</span>
-                    <span>• Recommended size 1024×576</span>
+                    <span>• Recommended 1024×576</span>
                   </div>
                 </>
               )}
             </div>
-            <input type="file" accept="image/*" className="hidden"
-              {...register('courseImage', { required: !editCourse })}
-              onChange={(e) => {
-                const file = e.target.files[0]
-                if (file) setThumbnailPreview(URL.createObjectURL(file))
-              }} />
+            <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
           </label>
-          {errors.courseImage && <p className="text-pink-400 text-xs">Thumbnail is required</p>}
         </div>
 
         {/* Benefits */}
@@ -229,7 +371,7 @@ const CourseInformationForm = () => {
           register={register} errors={errors} setValue={setValue} />
       </div>
 
-      {/* Next button — outside card, centered at bottom like Figma */}
+      {/* Action buttons */}
       <div className="flex justify-center mt-6">
         {editCourse && (
           <button type="button" onClick={() => dispatch(setStep(2))}
@@ -237,11 +379,8 @@ const CourseInformationForm = () => {
             Continue Without Saving
           </button>
         )}
-        <button
-          onClick={handleSubmit(onSubmit)}
-          disabled={loading}
-          className="flex items-center gap-2 px-8 py-2.5 bg-[#FFD60A] text-black font-semibold text-sm rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50"
-        >
+        <button onClick={handleSubmit(onSubmit)} disabled={loading || compressing}
+          className="flex items-center gap-2 px-8 py-2.5 bg-[#FFD60A] text-black font-semibold text-sm rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50">
           {loading ? 'Saving...' : editCourse ? 'Save Changes' : (<>Next <VscChevronRight /></>)}
         </button>
       </div>
