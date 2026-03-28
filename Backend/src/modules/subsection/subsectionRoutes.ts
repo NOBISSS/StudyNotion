@@ -2,12 +2,13 @@ import { Router } from "express";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import materialRouter from "./material/materialRoutes.js";
 import QuizRouter from "./quiz/quizRoutes.js";
-import { getAllSubsections } from "./subsectionController.js";
+import { getAllSubsections, markSubsectionAsCompleted } from "./subsectionController.js";
 import videoRouter from "./video/videoRoutes.js";
 
 const subsectionRouter = Router();
 
 subsectionRouter.route("/getall/:sectionId").get(getAllSubsections);
+subsectionRouter.route("/markcomplete/:subsectionId").post(markSubsectionAsCompleted);
 subsectionRouter.use(userMiddleware);
 subsectionRouter.use("/quiz", QuizRouter);
 subsectionRouter.use("/material", materialRouter);

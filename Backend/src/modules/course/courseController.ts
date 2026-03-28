@@ -58,16 +58,19 @@ export const createCourse = asyncHandler(async (req, res) => {
     throw AppError.notFound("Instructor not found");
   }
   const {
-    categoryId,
+    category: categoryId,
     courseName,
-    description,
-    typeOfCourse,
+    courseDescription: description,
     coursePlan,
     price,
     level,
     tag,
     whatYouWillLearn,
   } = parsedCourseData.data;
+  let typeOfCourse = "Paid";
+  if (price === 0) {
+    typeOfCourse = "Free";
+  }
   const course = await Course.create({
     courseName,
     description,
@@ -119,19 +122,22 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     throw AppError.notFound("Instructor not found");
   }
   const {
-    categoryId,
+    category: categoryId,
     courseName,
-    description,
-    typeOfCourse,
+    courseDescription: description,
     coursePlan,
     price,
     level,
     tag,
-    thumbnailUrl,
+    thumbnailImage: thumbnailUrl,
     whatYouWillLearn,
   } = parsedCourseData.data;
   if (!thumbnailUrl) {
     throw AppError.badRequest("Thumbnail URL is required for course creation");
+  }
+  let typeOfCourse = "Paid";
+  if (price === 0) {
+    typeOfCourse = "Free";
   }
   const course = await Course.create({
     courseName,
@@ -335,13 +341,16 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
   }
   const {
     courseName,
-    description,
-    typeOfCourse,
+    courseDescription: description,
     coursePlan,
     price,
     level,
     tag,
   } = parsedCourseData.data;
+  let typeOfCourse = "Paid";
+  if (price === 0) {
+    typeOfCourse = "Free";
+  }
   const course = await Course.findOne({
     _id: new Types.ObjectId(courseId),
     isActive: true,
