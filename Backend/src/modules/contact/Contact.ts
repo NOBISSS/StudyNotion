@@ -6,16 +6,16 @@ import type { Handler } from "../../shared/types.js";
 
 export const submitContactForm: Handler = asyncHandler(async (req, res) => {
   console.log("CONTACT US FORM API CALLED");
-  const { firstName, lastName, email, phoneNo, message } = req.body;
+  const { firstname, lastname, email, phoneNo, message } = req.body;
 
-  if (!firstName || !lastName || !email || !phoneNo || !message) {
+  if (!firstname || !lastname || !email || !phoneNo || !message) {
     throw AppError.badRequest("All fields are required");
   }
 
   const telegramMessage = `
 <b>🚨 NEW CONTACT ALERT</b>
 
-👤 <b>Name:</b> ${firstName} ${lastName}
+👤 <b>Name:</b> ${firstname} ${lastname}
 📧 <b>Email:</b> ${email}
 🔭 <b>Phone:</b> ${phoneNo}
 📝 <b>Message:</b>
