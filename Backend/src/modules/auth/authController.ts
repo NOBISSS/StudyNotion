@@ -1,5 +1,5 @@
 import axios from "axios";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { oAuth2Client } from "../../shared/config/OAuth2Client.js";
 import {
@@ -29,6 +29,7 @@ import {
   signupInputSchema,
 } from "./authValidation.js";
 import Wishlist from "../wishlist/wishlistModel.js";
+import { comparePasswords } from "./auth.utils.js";
 
 export const signupWithOTP = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -190,7 +191,7 @@ export const signin = asyncHandler(async (req, res) => {
     );
   }
   const { email, password } = userInput.data;
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email});
   if (!user) {
     throw AppError.notFound("User not found with this email");
   }
@@ -200,7 +201,10 @@ export const signin = asyncHandler(async (req, res) => {
   if (user.isDeleted) {
     throw AppError.unauthorized("User is deleted, Contact support");
   }
-  const isPasswordCorrect = user.comparePassword(password);
+  if (!user.password) {
+    throw AppError.unauthorized("Invalid authentication method");
+  }
+  const isPasswordCorrect = comparePasswords(password, user.password as string);
   if (!isPasswordCorrect) {
     throw AppError.badRequest("Invalid password");
   }
@@ -370,7 +374,7 @@ export const googleSignin = asyncHandler(async (req, res) => {
       firstName: userRes.data.name.split(" ")[0],
       lastName: userRes.data.name.split(" ").slice(1).join(" "),
       email: userRes.data.email,
-      // method: "oauth",
+      method: "google",
     });
   }
   const userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });

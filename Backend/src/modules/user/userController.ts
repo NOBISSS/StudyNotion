@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import type { UploadApiResponse } from "cloudinary";
 import type { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";

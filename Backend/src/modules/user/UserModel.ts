@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose, { Schema, type HydratedDocument, type InferSchemaType } from "mongoose";
 
@@ -14,6 +14,14 @@ export const userSchema = new Schema(
         message: "{VALUE} is not supported",
       },
       default: "student",
+    },
+    method: {
+      type: String,
+      enum: {
+        values: ["local", "google"],
+        message: "{VALUE} is not supported",
+      },
+      default: "local",
     },
     email: { type: String, required: true, unique: true, trim: true },
     refreshToken: { type: String },
