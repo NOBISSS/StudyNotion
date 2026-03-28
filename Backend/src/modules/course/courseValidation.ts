@@ -15,9 +15,8 @@ export const courseInputSchema = z.object({
   // }),
   coursePlan: z.string().optional(),
   price: z
-    .number({ error: "Price should be number" })
-    .min(0, { error: "Price cannot be negative" })
-    .optional(),
+    .string({ error: "Price is required" })
+    .optional().default("0"),
   thumbnailImage: z
     .url({ error: "Thumbnail URL must be a valid URL" })
     .optional(),

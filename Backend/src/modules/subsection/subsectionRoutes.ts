@@ -8,8 +8,8 @@ import videoRouter from "./video/videoRoutes.js";
 const subsectionRouter = Router();
 
 subsectionRouter.route("/getall/:sectionId").get(getAllSubsections);
-subsectionRouter.route("/markcomplete/:subsectionId").post(markSubsectionAsCompleted);
 subsectionRouter.use(userMiddleware);
+subsectionRouter.route("/markcomplete/:subsectionId").post(markSubsectionAsCompleted);
 subsectionRouter.use("/quiz", QuizRouter);
 subsectionRouter.use("/material", materialRouter);
 subsectionRouter.use("/video", videoRouter);

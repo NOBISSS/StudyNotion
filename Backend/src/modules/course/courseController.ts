@@ -68,7 +68,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     whatYouWillLearn,
   } = parsedCourseData.data;
   let typeOfCourse = "Paid";
-  if (price === 0) {
+  if (price === "0") {
     typeOfCourse = "Free";
   }
   const course = await Course.create({
@@ -79,7 +79,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     categoryId,
     typeOfCourse,
     coursePlan: coursePlan ? new Types.ObjectId(coursePlan) : null,
-    originalPrice: price || 0,
+    originalPrice: Number(price) || 0,
     level,
     tag: tag || [],
     thumbnailUrl: thumbnailImage.secure_url,
@@ -136,7 +136,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Thumbnail URL is required for course creation");
   }
   let typeOfCourse = "Paid";
-  if (price === 0) {
+  if (price === "0") {
     typeOfCourse = "Free";
   }
   const course = await Course.create({
@@ -147,7 +147,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     categoryId,
     typeOfCourse,
     coursePlan: coursePlan ? new Types.ObjectId(coursePlan) : null,
-    originalPrice: price || 0,
+    originalPrice: Number(price) || 0,
     level,
     tag: tag || [],
     thumbnailUrl,
@@ -348,7 +348,7 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
     tag,
   } = parsedCourseData.data;
   let typeOfCourse = "Paid";
-  if (price === 0) {
+  if (price == "0") {
     typeOfCourse = "Free";
   }
   const course = await Course.findOne({
