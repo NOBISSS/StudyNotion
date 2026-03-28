@@ -19,7 +19,7 @@ export async function filterCoursesByAI(courses: any[], query: string): Promise<
   }
 
   const rankedCourses = response.text;
-
+  console.log("AI Response:", rankedCourses);
   return JSON.parse(rankedCourses);
 }
 

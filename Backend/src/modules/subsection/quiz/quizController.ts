@@ -12,6 +12,8 @@ import {
   createQuizSchema,
   updateQuizSchema,
 } from "./quizValidation.js";
+import { Section } from "../../section/SectionModel.js";
+import { Course } from "../../course/CourseModel.js";
 
 export const createQuiz = asyncHandler(async (req, res) => {
   const parsedQuizData = createQuizSchema.safeParse(req.body);
@@ -69,6 +71,12 @@ export const createQuiz = asyncHandler(async (req, res) => {
     subSectionId: subSection._id,
     questions: questionsWithIds,
   });
+  await Section.findByIdAndUpdate(sectionId, {
+    $push: { subSectionIds: subSection._id },
+  });
+  await Course.findByIdAndUpdate(courseId, {
+    $inc: { totalQuizzes: 1, totalSubsections: 1 },
+  });
   ApiResponse.created(
     res,
     {
@@ -102,6 +110,12 @@ export const deleteQuiz = asyncHandler(async (req, res) => {
   }
   subsection.isActive = false;
   await subsection.save();
+  await Section.findByIdAndUpdate(subsection.sectionId, {
+    $pull: { subSectionIds: subsection._id },
+  });
+  await Course.findByIdAndUpdate(quiz.courseId, {
+    $inc: { totalQuizzes: -1, totalSubsections: -1 },
+  });
   ApiResponse.success(res, {}, "Quiz deleted successfully.");
 });
 export const getQuizBySubSectionId = asyncHandler(async (req, res) => {

@@ -83,6 +83,9 @@ export const addMaterial = asyncHandler(async (req, res) => {
   await Section.findByIdAndUpdate(sectionId, {
     $push: { subSectionIds: material._id },
   });
+  await Course.findByIdAndUpdate(courseId, {
+    $inc: { totalMaterials: 1, totalSubsections: 1 },
+  });
   ApiResponse.created(
     res,
     {
@@ -150,6 +153,9 @@ export const deleteMaterial = asyncHandler(async (req, res) => {
   await subsection.save();
   await Section.findByIdAndUpdate(subsection.sectionId, {
     $pull: { subSectionIds: material._id },
+  });
+  await Course.findByIdAndUpdate(material.courseId, {
+    $inc: { totalMaterials: -1, totalSubsections: -1 },
   });
   ApiResponse.success(res, {}, "Material deleted successfully.");
 });
