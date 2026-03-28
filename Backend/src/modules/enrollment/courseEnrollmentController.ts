@@ -64,13 +64,15 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
   })
     .populate("courseId")
     .sort({ createdAt: -1 });
-  const courseProgress = await CourseProgress.findOne({
-    userId: new Types.ObjectId(userId),
-    courseId: courseEnrollments[0]?.courseId._id as Types.ObjectId || new Types.ObjectId("000000000000000000000000"),
-  });
-  const courseEnrollmentsWithProgress = courseEnrollments.map((enrollment) => {
-    const enrollmentObj = enrollment.toObject();
-    const course = enrollmentObj.courseId as any;
+  
+  const courseEnrollmentsWithProgress = await Promise.all(
+    courseEnrollments.map(async (enrollment) => {
+      const enrollmentObj = enrollment.toObject();
+      const course = enrollmentObj.courseId as any;
+      const courseProgress = await CourseProgress.findOne({
+        userId: new Types.ObjectId(userId),
+        courseId: new Types.ObjectId(course._id),
+    });
     return {
       ...enrollmentObj,
       courseId:
@@ -87,7 +89,7 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
             }
           : enrollmentObj.courseId,
     };
-  });
+  }));
   ApiResponse.success(
     res,
     {

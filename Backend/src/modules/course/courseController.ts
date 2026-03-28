@@ -272,6 +272,14 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
       "Courses retrieved successfully",
     );
   });
+export const getInstructorCourses:Handler = asyncHandler(async (req, res) => {
+  const instructorId = req.userId;
+  if (!instructorId) {
+    throw AppError.unauthorized("Instructor ID is required");
+  }
+  const courses = await Course.find({ instructorId }).populate("categoryId", "name").sort({ createdAt: -1 });
+  ApiResponse.success(res, { courses }, "Instructor courses retrieved successfully");
+});
 export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   const course = await Course.findById(courseId);
