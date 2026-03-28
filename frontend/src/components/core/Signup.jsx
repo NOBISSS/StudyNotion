@@ -10,7 +10,7 @@ import { HighlightText } from './HomePage/HighlightText'
 import Image from '../../assets/LoginGirlImage.webp'
 import Lines from '../../assets/Lines2.png'
 
-const TABS = ['Student', 'Instructor']
+const TABS = ['student', 'instructor']
 
 export const Signup = () => {
   const dispatch = useDispatch()
@@ -53,7 +53,7 @@ export const Signup = () => {
       return
     }
     dispatch(setSignUpData({ accountType, firstName, lastName, email, password, confirmPassword }))
-    dispatch(sendOtp(email, navigate))
+    dispatch(sendOtp(formData, navigate))
   }
 
   return (
@@ -81,7 +81,7 @@ export const Signup = () => {
                 key={tab}
                 type="button"
                 onClick={() => handleTabClick(tab)}
-                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 capitalize ${
                   currentTab === tab
                     ? 'bg-[#0A0F1C] text-white shadow-sm'
                     : 'text-[#6B7280] hover:text-[#AFB2BF]'
