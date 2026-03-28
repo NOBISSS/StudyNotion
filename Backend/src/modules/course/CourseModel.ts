@@ -12,6 +12,7 @@ const courseSchema = new Schema(
       required: true,
     },
     totalDuration: { type: Number, default: 0 },
+    totalDurationFormatted: { type: String, default: "0:00:00" },
     coursePlan: { type: Types.ObjectId, ref: "CoursePlan" },
     originalPrice: { type: Number, default: 0 },
     discountPrice: { type: Number, default: 0 },

@@ -42,18 +42,17 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     contentType: "video",
     courseId: new Types.ObjectId(metadata.courseId),
     sectionId: new Types.ObjectId(metadata.sectionId),
+    isActive: false, // will activate after video is processed
   });
   const newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
     // videoURL,
     type,
-    status: "uploaded",
+    status: "processing",
     courseId: new Types.ObjectId(metadata.courseId),
+    sectionId: new Types.ObjectId(metadata.sectionId),
     subsectionId: subsection._id,
-  });
-  await Section.findByIdAndUpdate(metadata.sectionId, {
-    $push: { subsections: subsection._id },
   });
 
   const createCmd = new CreateMultipartUploadCommand({

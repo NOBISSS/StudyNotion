@@ -3,19 +3,22 @@ import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { embeddingQueue } from "../../shared/queue/embeddingQueue.js";
+import type { Handler } from "../../shared/types.js";
 import { uploadToCloudinary } from "../../shared/utils/cloudinaryUpload.js";
+import { vectorSearchCourses } from "../../shared/vector/searchCourses.js";
 import { Category } from "../category/CategoryModel.js";
 import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { RatingAndReview } from "../rating/RatingAndReview.js";
 import { Section } from "../section/SectionModel.js";
-import User from "../user/UserModel.js";
-import { Course } from "./CourseModel.js";
-import { courseInputSchema } from "./courseValidation.js";
-import type { Handler } from "../../shared/types.js";
 import { SubSection } from "../subsection/SubSectionModel.js";
 import { Material } from "../subsection/material/MaterialModel.js";
 import { Quiz } from "../subsection/quiz/QuizModel.js";
 import Video from "../subsection/video/VideoModel.js";
+import User from "../user/UserModel.js";
+import { Course } from "./CourseModel.js";
+import { courseInputSchema } from "./courseValidation.js";
+import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -90,6 +93,11 @@ export const createCourse = asyncHandler(async (req, res) => {
   //   subSectionIds: [],
   // });
   ApiResponse.created(res, { course }, "Course created successfully");
+  await embeddingQueue.add(
+    "embed-course",
+    { course: course.toObject() },
+    { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
+  );
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -154,6 +162,11 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   //   subSectionIds: [],
   // });
   ApiResponse.created(res, { course }, "Course created successfully");
+  await embeddingQueue.add(
+    "embed-course",
+    { course: course.toObject() },
+    { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
+  );
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
   const courses = await Course.find({ isActive: true });
@@ -168,7 +181,10 @@ export const getAllCourse = asyncHandler(async (req, res) => {
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
     const userId = req.userId;
-    const courses = await Course.find({ isActive: true }).populate("categoryId", "name");
+    const courses = await Course.find({ isActive: true }).populate(
+      "categoryId",
+      "name",
+    );
     const coursesWithEnrollmentCount = await Promise.all(
       courses.map(async (c) => ({
         ...c.toObject(),
@@ -209,8 +225,8 @@ export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
     );
   },
 );
-export const getAllCourseByEnrollmentsAndRatingsAndCategory:Handler = asyncHandler(
-  async (req, res) => {
+export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
+  asyncHandler(async (req, res) => {
     const userId = req.userId;
     const categoryId = req.params.categoryId;
     const courses = await Course.find({
@@ -255,9 +271,8 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory:Handler = asyncHandl
       },
       "Courses retrieved successfully",
     );
-  },
-);
-export const deleteCourse:Handler = asyncHandler(async (req, res) => {
+  });
+export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   const course = await Course.findById(courseId);
   if (!course) {
@@ -301,7 +316,7 @@ export const deleteCourse:Handler = asyncHandler(async (req, res) => {
   );
   ApiResponse.success(res, {}, "Course deleted successfully");
 });
-export const updateCourse:Handler = asyncHandler(async (req, res) => {
+export const updateCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   if (courseId && !Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID");
@@ -319,7 +334,10 @@ export const updateCourse:Handler = asyncHandler(async (req, res) => {
     level,
     tag,
   } = parsedCourseData.data;
-  const course = await Course.findOne({ _id: new Types.ObjectId(courseId), isActive: true });
+  const course = await Course.findOne({
+    _id: new Types.ObjectId(courseId),
+    isActive: true,
+  });
   if (!course) {
     throw AppError.notFound("Course not found");
   }
@@ -397,22 +415,44 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
       reviews,
       isUserEnrolled,
     },
-    "Course details retrieved successfully"
+    "Course details retrieved successfully",
   );
 });
-export const searchCourses:Handler = asyncHandler(async (req, res) => {
-  const { search } = req.query;
-  if (!search || typeof search !== "string") {
-    throw AppError.badRequest("Search search is required");
+export const searchCourses: Handler = asyncHandler(async (req, res) => {
+  const { query } = req.query;
+  if (!query || typeof query !== "string") {
+    throw AppError.badRequest("Search query is required");
   }
+  const vecotorSearchResults = await vectorSearchCourses(query);
   const courses = await Course.find({
-    courseName: { $regex: search, $options: "i" },
+    _id: { $in: vecotorSearchResults.map((result) => result.courseId) },
+    isActive: true,
+  }).populate("categoryId", "name");
+  const reviews = await RatingAndReview.find({
+    courseId: { $in: courses.map((course) => course._id) },
     isActive: true,
   });
+  const coursesWithRatingsAndScores = courses.map((course) => {
+    const courseReviews = reviews.filter(
+      (review) => review.courseId.toString() === course._id.toString(),
+    );
+    const averageRating =
+      courseReviews.reduce((sum, review) => sum + review.rating, 0) / courseReviews.length || 0;
+    const vectorSearchResult = vecotorSearchResults.find(
+      (result) => result.courseId.toString() === course._id.toString(),
+    );
+    return {
+      ...course.toObject(),
+      averageRating,
+      vectorScore: vectorSearchResult ? vectorSearchResult.score : 0,
+    };
+  });
+  const AIFilteredCourses = await filterCoursesByAI(coursesWithRatingsAndScores, query);
   ApiResponse.success(
     res,
     {
-      courses,
+      courses: coursesWithRatingsAndScores.sort((a, b) => b.vectorScore - a.vectorScore),
+      AIFilteredCourses,
     },
     "Search results retrieved successfully",
   );

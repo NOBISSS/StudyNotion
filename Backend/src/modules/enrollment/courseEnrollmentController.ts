@@ -5,6 +5,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
 import { Course } from "../course/CourseModel.js";
+import { convertSecondsToReadingTime } from "../subsection/video/videoUtils.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { CourseEnrollment } from "./CourseEnrollment.js";
 
@@ -68,7 +69,9 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
               thumbnailUrl: course?.thumbnailUrl || "",
               instructorId: course?.instructorId || "",
               progress: "0",
-              totalDuration: "2:30:00",
+              totalDuration: convertSecondsToReadingTime(
+                course?.totalDuration || 0,
+              ).hhmmss,
             }
           : enrollmentObj.courseId,
     };
