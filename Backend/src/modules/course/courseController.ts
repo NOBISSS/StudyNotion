@@ -84,7 +84,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     tag: tag || [],
     thumbnailUrl: thumbnailImage.secure_url,
     slug: `${instructor?.firstName} ${instructor?.lastName}/${courseName}`,
-    whatYouWillLearn: whatYouWillLearn || [],
+    whatYouWillLearn: [whatYouWillLearn || ""],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
@@ -156,7 +156,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
-    whatYouWillLearn: whatYouWillLearn || [],
+    whatYouWillLearn: [whatYouWillLearn || ""],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
