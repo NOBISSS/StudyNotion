@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import CountryCode from "../../../data/countrycode.json"
+import toast from 'react-hot-toast';
+import { ContactUs } from '../../../services/operations/contactAPI';
 const ContactUsForm = () => {
     const [loading,setLoading]=useState(false);
     const {
@@ -11,7 +13,11 @@ const ContactUsForm = () => {
     }=useForm();
 
     const submitContactForm=async(data)=>{
-        console.log(data);
+        if(data){
+            await ContactUs(data,setLoading)();
+        }else{
+            toast.error("Please Fill Details First")
+        }
     }
     useEffect(()=>{
         if(isSubmitSuccessful){
@@ -126,13 +132,16 @@ const ContactUsForm = () => {
                         </label>
 
                 </div>
-                <button type='submit'
-                className='text-center text-[17px] px-4 py-3 rounded-md font-bold 
-         bg-[#FFD60A] text-black
-        hover:scale-95 transition-all duration-200'
-                >
-                    SendMessage
-                </button>
+                <button
+  type="submit"
+  disabled={loading}
+  className={`text-center text-[17px] px-4 py-3 rounded-md font-bold 
+  bg-[#FFD60A] text-black transition-all duration-200
+  ${loading ? "opacity-50 cursor-not-allowed" : "hover:scale-95"}
+  `}
+>
+  {loading ? "Sending..." : "Send Message"}
+</button>
             </div>
     </form>
   )
