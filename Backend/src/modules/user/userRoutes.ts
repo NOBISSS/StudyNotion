@@ -11,6 +11,7 @@ import {
 } from "./userController.js";
 import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { ROLES } from "../../shared/constants.js";
+import { submitContactForm } from "../contact/Contact.js";
 
 const userRouter = Router();
 
@@ -26,5 +27,5 @@ userRouter.route("/create").post(createUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);
 userRouter.route("/getstudents").get(getStudents);
-
+router.post("/contact",submitContactForm);
 export default userRouter;
