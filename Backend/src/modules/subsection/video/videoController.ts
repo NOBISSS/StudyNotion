@@ -240,7 +240,7 @@ export const getVideo = asyncHandler(async (req, res) => {
   }
   const video = await Video.findOne({
     subsectionId: new Types.ObjectId(subsectionId),
-    isActive: true,
+    // isActive: true,
   });
   if (!video) {
     throw AppError.notFound("Video not found for this subsection");

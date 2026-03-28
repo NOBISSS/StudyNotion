@@ -167,7 +167,7 @@ export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   }
   if (
     // @ts-ignore
-    existingSection?.courseId.instructorId.toString() != instructorId
+    existingSection?.courseId.instructorId.toString() != instructorId || req.accountType !== "admin"
   ) {
     throw AppError.unauthorized(
       "You are not authorized to add sections to this course",
