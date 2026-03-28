@@ -5,6 +5,8 @@ import { setLoading, setToken } from '../../slices/authSlice';
 import { setUser } from "../../slices/profileSlice";
 import { endPoints, settingsEndPoints } from "../apis";
 import { updateUserState } from "../../utils/updateUserState";
+import axios from "axios";
+import { BACKEND_URL } from "../../utils/constants";
 
 const {
     SENDOTP_API,
@@ -251,3 +253,8 @@ export function deleteAccount(user) {
         }
     }
 }
+
+export const googleAuth = (code) =>
+  axios.get(`${BACKEND_URL}/auth/google?code=${code}`, {
+    withCredentials: true,
+  });

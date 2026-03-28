@@ -115,9 +115,15 @@ export const contactusEndpoint={
     CONTACT_US_API:BACKEND_URL+"/reach/contact",
 }
 
-export const settingsEndPoints={
+export const settingsEndPoints2={
     UPDATE_DISPLAY_PICTURE_API:BACKEND_URL+"/profile/updateDisplayPicture",
     UPDATE_PROFILE_API:BACKEND_URL+"/users/updateProfile",
     CHANGE_PASSWORD_API:BACKEND_URL+"/auth/changepassword",
     DELETE_PROFILE_API:BACKEND_URL+"/profile/deletedProfile"
 }
+export const settingsEndPoints = {
+  UPDATE_DISPLAY_PICTURE_API: BACKEND_URL + "/users/changeprofilephoto",
+  UPDATE_PROFILE_API: BACKEND_URL + "/users/updateProfile",
+  CHANGE_PASSWORD_API: BACKEND_URL + "/profile/changepassword",
+  DELETE_PROFILE_API: BACKEND_URL + "/profile/deleteprofile",
+};
