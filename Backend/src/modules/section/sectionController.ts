@@ -15,7 +15,7 @@ export const createSection = asyncHandler(async (req, res): Promise<void> => {
       parsedData.error.issues[0]?.message || "Invalid section data",
     );
   }
-  const { name, courseId, order } = parsedData.data;
+  const { sectionName:name, courseId, order } = parsedData.data;
   const existingSection = await Section.findOne({ courseId }).populate(
     "courseId",
   );
@@ -34,14 +34,16 @@ export const createSection = asyncHandler(async (req, res): Promise<void> => {
       "You are not authorized to add sections to this course",
     );
   }
+  const sectionCount = await Section.countDocuments({ courseId });
+  const newOrder = order !== undefined ? order : sectionCount + 1;
   await Section.updateMany(
-    { courseId, order: { $gte: order } },
+    { courseId, order: { $gte: newOrder } },
     { $inc: { order: 1 } },
   );
   const section = await Section.create({
     name,
     courseId,
-    order,
+    order: newOrder,
   });
   ApiResponse.created(
     res,
