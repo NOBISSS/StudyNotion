@@ -118,7 +118,7 @@ export async function processVideo({
         $set: { isActive: true },
       });
       const course = await Course.findByIdAndUpdate(video.courseId, {
-        $set: { totalDuration: { $add: [video.duration || videoDuration, "$totalDuration"] } },
+        $set: { totalDuration: { $add: [video.duration || videoDuration, "$totalDuration"] }, totalLectures: { $add: [1, "$totalLectures"] } },
       }, { new: true });
       if (course) {
       course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
