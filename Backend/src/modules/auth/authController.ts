@@ -13,7 +13,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { emailQueue } from "../../shared/queue/emailQueue.js";
 import { tokenService } from "../../shared/services/token.service.js";
-import { StatusCode } from "../../shared/types.js";
+import { StatusCode, type Handler } from "../../shared/types.js";
 import {
   canResendOTP,
   generateOTP,
@@ -31,7 +31,7 @@ import {
 import Wishlist from "../wishlist/wishlistModel.js";
 import { comparePasswords } from "./auth.utils.js";
 
-export const signupWithOTP = asyncHandler(async (req, res) => {
+export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
   if (!userInput.success) {
     throw AppError.badRequest(
@@ -73,15 +73,13 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const resendOTP = asyncHandler(async (req, res) => {
+export const resendOTP:Handler = asyncHandler(async (req, res) => {
   if (
-    !req.cookies.otp_data ||
-    !req.cookies.otp_data.email ||
-    !req.cookies.otp_data.type
+    !JSON.parse(req.cookies.otp_data)
   ) {
     throw AppError.badRequest("Invalid Request");
   }
-  const { email } = req.cookies.otp_data;
+  const { email } = JSON.parse(req.cookies.otp_data);
 
   const canResend = await canResendOTP(email);
   if (!canResend) {
@@ -125,12 +123,14 @@ export const resendOTP = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const signupOTPVerification = asyncHandler(async (req, res) => {
-  const otpDataCookie = req.cookies.otp_data;
-  if (!otpDataCookie || !otpDataCookie.email || !otpDataCookie.type) {
+export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
+  if (!JSON.parse(req.cookies.otp_data)) {
     throw AppError.badRequest("Invalid Request");
   }
-  const { email, type } = req.cookies.otp_data;
+  const { email, type } = JSON.parse(req.cookies.otp_data);
+  if (!email || !type) {
+    throw AppError.badRequest("Invalid Request");
+  }
   const { otp } = req.body;
   if (!otp) {
     throw AppError.badRequest("OTP is required");
@@ -325,7 +325,7 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
     );
   }
   const { otp, password } = parsedInput.data;
-  const { email } = req.cookies.otp_data;
+  const { email } = JSON.parse(req.cookies.otp_data);
   const lowerCaseEmail = email.toLowerCase();
   const otpData = await verifyOTP({
     email: lowerCaseEmail,

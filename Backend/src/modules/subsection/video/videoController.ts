@@ -42,6 +42,7 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     contentType: "video",
     courseId: new Types.ObjectId(metadata.courseId),
     sectionId: new Types.ObjectId(metadata.sectionId),
+    description: metadata.description || "",
     isActive: false, // will activate after video is processed
   });
   const newVideo = await Video.create({

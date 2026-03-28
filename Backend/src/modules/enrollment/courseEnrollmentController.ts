@@ -8,6 +8,7 @@ import { Course } from "../course/CourseModel.js";
 import { convertSecondsToReadingTime } from "../subsection/video/videoUtils.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { CourseEnrollment } from "./CourseEnrollment.js";
+import CourseProgress from "../course/CourseProgress.js";
 
 export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -35,6 +36,13 @@ export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     courseId: new Types.ObjectId(courseId),
   });
+  const courseProgress = await CourseProgress.create({
+    userId: new Types.ObjectId(userId),
+    courseId: new Types.ObjectId(courseId),
+    progress: 0,
+    completed:false,
+    completedSubsections: [],
+  });
   await Wishlist.findOneAndUpdate(
     { userId },
     { $pull: { courseIds: courseId } },
@@ -56,6 +64,10 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
   })
     .populate("courseId")
     .sort({ createdAt: -1 });
+  const courseProgress = await CourseProgress.findOne({
+    userId: new Types.ObjectId(userId),
+    courseId: courseEnrollments[0]?.courseId._id as Types.ObjectId || new Types.ObjectId("000000000000000000000000"),
+  });
   const courseEnrollmentsWithProgress = courseEnrollments.map((enrollment) => {
     const enrollmentObj = enrollment.toObject();
     const course = enrollmentObj.courseId as any;
@@ -68,7 +80,7 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
               courseName: course?.courseName || "",
               thumbnailUrl: course?.thumbnailUrl || "",
               instructorId: course?.instructorId || "",
-              progress: "0",
+              progress: courseProgress?.progress.toString() || "0",
               totalDuration: convertSecondsToReadingTime(
                 course?.totalDuration || 0,
               ).hhmmss,
