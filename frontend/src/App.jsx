@@ -36,6 +36,12 @@ function App() {
 
       <Routes>
         {/* ── Public routes ──────────────────────────────────────── */}
+
+        {/*NOTEEE:HAVE TO REMOVE THIS LINE */}
+        <Route path="/public/dashboard/my-courses" element={<MyCourses />} />
+              <Route path="/dashboard/add-course" element={<AddCourse />} />
+        {/*NOTEEE:HAVE TO REMOVE THIS LINE */}
+
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<ContactUs />} />

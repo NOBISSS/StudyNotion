@@ -2,9 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { BACKEND_URL } from '../utils/constants';
 
-// ─── Async thunk ──────────────────────────────────────────────────────────────
-// Fetches subsections for a single section by its _id.
-// Called from AccordionSection when the user first opens it.
 export const fetchSubSections = createAsyncThunk(
     'sections/fetchSubSections',
     async (sectionId, { getState, rejectWithValue }) => {

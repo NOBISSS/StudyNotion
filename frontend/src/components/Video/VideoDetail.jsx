@@ -18,13 +18,12 @@ import axios from "axios";
 import Footer from "../core/Footer";
 import { addCourseReview } from "../../services/operations/progressAPI";
 import PlyrPlayer from "./PlyrPlayer";
+import { BACKEND_URL } from "../../utils/constants";
 
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-const COURSE_DETAIL_API = (id) => `${BASE_URL}/courses/getdetails/${id}`;
-const SUBSECTIONS_API = (id) => `${BASE_URL}/subsections/getall/${id}`;
-const VIDEO_API = (id) => `${BASE_URL}/subsections/video/getone/${id}`;
+const COURSE_DETAIL_API = (id) => `${BACKEND_URL}/courses/getdetails/${id}`;
+const SUBSECTIONS_API = (id) => `${BACKEND_URL}/subsections/getall/${id}`;
+const VIDEO_API = (id) => `${BACKEND_URL}/subsections/video/getone/${id}`;
 
 function StarInput({ value, onChange }) {
   const [hover, setHover] = useState(0);

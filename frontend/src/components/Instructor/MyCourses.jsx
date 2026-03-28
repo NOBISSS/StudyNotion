@@ -1,135 +1,169 @@
-import { IconBtn } from '../common/IconBtn'
-import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline"
+import { VscAdd } from 'react-icons/vsc'
+import { fetchInstructorCourses, deleteCourse } from '../../services/operations/courseDetailsAPI'
+import { useDispatch } from 'react-redux'
+import { setEditCourse, setCourse, setStep } from '../../slices/courseSlice'
+import toast from 'react-hot-toast'
+
 const MyCourses = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
-const courses = [
-  {
-    id: 1,
-    title: "Introduction to Design",
-    description:
-      "This course provides an overview of the design process, design thinking, and basic design principles.",
-    created: "April 27, 2023 | 05:15 PM",
-    status: "Published",
-    duration: "20h 10m",
-    price: "₹520",
-    image: "https://images.unsplash.com/photo-1754901350791-04eff8b6289c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    id: 2,
-    title: "Graphic Design",
-    description:
-      "This course focuses on creating visual communication through the use of typography, images, and color.",
-    created: "April 28, 2023 | 04:20 PM",
-    status: "Drafted",
-    duration: "18h 30m",
-    price: "₹1200",
-    image: "https://images.unsplash.com/photo-1754901350791-04eff8b6289c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    id: 3,
-    title: "Web Design",
-    description:
-      "This course covers the basics of designing and building websites, including HTML, CSS, and responsive design.",
-    created: "April 29, 2023 | 12:32 PM",
-    status: "Published",
-    duration: "5h 52m",
-    price: "₹1800",
-    image: "https://images.unsplash.com/photo-1754901350791-04eff8b6289c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-];
-    return (
-    <div className='text-white p-5'>
-      <div>
-        <div className='Header-Part flex justify-between p-5 items-center'>
-            <div className='flex flex-col gap-3'>
-               <h1 className='text-[#838894]'>Home / Dashboard / <span className='text-[#FFD60A]'>MyCourse</span></h1>
-               <h1 className='text-4xl text-white font-medium'>My Courses</h1>
-            </div>
-            <div className='h-full'>
-            
-            <IconBtn iconName={"VscAdd"} text={"New"}
-                customClassName={"h-[50px] text-[20px] flex-row-reverse"} active={1}
-                type={"button"}
-            />              
-            </div>
+  useEffect(() => {
+    loadCourses()
+  }, [])
+
+  const loadCourses = async () => {
+    setLoading(true)
+    const result = await fetchInstructorCourses()
+    if (result) setCourses(result)
+    setLoading(false)
+  }
+
+  const handleEdit = (course) => {
+    dispatch(setCourse(course))
+    dispatch(setEditCourse(true))
+    dispatch(setStep(1))
+    navigate('/dashboard/add-course')
+  }
+
+  const handleDelete = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return
+    setDeletingId(courseId)
+    await deleteCourse({ courseId })
+    setCourses((prev) => prev.filter((c) => c._id !== courseId))
+    setDeletingId(null)
+  }
+
+  return (
+    <div className="text-white min-h-screen p-6 lg:p-8 w-full">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col gap-1">
+          <p className="text-[#838894] text-sm">
+            Home / Dashboard / <span className="text-[#FFD60A]">My Courses</span>
+          </p>
+          <h1 className="text-3xl lg:text-4xl font-semibold text-white">My Courses</h1>
         </div>
-        <div>
-
-
-     <div className="min-h-screen text-white p-6">
-      
+        <button
+          onClick={() => {
+            dispatch(setEditCourse(false))
+            dispatch(setCourse(null))
+            dispatch(setStep(1))
+            navigate('/dashboard/add-course')
+          }}
+          className="flex items-center gap-2 bg-[#FFD60A] text-black font-semibold px-5 py-2.5 rounded-lg hover:bg-yellow-300 transition-all duration-200"
+        >
+          <VscAdd className="text-lg" />
+          New
+        </button>
+      </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-700">
-        <table className="min-w-full text-sm">
-          {/* Table Header */}
-          <thead className="bg-gray-800 text-left  text-gray-300">
-            <tr className=''>
-              <th className="px-5 py-3">COURSES</th>
-              <th className="px-4 py-3">DURATION</th>
-              <th className="px-4 py-3">PRICE</th>
-              <th className="px-4 py-3">ACTIONS</th>
-            </tr>
-          </thead>
-
-          {/* Table Body */}
-          <tbody className="divide-y divide-gray-700">
-            {courses.map((course) => (
-              <tr key={course.id} className="bg-gray-900 ">
-                {/* Course Info */}
-                <td className="px-4 py-3 flex items-start gap-3">
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-3/12 h-3/12 object-cover rounded-md flex-shrink-0"
-                  />
-                  <div className='flex flex-col gap-2'>
-                    <h2 className="font-semibold text-2xl" >{course.title}</h2>
-                    <p className="text-gray-400 text-[1.10vw] w-1xs line-clamp-2">
-                      {course.description}
-                    </p>
-                    <p className="text-white text-xs mt-1">
-                      Created: {course.created}
-                    </p>
-                    <span
-                      className={`inline-block w-fit mt-2 px-2 py-1 text-xs rounded ${
-                        course.status === "Published"
-                          ? "bg-green-600"
-                          : "bg-red-600"
-                      }`}
-                    >
-                      {course.status}
-                    </span>
-                  </div>
-                </td>
-
-                {/* Duration */}
-                <td className="px-4 py-3 text-[#AFB2BF]">{course.duration}</td>
-
-                {/* Price */}
-                <td className="px-4 py-3 font-semibold text-[#AFB2BF]">{course.price}</td>
-
-                {/* Actions */}
-                <td className="px-4 py-3">
-                  <div className="flex space-x-2">
-                    <button className="p-1 hover:text-blue-400">
-                      <PencilIcon className="w-5 h-5" />
-                    </button>
-                    <button className="p-1 hover:text-red-400">
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
- 
-
+      {loading ? (
+        <div className="flex justify-center items-center h-64 text-[#838894]">
+          Loading courses...
         </div>
-      </div>
+      ) : courses.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 gap-3 text-[#838894]">
+          <p className="text-lg">No courses found.</p>
+          <p className="text-sm">Click "+ New" to create your first course.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-[#2C333F]">
+          <table className="min-w-full text-sm">
+            <thead className="bg-[#1D2532] text-left text-[#838894] uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-6 py-4">Courses</th>
+                <th className="px-6 py-4">Duration</th>
+                <th className="px-6 py-4">Price</th>
+                <th className="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#2C333F]">
+              {courses.map((course) => (
+                <tr key={course._id} className="bg-[#161D29] hover:bg-[#1a2333] transition-colors">
+                  {/* Course Info */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={course.thumbnailUrl || course.thumbnail}
+                        alt={course.courseName}
+                        className="w-[130px] h-[80px] object-cover rounded-lg flex-shrink-0"
+                        onError={(e) => {
+                          e.target.onerror = null
+                          e.target.style.display = 'none'
+                        }}
+                      />
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        <h2 className="font-semibold text-white text-base lg:text-lg line-clamp-1">
+                          {course.courseName}
+                        </h2>
+                        <p className="text-[#838894] text-xs lg:text-sm line-clamp-2 max-w-md">
+                          {course.courseDescription || course.description}
+                        </p>
+                        <p className="text-[#AFB2BF] text-xs">
+                          Created: {new Date(course.createdAt).toLocaleDateString('en-IN', {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                          })}
+                        </p>
+                        <span className={`inline-flex items-center gap-1.5 w-fit px-2.5 py-1 text-xs font-medium rounded-full ${
+                          course.status === 'Published'
+                            ? 'bg-green-900/50 text-green-400 border border-green-700'
+                            : 'bg-pink-900/50 text-pink-400 border border-pink-700'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            course.status === 'Published' ? 'bg-green-400' : 'bg-pink-400'
+                          }`} />
+                          {course.status}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Duration */}
+                  <td className="px-6 py-4 text-[#AFB2BF] whitespace-nowrap">
+                    {course.totalDuration || course.duration || '—'}
+                  </td>
+
+                  {/* Price */}
+                  <td className="px-6 py-4 font-semibold text-white whitespace-nowrap">
+                    {course.price === 0 || course.originalPrice === 0
+                      ? 'Free'
+                      : `₹${course.discountPrice || course.price || course.originalPrice}`}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEdit(course)}
+                        className="p-2 rounded-lg hover:bg-[#2C333F] text-[#AFB2BF] hover:text-blue-400 transition-all"
+                        title="Edit course"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course._id)}
+                        disabled={deletingId === course._id}
+                        className="p-2 rounded-lg hover:bg-[#2C333F] text-[#AFB2BF] hover:text-red-400 transition-all disabled:opacity-40"
+                        title="Delete course"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
