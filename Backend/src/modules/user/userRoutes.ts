@@ -27,5 +27,5 @@ userRouter.route("/create").post(createUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);
 userRouter.route("/getstudents").get(getStudents);
-router.post("/contact",submitContactForm);
+userRouter.route("/contact").post(submitContactForm);
 export default userRouter;
