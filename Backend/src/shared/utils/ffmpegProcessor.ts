@@ -94,7 +94,7 @@ export async function processVideo({
     }
     try {
       await mongoose.connect(`${process.env.MONGODB_URI}`);
-
+      const videoDuration = await getVideoDuration(outputPath);
       const video = await Video.findOneAndUpdate(
         { videoS3Key: key },
         {
@@ -102,10 +102,11 @@ export async function processVideo({
             videoS3Key: `compressed/${path.basename(outputPath)}`,
             URLExpiration: Date.now(),
             videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
-            duration: await getVideoDuration(outputPath),
+            duration: videoDuration,
             status: "ready",
           },
         },
+        { new: true },
       );
       if (!video) {
         throw new Error("Video not found");
@@ -117,7 +118,7 @@ export async function processVideo({
         $set: { isActive: true },
       });
       const course = await Course.findByIdAndUpdate(video.courseId, {
-        $set: { totalDuration: { $add: [video.duration, "$totalDuration"] } },
+        $set: { totalDuration: { $add: [video.duration || videoDuration, "$totalDuration"] } },
       }, { new: true });
       if (course) {
       course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
