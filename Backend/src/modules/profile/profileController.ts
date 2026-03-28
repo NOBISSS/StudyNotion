@@ -69,3 +69,24 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   }
   return ApiResponse.success(res, {}, "Account deleted successfully");
 });
+export const deleteProfile = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const profile = await Profile.findOneAndUpdate(
+    { userId: userId as Types.ObjectId },
+    { $set: { isDeleted: true } },
+  );
+  if (!profile) {
+    throw AppError.notFound("Profile not found");
+  }
+  await Profile.create({
+    userId: userId as Types.ObjectId,
+    about: "",
+    city: "",
+    country: "",
+    contactNumber: null,
+    gender: "",
+    profilePicture: "",
+    birthdate: null,
+  });
+  return ApiResponse.success(res, {}, "Profile deleted successfully");
+});

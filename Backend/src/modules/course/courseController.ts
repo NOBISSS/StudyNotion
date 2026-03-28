@@ -452,7 +452,12 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
     res,
     {
       courses: coursesWithRatingsAndScores.sort((a, b) => b.vectorScore - a.vectorScore),
-      AIFilteredCourses,
+      AIFilteredCourses: coursesWithRatingsAndScores.filter((course) =>
+        AIFilteredCourses.some(
+          (filtered) => filtered.courseId.toString() === course._id.toString(),
+        ),
+    ),
+
     },
     "Search results retrieved successfully",
   );

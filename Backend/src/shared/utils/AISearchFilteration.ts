@@ -4,10 +4,10 @@ import "dotenv/config";
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GENAI_API_KEY!,
 });
-export async function filterCoursesByAI(courses: any[], query: string) {
-  const prompt = `Given the following list of courses, rank them based on their relevance to the query: "${query}".\n\nCourses:\n${courses.map((course, index) => `${index + 1}. ${course.courseName} - ${course.description} rating: ${course.ratingsAverage || 0} vectorSearchScore: ${course.vectorScore || 0}`).join("\n")}\n\nReturn the ranked list of top 5 courses in the json format.'Return the final output strictly as a JSON object.','Output only the JSON object — no text, no explanation, no code block formatting. Don't use any *** *** to display header just use numbering.','Do not include triple backticks or any labels like 'json'.','Ensure the JSON is properly formatted and parsable. the fields: courseId=>The array of courseIds(_id) and relevance scores from which you ranked.' also remove \`\`\`json from start and \`\`\` from end of json output. so I can directly parse it.`;
+export async function filterCoursesByAI(courses: any[], query: string): Promise<{ courseId: string; relevanceScore: number }[]> {
+  const prompt = `Query: "${query}".\n\nCourses:\n${courses.map((course, index) => `${index + 1}. '_id':${course._id} ${course.courseName} - ${course.description} rating: ${course.ratingsAverage || 0} vectorSearchScore: ${course.vectorScore || 0}`).join("\n")}\n\n`;
 
-  const systemInstruction = `You are an expert course recommendation engine. You analyze course content, descriptions, and metadata to determine relevance to user queries. You consider factors like course topics, descriptions, ratings, and vector search scores to rank courses effectively. Your goal is to provide the most relevant course recommendations based on the user's search query.`;
+  const systemInstruction = `You are an expert course recommendation engine. You analyze course content, descriptions, and metadata to determine relevance to user queries. You consider factors like course topics, descriptions, ratings, and vector search scores to rank courses effectively. Your goal is to provide the most relevant course recommendations based on the user's search query. Response instruction: Return the ranked list of top 5 courses in the json format.'Return the final output strictly as a JSON object.','Output only the JSON object — no text, no explanation, no code block formatting. Don't use any *** *** to display header just use numbering.','Do not include triple backticks or any labels like 'json'.','Ensure the JSON is properly formatted and parsable. the fields: The array of courseIds(_id) and relevance scores from which you ranked.' also remove \`\`\`json from start and \`\`\` from end of json output. so I can directly parse it.`;
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
@@ -20,7 +20,7 @@ export async function filterCoursesByAI(courses: any[], query: string) {
 
   const rankedCourses = response.text;
 
-  return rankedCourses;
+  return JSON.parse(rankedCourses);
 }
 
 const sampleCourses = [
@@ -344,10 +344,10 @@ const sampleCourses = [
   },
 ];
 
-filterCoursesByAI(sampleCourses, "Learn JavaScript basics")
-  .then((rankedCourses) => {
-    console.log("Ranked Courses:", rankedCourses);
-  })
-  .catch((error) => {
-    console.error("Error filtering courses by AI:", error);
-  });
+// filterCoursesByAI(sampleCourses, "full stack development")
+//   .then((rankedCourses) => {
+//     console.log("Ranked Courses:", rankedCourses);
+//   })
+//   .catch((error) => {
+//     console.error("Error filtering courses by AI:", error);
+//   });
