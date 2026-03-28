@@ -10,10 +10,11 @@ import { BACKEND_URL } from "../../utils/constants";
 
 const {
     SENDOTP_API,
-    SIGNUP_API,
+    SIGNUP_VERIFY_API,
     LOGIN_API,
     RESETPASSTOKEN_API,
     RESETPASSWORD_API,
+    RESEND_OTP_API,
 } = endPoints
 
 const {
@@ -24,15 +25,12 @@ const {
 } = settingsEndPoints
 
 
-export function sendOtp(email, navigate) {
+export function sendOtp(formData, navigate) {
     return async (dispatch) => {
         const toastId = toast.loading("Loading..");
         dispatch(setLoading(true));
         try {
-            const response = await apiConnector("POST", SENDOTP_API, {
-                email,
-                checkUserPresent: true
-            })
+            const response = await apiConnector("POST", SENDOTP_API, formData)
             console.log("SENDOTP API RESPONSE............", response)
             console.log(response.data.success)
             if (!response.data.success) {
@@ -43,6 +41,29 @@ export function sendOtp(email, navigate) {
             navigate("/verifyemail");
         } catch (error) {
             console.log("SENDOTP API ERROR............", error);
+            toast.error(error.response.data.message || "Could Not Send OTP");
+        }
+        dispatch(setLoading(false));
+        toast.dismiss(toastId);
+    }
+}
+
+export function resendOtp(formData, navigate) {
+    return async (dispatch) => {
+        const toastId = toast.loading("Loading..");
+        dispatch(setLoading(true));
+        try {
+            const response = await apiConnector("POST", RESEND_OTP_API, formData)
+            console.log("SENDOTP API RESPONSE............", response)
+            console.log(response.data.data)
+            if (!response.data.data.success) {
+                throw new Error(response.data.message);
+            }
+
+            toast.success("OTP Sent Successfully");
+            navigate("/verifyemail");
+        } catch (error) {
+            console.log("RESEND OTP API ERROR............", error);
             toast.error(error.response.data.message || "Could Not Send OTP");
         }
         dispatch(setLoading(false));
@@ -64,7 +85,7 @@ export function signUp(
         const toastId = toast.loading("Loading...");
         dispatch(setLoading(true));
         try {
-            const response = await apiConnector("POST", SIGNUP_API, {
+            const response = await apiConnector("POST", SIGNUP_VERIFY_API, {
                 accountType,
                 firstName,
                 lastName,
@@ -76,7 +97,7 @@ export function signUp(
 
             console.log("SIGNUP API RESPONSE......", response);
 
-            if (!response.data.success) {
+            if (!response.data.data.success) {
                 throw new Error(response.data.message);
             }
             toast.success("Signup Succssful");

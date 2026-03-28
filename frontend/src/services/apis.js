@@ -1,8 +1,8 @@
 import { BACKEND_URL } from "../utils/constants"
 
 export const endPoints={
-    SENDOTP_API:BACKEND_URL+"/auth/sendotp",
-    SIGNUP_API:BACKEND_URL+"/auth/signup",
+    SENDOTP_API:BACKEND_URL+"/auth/signup",
+    // SIGNUP_API:BACKEND_URL+"/auth/signup",
     SIGNUP_VERIFY_API:BACKEND_URL+"/auth/signup/verify",
     RESEND_OTP_API:BACKEND_URL+"/auth/resendotp",
     FORGOT_PASSWORD_API:BACKEND_URL+"/auth/forgotpassword",
@@ -39,20 +39,26 @@ export const studentEndpoints={
 }
 
 export const courseEndpoints={
-    CREATE_COURSE_API:BACKEND_URL+"/courses/create",//with url
     GET_ALL_COURSE_API:BACKEND_URL+"/courses/getall",
     GET_TOP_COURSES_API:BACKEND_URL+"/courses/get-top",
     GET_TOP_COURSES_BY_CATEGORY_API:BACKEND_URL+"/courses/get-top/:categoryId",
 
     COURSE_DETAILS_API:BACKEND_URL+"/courses/getCourseDetails",
-    EDIT_COURSE_API:BACKEND_URL+"/courses/editCourse",  
-    COURSE_CATEGORIES_API:BACKEND_URL+"/courses/showAllCategories",
+    
+    COURSE_CATEGORIES_API:BACKEND_URL+"/categories/getall",
     DELETE_COURSE_API:BACKEND_URL+"/course/deleteCourse",
     GET_FULL_COURSE_DETAILS_AUTHENTICATED:
     BACKEND_URL+"/course/getFullCourseDetails",
     LECTURE_COMPLETION_API:BACKEND_URL+"/course/updateCourseProgress",
     CREATE_RATING_API:BACKEND_URL+"/course/createRating",
 
+
+    //INSTRUCTUOR
+    CREATE_COURSE_API:BACKEND_URL+"/courses/createcourse",//with 
+    CREATE_COURSE_MULTER_API:BACKEND_URL+"/courses/create",//with MULTER For Thumbnail
+    
+    GET_ALL_INSTRUCTOR_COURSE_API:BACKEND_URL+"/courses/instructor/getall",
+    EDIT_COURSE_API:BACKEND_URL+"/courses/editCourse",  
 }
 
 export const sectionEndpoints={

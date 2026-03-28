@@ -1,62 +1,52 @@
 import React from 'react'
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
-import CourseInformationForm from './CourseInformationForm';
-import CourseBuilderForm from './CourseBuilder/CourseBuilderForm';
+import CourseInformationForm from './CourseInformationForm'
+import CourseBuilderForm from './CourseBuilder/CourseBuilderForm'
+import PublishCourse from './PublishCourse'
+
+const steps = [
+  { id: 1, title: 'Course Information' },
+  { id: 2, title: 'Course Builder' },
+  { id: 3, title: 'Publish' },
+]
 
 const RenderSteps = () => {
-    const {step}=useSelector((state)=>state.course);
-    console.log("CURRENT STEP::",step)
-    const steps=[
-        {
-            id:1,
-            title:"Course Information"
-        },
-        {
-            id:2,
-            title:"Course Builder"
-        },
-        {
-            id:3,
-            title:"Publish"
-        },
-]
-    
+  const { step } = useSelector((state) => state.course)
+
   return (
-    <>
-    <div className='text-white w-[100%]'>
-        {
-            steps.map((item,index)=>(
-                
-                <div key={index}>
-                    <div className='bg-amber-200 w-fit'>
-                        <div className={`${step===item.id ? "bg-yellow-900 border-yellow-50 text-yellow-50" : "border-[#000917] bg-[#000998] text-white"}`}>
-                        {
-                            step > item.id ? (<FaCheck/>) : (item.id)
-                        }
-                        </div>
-                    </div>
-                    {
-                        item.id !==steps.length 
-                    }
-                </div>
-            ))}
-        </div>
-        <div>
-            {
-                steps.map((item,index)=>(
-                    <div key={index}>
-                        <div>
-                            <p>{item.title}</p>
-                        </div>
-                    </div>
-                ))
-            }
-        </div>
-        {step===1 && <CourseInformationForm/>}
-        {step===2 && <CourseBuilderForm/>}
-        {/* {step===3 && <CourseBuilderForm/>} */}
-    </>
+    <div className="w-full">
+      {/* Stepper */}
+      <div className="flex items-start mb-8">
+        {steps.map((item, index) => (
+          <React.Fragment key={item.id}>
+            <div className="flex flex-col items-center gap-2">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
+                step > item.id
+                  ? 'bg-[#FFD60A] border-[#FFD60A] text-black'
+                  : step === item.id
+                  ? 'bg-transparent border-[#FFD60A] text-[#FFD60A]'
+                  : 'bg-transparent border-[#424854] text-[#838894]'
+              }`}>
+                {step > item.id ? <FaCheck className="text-xs" /> : item.id}
+              </div>
+              <p className={`text-xs font-medium whitespace-nowrap ${step >= item.id ? 'text-white' : 'text-[#838894]'}`}>
+                {item.title}
+              </p>
+            </div>
+            {index < steps.length - 1 && (
+              <div className="flex-1 mt-[18px] mx-2">
+                <div className={`w-full border-t-2 border-dashed ${step > item.id ? 'border-[#FFD60A]' : 'border-[#424854]'}`} />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {step === 1 && <CourseInformationForm />}
+      {step === 2 && <CourseBuilderForm />}
+      {step === 3 && <PublishCourse />}
+    </div>
   )
 }
 

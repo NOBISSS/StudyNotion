@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline"
-import { VscAdd } from 'react-icons/vsc'
-import { fetchInstructorCourses, deleteCourse } from '../../services/operations/courseDetailsAPI'
 import { useDispatch } from 'react-redux'
-import { setEditCourse, setCourse, setStep } from '../../slices/courseSlice'
-import toast from 'react-hot-toast'
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { fetchInstructorCourses, deleteCourse } from '../../services/operations/courseDetailsAPI'
+import { setCourse, setEditCourse, setStep } from '../../slices/courseSlice'
 
 const MyCourses = () => {
   const navigate = useNavigate()
@@ -41,14 +39,14 @@ const MyCourses = () => {
   }
 
   return (
-    <div className="text-white min-h-screen p-6 lg:p-8 w-full">
+    <div className="text-white w-full min-h-screen bg-[#0F1117]">
       {/* Header */}
-      <div className="flex justify-between items-start mb-8">
-        <div className="flex flex-col gap-1">
-          <p className="text-[#838894] text-sm">
-            Home / Dashboard / <span className="text-[#FFD60A]">My Courses</span>
+      <div className="flex justify-between items-start px-8 pt-6 pb-4">
+        <div>
+          <p className="text-sm text-[#838894] mb-1">
+            Home / Dashboard / <span className="text-[#FFD60A]">Courses</span>
           </p>
-          <h1 className="text-3xl lg:text-4xl font-semibold text-white">My Courses</h1>
+          <h1 className="text-3xl font-bold text-white">My Course</h1>
         </div>
         <button
           onClick={() => {
@@ -57,111 +55,107 @@ const MyCourses = () => {
             dispatch(setStep(1))
             navigate('/dashboard/add-course')
           }}
-          className="flex items-center gap-2 bg-[#FFD60A] text-black font-semibold px-5 py-2.5 rounded-lg hover:bg-yellow-300 transition-all duration-200"
+          className="flex items-center gap-2 bg-[#FFD60A] text-black font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-yellow-300 transition-colors"
         >
-          <VscAdd className="text-lg" />
+          <span className="text-base">⊕</span>
           New
         </button>
       </div>
 
-      {/* Table */}
+      {/* Table container */}
       {loading ? (
-        <div className="flex justify-center items-center h-64 text-[#838894]">
-          Loading courses...
-        </div>
+        <div className="flex justify-center items-center h-64 text-[#838894]">Loading...</div>
       ) : courses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 gap-3 text-[#838894]">
-          <p className="text-lg">No courses found.</p>
+        <div className="flex flex-col items-center justify-center h-64 text-[#838894] gap-2">
+          <p className="text-base">No courses yet.</p>
           <p className="text-sm">Click "+ New" to create your first course.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[#2C333F]">
-          <table className="min-w-full text-sm">
-            <thead className="bg-[#1D2532] text-left text-[#838894] uppercase text-xs tracking-wider">
-              <tr>
-                <th className="px-6 py-4">Courses</th>
-                <th className="px-6 py-4">Duration</th>
-                <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#2C333F]">
-              {courses.map((course) => (
-                <tr key={course._id} className="bg-[#161D29] hover:bg-[#1a2333] transition-colors">
-                  {/* Course Info */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-start gap-4">
-                      <img
-                        src={course.thumbnailUrl || course.thumbnail}
-                        alt={course.courseName}
-                        className="w-[130px] h-[80px] object-cover rounded-lg flex-shrink-0"
-                        onError={(e) => {
-                          e.target.onerror = null
-                          e.target.style.display = 'none'
-                        }}
-                      />
-                      <div className="flex flex-col gap-1.5 min-w-0">
-                        <h2 className="font-semibold text-white text-base lg:text-lg line-clamp-1">
-                          {course.courseName}
-                        </h2>
-                        <p className="text-[#838894] text-xs lg:text-sm line-clamp-2 max-w-md">
-                          {course.courseDescription || course.description}
-                        </p>
-                        <p className="text-[#AFB2BF] text-xs">
-                          Created: {new Date(course.createdAt).toLocaleDateString('en-IN', {
-                            year: 'numeric', month: 'long', day: 'numeric'
-                          })}
-                        </p>
-                        <span className={`inline-flex items-center gap-1.5 w-fit px-2.5 py-1 text-xs font-medium rounded-full ${
-                          course.status === 'Published'
-                            ? 'bg-green-900/50 text-green-400 border border-green-700'
-                            : 'bg-pink-900/50 text-pink-400 border border-pink-700'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            course.status === 'Published' ? 'bg-green-400' : 'bg-pink-400'
-                          }`} />
-                          {course.status}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
+        <div className="mx-6 rounded-xl overflow-hidden border border-[#2C333F]">
+          {/* Table Header */}
+          <div className="grid bg-[#161D29] border-b border-[#2C333F] px-6 py-4"
+            style={{ gridTemplateColumns: '1fr 130px 100px 100px' }}>
+            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Courses</span>
+            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Duration</span>
+            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Price</span>
+            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Actions</span>
+          </div>
 
-                  {/* Duration */}
-                  <td className="px-6 py-4 text-[#AFB2BF] whitespace-nowrap">
-                    {course.totalDuration || course.duration || '—'}
-                  </td>
+          {/* Rows */}
+          {courses.length>0 && courses.map((course, idx) => (
+            <div
+              key={course._id}
+              className={`grid px-6 py-5 items-center bg-[#0F1117] hover:bg-[#161D29] transition-colors ${idx !== courses.length - 1 ? 'border-b border-[#2C333F]' : ''}`}
+              style={{ gridTemplateColumns: '1fr 130px 100px 100px' }}
+            >
+              {/* Course info */}
+              <div className="flex gap-4 items-start pr-4">
+                <img
+                  src={course.thumbnailUrl || course.thumbnail}
+                  alt={course.courseName}
+                  className="w-[180px] h-[110px] rounded-lg object-cover flex-shrink-0"
+                  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none' }}
+                />
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <h2 className="text-white font-bold text-lg leading-snug">
+                    {course.courseName}:
+                  </h2>
+                  <p className="text-[#838894] text-sm line-clamp-2">
+                    {course.courseDescription || course.description}
+                  </p>
+                  <p className="text-[#AFB2BF] text-xs">
+                    Created:{' '}
+                    {new Date(course.createdAt).toLocaleDateString('en-US', {
+                      month: 'long', day: 'numeric', year: 'numeric'
+                    })}{' '}
+                    |{' '}
+                    {new Date(course.createdAt).toLocaleTimeString('en-US', {
+                      hour: '2-digit', minute: '2-digit'
+                    })}
+                  </p>
+                  <span className={`inline-flex items-center gap-1.5 w-fit px-3 py-1 rounded-full text-xs font-medium mt-0.5 ${
+                    course.status === 'Published'
+                      ? 'bg-[#1C3829] text-[#4ade80]'
+                      : 'bg-[#2D1B27] text-[#f472b6]'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${course.status === 'Published' ? 'bg-[#4ade80]' : 'bg-[#f472b6]'}`} />
+                    {course.status || 'Drafted'}
+                  </span>
+                </div>
+              </div>
 
-                  {/* Price */}
-                  <td className="px-6 py-4 font-semibold text-white whitespace-nowrap">
-                    {course.price === 0 || course.originalPrice === 0
-                      ? 'Free'
-                      : `₹${course.discountPrice || course.price || course.originalPrice}`}
-                  </td>
+              {/* Duration */}
+              <span className="text-[#AFB2BF] text-sm">
+                {course.totalDuration || course.duration || '—'}
+              </span>
 
-                  {/* Actions */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(course)}
-                        className="p-2 rounded-lg hover:bg-[#2C333F] text-[#AFB2BF] hover:text-blue-400 transition-all"
-                        title="Edit course"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(course._id)}
-                        disabled={deletingId === course._id}
-                        className="p-2 rounded-lg hover:bg-[#2C333F] text-[#AFB2BF] hover:text-red-400 transition-all disabled:opacity-40"
-                        title="Delete course"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              {/* Price */}
+              <span className="text-[#AFB2BF] text-sm font-medium">
+                {course.price === 0 || course.originalPrice === 0
+                  ? 'Free'
+                  : `₹${course.discountPrice || course.price || course.originalPrice}`}
+              </span>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleEdit(course)}
+                  className="text-[#838894] hover:text-white transition-colors"
+                  title="Edit"
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => handleDelete(course._id)}
+                  disabled={deletingId === course._id}
+                  className="text-[#838894] hover:text-red-400 transition-colors disabled:opacity-40"
+                  title="Delete"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

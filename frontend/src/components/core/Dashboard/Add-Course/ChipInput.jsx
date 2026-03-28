@@ -1,69 +1,67 @@
 import React, { useState } from 'react'
 
-const ChipInput = ({label,register,errors,setValue,getValue}) => {
-    const [tag,setTag]=useState("");
-    const [tags,setTags]=useState([]);
-    const RemoveTag=(e,tagToRemove)=>{
-        e.preventDefault();
-        const newTags=tags.filter((t)=>t!==tagToRemove)
-        setTags(newTags)
-        setValue("courseTags",newTags);
-    }
-    const HandleTags=(e)=>{
-        e.preventDefault();
-        if(tag.trim()==="" || tags.includes(tag)) return;
-        const newTags=[...tags,tag];
-        setTags(newTags);
-        setTag("");
-        setValue("courseTags",newTags);
-    }
-    
-  return (
-     <div className="flex flex-col gap-3">
-      <label className="block mb-2 font-semibold">{label}</label>
+const ChipInput = ({ label, register, errors, setValue }) => {
+  const [tag, setTag] = useState('')
+  const [tags, setTags] = useState([])
 
+  const removeTag = (tagToRemove) => {
+    const newTags = tags.filter((t) => t !== tagToRemove)
+    setTags(newTags)
+    setValue('courseTag', newTags)
+  }
+
+  const addTag = (e) => {
+    e.preventDefault()
+    if (!tag.trim() || tags.includes(tag)) return
+    const newTags = [...tags, tag]
+    setTags(newTags)
+    setTag('')
+    setValue('courseTag', newTags)
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-white">
+        {label} <sup className="text-pink-400">*</sup>
+      </label>
+
+      {/* Tags display */}
       {tags.length > 0 && (
-        <div className="TAGS-BOX flex gap-2 flex-wrap">
-          {tags.map((t, index) => (
-            <div
-              key={index}
-              className="rounded-lg p-2 flex items-center gap-2 bg-amber-700 text-white"
-            >
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t, i) => (
+            <div key={i}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2C333F] text-white text-xs font-medium">
               <span>{t}</span>
-              <button
-                type="button"
-                className="bg-amber-950 px-2 rounded cursor-pointer"
-                onClick={(e) => RemoveTag(e, t)}
-              >
-                X
+              <button type="button" onClick={() => removeTag(t)}
+                className="text-[#838894] hover:text-red-400 transition-colors text-xs leading-none">
+                ✕
               </button>
             </div>
           ))}
         </div>
       )}
 
+      {/* Input + Add */}
       <div className="flex gap-3">
         <input
           type="text"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") HandleTags(e);
-          }}
-          placeholder="Enter Tags and press Add Or Enter"
-          className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-yellow-400"
+          onKeyDown={(e) => e.key === 'Enter' && addTag(e)}
+          placeholder="Choose a Tag"
+          className="flex-1 px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors"
         />
-        <button
-          className="px-4 py-2 bg-amber-300 text-black rounded-lg"
-          onClick={HandleTags}
-        >
-          Add+
+        <button type="button" onClick={addTag}
+          className="px-4 py-2.5 bg-[#FFD60A] text-black text-sm font-semibold rounded-lg hover:bg-yellow-300 transition-colors">
+          Add
         </button>
       </div>
 
-      {errors.courseTags && <span>Tag is Required**</span>}
+      {errors.courseTag && (
+        <p className="text-pink-400 text-xs">At least one tag is required</p>
+      )}
     </div>
-  );
+  )
 }
 
 export default ChipInput
