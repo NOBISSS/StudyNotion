@@ -12,17 +12,15 @@ const authSlice=createSlice({
     initialState:initialState,
     reducers:{
         setSignUpData(state,value){
-            console.log(value);
             state.signupData=value.payload;
         },
         setLoading(state,value){
             state.loading=value.payload
         },
         setToken(state,value){
-            console.log(value.payload);
             if(value.payload){
                 state.token=value.payload;
-                localStorage.setItem("accessToken",value.payload);
+                localStorage.setItem("accessToken",JSON.stringify(value.payload));
             }else{
                 localStorage.removeItem("accessToken");
             }

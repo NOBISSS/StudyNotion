@@ -13,6 +13,10 @@ export const endPoints={
     LOGOUT_API:BACKEND_URL+"/auth/logout",
 }
 
+export const contactUsEndpoints={
+    CONTACT_US_API:BACKEND_URL+"/users/contact",
+}
+
 export const profileEndpoints={
     GET_USER_DETAILS_API:BACKEND_URL+"/profile/getuser",
     GET_USER_ENROLLED_COURSE_API:BACKEND_URL+"/enrollments/getmy",
