@@ -2,18 +2,22 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { googleAuth } from "../services/operations/authAPI";
+import { setUser } from "../slices/profileSlice";
+import { setToken } from "../slices/authSlice";
+import { useDispatch } from "react-redux";
 
 const GoogleLoginButton = memo(() => {
   const navigate = useNavigate();
+  const dispatch=useDispatch();
   // const setUser = useSetRecoilState(userAtom);
   const responseGoogle = async (authResult) => {
     try {
       if (authResult["code"]) {
         const result = await googleAuth(authResult.code);
-        // setUser(result.data.user.username);
-        // navigate("/dashboard");
-        console.log(result.data.data.user);
-        // setUser(result.data.user.firstname);
+         dispatch(setUser(result.data.data.user));
+          const token=result.data.data.accessToken;
+          dispatch(setToken(token));
+          navigate("/");
       } else {
         console.log(authResult);
         throw new Error(authResult);

@@ -19,8 +19,9 @@ const authSlice=createSlice({
             state.loading=value.payload
         },
         setToken(state,value){
-            state.token=value.payload;
+            console.log(value.payload);
             if(value.payload){
+                state.token=value.payload;
                 localStorage.setItem("accessToken",value.payload);
             }else{
                 localStorage.removeItem("accessToken");
