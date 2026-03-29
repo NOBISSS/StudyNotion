@@ -117,9 +117,21 @@ export async function processVideo({
       await SubSection.findByIdAndUpdate(video.subsectionId, {
         $set: { isActive: true },
       });
-      const course = await Course.findByIdAndUpdate(video.courseId, {
-        $set: { totalDuration: { $add: [video.duration || videoDuration, "$totalDuration"] }, totalLectures: { $add: [1, "$totalLectures"], totalSubsections: { $add: [1, "$totalSubsections"] } } },
-      }, { new: true });
+      const course = await Course.findByIdAndUpdate(
+        video.courseId,
+        {
+          $set: {
+            totalDuration: {
+              $add: [video.duration || videoDuration, "$totalDuration"],
+            },
+            totalLectures: {
+              $add: [1, "$totalLectures"],
+            },
+            totalSubsections: { $add: [1, "$totalSubsections"] },
+          },
+        },
+        { new: true },
+      );
       if (course) {
       course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
       await course.save();
