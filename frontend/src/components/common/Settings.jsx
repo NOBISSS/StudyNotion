@@ -17,8 +17,8 @@ const Settings = () => {
     const [passwordData, setPasswordData] = useState({ oldPassword: "", confirmPassword: "", email: user?.email });
 
     const defaultAdditionalDetails = {
-        gender: user?.additionalDetails?.gender || "male",
-        dateOfBirth: user?.additionalDetails?.dateOfBirth,
+        gender: user?.additionalDetails?.gender || "Male",
+        dateOfBirth: user?.additionalDetails?.birthdate,
         about: user?.about,
         contactNumber: user?.additionalDetails?.contactNumber
     };
@@ -134,7 +134,7 @@ const Settings = () => {
 
                 <div className='flex gap-10 p-8 justify-between h-1/2 bg-[#161D29] rounded-md items-center'>
                     <div className='ml-5 flex gap-3 items-center'>
-                        <img src={user?.image} alt={`profile-${user?.firstName}`}
+                        <img src={user?.additionalDetails.profilePicture} alt={`profile-${user?.firstName}`}
                             className='aspect-square w-[75px] rounded-full object-cover'
                         />
 
@@ -180,7 +180,7 @@ const Settings = () => {
                                         id='dateOfBirth'
                                         name='dateOfBirth'
                                         onChange={(e) => HandleChange(e)}
-                                        value={formData.additionalDetails.dateOfBirth || new Date()}
+                                        value={formData.additionalDetails.dateOfBirth ? new Date(formData.additionalDetails.dateOfBirth).toISOString().split("T")[0] : new Date()}
                                         placeholder='Enter dateOfBirth'
                                         className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]' /></label>
                                 <label htmlFor="contactNumber">

@@ -128,7 +128,12 @@ export function UpdatePersonalInfo(formData) {
             }
 
             toast.success("PROFILE UPDATED SUCCESSFULLY");
-            dispatch(updateUserState(response.data.user));
+            dispatch(setUser({ ...response.data.data.user}));
+            localStorage.setItem(
+              "user",
+              JSON.stringify(response.data.data.user),
+            );
+            // dispatch(updateUserState(response.data.user));
             // dispatch(setUser({...response.data.user}))
             // localStorage.setItem("user", JSON.stringify(response.data.user));
         } catch (error) {
@@ -152,7 +157,7 @@ export function login(email, password, navigate) {
             if(!response.data.success){throw new Error(response.data.message);}
             toast.success("Login Successful");
             dispatch(setToken(response.data.data.accessToken));
-            const userImage = response.data?.data?.user?.image ? response.data.data.user.image : `https://api.dicebear.com/5.x/initals/svg?seed=${response.data.data.user?.firstName} ${response.data.data.user?.lastName}`;
+            const userImage = response.data?.data?.user?.additionalDetails.profilePicture ? response.data.data.user.additionalDetails.profilePicture : `https://api.dicebear.com/5.x/initals/svg?seed=${response.data.data.user?.firstName} ${response.data.data.user?.lastName}`;
             dispatch(setUser({ ...response.data.data.user, image: userImage }));
             localStorage.setItem("accessToken", JSON.stringify(response.data.data.accessToken));
             localStorage.setItem("user", JSON.stringify(response.data.data.user));
@@ -245,7 +250,7 @@ export function updateProfilePicture(displayPicture) {
             const response = await apiConnector("PUT", UPDATE_DISPLAY_PICTURE_API, formData);
             console.log(response);
             if (!response.data.success) throw new Error(response.data.message);
-            dispatch(setProfilePicture(response.data.data.profile.profilePicture))
+            dispatch(setProfilePicture(response.data.data.user.additionalDetails.profilePicture))
             localStorage.setItem("user", JSON.stringify(response.data.data.user));
             toast.success("PROFILE PHOTO UPDATED SUCCESSFULLY");
         } catch (error) {

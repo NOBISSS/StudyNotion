@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { BACKEND_URL } from "../../utils/constants";
 
 export default function VideoUploaderUppy({title, description, isPreview, sectionId, courseId}) {
   const metaRef = useRef({
@@ -64,7 +65,7 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
     // Use AwsS3Multipart plugin (companion endpoints on your backend)
     if (AwsS3MultipartPlugin) {
       uppy.use(AwsS3MultipartPlugin, {
-        companionUrl: "http://localhost:3000/api/v1/upload", // your backend implementing /s3/multipart endpoints
+        companionUrl: `${BACKEND_URL}/upload`, // your backend implementing /s3/multipart endpoints
       });
     } else {
       console.warn(

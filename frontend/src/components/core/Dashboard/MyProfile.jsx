@@ -87,7 +87,7 @@ const MyProfile = () => {
 
                             <div>
                                 <p className='text-[#424854] text-[20px]'>Date Of Birth</p>
-                                <p>{user?.additionalDetails?.dateOfBirth?.split("T")[0] ?? "Add Date Of Birth"}</p>
+                                <p>{user?.additionalDetails?.birthdate?.split("T")[0] ?? "Add Date Of Birth"}</p>
                             </div>
                         </div>
                     </div>

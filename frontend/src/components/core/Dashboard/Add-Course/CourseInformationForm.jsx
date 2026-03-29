@@ -117,6 +117,18 @@ const CourseInformationForm = ({courseId}) => {
           setValue('courseRequirements', course.instructions ?? [])
           setThumbnailPreview(course.thumbnailUrl || course.thumbnail || null)
         }
+      }else {
+        dispatch(setEditCourse(false));
+        setValue("courseTitle", "");
+        setValue("courseShortDesc", "");
+        setValue("coursePrice", null);
+        setValue("courseTag", []);
+
+        setValue("courseBenefits", "");
+        setValue("courseCategory", course.categoryId || course.category);
+        setValue("courseLevel", LEVEL[0]);
+        setValue("courseRequirements", []);
+        setThumbnailPreview(null);
       }
     }
     fetchCurrentCourse()
@@ -185,7 +197,7 @@ const CourseInformationForm = ({courseId}) => {
   const onSubmit = async (data) => {
 
     // ── EDIT mode ──────────────────────────────────────────────────────────
-    if (editCourse) {
+    if (editCourse && courseId) {
       if (!isFormUpdated()) {
         toast.error('No changes made to the form')
         return
@@ -391,7 +403,7 @@ const CourseInformationForm = ({courseId}) => {
 
       {/* Action buttons */}
       <div className="flex justify-center mt-6">
-        {editCourse && (
+        {editCourse && courseId && (
           <button type="button" onClick={() => dispatch(setStep(2))}
             className="mr-3 px-5 py-2.5 text-sm font-medium text-[#AFB2BF] border border-[#2C333F] rounded-lg hover:bg-[#2C333F] transition-colors">
             Continue Without Saving

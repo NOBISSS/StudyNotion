@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 const ProfileSchema = new Schema({
   about: { type: String, trim: true },
-  contactNumber: { type: Number },
+  contactNumber: { type: String, trim: true },
   gender: {
     type: String,
     enum: {
