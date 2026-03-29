@@ -19,43 +19,37 @@ import RequirementOfCourse from './RequirementOfCourse'
 import { useSearchParams } from 'react-router-dom'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const MAX_FILE_MB     = 2          // frontend validation limit (keep under multer limit)
-const MAX_FILE_BYTES  = MAX_FILE_MB * 1024 * 1024
-const COMPRESS_QUALITY = 0.75      // JPEG quality 0-1
-const COMPRESS_MAX_W  = 1280       // max width after compression
+const MAX_FILE_MB      = 2
+const MAX_FILE_BYTES   = MAX_FILE_MB * 1024 * 1024
+const COMPRESS_QUALITY = 0.75
+const COMPRESS_MAX_W   = 1280
 
-// ─── Helper: append array to FormData (Zod z.array expects repeated keys) ─────
+// ─── Helper: append array to FormData ────────────────────────────────────────
 const appendArray = (formData, key, arr = []) => {
   if (!arr?.length) return
   arr.forEach((item) => formData.append(key, item))
 }
 
-// ─── Helper: compress image via canvas ────────────────────────────────────────
+// ─── Helper: compress image via canvas ───────────────────────────────────────
 const compressImage = (file) =>
   new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(url)
-
-      // Scale down if wider than COMPRESS_MAX_W
       let { width, height } = img
       if (width > COMPRESS_MAX_W) {
         height = Math.round((height * COMPRESS_MAX_W) / width)
         width  = COMPRESS_MAX_W
       }
-
       const canvas = document.createElement('canvas')
       canvas.width  = width
       canvas.height = height
       canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-
       canvas.toBlob(
         (blob) => {
           if (!blob) { reject(new Error('Compression failed')); return }
-          // Preserve original filename
-          const compressed = new File([blob], file.name, { type: 'image/jpeg' })
-          resolve(compressed)
+          resolve(new File([blob], file.name, { type: 'image/jpeg' }))
         },
         'image/jpeg',
         COMPRESS_QUALITY
@@ -65,13 +59,13 @@ const compressImage = (file) =>
     img.src = url
   })
 
+// ─── Fetch course for edit ────────────────────────────────────────────────────
 async function getCurrentCourse(courseId) {
-  const course = await fetchCourseDetails(courseId);
-  // console.log("Fetched course details for editing:", course);
-  return course.data.course;
+  const res = await fetchCourseDetails(courseId)
+  return res?.data?.course ?? null
 }
 
-const CourseInformationForm = ({courseId}) => {
+const CourseInformationForm = ({ courseId }) => {
   const {
     register,
     handleSubmit,
@@ -79,16 +73,17 @@ const CourseInformationForm = ({courseId}) => {
     getValues,
     formState: { errors },
   } = useForm()
-  // console.log(courseId);
+
   const dispatch = useDispatch()
   const { course, editCourse } = useSelector((state) => state.course)
-  const [searchParams,setSearchParams] = useSearchParams();
-  const [loading, setLoading]                   = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const [loading, setCLoading]              = useState(false)
   const [courseCategories, setCourseCategories] = useState([])
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
   const [thumbnailFile, setThumbnailFile]       = useState(null)
   const [compressing, setCompressing]           = useState(false)
-  const [fileInfo, setFileInfo]                 = useState(null) // { name, sizeMB }
+  const [fileInfo, setFileInfo]                 = useState(null)
 
   // ── Fetch categories ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -99,142 +94,154 @@ const CourseInformationForm = ({courseId}) => {
     getCategories()
   }, [])
 
-  // ── Pre-fill for edit mode ───────────────────────────────────────────────
+  // ── Pre-fill form from API response ──────────────────────────────────────
+  // API response fields (from your actual response):
+  // courseName, description, originalPrice, tag[], whatYouWillLearn[],
+  // categoryId: { _id, name }, level, thumbnailUrl, tag[]
   useEffect(() => {
     const fetchCurrentCourse = async () => {
       if (courseId) {
-        const course = await getCurrentCourse(courseId)
-        if (course) {
-          dispatch(setEditCourse(true));
-          setValue('courseTitle',        course.courseName)
-          setValue('courseShortDesc',    course.description)
-          setValue('coursePrice',        course.originalPrice)
-          setValue('courseTag',          course.tag ?? [])
-          
-          setValue('courseBenefits',     course.whatYouWillLearn)
-          setValue('courseCategory',     course.categoryId || course.category)
-          setValue('courseLevel',        course.level || LEVEL[0])
-          setValue('courseRequirements', course.instructions ?? [])
-          setThumbnailPreview(course.thumbnailUrl || course.thumbnail || null)
-        }
-      }else {
-        dispatch(setEditCourse(false));
-        setValue("courseTitle", "");
-        setValue("courseShortDesc", "");
-        setValue("coursePrice", null);
-        setValue("courseTag", []);
+        const c = await getCurrentCourse(courseId)
+        if (!c) return
 
-        setValue("courseBenefits", "");
-        setValue("courseCategory", course.categoryId || course.category);
-        setValue("courseLevel", LEVEL[0]);
-        setValue("courseRequirements", []);
-        setThumbnailPreview(null);
+        dispatch(setEditCourse(true))
+
+        // ✅ Map each API field to its correct form field
+        setValue('courseTitle',        c.courseName ?? '')
+
+        // ✅ API uses "description" not "courseDescription"
+        setValue('courseShortDesc',    c.description ?? '')
+
+        // ✅ API uses "originalPrice" not "price"
+        setValue('coursePrice',        c.originalPrice ?? 0)
+
+        // ✅ API uses "tag" (array of strings)
+        setValue('courseTag',          Array.isArray(c.tag) ? c.tag : [])
+
+        // ✅ API uses "whatYouWillLearn" as array — join for textarea
+        setValue('courseBenefits',
+          Array.isArray(c.whatYouWillLearn)
+            ? c.whatYouWillLearn.join('\n')
+            : (c.whatYouWillLearn ?? '')
+        )
+
+        // ✅ API uses "categoryId._id" for the select value
+        setValue('courseCategory',     c.categoryId?._id ?? '')
+
+        setValue('courseLevel',        c.level ?? LEVEL[0])
+
+        // ✅ instructions may not exist in this response — fallback to []
+        setValue('courseRequirements', Array.isArray(c.instructions) ? c.instructions : [])
+
+        // ✅ API uses "thumbnailUrl"
+        setThumbnailPreview(c.thumbnailUrl ?? null)
+
+      } else {
+        // Reset for create mode
+        dispatch(setEditCourse(false))
+        setValue('courseTitle',        '')
+        setValue('courseShortDesc',    '')
+        setValue('coursePrice',        null)
+        setValue('courseTag',          [])
+        setValue('courseBenefits',     '')
+        setValue('courseCategory',     '')
+        setValue('courseLevel',        LEVEL[0])
+        setValue('courseRequirements', [])
+        setThumbnailPreview(null)
+        setThumbnailFile(null)
+        setFileInfo(null)
       }
     }
     fetchCurrentCourse()
-  }, [editCourse, courseId, setValue])
+  }, [courseId, setValue, dispatch])
 
-  // ── Handle thumbnail file selection with compression ─────────────────────
+  // ── Handle thumbnail with compression ────────────────────────────────────
   const handleThumbnailChange = async (e) => {
     const file = e.target.files[0]
     if (!file) return
-
-    // Must be an image
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      return
-    }
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return }
 
     setCompressing(true)
     try {
       let finalFile = file
-
-      // Compress if over limit
       if (file.size > MAX_FILE_BYTES) {
         toast.loading('Compressing image...', { id: 'compress' })
         finalFile = await compressImage(file)
         toast.dismiss('compress')
-
-        // If still too large after compression, reject
         if (finalFile.size > MAX_FILE_BYTES) {
-          toast.error(`Image still too large after compression (${(finalFile.size / 1024 / 1024).toFixed(1)}MB). Please use a smaller image.`)
+          toast.error(`Still too large (${(finalFile.size / 1024 / 1024).toFixed(1)}MB). Use a smaller image.`)
           setCompressing(false)
           return
         }
         toast.success(`Compressed to ${(finalFile.size / 1024 / 1024).toFixed(2)}MB`)
       }
-
       setThumbnailFile(finalFile)
       setThumbnailPreview(URL.createObjectURL(finalFile))
-      setFileInfo({
-        name:   finalFile.name,
-        sizeMB: (finalFile.size / 1024 / 1024).toFixed(2),
-      })
+      setFileInfo({ name: finalFile.name, sizeMB: (finalFile.size / 1024 / 1024).toFixed(2) })
     } catch (err) {
       toast.error('Failed to process image')
-      console.error(err)
     } finally {
       setCompressing(false)
     }
   }
 
-  // ── Detect changes for edit mode ─────────────────────────────────────────
+  // ── Detect changes for edit ───────────────────────────────────────────────
   const isFormUpdated = () => {
     const v = getValues()
+    // Compare against the raw API shape stored in Redux course
     return (
-      v.courseTitle        !== course?.courseName                                     ||
-      v.courseShortDesc    !== course?.courseDescription                              ||
-      String(v.coursePrice) !== String(course?.price)                                ||
-      v.courseBenefits     !== course?.whatYouWillLearn                              ||
-      v.courseLevel        !== (course?.level || LEVEL[0])                           ||
-      v.courseCategory     !== (course?.category?._id || course?.category)           ||
-      JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions)  ||
+      v.courseTitle     !== (course?.courseName ?? '')                               ||
+      v.courseShortDesc !== (course?.description ?? '')                              ||
+      String(v.coursePrice) !== String(course?.originalPrice ?? 0)                  ||
+      v.courseBenefits  !== (Array.isArray(course?.whatYouWillLearn)
+                              ? course.whatYouWillLearn.join('\n')
+                              : (course?.whatYouWillLearn ?? ''))                   ||
+      v.courseLevel     !== (course?.level ?? LEVEL[0])                             ||
+      v.courseCategory  !== (course?.categoryId?._id ?? '')                         ||
+      JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []) ||
       thumbnailFile !== null
     )
   }
 
-  // ── Submit ───────────────────────────────────────────────────────────────
+  // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (data) => {
 
-    // ── EDIT mode ──────────────────────────────────────────────────────────
+    // EDIT mode
     if (editCourse && courseId) {
-      if (!isFormUpdated()) {
-        toast.error('No changes made to the form')
-        return
-      }
+      if (!isFormUpdated()) { toast.error('No changes made'); return }
+
       const v        = getValues()
       const formData = new FormData()
-      formData.append('courseId', course._id)
+      formData.append('courseId', courseId)
 
-      if (v.courseTitle !== course.courseName)
-        formData.append('courseName', data.courseTitle)
-      if (v.courseShortDesc !== course.courseDescription)
+      if (v.courseTitle     !== (course?.courseName ?? ''))
+        formData.append('courseName',        data.courseTitle)
+      if (v.courseShortDesc !== (course?.description ?? ''))
         formData.append('courseDescription', data.courseShortDesc)
-      if (String(v.coursePrice) !== String(course.price))
-        formData.append('price', String(data.coursePrice))
-      if (v.courseBenefits !== course.whatYouWillLearn)
-        formData.append('whatYouWillLearn', data.courseBenefits)
-      if (v.courseCategory !== (course.category?._id || course.category))
-        formData.append('category', data.courseCategory)
-      if (v.courseLevel !== (course.level || LEVEL[0]))
-        formData.append('level', data.courseLevel)
-      if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course.instructions))
+      if (String(v.coursePrice) !== String(course?.originalPrice ?? 0))
+        formData.append('price',             String(data.coursePrice))
+      if (v.courseBenefits  !== (Array.isArray(course?.whatYouWillLearn)
+                                  ? course.whatYouWillLearn.join('\n')
+                                  : (course?.whatYouWillLearn ?? '')))
+        formData.append('whatYouWillLearn',  data.courseBenefits)
+      if (v.courseCategory  !== (course?.categoryId?._id ?? ''))
+        formData.append('category',          data.courseCategory)
+      if (v.courseLevel     !== (course?.level ?? LEVEL[0]))
+        formData.append('level',             data.courseLevel)
+      if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []))
         appendArray(formData, 'instructions', data.courseRequirements)
       if (thumbnailFile)
         formData.append('thumbnail', thumbnailFile)
 
-      setLoading(true)
+      setCLoading(true)
       const result = await editCourseDetails(formData)
-      setLoading(false)
+      setCLoading(false)
       if (result) { dispatch(setStep(2)); dispatch(setCourse(result)) }
       return
     }
 
-    // ── CREATE mode ────────────────────────────────────────────────────────
-    if (!thumbnailFile) {
-      toast.error('Please upload a course thumbnail')
-      return
-    }
+    // CREATE mode
+    if (!thumbnailFile) { toast.error('Please upload a course thumbnail'); return }
 
     const formData = new FormData()
     formData.append('courseName',        data.courseTitle)
@@ -248,10 +255,9 @@ const CourseInformationForm = ({courseId}) => {
     appendArray(formData, 'instructions', data.courseRequirements)
     appendArray(formData, 'tag',          data.courseTag)
 
-    setLoading(true)
+    setCLoading(true)
     const result = await addCourseDetails(formData)
-    console.log("Course creation result:", result);
-    setLoading(false)
+    setCLoading(false)
     if (result?.success) {
       setSearchParams({ courseId: result.data.course._id })
       dispatch(setStep(2))
@@ -339,7 +345,14 @@ const CourseInformationForm = ({courseId}) => {
         </div>
 
         {/* Tags */}
-        <ChipInput label="Tags" name="courseTag" register={register} errors={errors} setValue={setValue} currentTags={course?.tags || []} />
+        <ChipInput
+          label="Tags"
+          name="courseTag"
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          currentTags={Array.isArray(course?.tag) ? course.tag : []}
+        />
 
         {/* Thumbnail */}
         <div className="flex flex-col gap-1.5">
@@ -355,10 +368,8 @@ const CourseInformationForm = ({courseId}) => {
                 </div>
               ) : thumbnailPreview ? (
                 <div className="flex flex-col items-center gap-2">
-                  <img src={thumbnailPreview} alt="preview" className="max-h-48 object-cover rounded-lg" />
-                  {fileInfo && (
-                    <p className="text-[#6B7280] text-xs">{fileInfo.name} • {fileInfo.sizeMB}MB</p>
-                  )}
+                  <img src={thumbnailPreview} alt="preview" className="max-h-48 object-cover rounded-lg" loading="lazy" />
+                  {fileInfo && <p className="text-[#6B7280] text-xs">{fileInfo.name} • {fileInfo.sizeMB}MB</p>}
                   <p className="text-[#FFD60A] text-xs font-medium">Click to change</p>
                 </div>
               ) : (
@@ -371,9 +382,7 @@ const CourseInformationForm = ({courseId}) => {
                       Drag and drop an image, or{' '}
                       <span className="text-[#FFD60A] font-medium">Browse</span>
                     </p>
-                    <p className="text-[#838894] text-xs mt-1">
-                      Max {MAX_FILE_MB}MB · Auto-compressed if larger
-                    </p>
+                    <p className="text-[#838894] text-xs mt-1">Max {MAX_FILE_MB}MB · Auto-compressed if larger</p>
                   </div>
                   <div className="flex gap-6 text-xs text-[#838894]">
                     <span>• Aspect ratio 16:9</span>
@@ -411,7 +420,7 @@ const CourseInformationForm = ({courseId}) => {
         )}
         <button onClick={handleSubmit(onSubmit)} disabled={loading || compressing}
           className="flex items-center gap-2 px-8 py-2.5 bg-[#FFD60A] text-black font-semibold text-sm rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50">
-          {loading ? 'Saving...' : editCourse ? 'Save Changes' : (<>Create <VscChevronRight /></>)}
+          {loading ? 'Saving...' : editCourse && courseId ? 'Save Changes' : (<>Create <VscChevronRight /></>)}
         </button>
       </div>
     </>
