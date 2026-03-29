@@ -5,7 +5,6 @@ import { sendAdminNotification } from "../../shared/services/telegram.service.js
 import type { Handler } from "../../shared/types.js";
 
 export const submitContactForm: Handler = asyncHandler(async (req, res) => {
-  console.log("CONTACT US FORM API CALLED");
   const { firstname, lastname, email, phoneNo, message } = req.body;
 
   if (!firstname || !lastname || !email || !phoneNo || !message) {

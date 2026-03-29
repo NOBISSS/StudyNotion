@@ -12,6 +12,7 @@ import {
   getAllCourseByEnrollmentsAndRatingsAndCategory,
   getCourseDetails,
   getInstructorCourses,
+  publishCourse,
   searchCourses,
   updateCourse,
 } from "./courseController.js";
@@ -32,5 +33,6 @@ courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
 courseRouter.route("/update/:courseId").put(updateCourse);
+courseRouter.route("/publish/:courseId").put(publishCourse);
 
 export { courseRouter };

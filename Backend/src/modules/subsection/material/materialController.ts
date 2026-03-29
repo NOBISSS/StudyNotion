@@ -52,7 +52,6 @@ export const addMaterial = asyncHandler(async (req, res) => {
     materialSize,
     materialS3Key,
   } = parsedMaterialData.data;
-  console.log(userId);
   const course = await isValidInstructor(
     new Types.ObjectId(courseId),
     userId,

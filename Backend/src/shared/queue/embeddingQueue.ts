@@ -1,5 +1,6 @@
 import { Queue, Worker } from "bullmq";
 import redis from "../config/redis.js";
+import { generateCourseEmbedding } from "../vector/generateCourseEmbedding.js";
 
 export function buildCourseEmbeddingText(course: any): string {
   return [
@@ -29,6 +30,7 @@ new Worker(
   "course-embedding",
   async (job) => {
     const { course } = job.data;
+    await generateCourseEmbedding(course);
   },
   {
     connection: redis,

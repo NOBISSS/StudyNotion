@@ -19,6 +19,7 @@ import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
+import { isValidInstructor } from "../subsection/material/materialController.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -478,4 +479,30 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
     },
     "Search results retrieved successfully",
   );
+});
+export const publishCourse: Handler = asyncHandler(async (req, res) => {
+  const courseId = req.params.courseId;
+  const userId = req.userId;
+  if (!courseId || !userId) {
+    throw AppError.badRequest("Invalid course ID or user ID");
+  }
+  const course = await Course.findOne({
+    _id: new Types.ObjectId(courseId),
+    isActive: true,
+  });
+  if (!course) {
+    throw AppError.notFound("Course not found");
+  }
+  if (!await isValidInstructor(userId, course.instructorId)) {
+    throw AppError.forbidden("You are not the instructor of this course");
+  }
+
+  course.status = "Published";
+  await course.save();
+  ApiResponse.success(
+    res,
+    { course },
+    "Course published successfully",
+  );
+
 });

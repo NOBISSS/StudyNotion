@@ -377,9 +377,9 @@ export const googleSignin = asyncHandler(async (req, res) => {
       method: "google",
     });
   }
-  const userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
+  let userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
   if (!userProfile) {
-    await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
+    userProfile = await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
   }
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   return ApiResponse.success(
@@ -389,6 +389,7 @@ export const googleSignin = asyncHandler(async (req, res) => {
         ...user.toObject(),
         refreshToken: undefined,
         password: undefined,
+        additionalDetails: userProfile,
       },
       accessToken,
       refreshToken,
