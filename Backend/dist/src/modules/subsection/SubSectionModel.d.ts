@@ -6,6 +6,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, {}, {}, {
     id: string;
@@ -16,6 +17,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
@@ -28,6 +30,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
@@ -44,6 +47,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     isActive: boolean;
@@ -52,6 +56,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
@@ -64,6 +69,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
@@ -81,6 +87,7 @@ export declare const SubSection: import("mongoose").Model<{
         contentType: "video" | "material" | "quiz";
         isPreview: boolean;
         sectionId: Types.ObjectId;
+        isAvailable: boolean;
         description?: string | null;
     } & import("mongoose").DefaultTimestampProps, {
         id: string;
@@ -93,6 +100,7 @@ export declare const SubSection: import("mongoose").Model<{
         contentType: "video" | "material" | "quiz";
         isPreview: boolean;
         sectionId: Types.ObjectId;
+        isAvailable: boolean;
         description?: string | null;
     } & import("mongoose").DefaultTimestampProps & {
         _id: Types.ObjectId;
@@ -108,6 +116,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;
@@ -122,6 +131,7 @@ export declare const SubSection: import("mongoose").Model<{
     contentType: "video" | "material" | "quiz";
     isPreview: boolean;
     sectionId: Types.ObjectId;
+    isAvailable: boolean;
     description?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;

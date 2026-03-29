@@ -10,6 +10,7 @@ export declare const videoUploadSchema: z.ZodObject<{
             true: "true";
             false: "false";
         }>>, z.ZodTransform<boolean, "true" | "false">>;
+        description: z.ZodOptional<z.ZodString>;
     }, z.z.core.$strip>;
 }, z.z.core.$strip>;
 //# sourceMappingURL=videoValidation.d.ts.map

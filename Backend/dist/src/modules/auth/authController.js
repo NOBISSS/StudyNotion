@@ -1,5 +1,5 @@
 import axios from "axios";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { oAuth2Client } from "../../shared/config/OAuth2Client.js";
 import { accessTokenCookieOptions, logoutCookieOptions, OTPDatacookieOptions, refreshTokenCookieOptions, } from "../../shared/constants.js";
@@ -14,6 +14,7 @@ import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
 import { forgetInputSchema, signinInputSchema, signupInputSchema, } from "./authValidation.js";
 import Wishlist from "../wishlist/wishlistModel.js";
+import { comparePasswords } from "./auth.utils.js";
 export const signupWithOTP = asyncHandler(async (req, res) => {
     const userInput = signupInputSchema.safeParse(req.body);
     if (!userInput.success) {
@@ -47,12 +48,10 @@ export const signupWithOTP = asyncHandler(async (req, res) => {
     ]);
 });
 export const resendOTP = asyncHandler(async (req, res) => {
-    if (!req.cookies.otp_data ||
-        !req.cookies.otp_data.email ||
-        !req.cookies.otp_data.type) {
+    if (!JSON.parse(req.cookies.otp_data)) {
         throw AppError.badRequest("Invalid Request");
     }
-    const { email } = req.cookies.otp_data;
+    const { email } = JSON.parse(req.cookies.otp_data);
     const canResend = await canResendOTP(email);
     if (!canResend) {
         throw AppError.rateLimited("OTP resend limit reached. Please try again later.");
@@ -86,11 +85,13 @@ export const resendOTP = asyncHandler(async (req, res) => {
     ]);
 });
 export const signupOTPVerification = asyncHandler(async (req, res) => {
-    const otpDataCookie = req.cookies.otp_data;
-    if (!otpDataCookie || !otpDataCookie.email || !otpDataCookie.type) {
+    if (!JSON.parse(req.cookies.otp_data)) {
         throw AppError.badRequest("Invalid Request");
     }
-    const { email, type } = req.cookies.otp_data;
+    const { email, type } = JSON.parse(req.cookies.otp_data);
+    if (!email || !type) {
+        throw AppError.badRequest("Invalid Request");
+    }
     const { otp } = req.body;
     if (!otp) {
         throw AppError.badRequest("OTP is required");
@@ -151,7 +152,10 @@ export const signin = asyncHandler(async (req, res) => {
     if (user.isDeleted) {
         throw AppError.unauthorized("User is deleted, Contact support");
     }
-    const isPasswordCorrect = user.comparePassword(password);
+    if (!user.password) {
+        throw AppError.unauthorized("Invalid authentication method");
+    }
+    const isPasswordCorrect = comparePasswords(password, user.password);
     if (!isPasswordCorrect) {
         throw AppError.badRequest("Invalid password");
     }
@@ -243,7 +247,7 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
         throw AppError.badRequest(parsedInput.error?.issues[0]?.message || "OTP/Password is required");
     }
     const { otp, password } = parsedInput.data;
-    const { email } = req.cookies.otp_data;
+    const { email } = JSON.parse(req.cookies.otp_data);
     const lowerCaseEmail = email.toLowerCase();
     const otpData = await verifyOTP({
         email: lowerCaseEmail,
@@ -271,11 +275,12 @@ export const googleSignin = asyncHandler(async (req, res) => {
             firstName: userRes.data.name.split(" ")[0],
             lastName: userRes.data.name.split(" ").slice(1).join(" "),
             email: userRes.data.email,
+            method: "google",
         });
     }
-    const userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
+    let userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
     if (!userProfile) {
-        await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
+        userProfile = await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
     }
     const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
     return ApiResponse.success(res, {
@@ -283,6 +288,7 @@ export const googleSignin = asyncHandler(async (req, res) => {
             ...user.toObject(),
             refreshToken: undefined,
             password: undefined,
+            additionalDetails: userProfile,
         },
         accessToken,
         refreshToken,

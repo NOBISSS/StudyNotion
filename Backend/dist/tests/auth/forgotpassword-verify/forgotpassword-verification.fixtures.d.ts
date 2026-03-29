@@ -25,6 +25,7 @@ export declare function seedUser(overrides?: {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -38,6 +39,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -49,6 +51,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -65,6 +68,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -76,6 +80,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -92,6 +97,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -103,6 +109,7 @@ export declare function seedUser(overrides?: {
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -123,6 +130,7 @@ export declare function seedUser(overrides?: {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -139,6 +147,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -150,6 +159,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -166,6 +176,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -177,6 +188,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -193,6 +205,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -204,6 +217,7 @@ export declare function seedUser(overrides?: {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;

@@ -19,7 +19,7 @@ const courseProgressSchema = new Schema({
         type: Types.ObjectId,
         ref: "Course",
     },
-    completedVideos: [
+    completedSubsections: [
         {
             type: Types.ObjectId,
             ref: "SubSection",
@@ -27,4 +27,5 @@ const courseProgressSchema = new Schema({
     ],
 }, { timestamps: true });
 const CourseProgress = model("CourseProgress", courseProgressSchema);
+export default CourseProgress;
 //# sourceMappingURL=CourseProgress.js.map

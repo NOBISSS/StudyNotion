@@ -4,8 +4,10 @@ import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { Course } from "../course/CourseModel.js";
+import { convertSecondsToReadingTime } from "../subsection/video/videoUtils.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { CourseEnrollment } from "./CourseEnrollment.js";
+import CourseProgress from "../course/CourseProgress.js";
 export const EnrollInCourse = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const user = req.user;
@@ -31,6 +33,13 @@ export const EnrollInCourse = asyncHandler(async (req, res) => {
         userId: new Types.ObjectId(userId),
         courseId: new Types.ObjectId(courseId),
     });
+    const courseProgress = await CourseProgress.create({
+        userId: new Types.ObjectId(userId),
+        courseId: new Types.ObjectId(courseId),
+        progress: 0,
+        completed: false,
+        completedSubsections: [],
+    });
     await Wishlist.findOneAndUpdate({ userId }, { $pull: { courseIds: courseId } }, { new: true });
     ApiResponse.success(res, {
         courseEnrollment,
@@ -43,9 +52,13 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
     })
         .populate("courseId")
         .sort({ createdAt: -1 });
-    const courseEnrollmentsWithProgress = courseEnrollments.map((enrollment) => {
+    const courseEnrollmentsWithProgress = await Promise.all(courseEnrollments.map(async (enrollment) => {
         const enrollmentObj = enrollment.toObject();
         const course = enrollmentObj.courseId;
+        const courseProgress = await CourseProgress.findOne({
+            userId: new Types.ObjectId(userId),
+            courseId: new Types.ObjectId(course._id),
+        });
         return {
             ...enrollmentObj,
             courseId: typeof course === "object"
@@ -54,12 +67,12 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
                     courseName: course?.courseName || "",
                     thumbnailUrl: course?.thumbnailUrl || "",
                     instructorId: course?.instructorId || "",
-                    progress: "0",
-                    totalDuration: "2:30:00",
+                    progress: courseProgress?.progress.toString() || "0",
+                    totalDuration: convertSecondsToReadingTime(course?.totalDuration || 0).hhmmss,
                 }
                 : enrollmentObj.courseId,
         };
-    });
+    }));
     ApiResponse.success(res, {
         courseEnrollments: courseEnrollmentsWithProgress,
     }, "Course enrollments retrieved successfully");

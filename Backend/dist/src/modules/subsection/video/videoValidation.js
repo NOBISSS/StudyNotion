@@ -18,6 +18,7 @@ export const videoUploadSchema = z.object({
             .enum(["true", "false"], { error: "isPreview must be a boolean value" })
             .default("false")
             .transform((val) => val === "true"),
+        description: z.string().optional(),
     }),
 });
 //# sourceMappingURL=videoValidation.js.map

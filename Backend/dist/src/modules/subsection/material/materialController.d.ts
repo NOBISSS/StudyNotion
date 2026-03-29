@@ -8,6 +8,11 @@ export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types
     instructorId: Types.ObjectId;
     typeOfCourse: "Free" | "Paid";
     totalDuration: number;
+    totalLectures: number;
+    totalMaterials: number;
+    totalQuizzes: number;
+    totalSubsections: number;
+    totalDurationFormatted: string;
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
@@ -32,6 +37,11 @@ export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types
     instructorId: Types.ObjectId;
     typeOfCourse: "Free" | "Paid";
     totalDuration: number;
+    totalLectures: number;
+    totalMaterials: number;
+    totalQuizzes: number;
+    totalSubsections: number;
+    totalDurationFormatted: string;
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];

@@ -60,9 +60,4 @@ export const attachCoursesToCategories = async () => {
         console.error("❌ Error attaching courses:", error);
     }
 };
-seedCategories()
-    .then(() => {
-    console.log("courses attached to categories successfully");
-})
-    .catch((error) => console.log("error", error));
 //# sourceMappingURL=seedCategorties.js.map

@@ -34,7 +34,6 @@ export const addMaterial = asyncHandler(async (req, res) => {
         throw AppError.badRequest(parsedMaterialData.error.issues[0]?.message || "Invalid input data");
     }
     const { materialType, description, courseId, title, sectionId, materialSize, materialS3Key, } = parsedMaterialData.data;
-    console.log(userId);
     const course = await isValidInstructor(new Types.ObjectId(courseId), userId, req.user?.accountType);
     if (!course) {
         throw AppError.unauthorized("You are not authorized to add material to this course.");
@@ -58,6 +57,9 @@ export const addMaterial = asyncHandler(async (req, res) => {
     });
     await Section.findByIdAndUpdate(sectionId, {
         $push: { subSectionIds: material._id },
+    });
+    await Course.findByIdAndUpdate(courseId, {
+        $inc: { totalMaterials: 1, totalSubsections: 1 },
     });
     ApiResponse.created(res, {
         material,
@@ -109,6 +111,9 @@ export const deleteMaterial = asyncHandler(async (req, res) => {
     await subsection.save();
     await Section.findByIdAndUpdate(subsection.sectionId, {
         $pull: { subSectionIds: material._id },
+    });
+    await Course.findByIdAndUpdate(material.courseId, {
+        $inc: { totalMaterials: -1, totalSubsections: -1 },
     });
     ApiResponse.success(res, {}, "Material deleted successfully.");
 });

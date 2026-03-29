@@ -12,7 +12,7 @@ export const createSection = asyncHandler(async (req, res) => {
     if (!parsedData.success) {
         throw AppError.badRequest(parsedData.error.issues[0]?.message || "Invalid section data");
     }
-    const { name, courseId, order } = parsedData.data;
+    const { sectionName: name, courseId, order } = parsedData.data;
     const existingSection = await Section.findOne({ courseId }).populate("courseId");
     if (existingSection && existingSection.name === name) {
         throw AppError.conflict("Section with this name already exists for the course");
@@ -22,11 +22,13 @@ export const createSection = asyncHandler(async (req, res) => {
         req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to add sections to this course");
     }
-    await Section.updateMany({ courseId, order: { $gte: order } }, { $inc: { order: 1 } });
+    const sectionCount = await Section.countDocuments({ courseId });
+    const newOrder = order !== undefined ? order : sectionCount + 1;
+    await Section.updateMany({ courseId, order: { $gte: newOrder } }, { $inc: { order: 1 } });
     const section = await Section.create({
         name,
         courseId,
-        order,
+        order: newOrder,
     });
     ApiResponse.created(res, {
         section,
@@ -125,7 +127,7 @@ export const updateSection = asyncHandler(async (req, res) => {
     if (existingSection && existingSection.name === name) {
         throw AppError.conflict("Section with this name already exists for the course");
     }
-    if (existingSection?.courseId.instructorId.toString() != instructorId) {
+    if (existingSection?.courseId.instructorId.toString() != instructorId || req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to add sections to this course");
     }
     currentSection.name = name || currentSection.name;

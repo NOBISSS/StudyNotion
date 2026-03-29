@@ -11,13 +11,24 @@ const profileSlice=createSlice({
     reducers:{
         setUser(state,action){
             state.user=action.payload;
+            if(action.payload){
             localStorage.setItem("user",action.payload);
+            }else{
+                localStorage.removeItem("user");
+            }
         },
         setLoading(state,value){
             state.loading=value.payload
         },
+        setError(state,value){
+            state.error=value.payload;
+        },
+        setProfilePicture(state,value){
+            state.user.profilePicture=value.action;
+            localStorage.setItem("user", state.user);
+        }
     },
 });
 
-export const {setUser,setLoading} =profileSlice.actions;
+export const {setUser,setLoading,setError,setProfilePicture} =profileSlice.actions;
 export default profileSlice.reducer;

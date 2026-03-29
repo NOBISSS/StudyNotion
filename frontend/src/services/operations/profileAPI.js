@@ -7,8 +7,6 @@ import { logout } from "./authAPI";
 
 const {GET_USER_DETAILS_API,GET_USER_ENROLLED_COURSE_API}=profileEndpoints;
 
-
-
 export async function getMe(token){
     const toastId=toast.loading("Loading....");
     let result=[];

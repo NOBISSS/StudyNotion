@@ -3,6 +3,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -17,6 +18,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -33,6 +35,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -53,6 +56,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -65,6 +69,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -81,6 +86,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -102,6 +108,7 @@ declare const Video: import("mongoose").Model<{
         isActive: boolean;
         subsectionId: import("mongoose").Types.ObjectId;
         courseId: import("mongoose").Types.ObjectId;
+        sectionId: import("mongoose").Types.ObjectId;
         videoS3Key: string;
         type?: string | null;
         status?: string | null;
@@ -118,6 +125,7 @@ declare const Video: import("mongoose").Model<{
         isActive: boolean;
         subsectionId: import("mongoose").Types.ObjectId;
         courseId: import("mongoose").Types.ObjectId;
+        sectionId: import("mongoose").Types.ObjectId;
         videoS3Key: string;
         type?: string | null;
         status?: string | null;
@@ -137,6 +145,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;
@@ -155,6 +164,7 @@ declare const Video: import("mongoose").Model<{
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
+    sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
     type?: string | null;
     status?: string | null;

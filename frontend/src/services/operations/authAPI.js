@@ -2,11 +2,12 @@ import toast from "react-hot-toast"
 import { apiConnector } from "../apiconnector";
 import { setLoading, setToken } from '../../slices/authSlice';
 //import {resetCart} from '../../slices/cartSlice';
-import { setUser } from "../../slices/profileSlice";
+import { setProfilePicture, setUser } from "../../slices/profileSlice";
 import { endPoints, settingsEndPoints } from "../apis";
 import { updateUserState } from "../../utils/updateUserState";
 import axios from "axios";
 import { BACKEND_URL } from "../../utils/constants";
+import { resetCart } from "../../slices/cartSlice";
 
 const {
     SENDOTP_API,
@@ -166,10 +167,10 @@ export function logout(navigate) {
     return (dispatch) => {
         dispatch(setToken(null));
         dispatch(setUser(null))
-        //dispatch(resetCart());
+        dispatch(resetCart());
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
-        toast.success("Logged Out");
+        toast.success("Logged Out Successfully");
         navigate("/")
     }
 }
@@ -237,15 +238,15 @@ export function updateProfilePicture(displayPicture) {
     return async (dispatch) => {
         console.log(displayPicture);
         const formData = new FormData();
-        formData.append("displayPicture", displayPicture);
+        formData.append("profilephoto", displayPicture);
         console.log("FORM DATA :", formData);
         const toastId = toast.loading("UPLOADING PROFILE PICTURE")
         try {
             const response = await apiConnector("PUT", UPDATE_DISPLAY_PICTURE_API, formData);
             console.log(response);
             if (!response.data.success) throw new Error(response.data.message);
-            dispatch(setUser({ ...response.data.user }))
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+            dispatch(setProfilePicture(response.data.data.profile.profilePicture))
+            localStorage.setItem("user", JSON.stringify(response.data.data.user));
             toast.success("PROFILE PHOTO UPDATED SUCCESSFULLY");
         } catch (error) {
             console.log(error);

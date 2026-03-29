@@ -23,7 +23,11 @@ async function downloadFromS3(key, dest) {
     });
 }
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Course } from "../../modules/course/CourseModel.js";
+import { Section } from "../../modules/section/SectionModel.js";
+import { SubSection } from "../../modules/subsection/SubSectionModel.js";
 import Video from "../../modules/subsection/video/VideoModel.js";
+import { convertSecondsToReadingTime } from "../../modules/subsection/video/videoUtils.js";
 export async function processVideo({ key, videoName, }) {
     const tempDir = path.resolve("./temp");
     if (!fs.existsSync(tempDir))
@@ -71,14 +75,34 @@ export async function processVideo({ key, videoName, }) {
         }
         try {
             await mongoose.connect(`${process.env.MONGODB_URI}`);
-            const video = await Video.updateOne({ videoS3Key: key }, {
+            const videoDuration = await getVideoDuration(outputPath);
+            const video = await Video.findOneAndUpdate({ videoS3Key: key }, {
                 $set: {
                     videoS3Key: `compressed/${path.basename(outputPath)}`,
                     URLExpiration: Date.now(),
                     videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
-                    duration: await getVideoDuration(outputPath),
+                    duration: videoDuration,
+                    status: "ready",
                 },
+            }, { new: true });
+            if (!video) {
+                throw new Error("Video not found");
+            }
+            await Section.findByIdAndUpdate(video.sectionId, {
+                $push: { subsections: video.subsectionId },
             });
+            await SubSection.findByIdAndUpdate(video.subsectionId, {
+                $set: { isAvailable: true },
+            });
+            const course = await Course.findById(video.courseId);
+            if (course) {
+                course.totalDuration = (course.totalDuration || 0) + videoDuration;
+                course.totalLectures ? course.totalLectures += 1 : course.totalLectures = 1;
+                course.totalSubsections ? course.totalSubsections += 1 : course.totalSubsections = 1;
+                await course.save();
+                course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
+                await course.save();
+            }
         }
         catch (err) {
             console.log(err);

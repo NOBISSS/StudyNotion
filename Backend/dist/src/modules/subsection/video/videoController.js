@@ -28,17 +28,18 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
         contentType: "video",
         courseId: new Types.ObjectId(metadata.courseId),
         sectionId: new Types.ObjectId(metadata.sectionId),
+        description: metadata.description || "",
+        isActive: true,
+        isAvailable: false,
     });
     const newVideo = await Video.create({
         videoName: filename,
         videoS3Key: key,
         type,
-        status: "uploaded",
+        status: "processing",
         courseId: new Types.ObjectId(metadata.courseId),
+        sectionId: new Types.ObjectId(metadata.sectionId),
         subsectionId: subsection._id,
-    });
-    await Section.findByIdAndUpdate(metadata.sectionId, {
-        $push: { subsections: subsection._id },
     });
     const createCmd = new CreateMultipartUploadCommand({
         Bucket: BUCKET,
@@ -74,7 +75,6 @@ export const generateMultipartPresignedURL = asyncHandler(async (req, res) => {
 });
 export const completeVideoUpload = asyncHandler(async (req, res) => {
     const { uploadId } = req.params;
-    console.log("Body on complete: ", req.body);
     const key = req.body.key || req.query.key;
     const parts = req.body.parts || req.body.uploadParts || req.body.partsList;
     if (!uploadId || !key || !parts) {
@@ -174,7 +174,6 @@ export const getVideo = asyncHandler(async (req, res) => {
     }
     const video = await Video.findOne({
         subsectionId: new Types.ObjectId(subsectionId),
-        isActive: true,
     });
     if (!video) {
         throw AppError.notFound("Video not found for this subsection");

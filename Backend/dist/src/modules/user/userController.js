@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";

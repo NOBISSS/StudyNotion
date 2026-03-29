@@ -1,8 +1,8 @@
 import { Schema } from "mongoose";
 declare const QuizAttempt: import("mongoose").Model<{
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -25,8 +25,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     id: string;
 }, import("mongoose").Document<unknown, {}, {
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -51,8 +51,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     timestamps: true;
 }> & Omit<{
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -81,8 +81,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     timestamps: true;
 }, {
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -103,8 +103,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     }>;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -129,8 +129,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     timestamps: true;
 }>> & Omit<{
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -160,8 +160,8 @@ declare const QuizAttempt: import("mongoose").Model<{
 } | {
     [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
         userId: import("mongoose").Types.ObjectId;
-        quizId: import("mongoose").Types.ObjectId;
         score: number;
+        quizId: import("mongoose").Types.ObjectId;
         adaptiveData: any[];
         attemptedAt: NativeDate;
         answers: import("mongoose").Types.DocumentArray<{
@@ -186,8 +186,8 @@ declare const QuizAttempt: import("mongoose").Model<{
         timestamps: true;
     }>> & Omit<{
         userId: import("mongoose").Types.ObjectId;
-        quizId: import("mongoose").Types.ObjectId;
         score: number;
+        quizId: import("mongoose").Types.ObjectId;
         adaptiveData: any[];
         attemptedAt: NativeDate;
         answers: import("mongoose").Types.DocumentArray<{
@@ -215,8 +215,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     }> | undefined;
 }, {
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{
@@ -261,8 +261,8 @@ declare const QuizAttempt: import("mongoose").Model<{
     __v: number;
 }>, {
     userId: import("mongoose").Types.ObjectId;
-    quizId: import("mongoose").Types.ObjectId;
     score: number;
+    quizId: import("mongoose").Types.ObjectId;
     adaptiveData: any[];
     attemptedAt: NativeDate;
     answers: import("mongoose").Types.DocumentArray<{

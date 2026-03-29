@@ -4,6 +4,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -15,6 +16,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -31,6 +33,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -42,6 +45,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -58,6 +62,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -69,6 +74,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -90,6 +96,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -101,6 +108,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -117,6 +125,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -128,6 +137,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -144,6 +154,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -155,6 +166,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -175,6 +187,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -184,6 +197,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -195,6 +209,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -213,6 +228,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -224,6 +240,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -240,6 +257,7 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -256,6 +274,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -266,6 +285,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -277,6 +297,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -293,6 +314,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -304,6 +326,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -320,6 +343,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -331,6 +355,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -352,6 +377,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -365,6 +391,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -376,6 +403,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -392,6 +420,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -403,6 +432,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -419,6 +449,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -430,6 +461,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -450,6 +482,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -466,6 +499,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -477,6 +511,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -493,6 +528,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -504,6 +540,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -520,6 +557,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -531,6 +569,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -551,6 +590,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -562,6 +602,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -578,6 +619,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -589,6 +631,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -605,6 +648,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -616,6 +660,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -637,6 +682,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -648,6 +694,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -664,6 +711,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -675,6 +723,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -691,6 +740,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -702,6 +752,7 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
+            method: "local" | "google";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
@@ -722,6 +773,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -731,6 +783,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -742,6 +795,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -760,6 +814,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -771,6 +826,7 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
+        method: "local" | "google";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
@@ -787,6 +843,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
@@ -800,6 +857,7 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
+    method: "local" | "google";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
