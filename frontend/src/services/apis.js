@@ -46,7 +46,7 @@ export const courseEndpoints={
     COURSE_DETAILS_API:BACKEND_URL+"/courses/getdetails",
     
     COURSE_CATEGORIES_API:BACKEND_URL+"/categories/getall",
-    DELETE_COURSE_API:BACKEND_URL+"/course/deleteCourse",
+    DELETE_COURSE_API:BACKEND_URL+"/courses/delete/:courseId",
     GET_FULL_COURSE_DETAILS_AUTHENTICATED:
     BACKEND_URL+"/course/getFullCourseDetails",
     LECTURE_COMPLETION_API:BACKEND_URL+"/course/updateCourseProgress",

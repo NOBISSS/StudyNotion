@@ -47,7 +47,7 @@ export const editCourseDetails = async (data) => {
 export const deleteCourse = async (data) => {
   const toastId = toast.loading("Deleting course...")
   try {
-    const response = await apiConnector("DELETE", DELETE_COURSE_API, data)
+    const response = await apiConnector("DELETE", DELETE_COURSE_API.replace(":courseId", data.courseId), data)
     if (!response?.data?.success) throw new Error("Could not delete course")
     toast.success("Course deleted")
   } catch (error) {
