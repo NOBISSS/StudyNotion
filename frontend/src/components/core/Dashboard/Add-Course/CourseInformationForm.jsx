@@ -399,7 +399,7 @@ const CourseInformationForm = ({courseId}) => {
         )}
         <button onClick={handleSubmit(onSubmit)} disabled={loading || compressing}
           className="flex items-center gap-2 px-8 py-2.5 bg-[#FFD60A] text-black font-semibold text-sm rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50">
-          {loading ? 'Saving...' : editCourse ? 'Save Changes' : (<>Next <VscChevronRight /></>)}
+          {loading ? 'Saving...' : editCourse ? 'Save Changes' : (<>Create <VscChevronRight /></>)}
         </button>
       </div>
     </>
