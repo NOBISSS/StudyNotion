@@ -11,7 +11,7 @@ const steps = [
   { id: 3, title: 'Publish' },
 ]
 
-const RenderSteps = () => {
+const RenderSteps = ({courseId}) => {
   const { step } = useSelector((state) => state.course)
 
   return (
@@ -43,9 +43,9 @@ const RenderSteps = () => {
         ))}
       </div>
 
-      {step === 1 && <CourseInformationForm />}
-      {step === 2 && <CourseBuilderForm />}
-      {step === 3 && <PublishCourse />}
+      {step === 1 && <CourseInformationForm courseId={courseId} />}
+      {step === 2 && <CourseBuilderForm courseId={courseId} />}
+      {step === 3 && <PublishCourse courseId={courseId} />}
     </div>
   )
 }

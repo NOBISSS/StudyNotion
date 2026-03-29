@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 
-const ChipInput = ({ label, register, errors, setValue }) => {
+const ChipInput = ({ label, register, errors, setValue, currentTags }) => {
   const [tag, setTag] = useState('')
-  const [tags, setTags] = useState([])
+  const [tags, setTags] = useState(currentTags)
 
   const removeTag = (tagToRemove) => {
     const newTags = tags.filter((t) => t !== tagToRemove)

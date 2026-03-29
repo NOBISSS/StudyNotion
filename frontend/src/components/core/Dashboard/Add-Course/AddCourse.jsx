@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { VscChevronLeft } from 'react-icons/vsc'
 import RenderSteps from './RenderSteps'
 
@@ -16,7 +16,8 @@ const tips = [
 
 const AddCourse = () => {
   const navigate = useNavigate()
-
+  const [searchParams] = useSearchParams()
+  const courseId = searchParams.get('courseId')
   return (
     <div className="text-white min-h-screen w-full bg-[#0F1117] px-6 lg:px-8 py-6">
       <button
@@ -30,7 +31,7 @@ const AddCourse = () => {
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Left — stepper + form */}
         <div className="flex-1 min-w-0">
-          <RenderSteps />
+          <RenderSteps courseId={courseId} />
         </div>
 
         {/* Right — tips panel */}

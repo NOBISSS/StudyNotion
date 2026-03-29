@@ -43,7 +43,7 @@ export const courseEndpoints={
     GET_TOP_COURSES_API:BACKEND_URL+"/courses/get-top",
     GET_TOP_COURSES_BY_CATEGORY_API:BACKEND_URL+"/courses/get-top/:categoryId",
 
-    COURSE_DETAILS_API:BACKEND_URL+"/courses/getCourseDetails",
+    COURSE_DETAILS_API:BACKEND_URL+"/courses/getdetails",
     
     COURSE_CATEGORIES_API:BACKEND_URL+"/categories/getall",
     DELETE_COURSE_API:BACKEND_URL+"/course/deleteCourse",
@@ -59,6 +59,8 @@ export const courseEndpoints={
     
     GET_ALL_INSTRUCTOR_COURSE_API:BACKEND_URL+"/courses/instructor/getall",
     EDIT_COURSE_API:BACKEND_URL+"/courses/editCourse",  
+    PUT_PUBLISH_COURSE_API:BACKEND_URL+"/courses/publish/:courseId",
+    PUT_DRAFT_COURSE_API:BACKEND_URL+"/courses/draft/:courseId",
 }
 
 export const sectionEndpoints={
@@ -75,7 +77,7 @@ export const subSectionVideoEndpoints={
     GET_SUBSECTION_API:BACKEND_URL+"/subsections/getall/:sectionId",//has to be updated while calling
     CREATE_SUBSECTION_API:BACKEND_URL+"/subsections/create",
     EDIT_SUBSECTION_API:BACKEND_URL+"/subsections/edit",
-    DELETE_SUBSECTION_API:BACKEND_URL+"/subsections/delete",
+    DELETE_SUBSECTION_API:BACKEND_URL+"/subsections/delete/:subsectionId",
 }
 
 export const subSectionMaterialEndpoints={

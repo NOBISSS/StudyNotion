@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { fetchInstructorCourses, deleteCourse } from '../../services/operations/courseDetailsAPI'
@@ -11,7 +11,7 @@ const MyCourses = () => {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
-
+  const [searchParams, setSearchParams] = useSearchParams()
   useEffect(() => {
     loadCourses()
   }, [])
@@ -27,7 +27,8 @@ const MyCourses = () => {
     dispatch(setCourse(course))
     dispatch(setEditCourse(true))
     dispatch(setStep(1))
-    navigate('/dashboard/add-course')
+    navigate('/dashboard/add-course?courseId=' + course._id)
+    // navigate('/dashboard/add-course')
   }
 
   const handleDelete = async (courseId) => {

@@ -1,6 +1,6 @@
 import toast from "react-hot-toast"
 import { apiConnector } from "../apiconnector"
-import { courseEndpoints, SignatureEndpoints } from "../apis"
+import { courseEndpoints, sectionEndpoints, SignatureEndpoints, subSectionVideoEndpoints } from "../apis"
 
 const {
   GET_ALL_COURSE_API,
@@ -12,8 +12,18 @@ const {
   EDIT_COURSE_API,
   CREATE_COURSE_API,
   CREATE_COURSE_MULTER_API,
-} = courseEndpoints
+  PUT_PUBLISH_COURSE_API,
+  PUT_DRAFT_COURSE_API,
+} = courseEndpoints;
 
+const {
+  GET_SECTION_API,
+  CREATE_SECTION_API,
+  DELETE_SECTION_API,
+} = sectionEndpoints;
+
+
+const {GET_SUBSECTION_API,DELETE_SUBSECTION_API} = subSectionVideoEndpoints;
 const {
     POST_SIGNATURE_CLOUDINARY_API
 }=SignatureEndpoints;
@@ -97,7 +107,7 @@ export const fetchCourseDetails = async (courseId) => {
   const toastId = toast.loading("Loading...")
   let result = null
   try {
-    const response = await apiConnector("GET", COURSE_DETAILS_API, { courseId })
+    const response = await apiConnector("GET", COURSE_DETAILS_API+"/"+courseId, { courseId })
     if (!response?.data?.success) throw new Error("Could not fetch course details")
     result = response?.data
   } catch (error) {
@@ -150,4 +160,103 @@ export const addCourseDetails = async (data) => {
     toast.dismiss(toastId)
   }
   return result
+}
+
+export const fetchCourseSections = async (data) =>{
+  const toastId = toast.loading("Loading...");
+  let result = [];
+  try {
+    const response = await apiConnector("GET", GET_SECTION_API.replace(":courseId", data.courseId));
+    if (!response?.data?.success) throw new Error("Could not fetch sections");
+    result = response?.data?.data || [];
+  } catch (error) {
+    toast.error(error.message || "Failed to fetch sections");
+  } finally {
+    toast.dismiss(toastId);
+  }
+  return result;
+}
+
+export const createSection = async (data) => {
+  let result = null
+  const toastId = toast.loading("Creating section...")
+  try {
+    const response = await apiConnector("POST", CREATE_SECTION_API, data)
+    if (!response?.data?.success) throw new Error("Could not create section")
+    toast.success("Section created successfully")
+    result = response?.data.data
+    return result;
+  } catch (error) {
+    toast.error(error.message || "Failed to create section")
+  } finally {
+    toast.dismiss(toastId)
+  }
+}
+export const deleteSection = async (data) => {
+  const toastId = toast.loading("Deleting section...")
+  try {
+    const response = await apiConnector("DELETE", DELETE_SECTION_API.replace(":sectionId", data.sectionId));
+    if (!response?.data?.success) throw new Error("Could not delete section");
+    toast.success("Section deleted");
+  } catch (error) {
+    toast.error(error.message || "Failed to delete section");
+  } finally {
+    toast.dismiss(toastId);
+  }
+}
+export const publishCourse = async (courseId) => {
+  const toastId = toast.loading("Publishing course...")
+  try {
+    const response = await apiConnector("PUT", PUT_PUBLISH_COURSE_API.replace(":courseId", courseId));
+    if (!response?.data?.success) throw new Error("Could not publish course");
+    toast.success("Course published");
+    return response?.data?.data.course;
+  } catch (error) {
+    toast.error(error.message || "Failed to publish course");
+  }
+  finally {
+    toast.dismiss(toastId);
+  }
+}
+export const draftCourse = async (courseId) => {
+  const toastId = toast.loading("Drafting course...")
+  try {
+    const response = await apiConnector("PUT", PUT_DRAFT_COURSE_API.replace(":courseId", courseId));
+    if (!response?.data?.success) throw new Error("Could not draft course");
+    toast.success("Course drafted");
+    return response?.data?.data.course;
+  } catch (error) {
+    toast.error(error.message || "Failed to draft course");
+  }
+  finally {
+    toast.dismiss(toastId);
+  }
+}
+export const getAllSubsections = async (sectionId) => {
+  const toastId = toast.loading("Loading...");
+  let result = [];
+  try {
+    const response = await apiConnector("GET", subSectionVideoEndpoints.GET_SUBSECTION_API.replace(":sectionId", sectionId));
+    if (!response?.data?.success) throw new Error("Could not fetch subsections");
+    result = response?.data?.data || [];
+    return result;
+  } catch (error) {
+    toast.error(error.message || "Failed to fetch subsections");
+  } finally {
+    toast.dismiss(toastId);
+  }
+}
+export const removeSubsection = async (subsectionId) => {
+  const toastId = toast.loading("Deleting subsection...");
+  let result = [];
+  try {
+    const response = await apiConnector("DELETE", DELETE_SUBSECTION_API.replace(":subsectionId", subsectionId));
+    if (!response?.data?.success) throw new Error("Could not delete subsection");
+    result = response?.data?.data || [];
+    return result;
+  } catch (error) {
+    toast.error(error.message || "Failed to delete subsection");
+  } finally {
+    toast.dismiss(toastId);
+  }
 }

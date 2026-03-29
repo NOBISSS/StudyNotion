@@ -1,25 +1,43 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { VscChevronLeft } from 'react-icons/vsc'
 import { setStep, setCourse } from '../../../../slices/courseSlice'
-import { editCourseDetails } from '../../../../services/operations/courseDetailsAPI'
+import { draftCourse, editCourseDetails, publishCourse } from '../../../../services/operations/courseDetailsAPI'
 import { COURSE_STATUS } from '../../../../utils/constants'
 
-const PublishCourse = () => {
+const PublishCourse = ({courseId}) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { course } = useSelector((state) => state.course)
   const [isPublic, setIsPublic] = useState(course?.status === 'Published')
   const [loading, setLoading] = useState(false)
 
+
+  useEffect(() => {
+      if (!courseId) {
+        dispatch(setStep(1))
+      }
+      }, [courseId])
   const handleSave = async (status) => {
     setLoading(true)
     const formData = new FormData()
     formData.append('courseId', course._id)
     formData.append('status', status)
-    if (isPublic) formData.append('isPublic', true)
-    const result = await editCourseDetails(formData)
+    let result;
+    if (isPublic)
+    result = await publishCourse(courseId)
+    setLoading(false)
+    if (result) {
+      dispatch(setCourse(result))
+      navigate('/dashboard/my-courses')
+    }
+  }
+  const handleSaveDraft = async () => {
+    setLoading(true)
+    let result;
+    if (!isPublic)
+    result = await draftCourse(courseId)
     setLoading(false)
     if (result) {
       dispatch(setCourse(result))
@@ -53,7 +71,7 @@ const PublishCourse = () => {
           Back
         </button>
         <button
-          onClick={() => handleSave(COURSE_STATUS.DRAFT)}
+          onClick={() => handleSaveDraft(COURSE_STATUS.DRAFT)}
           disabled={loading}
           className="px-6 py-2.5 rounded-lg bg-[#1D2532] border border-[#424854] text-white text-sm font-medium hover:bg-[#2C333F] transition-colors disabled:opacity-50"
         >

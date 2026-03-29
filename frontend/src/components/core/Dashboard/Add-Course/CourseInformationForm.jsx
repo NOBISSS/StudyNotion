@@ -10,11 +10,13 @@ import {
   addCourseDetails,
   editCourseDetails,
   fetchCourseCategories,
+  fetchCourseDetails,
 } from '../../../../services/operations/courseDetailsAPI'
-import { setCourse, setStep } from '../../../../slices/courseSlice'
+import { setCourse, setEditCourse, setStep } from '../../../../slices/courseSlice'
 import { COURSE_STATUS, LEVEL } from '../../../../utils/constants'
 import ChipInput from './ChipInput'
 import RequirementOfCourse from './RequirementOfCourse'
+import { useSearchParams } from 'react-router-dom'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const MAX_FILE_MB     = 2          // frontend validation limit (keep under multer limit)
@@ -63,7 +65,13 @@ const compressImage = (file) =>
     img.src = url
   })
 
-const CourseInformationForm = () => {
+async function getCurrentCourse(courseId) {
+  const course = await fetchCourseDetails(courseId);
+  // console.log("Fetched course details for editing:", course);
+  return course.data.course;
+}
+
+const CourseInformationForm = ({courseId}) => {
   const {
     register,
     handleSubmit,
@@ -71,10 +79,10 @@ const CourseInformationForm = () => {
     getValues,
     formState: { errors },
   } = useForm()
-
+  // console.log(courseId);
   const dispatch = useDispatch()
   const { course, editCourse } = useSelector((state) => state.course)
-
+  const [searchParams,setSearchParams] = useSearchParams();
   const [loading, setLoading]                   = useState(false)
   const [courseCategories, setCourseCategories] = useState([])
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
@@ -93,18 +101,26 @@ const CourseInformationForm = () => {
 
   // ── Pre-fill for edit mode ───────────────────────────────────────────────
   useEffect(() => {
-    if (editCourse && course) {
-      setValue('courseTitle',        course.courseName)
-      setValue('courseShortDesc',    course.courseDescription)
-      setValue('coursePrice',        course.price)
-      setValue('courseTag',          course.tag ?? [])
-      setValue('courseBenefits',     course.whatYouWillLearn)
-      setValue('courseCategory',     course.category?._id || course.category)
-      setValue('courseLevel',        course.level || LEVEL[0])
-      setValue('courseRequirements', course.instructions ?? [])
-      setThumbnailPreview(course.thumbnailUrl || course.thumbnail || null)
+    const fetchCurrentCourse = async () => {
+      if (courseId) {
+        const course = await getCurrentCourse(courseId)
+        if (course) {
+          dispatch(setEditCourse(true));
+          setValue('courseTitle',        course.courseName)
+          setValue('courseShortDesc',    course.description)
+          setValue('coursePrice',        course.originalPrice)
+          setValue('courseTag',          course.tag ?? [])
+          
+          setValue('courseBenefits',     course.whatYouWillLearn)
+          setValue('courseCategory',     course.categoryId || course.category)
+          setValue('courseLevel',        course.level || LEVEL[0])
+          setValue('courseRequirements', course.instructions ?? [])
+          setThumbnailPreview(course.thumbnailUrl || course.thumbnail || null)
+        }
+      }
     }
-  }, [editCourse, course])
+    fetchCurrentCourse()
+  }, [editCourse, courseId, setValue])
 
   // ── Handle thumbnail file selection with compression ─────────────────────
   const handleThumbnailChange = async (e) => {
@@ -222,8 +238,10 @@ const CourseInformationForm = () => {
 
     setLoading(true)
     const result = await addCourseDetails(formData)
+    console.log("Course creation result:", result);
     setLoading(false)
     if (result?.success) {
+      setSearchParams({ courseId: result.data.course._id })
       dispatch(setStep(2))
       dispatch(setCourse(result.data || result))
     }
@@ -309,7 +327,7 @@ const CourseInformationForm = () => {
         </div>
 
         {/* Tags */}
-        <ChipInput label="Tags" name="courseTag" register={register} errors={errors} setValue={setValue} />
+        <ChipInput label="Tags" name="courseTag" register={register} errors={errors} setValue={setValue} currentTags={course?.tags || []} />
 
         {/* Thumbnail */}
         <div className="flex flex-col gap-1.5">

@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import { MdCloudUpload } from 'react-icons/md'
 import { IoClose } from 'react-icons/io5'
+import VideoUploaderUppy from '../../../../Course/VideoUploaderUppy'
 
 const EditLectureModal = ({ lecture, onClose, onSave }) => {
-  const [title, setTitle] = useState(lecture?.title || '')
-  const [description, setDescription] = useState(lecture?.description || '')
-  const [hours, setHours] = useState(lecture?.hours || '')
-  const [minutes, setMinutes] = useState(lecture?.minutes || '')
-  const [seconds, setSeconds] = useState(lecture?.seconds || '')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [isPreview, setIsPreview] = useState(false)
+  // const [hours, setHours] = useState(lecture?.hours || '')
+  // const [minutes, setMinutes] = useState(lecture?.minutes || '')
+  // const [seconds, setSeconds] = useState(lecture?.seconds || '')
   const [videoPreview, setVideoPreview] = useState(lecture?.videoUrl || null)
 
   const handleSave = () => {
@@ -16,9 +18,9 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
       ...lecture,
       title,
       description,
-      hours,
-      minutes,
-      seconds,
+      // hours,
+      // minutes,
+      // seconds,
       videoUrl: videoPreview,
       isNew: lecture.isNew,
     })
@@ -31,15 +33,20 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
       <div className="bg-[#1D2532] rounded-xl w-full max-w-[580px] max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-[#2C333F]">
-          <h2 className="text-white font-semibold text-base">Editing Lecture</h2>
-          <button onClick={onClose} className="text-[#838894] hover:text-white transition-colors">
+          <h2 className="text-white font-semibold text-base">
+            Editing Lecture
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-[#838894] hover:text-white transition-colors"
+          >
             <IoClose className="text-xl" />
           </button>
         </div>
 
         <div className="px-6 py-5 flex flex-col gap-5">
           {/* Lecture Video Upload */}
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-white">
               Lecture Video <sup className="text-pink-400">*</sup>
             </label>
@@ -72,8 +79,7 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
                   if (file) setVideoPreview(URL.createObjectURL(file))
                 }} />
             </label>
-          </div>
-
+          </div> */}
           {/* Lecture Title */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-white">
@@ -84,12 +90,25 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter Lecture Title"
+              name='title'
               className="w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-white">
+              Is Preview <sup className="text-pink-400">*</sup>
+            </label>
+            <input
+              type="checkbox"
+              name="isPreview"
+              checked={isPreview}
+              onChange={(e) => setIsPreview(e.target.checked)}
+              className="w-4 h-4 rounded border-[#424854] accent-[#FFD60A] cursor-pointer"
             />
           </div>
 
           {/* Video Playback Time */}
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-white">
               Video Playback Time <sup className="text-pink-400">*</sup>
             </label>
@@ -130,7 +149,7 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
                 <span className="text-xs text-[#838894]">SS</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Lecture Description */}
           <div className="flex flex-col gap-2">
@@ -141,26 +160,31 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              name='description'
               placeholder="Enter lecture description"
               className="w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors resize-none"
             />
           </div>
-
+          <VideoUploaderUppy title={title || "Introduction"} description={description} isPreview={isPreview} sectionId={lecture.sectionId} courseId={lecture.courseId} />
           {/* Footer buttons */}
           <div className="flex justify-end gap-3 pt-2">
-            <button onClick={onClose}
-              className="px-6 py-2.5 rounded-lg bg-[#2C333F] text-white text-sm font-medium hover:bg-[#374151] transition-colors">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 rounded-lg bg-[#2C333F] text-white text-sm font-medium hover:bg-[#374151] transition-colors"
+            >
               Cancel
             </button>
-            <button onClick={handleSave}
-              className="px-6 py-2.5 rounded-lg bg-[#FFD60A] text-black text-sm font-semibold hover:bg-yellow-300 transition-colors">
+            {/* <button
+              onClick={handleSave}
+              className="px-6 py-2.5 rounded-lg bg-[#FFD60A] text-black text-sm font-semibold hover:bg-yellow-300 transition-colors"
+            >
               Save Edits
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default EditLectureModal

@@ -1,41 +1,74 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { VscAdd, VscChevronLeft, VscChevronRight } from 'react-icons/vsc'
 import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { setStep, setCourse } from '../../../../../slices/courseSlice'
 import toast from 'react-hot-toast'
 import EditLectureModal from './EditLectureModal'
+import { createSection, deleteSection, fetchCourseSections, getAllSubsections, removeSubsection } from '../../../../../services/operations/courseDetailsAPI'
+import { useSearchParams } from 'react-router-dom'
 
-const CourseBuilderForm = () => {
+const CourseBuilderForm = ({courseId}) => {
   const dispatch = useDispatch()
   const { course } = useSelector((state) => state.course)
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sectionName, setSectionName] = useState('')
   const [sections, setSections] = useState(course?.sections || [])
   const [expandedSection, setExpandedSection] = useState(
     course?.sections?.length > 0 ? course.sections[0]._id : null
   )
+  const [subsections, setSubSections] = useState([]);
+  const demoSubsection =[
+    {sectionId:"1", _id:"1", title:"Lecture 1: Introduction to React", content:"This lecture covers the basics of React, including components, state, and props."},
+  ];
+  async function loadSections(sectionId) {
+    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+    if (courseId) {
+      const res = await getAllSubsections(sectionId)  
+      console.log("Fetched subsections for section:", res);
+      console.log("Current subsections state:", res.subsections);
+      setSubSections(res.subsections); 
+    }
+  }
+  useEffect(() => {
+    if (!courseId) {
+      dispatch(setStep(1))
+    }
+    }, [courseId])
+
   const [editingLecture, setEditingLecture] = useState(null)
   const [showModal, setShowModal] = useState(false)
 
-  const handleAddSection = () => {
+  const handleAddSection = async () => {
     if (!sectionName.trim()) { toast.error('Section name cannot be empty'); return }
-    const newSection = { _id: Date.now().toString(), sectionName: sectionName.trim(), subSection: [] }
-    const updated = [...sections, newSection]
+    const newSection = { _id: Date.now().toString(), name: sectionName.trim(), subSection: [] }
+    const res = await createSection({ courseId, sectionName: newSection.name })
+    const updated = [...sections, res.section]
     setSections(updated)
     setExpandedSection(newSection._id)
     setSectionName('')
   }
 
-  const handleDeleteSection = (sectionId) => {
+
+  useEffect(()=>{
+    const fetchCourseSection = async () => {
+          if (courseId) {
+          const res = await fetchCourseSections({ courseId })  
+          setSections(res.sections || []) 
+          // console.log("Fetched sections for course:", sections);
+          }
+        }
+        fetchCourseSection()
+  },[courseId])
+  const handleDeleteSection = async (sectionId) => {
+    await deleteSection({ sectionId })
     setSections((prev) => prev.filter((s) => s._id !== sectionId))
     if (expandedSection === sectionId) setExpandedSection(null)
   }
 
-  const handleDeleteLecture = (sectionId, lectureId) => {
-    setSections((prev) => prev.map((s) =>
-      s._id === sectionId ? { ...s, subSection: s.subSection.filter((l) => l._id !== lectureId) } : s
-    ))
+  const handleDeleteLecture = async (sectionId, lectureId) => {
+    await removeSubsection(lectureId);
+    setSubSections((prev) => prev.filter((l) => l._id !== lectureId))
   }
 
   const handleNext = () => {
@@ -57,7 +90,7 @@ const CourseBuilderForm = () => {
             <div className="flex items-center justify-between px-4 py-3 bg-[#2C333F]">
               <div className="flex items-center gap-3">
                 <span className="text-[#838894] text-base">☰</span>
-                <span className="text-white font-semibold text-sm">{section.sectionName}</span>
+                <span className="text-white font-semibold text-sm">{section.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button className="p-1.5 text-[#838894] hover:text-white transition-colors">
@@ -68,7 +101,7 @@ const CourseBuilderForm = () => {
                   <TrashIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => setExpandedSection(expandedSection === section._id ? null : section._id)}
+                  onClick={() => loadSections(section._id)}
                   className="p-1.5 text-[#838894] hover:text-white transition-colors"
                 >
                   {expandedSection === section._id
@@ -81,7 +114,7 @@ const CourseBuilderForm = () => {
             {/* Expanded: lectures */}
             {expandedSection === section._id && (
               <div className="bg-[#161D29] flex flex-col">
-                {section.subSection?.map((lecture) => (
+                {subsections.filter((s) => s.sectionId === section._id)?.map((lecture) => (
                   <div key={lecture._id}
                     className="flex items-center justify-between px-8 py-2.5 border-b border-[#2C333F] last:border-b-0">
                     <div className="flex items-center gap-3 text-sm text-[#AFB2BF]">
@@ -89,7 +122,7 @@ const CourseBuilderForm = () => {
                       <span>{lecture.title}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => { setEditingLecture({ ...lecture, sectionId: section._id }); setShowModal(true) }}
+                      <button onClick={() => { setEditingLecture({ ...lecture, sectionId: section._id, courseId }); setShowModal(true) }}
                         className="p-1.5 text-[#838894] hover:text-white transition-colors">
                         <PencilIcon className="w-3.5 h-3.5" />
                       </button>
@@ -102,7 +135,7 @@ const CourseBuilderForm = () => {
                 ))}
                 {/* Add Lecture */}
                 <button
-                  onClick={() => { setEditingLecture({ sectionId: section._id, isNew: true }); setShowModal(true) }}
+                  onClick={() => { setEditingLecture({ sectionId: section._id, isNew: true, courseId }); setShowModal(true) }}
                   className="flex items-center gap-2 px-8 py-3 text-[#FFD60A] text-sm font-medium hover:text-yellow-300 transition-colors w-fit"
                 >
                   <VscAdd />
@@ -133,7 +166,10 @@ const CourseBuilderForm = () => {
 
       {/* Back / Next — outside card, centered at bottom like Figma */}
       <div className="flex justify-center gap-4 mt-6">
-        <button type="button" onClick={() => dispatch(setStep(1))}
+        <button type="button" onClick={() =>{ 
+          if(courseId)
+          setSearchParams({ courseId: courseId })
+          dispatch(setStep(1))}}
           className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-[#424854] text-white bg-[#1D2532] hover:bg-[#2C333F] transition-colors text-sm font-medium">
           <VscChevronLeft />
           Back
