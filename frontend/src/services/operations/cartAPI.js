@@ -7,7 +7,7 @@ import { setCart, addToCart, removeFromCart, resetCart } from "../../slices/cart
 const {
   GET_WISHLIST_API,
   ADD_WISHLIST_API,
-  REMOVE_WISHLIST_APaI,
+  REMOVE_WISHLIST_API,
   REMOVE_ALL_WISHLIST_API,
 } = cartEndPoints;
 
