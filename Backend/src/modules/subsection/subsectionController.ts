@@ -4,6 +4,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import CourseProgress from "../course/CourseProgress.js";
 import { SubSection } from "./SubSectionModel.js";
+import { isValidInstructor } from "./material/materialController.js";
 
 export const getAllSubsections = asyncHandler(async (req, res) => {
   const sectionId = req.params.sectionId;
@@ -66,5 +67,32 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
     res,
     { courseProgress },
     "SubSection marked as completed and course progress updated successfully",
+  );
+});
+export const deleteSubsection = asyncHandler(async (req, res) => {
+  const subsectionId = req.params.subsectionId;
+  const instructorId = req.userId;
+  if (!subsectionId) {
+    throw AppError.badRequest("SubSection ID is required");
+  }
+  if (!instructorId) {
+    throw AppError.unauthorized("Instructor ID is required");
+  }
+    const subsection = await SubSection.findById(subsectionId);
+  if (!subsection) {
+    throw AppError.notFound("SubSection not found");
+  }
+  const validInstructor = await isValidInstructor(subsection.courseId, instructorId);
+  if (!validInstructor) {
+    throw AppError.unauthorized("You are not authorized to delete this subsection");
+  }
+  subsection.isActive = false;
+  await subsection.save();
+  ApiResponse.success(
+    res,
+    {
+      subsection,
+    },
+    "SubSection deleted successfully",
   );
 });

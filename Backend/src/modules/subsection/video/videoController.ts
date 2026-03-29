@@ -56,6 +56,9 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     subsectionId: subsection._id,
   });
 
+  await Section.findByIdAndUpdate(metadata.sectionId, {
+    $push: { subSections: subsection._id },
+  });
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,

@@ -7,6 +7,7 @@ import {
   createCourse,
   createCourseWithThumbnailURL,
   deleteCourse,
+  draftCourse,
   getAllCourse,
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
@@ -34,5 +35,6 @@ courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
 courseRouter.route("/update/:courseId").put(updateCourse);
 courseRouter.route("/publish/:courseId").put(publishCourse);
+courseRouter.route("/draft/:courseId").put(draftCourse);
 
 export { courseRouter };

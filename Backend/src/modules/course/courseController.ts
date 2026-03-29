@@ -490,23 +490,47 @@ export const publishCourse: Handler = asyncHandler(async (req, res) => {
   if (!courseId || !userId) {
     throw AppError.badRequest("Invalid course ID or user ID");
   }
-  const course = await Course.findOne({
+  const oldcourse = await Course.findOne({
     _id: new Types.ObjectId(courseId),
     isActive: true,
   });
-  if (!course) {
+  if (!oldcourse) {
     throw AppError.notFound("Course not found");
   }
-  if (!await isValidInstructor(userId, course.instructorId)) {
+  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-
-  course.status = "Published";
-  await course.save();
+  const course = await Course.findByIdAndUpdate(courseId, { status: "Published" }, { new: true });
   ApiResponse.success(
     res,
     { course },
     "Course published successfully",
+  );
+
+});
+export const draftCourse: Handler = asyncHandler(async (req, res) => {
+  const courseId = req.params.courseId;
+  const userId = req.userId;
+  if (!courseId || !userId) {
+    throw AppError.badRequest("Invalid course ID or user ID");
+  }
+  const oldcourse = await Course.findOne({
+    _id: new Types.ObjectId(courseId),
+    isActive: true,
+  });
+  if (!oldcourse) {
+    throw AppError.notFound("Course not found");
+  }
+  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  if (!instuctorValid) {
+    throw AppError.forbidden("You are not the instructor of this course");
+  }
+  const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { new: true });
+  ApiResponse.success(
+    res,
+    { course },
+    "Course drafted successfully",
   );
 
 });
