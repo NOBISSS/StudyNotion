@@ -570,7 +570,7 @@ export default function VideoDetail() {
   </main>
 </div>
 
-    <Footer />
+
 
     {showModal && (
       <ReviewModal

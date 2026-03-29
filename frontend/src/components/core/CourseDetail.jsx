@@ -26,7 +26,7 @@ function StarRating({ rating = 0, size = 14 }) {
     <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
       {[1, 2, 3, 4, 5].map((s) => {
         const filled = clamped >= s;
-        const half   = !filled && clamped >= s - 0.5;
+        const half = !filled && clamped >= s - 0.5;
         const gradId = `sg-${size}-${s}`;
         return (
           <svg key={s} width={size} height={size} viewBox="0 0 20 20"
@@ -130,8 +130,8 @@ function PurchaseCard({
 }) {
   const [addedToCart, setAddedToCart] = useState(false);
 
-  const isFree       = typeOfCourse === "Free" || (!originalPrice && !discountPrice);
-  const hasDiscount  = !isFree && discountPrice > 0 && discountPrice < originalPrice;
+  const isFree = typeOfCourse === "Free" || (!originalPrice && !discountPrice);
+  const hasDiscount = !isFree && discountPrice > 0 && discountPrice < originalPrice;
   const displayPrice = isFree ? 0 : (discountPrice > 0 ? discountPrice : originalPrice);
 
   const INCLUDES = [
@@ -142,25 +142,25 @@ function PurchaseCard({
   ];
 
 
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
   const handleCartClick = () => {
-    
+
     if (isEnrolled) { onGoToCourse?.(); return; }
-    if (isFree)     { onEnroll?.(); return; }
+    if (isFree) { onEnroll?.(); return; }
     setAddedToCart(true);
-    console.log("COURSE ID",courseId);
-    dispatch(addCourseToWishList(courseId,dispatch))
+    console.log("COURSE ID", courseId);
+    dispatch(addCourseToWishList(courseId, dispatch))
   };
 
   const ctaLabel = () => {
-    if (enrolling)    return "Enrolling…";
-    if (isEnrolled)   return "Go to Course";
-    if (isFree)       return "Enroll for Free";
-    if (addedToCart)  return "Added to Cart";
+    if (enrolling) return "Enrolling…";
+    if (isEnrolled) return "Go to Course";
+    if (isFree) return "Enroll for Free";
+    if (addedToCart) return "Added to Cart";
     return "Add to Cart";
   };
 
-  const ctaBg    = isEnrolled ? "#47A992" : addedToCart ? "#47A992" : "#FFD60A";
+  const ctaBg = isEnrolled ? "#47A992" : addedToCart ? "#47A992" : "#FFD60A";
   const ctaColor = isEnrolled || addedToCart ? "#fff" : "#000";
 
   return (
@@ -292,11 +292,11 @@ function PurchaseCard({
 // SubSections fetched lazily from: GET /sections/:sectionId/subSections
 function AccordionSection({ section, forceOpen }) {
   // Open by default if it's order=1 (first section)
-  const [open, setOpen]               = useState(section.order === 1);
+  const [open, setOpen] = useState(section.order === 1);
   const [subSections, setSubSections] = useState(null); // null = not yet fetched
-  const [loading, setLoading]         = useState(false);
-  const [fetchError, setFetchError]   = useState(null);
-  const prevForce                     = useRef(undefined);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+  const prevForce = useRef(undefined);
 
   // Sync with Collapse/Expand all
   useEffect(() => {
@@ -306,36 +306,32 @@ function AccordionSection({ section, forceOpen }) {
     }
   }, [forceOpen]);
 
+  const fetchSubSections = async () => {
+    setLoading(true);
+    setFetchError(null);
+
+    try {
+      const res = await axios.get(
+        `${BACKEND_URL}/subSections/getall/${section._id}`
+      );
+
+      const data =
+        res?.data?.data?.subsections ?? res?.data?.subsections;
+
+      setSubSections(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setFetchError("Failed to load lectures.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Lazy-fetch subsections when accordion opens
   useEffect(() => {
-    if (!open) return;
-    if (subSections !== null) return;          // already fetched
-    if (!section.subSectionIds?.length) {      // no sub-sections on this section
-      setSubSections([]);
-      return;
+    if (open && subSections === null) {
+      fetchSubSections();
     }
-
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      setFetchError(null);
-      try {
-        const res = await axios.get(`${BACKEND_URL}/subSections/getall/${section._id}/`);
-        console.log(res.data);
-        if (!cancelled) {
-          const data = res?.data?.data?.subsections ?? res?.data?.subsections;
-          setSubSections(Array.isArray(data) ? data : []);
-          console.log("SUB SECTION DATA",subSections);
-        }
-      } catch {
-        if (!cancelled) setFetchError("Failed to load lectures.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [open, section._id, section.subSectionIds, subSections]);
+  }, [open]);
 
   const retry = (e) => {
     e.stopPropagation();
@@ -352,7 +348,14 @@ function AccordionSection({ section, forceOpen }) {
     <div style={{ borderBottom: "1px solid #2C3244" }}>
       {/* Header */}
       <div
-        onClick={() => setOpen(o => !o)}
+        onClick={() => {
+          setOpen((prev) => {
+            if (!prev && subSections === null) {
+              fetchSubSections(); // 🔥 trigger manually
+            }
+            return !prev;
+          });
+        }}
         style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
           padding: "14px 20px", cursor: "pointer",
@@ -461,14 +464,14 @@ function ReviewCard({ review }) {
   const [hovered, setHovered] = useState(false);
 
   const firstName = review?.user?.firstName || "";
-  const lastName  = review?.user?.lastName  || "";
-  const name      = `${firstName} ${lastName}`.trim() || "Student";
-  const avatar    = review?.user?.image || null;
-  const initial   = name.charAt(0).toUpperCase();
-  const text      = review?.review || review?.comment || "";
-  const rating    = Number(review?.rating) || 0;
-  const palette   = ["#E67E22", "#8E44AD", "#27AE60", "#2980B9", "#C0392B", "#16A085"];
-  const color     = palette[name.charCodeAt(0) % palette.length];
+  const lastName = review?.user?.lastName || "";
+  const name = `${firstName} ${lastName}`.trim() || "Student";
+  const avatar = review?.user?.image || null;
+  const initial = name.charAt(0).toUpperCase();
+  const text = review?.review || review?.comment || "";
+  const rating = Number(review?.rating) || 0;
+  const palette = ["#E67E22", "#8E44AD", "#27AE60", "#2980B9", "#C0392B", "#16A085"];
+  const color = palette[name.charCodeAt(0) % palette.length];
 
   return (
     <div
@@ -621,19 +624,19 @@ function Footer() {
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function CourseDetail() {
   const { courseId } = useParams();
-  const navigate     = useNavigate();
-  const dispatch     = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // ── Redux: auth + enrollment state ───────────────────────────────────────
-  const token              = useSelector((store)=>store.auth.token);
-  const isEnrolled         = useSelector(selectIsEnrolled(courseId));
-  const enrolling          = useSelector(selectEnrolling);
-  const enrolledFetched    = useSelector(selectEnrolledFetched);
+  const token = useSelector((store) => store.auth.token);
+  const isEnrolled = useSelector(selectIsEnrolled(courseId));
+  const enrolling = useSelector(selectEnrolling);
+  const enrolledFetched = useSelector(selectEnrolledFetched);
 
-  const [apiData, setApiData]     = useState(null);
+  const [apiData, setApiData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError]         = useState(null);
-  const [allOpen, setAllOpen]     = useState(true);
+  const [error, setError] = useState(null);
+  const [allOpen, setAllOpen] = useState(true);
   const [forceOpen, setForceOpen] = useState(undefined);
 
   // ── Fetch: GET /courses/getDetails/:courseId ──────────────────────────────
@@ -686,25 +689,25 @@ export default function CourseDetail() {
 
   // ── Map API response fields ───────────────────────────────────────────────
   // Top-level keys: course, sections, enrollmentsCount, reviews
-  const courseObj  = apiData?.course           ?? {};
-  const sections   = apiData?.sections         ?? [];
+  const courseObj = apiData?.course ?? {};
+  const sections = apiData?.sections ?? [];
   const enrollments = apiData?.enrollmentsCount ?? 0;
-  const reviews    = apiData?.reviews          ?? [];
+  const reviews = apiData?.reviews ?? [];
 
   // courseObj fields (exact field names from your API)
-  const courseName     = courseObj.courseName     || "";
-  const description    = courseObj.description    || "";
+  const courseName = courseObj.courseName || "";
+  const description = courseObj.description || "";
   const instructorName = courseObj.instructorName || "";
-  const thumbnailUrl   = courseObj.thumbnailUrl   || "";
-  const originalPrice  = courseObj.originalPrice  ?? 0;
-  const discountPrice  = courseObj.discountPrice  ?? 0;
-  const typeOfCourse   = courseObj.typeOfCourse   || "";
-  const totalDuration  = courseObj.totalDuration  || 0;
-  const level          = courseObj.level          || "";
-  const language       = courseObj.language       || "";
-  const tag            = courseObj.tag            || [];
-  const categoryName   = courseObj.categoryId?.name || "";
-  const createdAt      = courseObj.createdAt
+  const thumbnailUrl = courseObj.thumbnailUrl || "";
+  const originalPrice = courseObj.originalPrice ?? 0;
+  const discountPrice = courseObj.discountPrice ?? 0;
+  const typeOfCourse = courseObj.typeOfCourse || "";
+  const totalDuration = courseObj.totalDuration || 0;
+  const level = courseObj.level || "";
+  const language = courseObj.language || "";
+  const tag = courseObj.tag || [];
+  const categoryName = courseObj.categoryId?.name || "";
+  const createdAt = courseObj.createdAt
     ? new Date(courseObj.createdAt).toLocaleDateString("en-US", { month: "2-digit", year: "numeric" })
     : "";
 
