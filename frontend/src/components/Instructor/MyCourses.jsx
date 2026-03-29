@@ -19,7 +19,7 @@ const MyCourses = () => {
   const loadCourses = async () => {
     setLoading(true)
     const result = await fetchInstructorCourses()
-    if (result) setCourses(result)
+    if (result) setCourses(result.courses || [])
     setLoading(false)
   }
 

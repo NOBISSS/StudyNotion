@@ -176,7 +176,10 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   );
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
-  const courses = await Course.find({ isActive: true });
+  const courses = await Course.find({ isActive: true, status: "Published" }).populate(
+    "categoryId",
+    "name",
+  );
   ApiResponse.success(
     res,
     {
@@ -188,7 +191,7 @@ export const getAllCourse = asyncHandler(async (req, res) => {
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
     const userId = req.userId;
-    const courses = await Course.find({ isActive: true }).populate(
+    const courses = await Course.find({ isActive: true, status: "Published" }).populate(
       "categoryId",
       "name",
     );
@@ -239,7 +242,8 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
     const courses = await Course.find({
       categoryId: new Types.ObjectId(categoryId),
       isActive: true,
-    });
+      status: "Published",
+    }).populate("categoryId", "name");
     const coursesWithEnrollmentCount = await Promise.all(
       courses.map(async (c) => ({
         ...c.toObject(),
