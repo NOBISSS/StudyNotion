@@ -16,6 +16,7 @@ const subSectionSchema = new Schema({
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
     sectionId: { type: Types.ObjectId, ref: "Section", required: true },
     isActive: { type: Boolean, default: true },
+    isAvailable: { type: Boolean, default: false },
     // videoAssetId: { type: Types.ObjectId, ref: "VideoAsset" },
 }, { timestamps: true });
 

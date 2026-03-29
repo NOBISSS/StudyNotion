@@ -20,7 +20,7 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
   ApiResponse.success(
     res,
     {
-      subsections,
+      subsections
     },
     "SubSections fetched successfully",
   );

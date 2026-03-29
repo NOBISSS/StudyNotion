@@ -84,7 +84,7 @@ export async function processVideo({
 
     async function getVideoDuration(filePath: string): Promise<number> {
       return new Promise((resolve, reject) => {
-        ffmpeg.ffprobe(filePath, (err:any, metadata:any) => {
+        ffmpeg.ffprobe(filePath, (err: any, metadata: any) => {
           if (err) return reject(err);
           const duration = metadata.format.duration;
           if (typeof duration === "number") resolve(duration);
@@ -115,26 +115,18 @@ export async function processVideo({
         $push: { subsections: video.subsectionId },
       });
       await SubSection.findByIdAndUpdate(video.subsectionId, {
-        $set: { isActive: true },
+        $set: { isAvailable: true },
       });
-      const course = await Course.findByIdAndUpdate(
-        video.courseId,
-        {
-          $set: {
-            totalDuration: {
-              $add: [video.duration || videoDuration, "$totalDuration"],
-            },
-            totalLectures: {
-              $add: [1, "$totalLectures"],
-            },
-            totalSubsections: { $add: [1, "$totalSubsections"] },
-          },
-        },
-        { new: true },
-      );
+      const course = await Course.findById(video.courseId,);
       if (course) {
-      course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
-      await course.save();
+        course.totalDuration = (course.totalDuration || 0) + videoDuration;
+        course.totalLectures ? course.totalLectures += 1 : course.totalLectures = 1;
+        course.totalSubsections ? course.totalSubsections += 1 : course.totalSubsections = 1;
+        await course.save();
+        course.totalDurationFormatted = convertSecondsToReadingTime(
+          course.totalDuration,
+        ).hhmmss;
+        await course.save();
       }
     } catch (err) {
       console.log(err);
