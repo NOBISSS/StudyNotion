@@ -256,7 +256,7 @@ function PurchaseCard({
           )}
 
           <p style={{ color: "#6B7280", fontSize: 12, textAlign: "center", marginBottom: 18 }}>
-            30-Day Money-Back Guarantee
+            --------------
           </p>
 
           <p style={{ color: "#F1F2FF", fontWeight: 700, fontSize: 13, marginBottom: 12 }}>This course includes:</p>

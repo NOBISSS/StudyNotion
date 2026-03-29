@@ -65,7 +65,7 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
     // Use AwsS3Multipart plugin (companion endpoints on your backend)
     if (AwsS3MultipartPlugin) {
       uppy.use(AwsS3MultipartPlugin, {
-        companionUrl: `${BACKEND_URL}/upload`, // your backend implementing /s3/multipart endpoints
+        companionUrl: BACKEND_URL+"/upload", // your backend implementing /s3/multipart endpoints
       });
     } else {
       console.warn(

@@ -249,8 +249,8 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
                         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     }}>
                         {[
-                            { icon: '▶', label: 'Continue Learning' },
-                            { icon: '↗', label: 'View Course' },
+                            { icon: '▶', label: 'Continue Learning',path:"/course/:courseId/learn" },
+                            { icon: '↗', label: 'View Course',path:"/course/:courseId" },
                             { icon: '⋯', label: 'View Details' },
                         ].map(item => (
                             <button

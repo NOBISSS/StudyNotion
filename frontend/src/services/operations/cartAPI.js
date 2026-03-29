@@ -34,7 +34,7 @@ export const getWishListData = async (token, dispatch) => {
 
   } catch (error) {
     console.error("GET_WISHLIST API ERROR:", error);
-    toast.error(error.message);
+    toast.error(error.response.data.message);
   } finally {
     toast.dismiss(toastId);
   }
