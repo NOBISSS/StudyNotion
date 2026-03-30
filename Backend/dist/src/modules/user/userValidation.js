@@ -1,5 +1,13 @@
 import z from "zod";
 export const userInputSchema = z.object({
+    about: z.string().optional(),
+    contactNumber: z.string().optional(),
+    gender: z.enum(["Male", "Female", "Other"]).optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
+    dateOfBirth: z.string().optional(),
+});
+export const updateProfileSchema = z.object({
     firstName: z
         .string()
         .min(3, { message: "First name must be atleast 3 characters" })
@@ -8,14 +16,6 @@ export const userInputSchema = z.object({
         .string()
         .min(3, { message: "Last name must be atleast 3 characters" })
         .optional(),
-    about: z.string().optional(),
-    contactNumber: z.number().optional(),
-    gender: z.enum(["male", "female", "other"]).optional(),
-    city: z.string().optional(),
-    country: z.string().optional(),
-    birthdate: z.string().datetime().optional(),
-});
-export const updateProfileSchema = z.object({
     additionalDetails: userInputSchema,
 });
 //# sourceMappingURL=userValidation.js.map

@@ -49,8 +49,9 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const courseEnrollments = await CourseEnrollment.find({
         userId: new Types.ObjectId(userId),
+        isActive: true,
     })
-        .populate("courseId")
+        .populate({ path: "courseId", match: { isActive: true } })
         .sort({ createdAt: -1 });
     const courseEnrollmentsWithProgress = await Promise.all(courseEnrollments.map(async (enrollment) => {
         const enrollmentObj = enrollment.toObject();

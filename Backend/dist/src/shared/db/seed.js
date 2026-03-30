@@ -5,6 +5,7 @@ import { Course } from "../../modules/course/CourseModel.js";
 import { CourseEnrollment } from "../../modules/enrollment/CourseEnrollment.js";
 import { connectDB } from "./index.js";
 import User from "../../modules/user/UserModel.js";
+import { Section } from "../../modules/section/SectionModel.js";
 dotenv.config();
 async function seedData() {
     await connectDB(process.env.MONGODB_URI);
@@ -247,4 +248,54 @@ export const updateCourseSlugs = async () => {
         console.error("❌ Error updating course slugs:", error);
     }
 };
+export const seedSubsections = async () => {
+    try {
+        await connectDB(process.env.MONGODB_URI);
+        await Section.findByIdAndUpdate("69c97d9239aff5471ffc29ad", {
+            $push: {
+                subSectionIds: {
+                    $each: [new mongoose.Types.ObjectId("69c97e0e39aff5471ffc29b0")],
+                },
+            },
+        });
+        await Section.findByIdAndUpdate("69c97e3c39aff5471ffc29bc", {
+            $push: {
+                subSectionIds: {
+                    $each: [new mongoose.Types.ObjectId("69c97e8239aff5471ffc29bf")],
+                },
+            },
+        });
+        await Section.findByIdAndUpdate("69c97eab39aff5471ffc29cb", {
+            $push: {
+                subSectionIds: {
+                    $each: [new mongoose.Types.ObjectId("69c97eef39aff5471ffc29ce")],
+                },
+            },
+        });
+        await Section.findByIdAndUpdate("69c97f2e39aff5471ffc29db", {
+            $push: {
+                subSectionIds: {
+                    $each: [
+                        new mongoose.Types.ObjectId("69c97f9c39aff5471ffc29de"),
+                        new mongoose.Types.ObjectId("69c9800c39aff5471ffc29e4"),
+                        new mongoose.Types.ObjectId("69c9806739aff5471ffc29ea"),
+                        new mongoose.Types.ObjectId("69c980f639aff5471ffc29f6"),
+                        new mongoose.Types.ObjectId("69c9812539aff5471ffc29fc"),
+                    ],
+                },
+            },
+        });
+    }
+    catch (err) {
+    }
+};
+seedSubsections()
+    .then(() => {
+    console.log("Unseeding completed");
+    process.exit(0);
+})
+    .catch((error) => {
+    console.error("Seeding failed:", error);
+    process.exit(1);
+});
 //# sourceMappingURL=seed.js.map

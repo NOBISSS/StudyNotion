@@ -14,6 +14,7 @@ const GoogleLoginButton = memo(() => {
     try {
       if (authResult["code"]) {
         const result = await googleAuth(authResult.code);
+        console.log(result);
          dispatch(setUser(result.data.data.user));
           const token=result.data.data.accessToken;
           dispatch(setToken(token));

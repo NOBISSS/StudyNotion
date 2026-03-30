@@ -210,16 +210,19 @@ export const getInstructorCourses = asyncHandler(async (req, res) => {
     if (!instructorId) {
         throw AppError.unauthorized("Instructor ID is required");
     }
-    const courses = await Course.find({ instructorId }).populate("categoryId", "name").sort({ createdAt: -1 });
+    const courses = await Course.find({ instructorId, isActive: true }).populate("categoryId", "name").sort({ createdAt: -1 });
     ApiResponse.success(res, { courses }, "Instructor courses retrieved successfully");
 });
 export const deleteCourse = asyncHandler(async (req, res) => {
     const courseId = req.params.courseId;
+    const userId = req.userId;
     const course = await Course.findById(courseId);
+    if (!userId)
+        throw AppError.unauthorized("User ID is required to delete the course");
     if (!course) {
         throw AppError.notFound("Course not found");
     }
-    if (course.instructorId !== req.userId) {
+    if (course.instructorId.toString() != userId.toString() && req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to delete this course");
     }
     course.isActive = false;

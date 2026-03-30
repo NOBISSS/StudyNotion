@@ -8,11 +8,11 @@ import { ApiResponse } from "../../../shared/lib/ApiResponse.js";
 import { AppError } from "../../../shared/lib/AppError.js";
 import { asyncHandler } from "../../../shared/lib/asyncHandler.js";
 import { videoQueue } from "../../../shared/queue/videoQueue.js";
-import { Section } from "../../section/SectionModel.js";
 import { SubSection } from "../SubSectionModel.js";
 import Video from "./VideoModel.js";
 import VideoProgress from "./VideoProgressModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
+import { Section } from "../../section/SectionModel.js";
 const BUCKET = process.env.AWS_BUCKET_NAME;
 export const addVideo = asyncHandler(async (req, res) => { });
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
@@ -40,6 +40,9 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
         courseId: new Types.ObjectId(metadata.courseId),
         sectionId: new Types.ObjectId(metadata.sectionId),
         subsectionId: subsection._id,
+    });
+    await Section.findByIdAndUpdate(metadata.sectionId, {
+        $push: { subSectionIds: subsection._id },
     });
     const createCmd = new CreateMultipartUploadCommand({
         Bucket: BUCKET,

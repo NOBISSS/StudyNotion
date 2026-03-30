@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 declare const Profile: import("mongoose").Model<{
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -13,7 +13,7 @@ declare const Profile: import("mongoose").Model<{
 }, import("mongoose").Document<unknown, {}, {
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -24,7 +24,7 @@ declare const Profile: import("mongoose").Model<{
 }, import("mongoose").DefaultSchemaOptions> & Omit<{
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -39,7 +39,7 @@ declare const Profile: import("mongoose").Model<{
 }, Schema<any, import("mongoose").Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, {
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -48,7 +48,7 @@ declare const Profile: import("mongoose").Model<{
 }, import("mongoose").Document<unknown, {}, {
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -59,7 +59,7 @@ declare const Profile: import("mongoose").Model<{
 }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -77,7 +77,7 @@ declare const Profile: import("mongoose").Model<{
     [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
         userId: import("mongoose").Types.ObjectId;
         about?: string | null;
-        contactNumber?: number | null;
+        contactNumber?: string | null;
         gender?: "male" | "female" | "other" | null;
         city?: string | null;
         country?: string | null;
@@ -88,7 +88,7 @@ declare const Profile: import("mongoose").Model<{
     }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
         userId: import("mongoose").Types.ObjectId;
         about?: string | null;
-        contactNumber?: number | null;
+        contactNumber?: string | null;
         gender?: "male" | "female" | "other" | null;
         city?: string | null;
         country?: string | null;
@@ -104,7 +104,7 @@ declare const Profile: import("mongoose").Model<{
 }, {
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
@@ -117,7 +117,7 @@ declare const Profile: import("mongoose").Model<{
 }>, {
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
-    contactNumber?: number | null;
+    contactNumber?: string | null;
     gender?: "male" | "female" | "other" | null;
     city?: string | null;
     country?: string | null;
