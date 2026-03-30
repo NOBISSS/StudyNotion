@@ -77,8 +77,8 @@ const MyCourses = () => {
           <div className="grid bg-[#161D29] border-b border-[#2C333F] px-6 py-4"
             style={{ gridTemplateColumns: '1fr 130px 100px 100px' }}>
             <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Courses</span>
-            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Duration</span>
-            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Price</span>
+            {/* <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Duration</span>
+            <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Price</span> */}
             <span className="text-xs font-semibold text-[#838894] uppercase tracking-wider">Actions</span>
           </div>
 
@@ -126,9 +126,9 @@ const MyCourses = () => {
               </div>
 
               {/* Duration */}
-              <span className="text-[#AFB2BF] text-sm">
+              {/* <span className="text-[#AFB2BF] text-sm">
                 {course.totalDuration || course.duration || '—'}
-              </span>
+              </span> */}
 
               {/* Price */}
               <span className="text-[#AFB2BF] text-sm font-medium">

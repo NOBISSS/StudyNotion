@@ -14,14 +14,17 @@ export const updateProfile = asyncHandler(async (req, res) => {
     if (!updateProfileInput.success) {
         throw AppError.badRequest(updateProfileInput.error?.issues[0]?.message || "Invalid input data");
     }
-    const { additionalDetails } = updateProfileInput.data;
+    const { additionalDetails, firstName, lastName } = updateProfileInput.data;
     try {
         const updatedUser = await User.findOneAndUpdate({ _id: userId }, {
             $set: {
-                firstName: additionalDetails.firstName,
-                lastName: additionalDetails.lastName,
+                firstName: firstName,
+                lastName: lastName,
             },
         }, { new: true }).select("-password -refreshToken");
+        if (!updatedUser) {
+            throw AppError.notFound("User not found");
+        }
         let updatedProfile = await Profile.findOneAndUpdate({ userId: userId }, {
             $set: {
                 about: additionalDetails.about,
@@ -29,7 +32,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
                 gender: additionalDetails.gender,
                 city: additionalDetails.city,
                 country: additionalDetails.country,
-                birthdate: additionalDetails.birthdate,
+                birthdate: new Date(additionalDetails.dateOfBirth || ""),
             },
         }, { new: true });
         if (!updatedProfile) {
@@ -40,10 +43,15 @@ export const updateProfile = asyncHandler(async (req, res) => {
                 gender: additionalDetails.gender || "other",
                 city: additionalDetails.city || "",
                 country: additionalDetails.country || "",
-                birthdate: additionalDetails.birthdate || "",
+                birthdate: new Date(additionalDetails.dateOfBirth || ""),
             });
         }
-        return ApiResponse.success(res, { user: updatedUser, profile: updatedProfile }, "Profile updated successfully");
+        return ApiResponse.success(res, { user: {
+                ...updatedUser.toObject(),
+                additionalDetails: updatedProfile.toObject(),
+                password: undefined,
+                refreshToken: undefined,
+            } }, "Profile updated successfully");
     }
     catch (error) {
         if (error?.code === 11000)
@@ -63,6 +71,7 @@ export const banUser = asyncHandler(async (req, res) => {
 });
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
     let avatar = null;
+    const user = req.user;
     const profilePicture = req.file;
     if (!profilePicture) {
         res
@@ -83,7 +92,12 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
             await deleteFromCloudinary(avatar.public_id);
         throw AppError.notFound("Profile not found");
     }
-    ApiResponse.success(res, { profile }, "Profile picture updated successfully");
+    ApiResponse.success(res, { user: {
+            ...user.toObject(),
+            additionalDetails: profile.toObject(),
+            password: undefined,
+            refreshToken: undefined,
+        } }, "Profile picture updated successfully");
 });
 export const createUser = asyncHandler(async (req, res) => {
     const userInput = signupInputSchema.safeParse(req.body);

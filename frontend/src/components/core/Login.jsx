@@ -183,14 +183,14 @@ export const Login = () => {
         <div className="relative flex w-full items-center justify-center md:w-1/2">
           {/* Lines background — decorative */}
           <img
-            src={Lines}
+            src={"https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"}
             alt=""
             aria-hidden="true"
             className="absolute right-0 top-4 h-[280px] w-[360px] object-cover opacity-60 sm:h-[340px] sm:w-[420px] md:h-[400px] md:w-[480px]"
           />
           {/* Main illustration */}
           <img
-            src={Image}
+            src={"https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"}
             alt="Student learning online"
             className="relative z-10 h-[260px] w-auto sm:h-[320px] md:h-[400px] drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           />

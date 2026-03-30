@@ -98,7 +98,7 @@ export function signUp(
 
             console.log("SIGNUP API RESPONSE......", response);
 
-            if (!response.data.data.success) {
+            if (response.status!=201) {
                 throw new Error(response.data.message);
             }
             toast.success("Signup Succssful");

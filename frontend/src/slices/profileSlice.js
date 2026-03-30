@@ -12,7 +12,7 @@ const profileSlice=createSlice({
         setUser(state,action){
             state.user=action.payload;
             if(action.payload){
-            localStorage.setItem("user",action.payload);
+            localStorage.setItem("user",JSON.stringify(action.payload));
             }else{
                 localStorage.removeItem("user");
             }

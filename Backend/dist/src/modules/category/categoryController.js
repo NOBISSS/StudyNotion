@@ -60,19 +60,22 @@ export const getAllCategory = asyncHandler(async (req, res) => {
 export const categoryPageDetails = asyncHandler(async (req, res) => {
     const { categoryId } = req.params;
     const selectedCategory = await Category.findById(categoryId)
-        .populate("courses")
+        .populate({ path: "courses", match: { status: "Published", isActive: true } })
         .exec();
     if (!selectedCategory) {
         throw AppError.notFound("Category is not found");
     }
     const categoriesExceptSelected = await Category.find({
         _id: { $ne: categoryId },
-    }).populate("courses");
+    }).populate({ path: "courses", match: { status: "Published", isActive: true } });
     let differenceCourses = [];
     for (const category of categoriesExceptSelected) {
         differenceCourses.push(...category.courses);
     }
-    const allCategories = await Category.find().populate("courses");
+    const allCategories = await Category.find().populate({
+        path: "courses",
+        match: { status: "Published", isActive: true },
+    });
     const allCourse = allCategories.flatMap((category) => category.courses);
     const mostSellingCourses = allCourse
         .slice(0, 10);
