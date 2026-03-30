@@ -63,7 +63,7 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     isActive: true,
   })
-    .populate("courseId")
+    .populate({path:"courseId", match:{isActive: true}})
     .sort({ createdAt: -1 });
   
   const courseEnrollmentsWithProgress = await Promise.all(

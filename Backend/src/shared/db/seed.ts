@@ -282,6 +282,13 @@ export const updateCourseSlugs = async () => {
 
 export const seedSubsections = async () => {
   try {    await connectDB(process.env.MONGODB_URI!);
+    await Section.findByIdAndUpdate("69c97d9239aff5471ffc29ad", {
+      $push: {
+        subSectionIds: {
+          $each: [new mongoose.Types.ObjectId("69c97e0e39aff5471ffc29b0")],
+        },
+      },
+    });
     await Section.findByIdAndUpdate("69c97e3c39aff5471ffc29bc", {
       $push: {
         subSectionIds: {
