@@ -62,8 +62,8 @@ export const getAllReviews = asyncHandler(async (req, res) => {
     courseId: new Types.ObjectId(courseId),
     isActive: true,
   })
-    .populate("userId","firstName lastName")
-    .populate("courseId","courseName")
+    .populate("userId", "firstName lastName")
+    .populate("courseId", "courseName")
     .sort({ createdAt: -1 });
   const reviewCount = courseReviews.length;
   const averageRating =
@@ -144,5 +144,32 @@ export const deleteReview = asyncHandler(async (req, res) => {
       ratingAndReview: existingReview,
     },
     "Course review deleted successfully",
+  );
+});
+export const getGlobalReviews = asyncHandler(async (req, res) => {
+  const { limit = 10, minRating = 4 } = req.query;
+
+  const globalReviews = await RatingAndReview.find({
+    isActive: true,
+    rating: { $gte: Number(minRating) },
+  })
+    .populate("userId", "firstName lastName image")
+    .populate("courseId", "courseName thumbnail")
+    .sort({ rating: -1, createdAt: -1 })
+    .limit(Number(limit));
+
+  const reviewCount = globalReviews.length;
+  const averageRating =
+    globalReviews.reduce((acc, review) => acc + review.rating, 0) /
+    (reviewCount || 1);
+
+  ApiResponse.success(
+    res,
+    {
+      reviews: globalReviews,
+      reviewCount,
+      averageRating,
+    },
+    "Global reviews retrieved successfully",
   );
 });

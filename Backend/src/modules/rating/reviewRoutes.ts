@@ -3,6 +3,7 @@ import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import {
   deleteReview,
   getAllReviews,
+  getGlobalReviews,
   rateAndReviewCourse,
   updateReview,
 } from "./ratingsAndReviewController.js";
@@ -12,6 +13,7 @@ import { ROLES } from "../../shared/constants.js";
 const reviewRouter = Router();
 
 reviewRouter.route("/getall/:courseId").get(getAllReviews);
+reviewRouter.route("/global").get(getGlobalReviews);
 reviewRouter.use(userMiddleware);
 
 reviewRouter.use(authorizeRoles(ROLES.STUDENT));
