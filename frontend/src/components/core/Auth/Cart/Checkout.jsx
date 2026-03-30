@@ -6,6 +6,7 @@ import ReactStars from "react-stars";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { resetCart } from "../../../../slices/cartSlice"; // adjust path
+import { enrollInCourse } from "../../../../services/operations/enrolledCourseAPI";
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -34,7 +35,7 @@ const Checkout = () => {
       const courseIds = cart.map((c) => c._id);
       console.log("Initiating payment for courses:", courseIds);
       console.log("User details:", data);
-
+      dispatch(enrollInCourse(courseIds[0], token, navigate));
       // TODO: Call your payment API here
       // await buyCourse(token, courseIds, user, navigate, dispatch);
 
