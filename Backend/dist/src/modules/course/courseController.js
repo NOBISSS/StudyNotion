@@ -284,6 +284,7 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
     const course = await Course.findOne({
         _id: courseObjectId,
         isActive: true,
+        status: "Published",
     }).populate("categoryId", "name");
     if (!course) {
         throw AppError.notFound("Course not found");
