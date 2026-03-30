@@ -10,6 +10,8 @@ import {
 } from "../../slices/enrollmentSlice";
 import { BACKEND_URL } from "../../utils/constants";
 import { addCourseToWishList } from "../../services/operations/cartAPI";
+import Footer from "./Footer"
+
 
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -20,7 +22,7 @@ const globalStyles = `
   @keyframes sectionSpin { to { transform: rotate(360deg); } }
 `;
 
-function StarRating({ rating = 0, size = 14 }) {
+export function StarRating({ rating = 0, size = 14 }) {
   const clamped = Math.min(5, Math.max(0, rating));
   return (
     <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -59,67 +61,7 @@ function PageLoader() {
   );
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar() {
-  const navigate = useNavigate();
-  return (
-    <nav style={{
-      background: "#161D29", borderBottom: "1px solid #2C3244",
-      position: "sticky", top: 0, zIndex: 100,
-      height: 56, display: "flex", alignItems: "center", padding: "0 40px",
-    }}>
-      <div style={{ maxWidth: 1200, width: "100%", margin: "0 auto", display: "flex", alignItems: "center", gap: 32 }}>
-        {/* Logo */}
-        <div onClick={() => navigate("/")} style={{
-          display: "flex", alignItems: "center", gap: 8,
-          fontWeight: 800, fontSize: 16, color: "#F1F2FF", cursor: "pointer",
-        }}>
-          <div style={{ width: 30, height: 30, background: "#FFD60A", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path d="M10 2L3 7v11h14V7L10 2z" fill="#000" />
-              <rect x="7" y="11" width="6" height="7" fill="#FFD60A" />
-            </svg>
-          </div>
-          StudyNotion
-        </div>
 
-        {/* Links */}
-        <div style={{ display: "flex", gap: 28, alignItems: "center", marginLeft: 16 }}>
-          {[
-            { label: "Home", path: "/" },
-            { label: "Catalog ▾", path: "/catalog" },
-            { label: "About us", path: "/about" },
-            { label: "Contact us", path: "/contact" },
-          ].map((link, i) => (
-            <span key={link.label} onClick={() => navigate(link.path)} style={{
-              color: i === 1 ? "#FFD60A" : "#AFB2BF", fontSize: 14, fontWeight: 500, cursor: "pointer",
-            }}>{link.label}</span>
-          ))}
-        </div>
-
-        {/* Right */}
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 18 }}>
-          <button style={{ background: "none", border: "none", color: "#AFB2BF", display: "flex", cursor: "pointer" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </button>
-          <button style={{ background: "none", border: "none", color: "#AFB2BF", display: "flex", cursor: "pointer" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </button>
-          <div style={{
-            width: 32, height: 32, borderRadius: "50%", background: "#FFD60A",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontWeight: 700, fontSize: 13, color: "#000",
-          }}>U</div>
-        </div>
-      </div>
-    </nav>
-  );
-}
 
 function PurchaseCard({
   courseId,
@@ -458,9 +400,7 @@ function AccordionSection({ section, forceOpen }) {
   );
 }
 
-// ─── Review Card ───────────────────────────────────────────────────────────────
-// review shape from API: { _id, user: { firstName, lastName, image, accountType }, review, rating }
-function ReviewCard({ review }) {
+export function ReviewCard({ review }) {
   const [hovered, setHovered] = useState(false);
 
   const firstName = review?.user?.firstName || "";
@@ -510,114 +450,6 @@ function ReviewCard({ review }) {
         <StarRating rating={rating} size={13} />
       </div>
     </div>
-  );
-}
-
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-  const cols = [
-    {
-      title: "Resources",
-      links: ["Articles", "Blog", "Chart Sheet", "Code challenges", "Docs", "Projects", "Videos", "Workspaces"],
-      extra: { title: "Support", links: ["Help Center"] },
-    },
-    {
-      title: "Plans",
-      links: ["Paid memberships", "For students", "Business solutions"],
-      extra: { title: "Community", links: ["Forums", "Chapters", "Events"] },
-    },
-    {
-      title: "Subjects",
-      links: ["AI", "Cloud Computing", "Code Foundations", "Computer Science", "Cybersecurity",
-        "Data Analytics", "Data Science", "Data Visualization", "Developer Tools", "DevOps",
-        "Game Development", "IT", "Machine Learning", "Math", "Mobile Development", "Web Design", "Web Development"],
-    },
-    {
-      title: "Languages",
-      links: ["Bash", "C", "C++", "C#", "Go", "HTML & CSS", "Java", "JavaScript", "Kotlin", "PHP", "Python", "R", "Ruby", "SQL", "Swift"],
-    },
-    {
-      title: "Career building",
-      links: ["Career paths", "Career services", "Interview prep", "Professional certification"],
-      extra: { title: "", links: ["Full Catalog", "Beta Content"] },
-    },
-  ];
-
-  return (
-    <footer style={{ background: "#161D29", borderTop: "1px solid #2C3244", padding: "48px 40px 24px" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <div style={{ display: "flex", gap: 60, marginBottom: 40, flexWrap: "wrap" }}>
-          {/* Brand */}
-          <div style={{ flex: "0 0 160px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800, fontSize: 15, marginBottom: 12 }}>
-              <div style={{ width: 26, height: 26, background: "#FFD60A", borderRadius: 5, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 2L3 7v11h14V7L10 2z" fill="#000" />
-                  <rect x="7" y="11" width="6" height="7" fill="#FFD60A" />
-                </svg>
-              </div>
-              StudyNotion
-            </div>
-            <p style={{ color: "#AFB2BF", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-              Company
-            </p>
-            {["About", "Careers", "Affiliates"].map(l => (
-              <p key={l} style={{ color: "#AFB2BF", fontSize: 13, cursor: "pointer", marginBottom: 7 }}>{l}</p>
-            ))}
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-              {[0, 1, 2, 3].map(i => (
-                <div key={i} style={{
-                  width: 28, height: 28, borderRadius: "50%", background: "#2C3244",
-                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  color: "#AFB2BF", fontSize: 11,
-                }}>
-                  {["f", "◎", "▶", "t"][i]}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Columns */}
-          <div style={{ display: "flex", gap: 48, flex: 1, flexWrap: "wrap" }}>
-            {cols.map(col => (
-              <div key={col.title} style={{ minWidth: 100 }}>
-                <p style={{ color: "#F1F2FF", fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{col.title}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {col.links.map(l => (
-                    <span key={l} style={{ color: "#AFB2BF", fontSize: 13, cursor: "pointer" }}>{l}</span>
-                  ))}
-                </div>
-                {col.extra && (
-                  <>
-                    <br />
-                    {col.extra.title && (
-                      <p style={{ color: "#F1F2FF", fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{col.extra.title}</p>
-                    )}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {col.extra.links.map(l => (
-                        <span key={l} style={{ color: "#AFB2BF", fontSize: 13, cursor: "pointer" }}>{l}</span>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{
-          borderTop: "1px solid #2C3244", paddingTop: 20,
-          display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12,
-        }}>
-          <div style={{ display: "flex", gap: 20 }}>
-            {["Privacy Policy", "Cookie Policy", "Terms"].map(l => (
-              <span key={l} style={{ color: "#AFB2BF", fontSize: 12, cursor: "pointer" }}>{l}</span>
-            ))}
-          </div>
-          <span style={{ color: "#6B7280", fontSize: 12 }}>Made with ❤️ CodeHelp © 2023 Studynotion</span>
-        </div>
-      </div>
-    </footer>
   );
 }
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FaArrowRight } from "react-icons/fa";
 import { HighlightText } from '../components/core/HomePage/HighlightText';
@@ -11,9 +11,91 @@ import { InstructorSection } from '../components/core/HomePage/InstructorSection
 import { ExploreMore } from '../components/core/HomePage/ExploreMore';
 import Navbar from '../components/core/Navbar';
 import { useSelector } from 'react-redux';
+import { ReviewCard, StarRating } from '../components/core/CourseDetail';
+
+
 
 export const Home = () => {
   const user=useSelector((store)=>store.profile.user);
+ const reviews = [
+  {
+    _id: "1",
+    user: {
+      firstName: "Amit",
+      lastName: "Sharma",
+      image: null,
+      accountType: "Student"
+    },
+    review: "This platform completely changed how I learn coding. The UI is clean and the lessons are super easy to follow.",
+    rating: 4.5
+  },
+  {
+    _id: "2",
+    user: {
+      firstName: "Priya",
+      lastName: "Patel",
+      image: null,
+      accountType: "Student"
+    },
+    review: "Loved the hands-on projects! I was able to build real-world apps within weeks.",
+    rating: 5
+  },
+  {
+    _id: "3",
+    user: {
+      firstName: "Rahul",
+      lastName: "Verma",
+      image: null,
+      accountType: "Instructor"
+    },
+    review: "Great platform for both learners and instructors. Content quality is top-notch.",
+    rating: 4.2
+  },
+  {
+    _id: "4",
+    user: {
+      firstName: "Sneha",
+      lastName: "Iyer",
+      image: null,
+      accountType: "Student"
+    },
+    review: "The timeline and structured learning paths really helped me stay consistent.",
+    rating: 4.8
+  },
+  {
+    _id: "5",
+    user: {
+      firstName: "Karan",
+      lastName: "Mehta",
+      image: null,
+      accountType: "Student"
+    },
+    review: "Good courses, but I wish there were more advanced topics. Still worth it!",
+    rating: 3.9
+  },
+  {
+    _id: "6",
+    user: {
+      firstName: "Neha",
+      lastName: "Gupta",
+      image: null,
+      accountType: "Student"
+    },
+    review: "Amazing experience! The instructors explain concepts very clearly.",
+    rating: 4.7
+  },
+  {
+    _id: "7",
+    user: {
+      firstName: "Arjun",
+      lastName: "Reddy",
+      image: null,
+      accountType: "Student"
+    },
+    review: "I started from zero and now I can build full-stack apps. Highly recommend!",
+    rating: 5
+  }
+];
   return (
     <div className="">
       
@@ -181,6 +263,25 @@ export const Home = () => {
         <InstructorSection/>
         <h2 className='text-center text-4xl font-semibold'>Review from other Learners</h2>
         {/*Slider*/}
+        <section style={{ marginBottom: 40 }}>
+            <h2 style={{ color: "#F1F2FF", fontSize: 24, fontWeight: 700, textAlign: "center", marginBottom: 32 }}>
+              Reviews from other learners
+            </h2>
+            {reviews?.length > 0 ? (
+              <div style={{
+                display: "flex", gap: 16, overflowX: "auto", paddingBottom: 10,
+                scrollbarWidth: "none", msOverflowStyle: "none",
+              }}>
+                {reviews.map((review, i) => (
+                  <ReviewCard key={review._id || i} review={review} />
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: "#6B7280", fontSize: 14, textAlign: "center" }}>
+                No reviews yet. Be the first to review this course!
+              </p>
+            )}
+          </section>
       </div>
       {/*Section4 */}
     </div>
