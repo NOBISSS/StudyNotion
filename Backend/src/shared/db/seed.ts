@@ -5,6 +5,7 @@ import { Course } from "../../modules/course/CourseModel.js";
 import { CourseEnrollment } from "../../modules/enrollment/CourseEnrollment.js";
 import { connectDB } from "./index.js";
 import User from "../../modules/user/UserModel.js";
+import { Section } from "../../modules/section/SectionModel.js";
 
 dotenv.config();
 
@@ -278,12 +279,28 @@ export const updateCourseSlugs = async () => {
     console.error("❌ Error updating course slugs:", error);
   }
 };
-// seedData()
-//   .then(() => {
-//     console.log("Unseeding completed");
-//     process.exit(0);
-//   })
-//   .catch((error) => {
-//     console.error("Seeding failed:", error);
-//     process.exit(1);
-//   });
+
+export const seedSubsections = async () => {
+  try {    await connectDB(process.env.MONGODB_URI!);
+    await Section.findByIdAndUpdate("69c9754139aff5471ffc28ae", {
+      $push: {
+        subSectionIds: {
+          $each: [new mongoose.Types.ObjectId("69c9756839aff5471ffc28b1")],
+        },
+      },
+    });
+  }
+  catch(err){
+
+  }
+}
+
+seedSubsections()
+  .then(() => {
+    console.log("Unseeding completed");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Seeding failed:", error);
+    process.exit(1);
+  });

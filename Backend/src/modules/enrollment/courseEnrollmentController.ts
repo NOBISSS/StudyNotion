@@ -61,6 +61,7 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
 
   const courseEnrollments = await CourseEnrollment.find({
     userId: new Types.ObjectId(userId),
+    isActive: true,
   })
     .populate("courseId")
     .sort({ createdAt: -1 });

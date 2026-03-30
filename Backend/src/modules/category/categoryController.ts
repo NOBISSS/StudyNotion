@@ -96,7 +96,7 @@ export const getAllCategory = asyncHandler(async (req, res) => {
 export const categoryPageDetails = asyncHandler(async (req, res) => {
   const { categoryId } = req.params;
   const selectedCategory = await Category.findById(categoryId)
-    .populate("courses")
+    .populate({ path: "courses", match: { status: "Published" } })
     .exec();
 
   if (!selectedCategory) {
@@ -106,7 +106,7 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
   //get courses for other categories
   const categoriesExceptSelected = await Category.find({
     _id: { $ne: categoryId },
-  }).populate("courses");
+  }).populate({path:"courses",match:{status:"Published"}});
 
   let differenceCourses = [];
   for (const category of categoriesExceptSelected) {
@@ -114,7 +114,10 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
   }
 
   //get Top-selling courses across all categories
-  const allCategories = await Category.find().populate("courses");
+  const allCategories = await Category.find().populate({
+    path: "courses",
+    match: { status: "Published" },
+  });
   const allCourse = allCategories.flatMap((category) => category.courses);
   const mostSellingCourses = allCourse
     //   .sort((a, b) => b.sold - a.sold)

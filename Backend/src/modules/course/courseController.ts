@@ -297,7 +297,7 @@ export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   if (!course) {
     throw AppError.notFound("Course not found");
   }
-  if (course.instructorId !== req.userId) {
+  if (course.instructorId !== req.userId && req.accountType !== "admin") {
     throw AppError.unauthorized("You are not authorized to delete this course");
   }
   course.isActive = false;

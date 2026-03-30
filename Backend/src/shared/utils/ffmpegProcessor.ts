@@ -111,9 +111,9 @@ export async function processVideo({
       if (!video) {
         throw new Error("Video not found");
       }
-      await Section.findByIdAndUpdate(video.sectionId, {
-        $push: { subsections: video.subsectionId },
-      });
+      // await Section.findByIdAndUpdate(video.sectionId, {
+      //   $push: { subsections: video.subsectionId },
+      // });
       await SubSection.findByIdAndUpdate(video.subsectionId, {
         $set: { isAvailable: true },
       });
