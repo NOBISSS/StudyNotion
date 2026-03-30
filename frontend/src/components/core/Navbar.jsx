@@ -178,7 +178,7 @@ const Navbar = () => {
             </button>
 
             {/* Cart */}
-            {user && user?.accountType !== "Instructor" && (
+            {user && user?.accountType !== "instructor" && (
               <Link
                 to="/dashboard/cart"
                 className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white"
