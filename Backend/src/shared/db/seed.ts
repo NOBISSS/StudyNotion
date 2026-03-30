@@ -282,10 +282,30 @@ export const updateCourseSlugs = async () => {
 
 export const seedSubsections = async () => {
   try {    await connectDB(process.env.MONGODB_URI!);
-    await Section.findByIdAndUpdate("69c9754139aff5471ffc28ae", {
+    await Section.findByIdAndUpdate("69c97e3c39aff5471ffc29bc", {
       $push: {
         subSectionIds: {
-          $each: [new mongoose.Types.ObjectId("69c9756839aff5471ffc28b1")],
+          $each: [new mongoose.Types.ObjectId("69c97e8239aff5471ffc29bf")],
+        },
+      },
+    });
+    await Section.findByIdAndUpdate("69c97eab39aff5471ffc29cb", {
+      $push: {
+        subSectionIds: {
+          $each: [new mongoose.Types.ObjectId("69c97eef39aff5471ffc29ce")],
+        },
+      },
+    });
+    await Section.findByIdAndUpdate("69c97f2e39aff5471ffc29db", {
+      $push: {
+        subSectionIds: {
+          $each: [
+            new mongoose.Types.ObjectId("69c97f9c39aff5471ffc29de"),
+            new mongoose.Types.ObjectId("69c9800c39aff5471ffc29e4"),
+            new mongoose.Types.ObjectId("69c9806739aff5471ffc29ea"),
+            new mongoose.Types.ObjectId("69c980f639aff5471ffc29f6"),
+            new mongoose.Types.ObjectId("69c9812539aff5471ffc29fc"),
+          ],
         },
       },
     });
