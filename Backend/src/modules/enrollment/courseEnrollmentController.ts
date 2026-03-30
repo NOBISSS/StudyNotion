@@ -63,39 +63,45 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     isActive: true,
   })
-    .populate({path:"courseId", match:{isActive: true,status:"Published"}})
+    .populate({
+      path: "courseId",
+      match: { isActive: true, status: "Published" },
+    })
     .sort({ createdAt: -1 });
-  
+
+  // Filter out enrollments where courseId was nulled by populate's match condition
+  const validEnrollments = courseEnrollments.filter(
+    (enrollment) => enrollment.courseId !== null,
+  );
+
   const courseEnrollmentsWithProgress = await Promise.all(
-    courseEnrollments.map(async (enrollment) => {
+    validEnrollments.map(async (enrollment) => {
       const enrollmentObj = enrollment.toObject();
       const course = enrollmentObj.courseId as any;
+
       const courseProgress = await CourseProgress.findOne({
         userId: new Types.ObjectId(userId),
-        courseId: new Types.ObjectId(course._id),
-    });
-    return {
-      ...enrollmentObj,
-      courseId:
-        typeof course === "object"
-          ? {
-              _id: course?._id || "",
-              courseName: course?.courseName || "",
-              thumbnailUrl: course?.thumbnailUrl || "",
-              instructorId: course?.instructorId || "",
-              progress: courseProgress?.progress.toString() || "0",
-              totalDuration: convertSecondsToReadingTime(
-                course?.totalDuration || 0,
-              ).hhmmss,
-            }
-          : enrollmentObj.courseId,
-    };
-  }));
+        courseId: new Types.ObjectId(course._id), // now guaranteed to exist
+      });
+
+      return {
+        ...enrollmentObj,
+        courseId: {
+          _id: course._id,
+          courseName: course.courseName,
+          thumbnailUrl: course.thumbnailUrl,
+          instructorId: course.instructorId,
+          progress: courseProgress?.progress.toString() ?? "0",
+          totalDuration: convertSecondsToReadingTime(course.totalDuration ?? 0)
+            .hhmmss,
+        },
+      };
+    }),
+  );
+
   ApiResponse.success(
     res,
-    {
-      courseEnrollments: courseEnrollmentsWithProgress,
-    },
+    { courseEnrollments: courseEnrollmentsWithProgress },
     "Course enrollments retrieved successfully",
   );
 });
