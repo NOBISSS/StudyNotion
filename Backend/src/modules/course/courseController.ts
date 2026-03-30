@@ -401,6 +401,7 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
   const course = await Course.findOne({
     _id: courseObjectId,
     isActive: true,
+    status: "Published",
   }).populate("categoryId", "name");
 
   if (!course) {

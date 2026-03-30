@@ -5,10 +5,10 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
 import { Course } from "../course/CourseModel.js";
+import CourseProgress from "../course/CourseProgress.js";
 import { convertSecondsToReadingTime } from "../subsection/video/videoUtils.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { CourseEnrollment } from "./CourseEnrollment.js";
-import CourseProgress from "../course/CourseProgress.js";
 
 export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -63,7 +63,7 @@ export const getUserEnrollments: Handler = asyncHandler(async (req, res) => {
     userId: new Types.ObjectId(userId),
     isActive: true,
   })
-    .populate({path:"courseId", match:{isActive: true}})
+    .populate({path:"courseId", match:{isActive: true,status:"Published"}})
     .sort({ createdAt: -1 });
   
   const courseEnrollmentsWithProgress = await Promise.all(
