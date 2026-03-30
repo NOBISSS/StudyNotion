@@ -51,9 +51,13 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
         userId: new Types.ObjectId(userId),
         isActive: true,
     })
-        .populate({ path: "courseId", match: { isActive: true, status: "Published" } })
+        .populate({
+        path: "courseId",
+        match: { isActive: true, status: "Published" },
+    })
         .sort({ createdAt: -1 });
-    const courseEnrollmentsWithProgress = await Promise.all(courseEnrollments.map(async (enrollment) => {
+    const validEnrollments = courseEnrollments.filter((enrollment) => enrollment.courseId !== null);
+    const courseEnrollmentsWithProgress = await Promise.all(validEnrollments.map(async (enrollment) => {
         const enrollmentObj = enrollment.toObject();
         const course = enrollmentObj.courseId;
         const courseProgress = await CourseProgress.findOne({
@@ -62,21 +66,18 @@ export const getUserEnrollments = asyncHandler(async (req, res) => {
         });
         return {
             ...enrollmentObj,
-            courseId: typeof course === "object"
-                ? {
-                    _id: course?._id || "",
-                    courseName: course?.courseName || "",
-                    thumbnailUrl: course?.thumbnailUrl || "",
-                    instructorId: course?.instructorId || "",
-                    progress: courseProgress?.progress.toString() || "0",
-                    totalDuration: convertSecondsToReadingTime(course?.totalDuration || 0).hhmmss,
-                }
-                : enrollmentObj.courseId,
+            courseId: {
+                _id: course._id,
+                courseName: course.courseName,
+                thumbnailUrl: course.thumbnailUrl,
+                instructorId: course.instructorId,
+                progress: courseProgress?.progress.toString() ?? "0",
+                totalDuration: convertSecondsToReadingTime(course.totalDuration ?? 0)
+                    .hhmmss,
+            },
         };
     }));
-    ApiResponse.success(res, {
-        courseEnrollments: courseEnrollmentsWithProgress,
-    }, "Course enrollments retrieved successfully");
+    ApiResponse.success(res, { courseEnrollments: courseEnrollmentsWithProgress }, "Course enrollments retrieved successfully");
 });
 export const getAllEnrollments = asyncHandler(async (req, res) => {
     const courseEnrollments = await CourseEnrollment.find({})
