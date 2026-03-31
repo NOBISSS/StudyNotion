@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
   forgotpasswordOTPVerification,
+  reactivateAccountOTPVerification,
   resendOtp,
   signUp,
 } from "../services/operations/authAPI";
@@ -37,6 +38,9 @@ const VerifyEmail = () => {
     } = signupData;
     if (otpPurpose == "forgotPassword") {
       dispatch(forgotpasswordOTPVerification(otp, navigate));
+      return;
+    }else if(otpPurpose === "reactivate"){
+      dispatch(reactivateAccountOTPVerification(otp, navigate));
       return;
     }
     dispatch(

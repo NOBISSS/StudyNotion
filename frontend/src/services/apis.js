@@ -12,6 +12,8 @@ export const endPoints={
     RESETPASSTOKEN_API:BACKEND_URL+"/auth/reset-password-token",
     RESETPASSWORD_API:BACKEND_URL+"/auth/reset-password",
     LOGOUT_API:BACKEND_URL+"/auth/logout",
+    REACTIVATE_ACCOUNT_SEND_OTP_API:BACKEND_URL+"/users/reactivate",
+    REACTIVATE_ACCOUNT_VERIFY_API:BACKEND_URL+"/users/reactivate/verify",
 }
 
 export const contactUsEndpoints={

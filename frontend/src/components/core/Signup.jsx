@@ -52,7 +52,7 @@ export const Signup = () => {
       setError('Password must be at least 8 characters.')
       return
     }
-    dispatch(setSignUpData({ accountType, firstName, lastName, email, password, confirmPassword }))
+    dispatch(setSignUpData({ accountType, firstName, lastName, email, password, confirmPassword,otpPurpose:"signup" }))
     dispatch(sendOtp(formData, navigate))
   }
 

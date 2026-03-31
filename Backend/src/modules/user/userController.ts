@@ -184,10 +184,12 @@ export const reactivateAccount = asyncHandler(async (req, res) => {
   }
   const user = await User.findOne({
     email: email.toLowerCase(),
-    isDeleted: true,
   });
   if (!user) {
     throw AppError.notFound("User not found with this email");
+  }
+  if (!user.isDeleted) {
+    throw AppError.badRequest("This account is not deactivated");
   }
   const otp = generateOTP();
   await saveOTP({

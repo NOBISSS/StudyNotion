@@ -25,6 +25,7 @@ const Error             = lazy(() => import('../../pages/Error'))
 const Login             = lazy(() => import('../core/Login').then(m => ({ default: m.Login })))
 const Signup            = lazy(() => import('../core/Signup').then(m => ({ default: m.Signup })))
 const ForgotPassword    = lazy(() => import('../../pages/ForgotPassword'))
+const ReactivateAccount = lazy(() => import('../../pages/ReactivateAccount'))
 const UpdatePassword    = lazy(() => import('../../pages/UpdatePassword'))
 const VerifyEmail       = lazy(() => import('../../pages/VerifyEmail'))
 const ResetPassword     = lazy(() => import('../../pages/ResetPassword'))
@@ -83,6 +84,8 @@ const AppRoutes = () => {
         <Route path="/signup"           element={<OpenRoute><Signup /></OpenRoute>} />
         <Route path="/forgotpassword"   element={<OpenRoute><ForgotPassword /></OpenRoute>} />
         <Route path="/forgotpassword/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
+        <Route path="/reactivate-account"   element={<OpenRoute><ReactivateAccount /></OpenRoute>} />
+        <Route path="/reactivate-account/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
         <Route path="/update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>} />
         <Route path="/resetpassword"    element={<OpenRoute><ResetPassword /></OpenRoute>} />
 
