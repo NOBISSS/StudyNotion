@@ -263,14 +263,17 @@ export function updateProfilePicture(displayPicture) {
 }
 
 
-export function deleteAccount(user) {
+export function deleteAccount(navigate) {
     return async (dispatch) => {
         const toastId = toast.loading("DELETING YOUR ACCOUNT");
 
         try {
-            const response = await apiConnector("DELETE", DELETE_PROFILE_API, {userId:user._id});
+            const response = await apiConnector("DELETE", DELETE_PROFILE_API);
             console.log(response);
             if (!response.data.success) throw new Error(response.data.message);
+            dispatch(logout());
+            dispatch(setUser(null));
+            navigate("/");
             toast.success("YOUR ACCOUNT IS DELETED SUCCSSFULLY");
         } catch (error) {
             console.log("ERROR OCCURED WHILE DELETING PROFILE>>>>>>", error);

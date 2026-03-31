@@ -6,6 +6,8 @@ import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
 import { changePasswordInputSchema } from "./profileValidation.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
+import Comment from "../comment/CommentModel.js";
 
 export const getUser = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -67,6 +69,11 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   if (!user) {
     throw AppError.notFound("User not found");
   }
+  const profile = await Profile.findOneAndUpdate(
+    { userId: userId as Types.ObjectId },
+    { $set: { isDeleted: true } },
+  );
+  const userEnrolledCourses = await CourseEnrollment.find({ userId: userId as Types.ObjectId, isActive:false });
   return ApiResponse.success(res, {}, "Account deleted successfully");
 });
 export const deleteProfile = asyncHandler(async (req, res) => {

@@ -30,6 +30,7 @@ import {
 } from "./authValidation.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { comparePasswords } from "./auth.utils.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 
 export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -40,8 +41,8 @@ export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
   }
   const { email, password, firstName, lastName, accountType } = userInput.data;
   const lowerCaseEmail = email.toLowerCase();
-  const userExists = await User.findOne({ email: lowerCaseEmail });
-  if (userExists) {
+  const userExists = await User.findOne({ email: lowerCaseEmail});
+  if (userExists && !userExists.isDeleted) {
     throw AppError.conflict("User already exists with this username or email");
   }
 
@@ -145,16 +146,44 @@ export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
   if (!otpData || otpData.otpType !== "registration" || type !== "signup") {
     throw AppError.forbidden("Invalid or Expired OTP");
   }
+  let user = await User.findOne({ email });
+  let profile;
+  let wishlist;
+  if (user && user.isDeleted) {
+    user.isDeleted = false;
+    user.password = otpData.password as string;
+    user.firstName = otpData.firstName as string;
+    user.lastName = otpData.lastName as string;
+    user.accountType = otpData.accountType as
+      | "admin"
+      | "instructor"
+      | "student";
+    profile = await Profile.findOneAndUpdate(
+      { userId: user._id },
+      {
+        profilePicture: `http://api.dicebear.com/5.x/initials/svg?seed=${user.firstName} ${user.lastName}`,
+        isDeleted: false,
+      },
+      { new: true },
+    );
+    wishlist = await Wishlist.findOneAndUpdate({ userId: user._id},{courseIds:[], bundleIds:[]}, { new: true });
+    await CourseEnrollment.updateMany({ userId: user._id }, { $set: { isActive: false } });
+    await user.save();
+  } else
+    user = await User.create({
+      email,
+      password: otpData.password as string,
+      firstName: otpData.firstName as string,
+      lastName: otpData.lastName as string,
+      accountType: otpData.accountType as "admin" | "instructor" | "student",
+    });
 
-  const user = await User.create({
-    email,
-    password: otpData.password as string,
-    firstName: otpData.firstName as string,
-    lastName: otpData.lastName as string,
-    accountType: otpData.accountType as "admin" | "instructor" | "student",
-  });
-  const profile = await Profile.create({ userId: user._id });
-  const wishlist = await Wishlist.create({ userId: user._id });
+  if (!profile) {
+    profile = await Profile.create({ userId: user._id, profilePicture: `http://api.dicebear.com/5.x/initials/svg?seed=${user.firstName} ${user.lastName}` });
+  }
+  if (!wishlist) {
+    wishlist = await Wishlist.create({ userId: user._id });
+  }
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   await user.updateOne({ refreshToken });
   return ApiResponse.created(
@@ -164,6 +193,7 @@ export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
         ...user.toObject(),
         refreshToken: undefined,
         password: undefined,
+        additionalDetails: profile,
       },
       accessToken,
       refreshToken,
