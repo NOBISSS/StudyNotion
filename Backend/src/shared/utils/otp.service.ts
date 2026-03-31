@@ -16,7 +16,7 @@ export type OTPData = {
   lastName?: string | undefined;
   accountType?: "admin" | "instructor" | "student" | undefined;
   password?: string | undefined;
-  otpType?: "registration" | "forgot" | undefined;
+  otpType?: "registration" | "forgot" | "recovery" | undefined;
 };
 
 //SAVE OTP IN REDIS
@@ -59,7 +59,7 @@ export const verifyOTP = async ({
 }: {
   email: string;
   userOtp: string;
-  otpType: "registration" | "forgot";
+  otpType: "registration" | "forgot" | "recovery";
 }) => {
   const data = await getOTPData(email);
   if (!data || !data.otp) return null;

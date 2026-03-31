@@ -9,6 +9,8 @@ import {
   getInstructors,
   getStudents,
   getUsers,
+  reactivateAccount,
+  reactivateAccountOTPVerification,
   updateProfile,
   updateProfilePhoto,
 } from "./userController.js";
@@ -16,6 +18,8 @@ import {
 const userRouter = Router();
 
 userRouter.route("/contact").post(submitContactForm);
+userRouter.route("/reactivate").post(reactivateAccount);
+userRouter.route("/reactivate/verify").post(reactivateAccountOTPVerification);
 userRouter.use(userMiddleware);
 userRouter.route("/updateprofile").put(updateProfile);
 userRouter

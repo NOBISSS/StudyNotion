@@ -75,8 +75,6 @@ export const deleteAccount = asyncHandler(async (req, res) => {
         isDeleted: true,
         refreshToken: null,
         deletedAt: new Date(),
-        firstName: `Deleted_`,
-        lastName: req.accountType,
       },
     },
     { new: true },

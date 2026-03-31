@@ -351,14 +351,6 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid OTP");
   }
 
-  // await User.updateOne(
-  //   { email: lowerCaseEmail },
-  //   {
-  //     $set: {
-  //       password: bcrypt.hashSync(password, 10),
-  //     },
-  //   },
-  // );
   return ApiResponse.success(
     res,
     {},
