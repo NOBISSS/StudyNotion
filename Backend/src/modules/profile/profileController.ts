@@ -5,9 +5,11 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
+import {
+  handleInstructorDeletion,
+  handleUserDeletion,
+} from "./profile.utils.js";
 import { changePasswordInputSchema } from "./profileValidation.js";
-import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
-import Comment from "../comment/CommentModel.js";
 
 export const getUser = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -63,17 +65,36 @@ export const changePassword = asyncHandler(async (req, res) => {
 });
 export const deleteAccount = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  const user = await User.findByIdAndUpdate(userId, {
-    $set: { isDeleted: true },
-  });
+  if (!userId) {
+    throw AppError.unauthorized("Unauthorized");
+  }
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        isDeleted: true,
+        refreshToken: null,
+        deletedAt: new Date(),
+        firstName: `Deleted_`,
+        lastName: req.accountType,
+      },
+    },
+    { new: true },
+  );
   if (!user) {
     throw AppError.notFound("User not found");
   }
   const profile = await Profile.findOneAndUpdate(
     { userId: userId as Types.ObjectId },
-    { $set: { isDeleted: true } },
+    {
+      $set: {
+        isDeleted: true,
+        profilePicture: `http://api.dicebear.com/5.x/initials/svg?seed=${user.firstName} ${user.lastName}`,
+      },
+    },
   );
-  const userEnrolledCourses = await CourseEnrollment.find({ userId: userId as Types.ObjectId, isActive:false });
+  if (req.accountType == "instructor") await handleInstructorDeletion(userId);
+  else if (req.accountType == "student") await handleUserDeletion(userId);
   return ApiResponse.success(res, {}, "Account deleted successfully");
 });
 export const deleteProfile = asyncHandler(async (req, res) => {

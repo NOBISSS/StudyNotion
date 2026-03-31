@@ -27,6 +27,7 @@ export const UserSchema = new Schema(
     refreshToken: { type: String },
     isBanned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
   },
   {
     methods: {

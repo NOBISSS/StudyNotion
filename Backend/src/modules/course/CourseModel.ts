@@ -32,11 +32,12 @@ const courseSchema = new Schema(
     },
     status: {
       type: String,
-        enum: ["Draft", "Published"],
+        enum: ["Draft", "Published","Removed"],
         default: "Draft",
     },
     isBoosted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isOrphaned: { type: Boolean, default: false },
     sections: [{ type: Types.ObjectId, ref: "Section" }],
   },
   { timestamps: true }
