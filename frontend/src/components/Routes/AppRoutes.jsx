@@ -27,6 +27,7 @@ const Signup            = lazy(() => import('../core/Signup').then(m => ({ defau
 const ForgotPassword    = lazy(() => import('../../pages/ForgotPassword'))
 const UpdatePassword    = lazy(() => import('../../pages/UpdatePassword'))
 const VerifyEmail       = lazy(() => import('../../pages/VerifyEmail'))
+const ResetPassword     = lazy(() => import('../../pages/ResetPassword'))
 
 // Catalog / Course
 const CatalogItem       = lazy(() => import('../core/CatalogItem'))
@@ -81,7 +82,9 @@ const AppRoutes = () => {
         <Route path="/login"            element={<OpenRoute><Login /></OpenRoute>} />
         <Route path="/signup"           element={<OpenRoute><Signup /></OpenRoute>} />
         <Route path="/forgotpassword"   element={<OpenRoute><ForgotPassword /></OpenRoute>} />
+        <Route path="/forgotpassword/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
         <Route path="/update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>} />
+        <Route path="/resetpassword"    element={<OpenRoute><ResetPassword /></OpenRoute>} />
 
         {/* ── Analytics dashboards ──────────────────────────────────── */}
         <Route path="/dashboard/analytics" element={

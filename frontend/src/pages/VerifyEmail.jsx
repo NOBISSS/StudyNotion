@@ -1,11 +1,15 @@
 // pages/VerifyEmail.jsx
 import { useEffect, useState } from "react";
+import { LuTimerReset } from "react-icons/lu";
+import { PiArrowLeftBold } from "react-icons/pi";
 import OTPInput from "react-otp-input";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { resendOtp, sendOtp, signUp } from "../services/operations/authAPI";
-import { PiArrowLeftBold } from "react-icons/pi";
-import { LuTimerReset } from "react-icons/lu";
+import {
+  forgotpasswordOTPVerification,
+  resendOtp,
+  signUp,
+} from "../services/operations/authAPI";
 
 const VerifyEmail = () => {
   const [otp, setOtp] = useState("");
@@ -29,7 +33,12 @@ const VerifyEmail = () => {
       email,
       password,
       confirmPassword,
+      otpPurpose = "signup",
     } = signupData;
+    if (otpPurpose == "forgotPassword") {
+      dispatch(forgotpasswordOTPVerification(otp, navigate));
+      return;
+    }
     dispatch(
       signUp(
         accountType,
@@ -39,8 +48,8 @@ const VerifyEmail = () => {
         password,
         confirmPassword,
         otp,
-        navigate
-      )
+        navigate,
+      ),
     );
   };
 
@@ -58,11 +67,8 @@ const VerifyEmail = () => {
   return (
     <div className="min-h-screen bg-[#000814] flex items-center justify-center px-4">
       <div className="w-full max-w-[400px]">
-
         {/* Title */}
-        <h1 className="text-white text-3xl font-semibold mb-3">
-          Verify email
-        </h1>
+        <h1 className="text-white text-3xl font-semibold mb-3">Verify email</h1>
 
         {/* Subtitle */}
         <p className="text-[#AFB2BF] text-sm leading-relaxed mb-8">
@@ -71,7 +77,6 @@ const VerifyEmail = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
           {/* OTP Inputs */}
           <OTPInput
             value={otp}
@@ -88,9 +93,10 @@ const VerifyEmail = () => {
                 className={`
                   !w-[52px] !h-[52px] rounded-lg text-white text-lg font-semibold text-center
                   bg-[#161D29] border transition-all duration-200 outline-none
-                  ${props.value
-                    ? "border-[#FFD60A]"
-                    : "border-[#2C333F] focus:border-[#FFD60A]"
+                  ${
+                    props.value
+                      ? "border-[#FFD60A]"
+                      : "border-[#2C333F] focus:border-[#FFD60A]"
                   }
                 `}
               />

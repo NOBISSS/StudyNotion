@@ -26,7 +26,8 @@ import User from "../user/UserModel.js";
 import Wishlist from "../wishlist/wishlistModel.js";
 import { comparePasswords } from "./auth.utils.js";
 import {
-  forgetInputSchema,
+  forgetOTPVerificationSchema,
+  forgetPasswordResetSchema,
   signinInputSchema,
   signupInputSchema,
 } from "./authValidation.js";
@@ -331,13 +332,13 @@ export const forgetWithOTP = asyncHandler(async (req, res) => {
   );
 });
 export const forgetOTPVerification = asyncHandler(async (req, res) => {
-  const parsedInput = forgetInputSchema.safeParse(req.body);
+  const parsedInput = forgetOTPVerificationSchema.safeParse(req.body);
   if (!parsedInput.success) {
     throw AppError.badRequest(
       parsedInput.error?.issues[0]?.message || "OTP/Password is required",
     );
   }
-  const { otp, password } = parsedInput.data;
+  const { otp} = parsedInput.data;
   const { email } = JSON.parse(req.cookies.otp_data);
   const lowerCaseEmail = email.toLowerCase();
   const otpData = await verifyOTP({
@@ -350,6 +351,33 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid OTP");
   }
 
+  // await User.updateOne(
+  //   { email: lowerCaseEmail },
+  //   {
+  //     $set: {
+  //       password: bcrypt.hashSync(password, 10),
+  //     },
+  //   },
+  // );
+  return ApiResponse.success(
+    res,
+    {},
+    "OTP verified successfully",
+  );
+});
+export const forgetOTPPasswordReset = asyncHandler(async (req, res) => {
+  const parsedInput = forgetPasswordResetSchema.safeParse(req.body);
+  if (!parsedInput.success) {
+    throw AppError.badRequest(
+      parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+    );
+  }
+  const { password } = parsedInput.data;
+  const { email, type } = JSON.parse(req.cookies.otp_data);
+  const lowerCaseEmail = email.toLowerCase();
+  if(!email || type !== "forgot") {
+    throw AppError.badRequest("Invalid Request");
+  }
   await User.updateOne(
     { email: lowerCaseEmail },
     {

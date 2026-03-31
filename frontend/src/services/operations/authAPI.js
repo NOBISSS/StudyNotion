@@ -1,6 +1,6 @@
 import toast from "react-hot-toast"
 import { apiConnector } from "../apiconnector";
-import { setLoading, setToken } from '../../slices/authSlice';
+import { setLoading, setOTPVerified, setSignUpData, setToken } from '../../slices/authSlice';
 //import {resetCart} from '../../slices/cartSlice';
 import { setProfilePicture, setUser } from "../../slices/profileSlice";
 import { endPoints, settingsEndPoints } from "../apis";
@@ -16,6 +16,9 @@ const {
     RESETPASSTOKEN_API,
     RESETPASSWORD_API,
     RESEND_OTP_API,
+    FORGOT_PASSWORD_API,
+    FORGOT_PASSWORD_VERIFY_API,
+    FORGOT_PASSWORD_RESET_PASSWORD_API
 } = endPoints
 
 const {
@@ -195,6 +198,63 @@ export function getPasswordResetToken(email, setEmailSent) {
         } catch (error) {
             console.log("RESET PASSWORD TOKEN ERROR...", error);
             toast.error("Failed to send email for resetting password");
+        }
+        dispatch(setLoading(false));
+    }
+}
+export function forgotpasswordSendOTP(email, setEmailSent, navigate) {
+    return async (dispatch) => {
+        dispatch(setLoading(true));
+        try {
+            const response = await apiConnector("POST", FORGOT_PASSWORD_API, { email })
+            
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+            toast.success("RESET EMAIL SENT");
+            setEmailSent(true);
+            dispatch(setSignUpData({ email, otpPurpose: "forgotPassword" }));
+            navigate("/forgotpassword/verify", { state: { email } })
+        } catch (error) {
+            console.log("RESET PASSWORD TOKEN ERROR...", error);
+            toast.error("Failed to send email for resetting password");
+        }
+        dispatch(setLoading(false));
+    }
+}
+export function forgotpasswordOTPVerification(otp, navigate) {
+    return async (dispatch) => {
+        dispatch(setLoading(true));
+        try {
+        const response = await apiConnector("POST", FORGOT_PASSWORD_VERIFY_API, { otp: Number(otp) })
+            
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+            toast.success("OTP Verified Successfully");
+            dispatch(setOTPVerified(true));
+            navigate("/resetpassword");
+        } catch (error) {
+            console.log("RESET PASSWORD TOKEN ERROR...", error);
+            toast.error("Failed to verify OTP");
+        }
+        dispatch(setLoading(false));
+    }
+}
+export function forgotpasswordResetPassword(navigate,data) {
+    return async (dispatch) => {
+        dispatch(setLoading(true));
+        try {
+        const response = await apiConnector("POST", FORGOT_PASSWORD_RESET_PASSWORD_API, {...data})
+            
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+            toast.success("Password reset successfully");
+            navigate("/login");
+        } catch (error) {
+            console.log("RESET PASSWORD TOKEN ERROR...", error);
+            toast.error("Failed to reset password");
         }
         dispatch(setLoading(false));
     }

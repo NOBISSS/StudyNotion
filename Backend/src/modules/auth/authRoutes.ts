@@ -2,6 +2,7 @@ import { Router } from "express";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 
 import {
+  forgetOTPPasswordReset,
   forgetOTPVerification,
   forgetWithOTP,
   googleSignin,
@@ -18,6 +19,7 @@ authRouter.route("/signup").post(signupWithOTP);
 authRouter.route("/signup/verify").post(signupOTPVerification);
 authRouter.route("/forgotpassword").post(forgetWithOTP);
 authRouter.route("/forgotpassword/verify").post(forgetOTPVerification);
+authRouter.route("/forgotpassword/reset").post(forgetOTPPasswordReset);
 authRouter.route("/resendotp").post(resendOTP);
 authRouter.route("/login").post(signin);
 authRouter.route("/google").get(googleSignin);

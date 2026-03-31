@@ -7,6 +7,7 @@ export const endPoints={
     RESEND_OTP_API:BACKEND_URL+"/auth/resendotp",
     FORGOT_PASSWORD_API:BACKEND_URL+"/auth/forgotpassword",
     FORGOT_PASSWORD_VERIFY_API:BACKEND_URL+"/auth/forgotpassword/verify",
+    FORGOT_PASSWORD_RESET_PASSWORD_API:BACKEND_URL+"/auth/forgotpassword/reset",
     LOGIN_API:BACKEND_URL+"/auth/login", 
     RESETPASSTOKEN_API:BACKEND_URL+"/auth/reset-password-token",
     RESETPASSWORD_API:BACKEND_URL+"/auth/reset-password",

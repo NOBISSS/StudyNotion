@@ -100,7 +100,6 @@ export const createCourse = asyncHandler(async (req, res) => {
   await embeddingQueue.add(
     "embed-course",
     { course: course.toObject() },
-    { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
   );
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {

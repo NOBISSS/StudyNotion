@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState={
     signupData:null,
     loading:false,
+    isOTPVerified:false,
     //token:localStorage.getItem("accessToken") ? JSON.parse(localStorage.getItem("accessToken")) : null,
     token:localStorage.getItem("accessToken") || null,
 }
@@ -17,6 +18,9 @@ const authSlice=createSlice({
         setLoading(state,value){
             state.loading=value.payload
         },
+        setOTPVerified(state,value){
+            state.isOTPVerified=value.payload
+        },
         setToken(state,value){
             state.token=value.payload
             if(value.payload){
@@ -30,5 +34,5 @@ const authSlice=createSlice({
     },
 });
 
-export const {setToken,setLoading,setSignUpData} =authSlice.actions;
+export const {setToken,setLoading,setSignUpData,setOTPVerified} =authSlice.actions;
 export default authSlice.reducer;

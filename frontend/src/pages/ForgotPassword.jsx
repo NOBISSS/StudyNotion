@@ -1,20 +1,26 @@
 // pages/ForgotPassword.jsx
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
-import { getPasswordResetToken } from '../services/operations/authAPI'
+import { Link, useNavigate } from 'react-router-dom'
+import { forgotpasswordSendOTP, getPasswordResetToken } from '../services/operations/authAPI'
+import { setSignUpData } from '../slices/authSlice'
 
 const ForgotPassword = () => {
   const [emailSent, setEmailSent] = useState(false)
   const [email, setEmail]         = useState('')
   const { loading }               = useSelector(state => state.auth)
   const dispatch                  = useDispatch()
-
+  const navigate                 = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault()
-    dispatch(getPasswordResetToken(email, setEmailSent))
+    dispatch(forgotpasswordSendOTP(email, setEmailSent,navigate))
   }
-
+  // useEffect(() => {
+  //   if (emailSent) {
+  //     dispatch(setSignUpData({ email, otpPurpose: "forgotPassword" }));
+  //     navigate("/forgotpassword/verify", { state: { email } })
+  //   }
+  // }, [emailSent])
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-[#0A0F1C] px-4 py-16">
       {loading ? (

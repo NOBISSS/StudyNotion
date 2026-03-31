@@ -30,6 +30,7 @@ new Worker(
   "course-embedding",
   async (job) => {
     const { course } = job.data;
+    console.log(`Processing embedding for course: ${course.courseName}`);
     await generateCourseEmbedding(course);
   },
   {
