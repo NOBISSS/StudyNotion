@@ -67,6 +67,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     level,
     tag,
     whatYouWillLearn,
+    instructions,
   } = parsedCourseData.data;
   let typeOfCourse = "Paid";
   if (price === "0") {
@@ -86,6 +87,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     thumbnailUrl: thumbnailImage.secure_url,
     slug: `${instructor?.firstName} ${instructor?.lastName}/${courseName}`,
     whatYouWillLearn: [whatYouWillLearn || ""],
+    instructions: instructions || [],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
@@ -131,6 +133,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     tag,
     thumbnailImage: thumbnailUrl,
     whatYouWillLearn,
+    instructions,
   } = parsedCourseData.data;
   if (!thumbnailUrl) {
     throw AppError.badRequest("Thumbnail URL is required for course creation");
@@ -157,6 +160,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
     whatYouWillLearn: [whatYouWillLearn || ""],
+    instructions: instructions || [],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },

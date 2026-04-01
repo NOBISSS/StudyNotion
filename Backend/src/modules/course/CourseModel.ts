@@ -22,6 +22,7 @@ const courseSchema = new Schema(
     discountPrice: { type: Number, default: 0 },
     thumbnailUrl: { type: String },
     whatYouWillLearn: { type: [String], default: [] },
+    instructions: { type: [String], default: [] },
     tag: { type: [String], default: [] },
     slug: { type: String, required: true, unique: true },
     categoryId: { type: Types.ObjectId, ref: "Category", required: true },

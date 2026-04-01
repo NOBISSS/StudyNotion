@@ -54,7 +54,7 @@ const MENU_ITEMS = [
 const INSTRUCTOR_ITEMS = [
   {
     label: 'My Courses',
-    path: '/dashboard/instructor',
+    path: '/dashboard/my-courses',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="23 7 16 12 23 17 23 7" />
@@ -80,7 +80,7 @@ const ProfileDropDown = () => {
   const dispatch = useDispatch()
   const { user } = useSelector(state => state.profile)
 
-  const isInstructor = user?.accountType === 'Instructor'
+  const isInstructor = user?.accountType === 'instructor'
   const profilePic   =
     user?.additionalDetails?.profilePicture ||
     user?.image ||
