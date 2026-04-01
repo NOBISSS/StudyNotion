@@ -20,6 +20,7 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
+import { schedulePublish,cancelScheduledPublish, reschedulePublish } from "../../shared/queue/scheduleQueue.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -538,3 +539,96 @@ export const draftCourse: Handler = asyncHandler(async (req, res) => {
   );
 
 });
+
+
+export const scheduleCoursePublish:Handler=asyncHandler(async (req,res)=>{
+  const {courseId}=req.params;
+  const {scheduledPublishAt}=req.body;
+
+  if(!Types.ObjectId.isValid(courseId)){
+    throw AppError.badRequest("Invalid course ID")
+  }
+
+  const course=await Course.findOne({_id:courseId,isActive:true})
+  if(!course) throw AppError.notFound("Course not Found")
+
+  
+  if(course.instructorId.toString() !== req.userId){
+    throw AppError.unauthorized("Not Authorized to Schedule this course")
+  }
+
+  //cancel existing schedule
+  if(!scheduledPublishAt){
+    if(course.scheduledJobId){
+      await cancelScheduledPublish(course.scheduledJobId)
+    }
+
+    await Course.findByIdAndUpdate(courseId,{
+      isScheduled:false,
+      scheduledPublishAt:null,
+      scheduledJobId:null
+    })
+
+    return ApiResponse.success(res,{},"Scheduled publish cancelled")
+  }
+
+  //Validate the Date
+
+  const publishAt=new Date(scheduledPublishAt)
+  if(isNaN(publishAt.getTime())){
+    throw AppError.badRequest("Invalid Date Format For ScheduledPublishAt")
+  }
+
+  if(publishAt <= new Date()){
+    throw AppError.badRequest("scheduledPublishAt must be a future date")
+  }
+
+
+  //enqueu 
+  const job=await reschedulePublish(
+    course.scheduledJobId ?? undefined,
+    {
+      courseId:courseId,
+      instructorId:req.userId,
+      courseName:course.courseName,
+      scheduledAt:publishAt.toISOString(),
+    },
+    publishAt
+  )
+
+
+  await Course.findByIdAndUpdate(courseId,{
+    isScheduled:true,
+    scheduledPublishAt:publishAt,
+    scheduledJobId:String(job.id),
+    status:"Draft",
+  })
+
+  ApiResponse.success(
+    res,
+    {
+      scheduledPublishAt:publishAt,
+      jobId:job.id,
+    },
+    `Course Scheduled To Publish On ${publishAt.toUTCString()}`
+  )
+})
+
+export const getScheduledCourses:Handler=asyncHandler(async (req,res)=>{
+  const instructorId=req.userId
+
+  const courses=await Course.find({
+    instructorId,
+    isScheduled:true,
+    isActive:true
+  })
+  .select("courseName thumbnailUrl scheduledPublishat scheduleJobId level")
+  .sort({scheduledPublishAt:1})
+  .lean()
+
+  ApiResponse.success(
+    res,
+    {courses},
+    "Scheduled Courses retrived successfully"
+  )
+})

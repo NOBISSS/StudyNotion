@@ -31,4 +31,5 @@ export const courseInputSchema = z.object({
   tag: z.array(z.string()).optional(),
   instructorId: z.string().optional(),
   instructions: z.array(z.string({ error: "Each instruction must be a string" }), { error: "Instructions must be an array of strings" }).optional(),
+  scheduledPublishAt: z.string().optional()
 });
