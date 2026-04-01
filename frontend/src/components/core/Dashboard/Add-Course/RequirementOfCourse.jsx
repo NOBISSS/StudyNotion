@@ -9,8 +9,8 @@ const RequirementOfCourse = ({ label, register, errors, setValue, requirements: 
       required: 'At least one requirement is required',
       validate: (value) => value?.length > 0 || 'At least one requirement is required',
     })
-    setValue('courseRequirements', [], { shouldValidate: false })
-  }, [register, setValue])
+    setValue('courseRequirements', requirements, { shouldValidate: false })
+  }, [register, setValue,requirements])
 
   const addRequirement = (e) => {
     e.preventDefault()
