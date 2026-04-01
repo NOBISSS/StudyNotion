@@ -1,8 +1,7 @@
 //Handle Delayed Jobs
 //Jobs live in redis they survive server restarts and are never processed twice
 
-import Bull from "bull"
-import {env} from "../config/env.js"
+import {Queue} from "bullmq"
 import redis from "../config/redis.js"
 
 export interface SchedulePublishPayload{
@@ -12,7 +11,7 @@ export interface SchedulePublishPayload{
     scheduledAt:string
 }
 
-export const scheduleQueue=new Bull<SchedulePublishPayload>(
+export const scheduleQueue=new Queue<SchedulePublishPayload>(
     "schedule-publish",
     {
         connection:redis,
@@ -40,7 +39,7 @@ export const schedulePublish=async(
     const delay=publishAt.getTime()-Date.now()
     if(delay<=0) throw new Error("scheduledPublishAt must be in the future")
 
-    const job=await scheduleQueue.add(payload,{delay})
+    const job=await scheduleQueue.add("publish-course",payload,{delay})
     return job
 }
 
@@ -57,8 +56,16 @@ export const reschedulePublish=async(
     payload:SchedulePublishPayload,
     newPublishAt:Date
 )=>{
-    if(oldJobId) await cancelScheduledPublish(oldJobId)
-        return scheduleQueue.add(payload,{
-    delay:newPublishAt.getTime()-Date.now(),
+    if(oldJobId){await cancelScheduledPublish(oldJobId)}
+    const delay=newPublishAt.getTime()-Date.now();
+    if(delay<=0) throw new Error("New Publish Time Must be in future date");
+
+    return scheduleQueue.add("publish-course",payload,{
+    delay,
 })
 }
+
+process.on("SIGINT", async () => {
+  await scheduleQueue.close();
+  process.exit();
+});
