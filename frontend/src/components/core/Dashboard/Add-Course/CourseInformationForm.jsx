@@ -11,6 +11,7 @@ import {
   editCourseDetails,
   fetchCourseCategories,
   fetchCourseDetails,
+  fetchInstructorCourseDetails,
 } from '../../../../services/operations/courseDetailsAPI'
 import { setCourse, setEditCourse, setStep } from '../../../../slices/courseSlice'
 import { COURSE_STATUS, LEVEL } from '../../../../utils/constants'
@@ -61,7 +62,7 @@ const compressImage = (file) =>
 
 // ─── Fetch course for edit ────────────────────────────────────────────────────
 async function getCurrentCourse(courseId) {
-  const res = await fetchCourseDetails(courseId)
+  const res = await fetchInstructorCourseDetails(courseId)
   return res?.data?.course ?? null
 }
 

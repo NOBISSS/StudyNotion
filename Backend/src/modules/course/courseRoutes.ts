@@ -12,6 +12,7 @@ import {
   getAllCourseByEnrollmentsAndRatings,
   getAllCourseByEnrollmentsAndRatingsAndCategory,
   getCourseDetails,
+  getInstructorCourseDetails,
   getInstructorCourses,
   publishCourse,
   searchCourses,
@@ -29,6 +30,7 @@ courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/search").get(searchCourses); 
 courseRouter.use(userMiddleware);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
+courseRouter.route("/getinstructorcourse/:courseId").get(getInstructorCourseDetails);
 courseRouter.route("/instructor/getall").get(getInstructorCourses);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);

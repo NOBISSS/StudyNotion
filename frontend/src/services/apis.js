@@ -48,6 +48,7 @@ export const courseEndpoints={
     GET_TOP_COURSES_BY_CATEGORY_API:BACKEND_URL+"/courses/get-top/:categoryId",
 
     COURSE_DETAILS_API:BACKEND_URL+"/courses/getdetails",
+    INSTRUCTOR_COURSE_DETAILS_API:BACKEND_URL+"/courses/getinstructorcourse/:courseId",
     
     COURSE_CATEGORIES_API:BACKEND_URL+"/categories/getall",
     DELETE_COURSE_API:BACKEND_URL+"/courses/delete/:courseId",

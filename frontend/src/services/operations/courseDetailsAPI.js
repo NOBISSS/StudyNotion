@@ -14,6 +14,7 @@ const {
   CREATE_COURSE_MULTER_API,
   PUT_PUBLISH_COURSE_API,
   PUT_DRAFT_COURSE_API,
+  INSTRUCTOR_COURSE_DETAILS_API,
 } = courseEndpoints;
 
 const {
@@ -108,6 +109,20 @@ export const fetchCourseDetails = async (courseId) => {
   let result = null
   try {
     const response = await apiConnector("GET", COURSE_DETAILS_API+"/"+courseId, { courseId })
+    if (!response?.data?.success) throw new Error("Could not fetch course details")
+    result = response?.data
+  } catch (error) {
+    toast.error(error.message || "Failed to fetch course details")
+  } finally {
+    toast.dismiss(toastId)
+  }
+  return result
+}
+export const fetchInstructorCourseDetails = async (courseId) => {
+  const toastId = toast.loading("Loading...")
+  let result = null
+  try {
+    const response = await apiConnector("GET", INSTRUCTOR_COURSE_DETAILS_API.replace(":courseId", courseId))
     if (!response?.data?.success) throw new Error("Could not fetch course details")
     result = response?.data
   } catch (error) {

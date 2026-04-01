@@ -443,6 +443,35 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
     "Course details retrieved successfully",
   );
 });
+export const getInstructorCourseDetails: Handler = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { userId } = req;
+  if(!userId)
+    throw AppError.unauthorized("User ID is required to get course details");
+  if (!courseId || !Types.ObjectId.isValid(courseId)) {
+    throw AppError.badRequest("Invalid course ID");
+  }
+
+  const courseObjectId = new Types.ObjectId(courseId);
+
+  const course = await Course.findOne({
+    _id: courseObjectId,
+    isActive: true,
+    instructorId: userId,
+  }).populate("categoryId", "name");
+
+  if (!course) {
+    throw AppError.notFound("Course not found");
+  }
+
+  ApiResponse.success(
+    res,
+    {
+      course,
+    },
+    "Course details retrieved successfully",
+  );
+});
 export const searchCourses: Handler = asyncHandler(async (req, res) => {
   const { query } = req.query;
   if (!query || typeof query !== "string") {
