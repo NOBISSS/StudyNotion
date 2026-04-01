@@ -32,4 +32,8 @@ worker.on("failed", (job, err) => {
 });
 
 worker.on("error", (err) => console.error("Worker error:", err));
-console.log("Worker initialized");
+
+process.on("SIGINT", async () => {
+  await videoQueue.close();
+  process.exit();
+});

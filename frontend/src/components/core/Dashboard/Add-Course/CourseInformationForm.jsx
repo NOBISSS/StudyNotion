@@ -201,6 +201,8 @@ const CourseInformationForm = ({ courseId }) => {
       v.courseLevel     !== (course?.level ?? LEVEL[0])                             ||
       v.courseCategory  !== (course?.categoryId?._id ?? '')                         ||
       JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []) ||
+      v.courseCategory  !== (course?.categoryId?._id ?? '')                         ||
+      JSON.stringify(v.tag) !== JSON.stringify(course?.tag ?? []) ||
       thumbnailFile !== null
     )
   }
@@ -232,6 +234,7 @@ const CourseInformationForm = ({ courseId }) => {
       formData.append('level',             data.courseLevel);
       appendArray(formData, 'tag', data.courseTag);
       // if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []))
+      console.log("Appending instructions:", data.courseRequirements);
       appendArray(formData, 'instructions', data.courseRequirements);
       if (thumbnailFile)
         formData.append('thumbnail', thumbnailFile)

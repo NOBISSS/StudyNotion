@@ -26,8 +26,8 @@ export const embeddingQueue = new Queue("embedding-queue", {
   },
 });
 
-new Worker(
-  "course-embedding",
+const worker = new Worker(
+  "embedding-queue",
   async (job) => {
     const { course } = job.data;
     console.log(`Processing embedding for course: ${course.courseName}`);
@@ -38,6 +38,10 @@ new Worker(
     concurrency: 2,
   },
 );
+
+worker.on("completed", (job) => {
+  console.log(`Embedding Job - ${job.id} completed`);
+});
 
 process.on("SIGINT", async () => {
   await embeddingQueue.close();
