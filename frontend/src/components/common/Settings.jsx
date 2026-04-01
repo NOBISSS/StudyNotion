@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
 import { IconBtn } from './IconBtn';
 import { CTAButton } from '../core/HomePage/Button';
-import { UpdatePassword, UpdatePersonalInfo, updateProfilePicture } from '../../services/operations/authAPI';
+import { UpdatePassword, UpdatePersonalInfo, updateProfilePicture,deleteAccount } from '../../services/operations/authAPI';
 import toast from 'react-hot-toast';
 
 const Settings = () => {
@@ -63,7 +63,15 @@ const Settings = () => {
             setFormData(prev => ({ ...prev, additionalDetails: { ...prev.additionalDetails, [name]: value } }));
         } else { setFormData(prev => ({ ...prev, [name]: value })); }
     };
-
+    const handleDeleteAccount = () => {
+      const confirmation = window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      );
+      if (confirmation) {
+        // Dispatch delete account action here
+        dispatch(deleteAccount(navigate));
+      }
+    }
     const genderOptions = [
         "Male",
         "Female",
@@ -361,7 +369,9 @@ const Settings = () => {
                 will remove all the contain associated with it.
               </p>
               <p className="text-red-500 cursor-pointer">
-                <i>I want to delete my account.</i>
+                <button onClick={handleDeleteAccount}>
+                  <i>I want to delete my account.</i>
+                </button>
               </p>
             </div>
           </div>

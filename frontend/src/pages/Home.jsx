@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FaArrowRight } from "react-icons/fa";
+// import { FaArrowRight } from "react-icons/fa";
 import { HighlightText } from '../components/core/HomePage/HighlightText';
 import { CTAButton } from '../components/core/HomePage/Button';
 import Banner from "../../public/banner.mp4"
@@ -12,6 +12,7 @@ import { ExploreMore } from '../components/core/HomePage/ExploreMore';
 import Navbar from '../components/core/Navbar';
 import { useSelector } from 'react-redux';
 import { ReviewCard, StarRating } from '../components/core/CourseDetail';
+import { FaArrowRight } from 'react-icons/fa';
 
 
 

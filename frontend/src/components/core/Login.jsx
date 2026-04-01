@@ -1,15 +1,16 @@
 // components/core/Login.jsx
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEye } from "react-icons/io5";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import Lines from "../../assets/Lines2.png";
-import Image from "../../assets/LoginGirlImage.webp";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "../../services/operations/authAPI";
 import GoogleLoginButton from "../../utils/GoogleLogin";
 import { HighlightText } from "./HomePage/HighlightText";
+import { endPoints } from "../../services/apis";
+
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,19 @@ export const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(login(email, password, navigate));
+  };
+  const handleGithubLogin = () => {
+    // create a CSRF token and store it locally
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const randomHex = Array.from(array)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    localStorage.setItem("latestCSRFToken", randomHex);
+
+    // redirect the user to github
+    const link = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&response_type=code&scop=read:user&redirect_uri=${import.meta.env.VITE_FRONTEND_URL}&state=${randomHex}`;
+    window.location.assign(link);
   };
 
   return (
@@ -42,13 +56,16 @@ export const Login = () => {
           {/* ── Social login pills ── */}
           <div className="mb-6 flex gap-3">
             {/* Google */}
-            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <GoogleOAuthProvider
+              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+            >
               <GoogleLoginButton />
             </GoogleOAuthProvider>
 
             {/* GitHub */}
             <button
               type="button"
+              onClick={handleGithubLogin}
               className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-[#2C333F] bg-[#161D29] py-2.5 text-sm font-medium text-[#AFB2BF] transition-all hover:border-[#FFD60A] hover:text-white"
             >
               <svg
@@ -178,19 +195,33 @@ export const Login = () => {
               Sign up for free
             </Link>
           </p>
+
+          <p className="mt-3 text-center text-sm text-[#6B7280]">
+            Account deactivated?{" "}
+            <Link
+              to="/reactivate-account"
+              className="font-semibold text-[#06B6D4] transition-colors hover:text-[#FFD60A]"
+            >
+              Reactivate your account
+            </Link>
+          </p>
         </div>
 
         <div className="relative flex w-full items-center justify-center md:w-1/2">
           {/* Lines background — decorative */}
           <img
-            src={"https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"}
+            src={
+              "https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"
+            }
             alt=""
             aria-hidden="true"
             className="absolute right-0 top-4 h-[280px] w-[360px] object-cover opacity-60 sm:h-[340px] sm:w-[420px] md:h-[400px] md:w-[480px]"
           />
           {/* Main illustration */}
           <img
-            src={"https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"}
+            src={
+              "https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"
+            }
             alt="Student learning online"
             className="relative z-10 h-[260px] w-auto sm:h-[320px] md:h-[400px] drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           />

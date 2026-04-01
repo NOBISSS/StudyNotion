@@ -7,10 +7,14 @@ export const endPoints={
     RESEND_OTP_API:BACKEND_URL+"/auth/resendotp",
     FORGOT_PASSWORD_API:BACKEND_URL+"/auth/forgotpassword",
     FORGOT_PASSWORD_VERIFY_API:BACKEND_URL+"/auth/forgotpassword/verify",
+    FORGOT_PASSWORD_RESET_PASSWORD_API:BACKEND_URL+"/auth/forgotpassword/reset",
     LOGIN_API:BACKEND_URL+"/auth/login", 
     RESETPASSTOKEN_API:BACKEND_URL+"/auth/reset-password-token",
     RESETPASSWORD_API:BACKEND_URL+"/auth/reset-password",
     LOGOUT_API:BACKEND_URL+"/auth/logout",
+    REACTIVATE_ACCOUNT_SEND_OTP_API:BACKEND_URL+"/users/reactivate",
+    REACTIVATE_ACCOUNT_VERIFY_API:BACKEND_URL+"/users/reactivate/verify",
+    GITHUB_AUTH_API:BACKEND_URL+"/auth/github?code=",
 }
 
 export const contactUsEndpoints={
@@ -44,6 +48,7 @@ export const courseEndpoints={
     GET_TOP_COURSES_BY_CATEGORY_API:BACKEND_URL+"/courses/get-top/:categoryId",
 
     COURSE_DETAILS_API:BACKEND_URL+"/courses/getdetails",
+    INSTRUCTOR_COURSE_DETAILS_API:BACKEND_URL+"/courses/getinstructorcourse/:courseId",
     
     COURSE_CATEGORIES_API:BACKEND_URL+"/categories/getall",
     DELETE_COURSE_API:BACKEND_URL+"/courses/delete/:courseId",
@@ -127,15 +132,9 @@ export const contactusEndpoint={
     CONTACT_US_API:BACKEND_URL+"/reach/contact",
 }
 
-export const settingsEndPoints2={
-    UPDATE_DISPLAY_PICTURE_API:BACKEND_URL+"/profile/updateDisplayPicture",
-    UPDATE_PROFILE_API:BACKEND_URL+"/users/updateProfile",
-    CHANGE_PASSWORD_API:BACKEND_URL+"/auth/changepassword",
-    DELETE_PROFILE_API:BACKEND_URL+"/profile/deletedProfile"
-}
 export const settingsEndPoints = {
   UPDATE_DISPLAY_PICTURE_API: BACKEND_URL + "/users/changeprofilephoto",
   UPDATE_PROFILE_API: BACKEND_URL + "/users/updateProfile",
   CHANGE_PASSWORD_API: BACKEND_URL + "/profile/changepassword",
-  DELETE_PROFILE_API: BACKEND_URL + "/profile/deleteprofile",
+  DELETE_PROFILE_API: BACKEND_URL + "/profile/deleteaccount",
 };

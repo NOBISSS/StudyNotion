@@ -23,15 +23,16 @@ import {
 } from "../../shared/utils/otp.service.js";
 import { Profile } from "../user/ProfileModel.js";
 import User from "../user/UserModel.js";
+import Wishlist from "../wishlist/wishlistModel.js";
+import { comparePasswords } from "./auth.utils.js";
 import {
-  forgetInputSchema,
+  forgetOTPVerificationSchema,
+  forgetPasswordResetSchema,
   signinInputSchema,
   signupInputSchema,
 } from "./authValidation.js";
-import Wishlist from "../wishlist/wishlistModel.js";
-import { comparePasswords } from "./auth.utils.js";
 
-export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
+export const signupWithOTP: Handler = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
   if (!userInput.success) {
     throw AppError.badRequest(
@@ -41,10 +42,20 @@ export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
   const { email, password, firstName, lastName, accountType } = userInput.data;
   const lowerCaseEmail = email.toLowerCase();
   const userExists = await User.findOne({ email: lowerCaseEmail });
-  if (userExists) {
+  if (userExists && !userExists.isDeleted) {
     throw AppError.conflict("User already exists with this username or email");
   }
-
+  if (userExists && userExists.isDeleted) {
+    ApiResponse.error(
+      res,
+      {
+        code: "ACCOUNT_DELETED", // frontend keys off this
+        message: "This email belongs to a deleted account.",
+      },
+      "Account deleted",
+    );
+    throw AppError.conflict("Email already in use");
+  }
   const otp = generateOTP();
   await saveOTP({
     email: lowerCaseEmail,
@@ -73,10 +84,8 @@ export const signupWithOTP:Handler = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const resendOTP:Handler = asyncHandler(async (req, res) => {
-  if (
-    !JSON.parse(req.cookies.otp_data)
-  ) {
+export const resendOTP: Handler = asyncHandler(async (req, res) => {
+  if (!JSON.parse(req.cookies.otp_data)) {
     throw AppError.badRequest("Invalid Request");
   }
   const { email } = JSON.parse(req.cookies.otp_data);
@@ -123,7 +132,7 @@ export const resendOTP:Handler = asyncHandler(async (req, res) => {
     ],
   );
 });
-export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
+export const signupOTPVerification: Handler = asyncHandler(async (req, res) => {
   if (!JSON.parse(req.cookies.otp_data)) {
     throw AppError.badRequest("Invalid Request");
   }
@@ -145,7 +154,6 @@ export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
   if (!otpData || otpData.otpType !== "registration" || type !== "signup") {
     throw AppError.forbidden("Invalid or Expired OTP");
   }
-
   const user = await User.create({
     email,
     password: otpData.password as string,
@@ -153,8 +161,13 @@ export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
     lastName: otpData.lastName as string,
     accountType: otpData.accountType as "admin" | "instructor" | "student",
   });
-  const profile = await Profile.create({ userId: user._id });
+
+  const profile = await Profile.create({
+    userId: user._id,
+    profilePicture: `http://api.dicebear.com/5.x/initials/svg?seed=${user.firstName} ${user.lastName}`,
+  });
   const wishlist = await Wishlist.create({ userId: user._id });
+
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   await user.updateOne({ refreshToken });
   return ApiResponse.created(
@@ -164,6 +177,7 @@ export const signupOTPVerification:Handler = asyncHandler(async (req, res) => {
         ...user.toObject(),
         refreshToken: undefined,
         password: undefined,
+        additionalDetails: profile,
       },
       accessToken,
       refreshToken,
@@ -191,7 +205,7 @@ export const signin = asyncHandler(async (req, res) => {
     );
   }
   const { email, password } = userInput.data;
-  const user = await User.findOne({ email});
+  const user = await User.findOne({ email });
   if (!user) {
     throw AppError.notFound("User not found with this email");
   }
@@ -318,13 +332,13 @@ export const forgetWithOTP = asyncHandler(async (req, res) => {
   );
 });
 export const forgetOTPVerification = asyncHandler(async (req, res) => {
-  const parsedInput = forgetInputSchema.safeParse(req.body);
+  const parsedInput = forgetOTPVerificationSchema.safeParse(req.body);
   if (!parsedInput.success) {
     throw AppError.badRequest(
       parsedInput.error?.issues[0]?.message || "OTP/Password is required",
     );
   }
-  const { otp, password } = parsedInput.data;
+  const { otp} = parsedInput.data;
   const { email } = JSON.parse(req.cookies.otp_data);
   const lowerCaseEmail = email.toLowerCase();
   const otpData = await verifyOTP({
@@ -337,6 +351,25 @@ export const forgetOTPVerification = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid OTP");
   }
 
+  return ApiResponse.success(
+    res,
+    {},
+    "OTP verified successfully",
+  );
+});
+export const forgetOTPPasswordReset = asyncHandler(async (req, res) => {
+  const parsedInput = forgetPasswordResetSchema.safeParse(req.body);
+  if (!parsedInput.success) {
+    throw AppError.badRequest(
+      parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+    );
+  }
+  const { password } = parsedInput.data;
+  const { email, type } = JSON.parse(req.cookies.otp_data);
+  const lowerCaseEmail = email.toLowerCase();
+  if(!email || type !== "forgot") {
+    throw AppError.badRequest("Invalid Request");
+  }
   await User.updateOne(
     { email: lowerCaseEmail },
     {
@@ -358,18 +391,12 @@ export const googleSignin = asyncHandler(async (req, res) => {
   const userRes = await axios.get(
     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleResponse.tokens.access_token}`,
   );
-  
-  let user = await User.findOne({ email: userRes.data.email, isDeleted: false });
+
+  let user = await User.findOne({
+    email: userRes.data.email,
+    isDeleted: false,
+  });
   if (!user) {
-//     data: {
-//     id: '100612055580398392690',
-//     email: 'mansuriarafat302@gmail.com',
-//     verified_email: true,
-//     name: 'Arafat Mansuri',
-//     given_name: 'Arafat',
-//     family_name: 'Mansuri',
-//     picture: 'https://lh3.googleusercontent.com/a/ACg8ocJrM6TzMclHa2mnjSgqcxvMpGVyYCKQ9_UUxJruMNLmiUVZcI3k=s96-c'
-//   }
     user = await User.create({
       firstName: userRes.data.name.split(" ")[0],
       lastName: userRes.data.name.split(" ").slice(1).join(" "),
@@ -377,12 +404,93 @@ export const googleSignin = asyncHandler(async (req, res) => {
       method: "google",
     });
   }
-  let userProfile = await Profile.findOneAndUpdate({ userId: user._id }, { profilePicture: userRes.data.picture }, { new: true });
+  let userProfile = await Profile.findOneAndUpdate(
+    { userId: user._id },
+    { profilePicture: userRes.data.picture },
+    { new: true },
+  );
   if (!userProfile) {
-    userProfile = await Profile.create({ userId: user._id, profilePicture: userRes.data.picture });
+    userProfile = await Profile.create({
+      userId: user._id,
+      profilePicture: userRes.data.picture,
+    });
   }
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   return ApiResponse.success(
+    res,
+    {
+      user: {
+        ...user.toObject(),
+        refreshToken: undefined,
+        password: undefined,
+        additionalDetails: userProfile,
+      },
+      accessToken,
+      refreshToken,
+    },
+    "Signin successful",
+    StatusCode.Success,
+    [
+      {
+        name: "accessToken",
+        value: accessToken,
+        options: accessTokenCookieOptions,
+      },
+      {
+        name: "refreshToken",
+        value: refreshToken,
+        options: refreshTokenCookieOptions,
+      },
+    ],
+  );
+});
+export const githubSignin = asyncHandler(async (req, res) => {
+  const code = req.query.code;
+  const response = await axios.get("https://github.com/login/oauth/access_token", {
+    params: {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code: code,
+      redirect_uri: process.env.GITHUB_REDIRECT_URI,
+    },
+    headers: {
+      Accept: "application/json",
+      "Accept-Encoding": "application/json",
+    },
+  });
+
+  const access_token = response.data.access_token;
+
+  const userRes = await axios.get("https://api.github.com/user", {
+    headers: {
+      Authorization: `token ${access_token}`,
+    },
+  });
+  let user = await User.findOneAndUpdate({
+    email: userRes.data.email,
+    isDeleted: false,
+  }, { method: "github" }, { new: true });
+  if (!user) {
+    user = await User.create({
+      firstName: userRes.data.name.split(" ")[0],
+      lastName: userRes.data.name.split(" ").slice(1).join(" "),
+      email: userRes.data.email,
+      method: "github",
+    });
+  }
+  let userProfile = await Profile.findOneAndUpdate(
+    { userId: user._id },
+    { profilePicture: userRes.data.avatar_url },
+    { new: true },
+  );
+  if (!userProfile) {
+    userProfile = await Profile.create({
+      userId: user._id,
+      profilePicture: userRes.data.avatar_url,
+    });
+  }
+  const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+  ApiResponse.success(
     res,
     {
       user: {

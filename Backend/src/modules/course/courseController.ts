@@ -68,6 +68,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     level,
     tag,
     whatYouWillLearn,
+    instructions,
   } = parsedCourseData.data;
   let typeOfCourse = "Paid";
   if (price === "0") {
@@ -87,6 +88,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     thumbnailUrl: thumbnailImage.secure_url,
     slug: `${instructor?.firstName} ${instructor?.lastName}/${courseName}`,
     whatYouWillLearn: [whatYouWillLearn || ""],
+    instructions: instructions || [],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
@@ -101,7 +103,6 @@ export const createCourse = asyncHandler(async (req, res) => {
   await embeddingQueue.add(
     "embed-course",
     { course: course.toObject() },
-    { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
   );
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
@@ -133,6 +134,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     tag,
     thumbnailImage: thumbnailUrl,
     whatYouWillLearn,
+    instructions,
   } = parsedCourseData.data;
   if (!thumbnailUrl) {
     throw AppError.badRequest("Thumbnail URL is required for course creation");
@@ -159,6 +161,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
     whatYouWillLearn: [whatYouWillLearn || ""],
+    instructions: instructions || [],
   });
   await Category.findByIdAndUpdate(categoryId, {
     $push: { courses: course._id },
@@ -441,6 +444,35 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
       enrollmentsCount,
       reviews,
       isUserEnrolled,
+    },
+    "Course details retrieved successfully",
+  );
+});
+export const getInstructorCourseDetails: Handler = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { userId } = req;
+  if(!userId)
+    throw AppError.unauthorized("User ID is required to get course details");
+  if (!courseId || !Types.ObjectId.isValid(courseId)) {
+    throw AppError.badRequest("Invalid course ID");
+  }
+
+  const courseObjectId = new Types.ObjectId(courseId);
+
+  const course = await Course.findOne({
+    _id: courseObjectId,
+    isActive: true,
+    instructorId: userId,
+  }).populate("categoryId", "name");
+
+  if (!course) {
+    throw AppError.notFound("Course not found");
+  }
+
+  ApiResponse.success(
+    res,
+    {
+      course,
     },
     "Course details retrieved successfully",
   );

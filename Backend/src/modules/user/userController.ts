@@ -9,10 +9,15 @@ import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../../shared/utils/cloudinaryUpload.js";
-import { signupInputSchema } from "../auth/authValidation.js";
+import { forgetOTPVerificationSchema, signupInputSchema } from "../auth/authValidation.js";
 import { Profile } from "./ProfileModel.js";
 import User from "./UserModel.js";
 import { updateProfileSchema } from "./userValidation.js";
+import { generateOTP, saveOTP, verifyOTP } from "../../shared/utils/otp.service.js";
+import { OTPDatacookieOptions } from "../../shared/constants.js";
+import { emailQueue } from "../../shared/queue/emailQueue.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
+import { Course } from "../course/CourseModel.js";
 
 export const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -29,7 +34,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       {
         $set: {
           firstName: firstName,
-          lastName: lastName ,
+          lastName: lastName,
         },
       },
       { new: true },
@@ -64,19 +69,23 @@ export const updateProfile = asyncHandler(async (req, res) => {
     }
     return ApiResponse.success(
       res,
-      { user: {
-        ...updatedUser.toObject(),
-        additionalDetails: updatedProfile.toObject(),
-        password: undefined,
-        refreshToken: undefined,
-      } },
+      {
+        user: {
+          ...updatedUser.toObject(),
+          additionalDetails: updatedProfile.toObject(),
+          password: undefined,
+          refreshToken: undefined,
+        },
+      },
       "Profile updated successfully",
     );
   } catch (error) {
     if ((error as any)?.code === 11000)
       throw AppError.conflict("Username already taken");
     else
-      throw AppError.internal("Something went wrong while updating the profile");
+      throw AppError.internal(
+        "Something went wrong while updating the profile",
+      );
   }
 });
 export const banUser = asyncHandler(async (req, res) => {
@@ -118,12 +127,18 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
     if (avatar) await deleteFromCloudinary(avatar.public_id);
     throw AppError.notFound("Profile not found");
   }
-  ApiResponse.success(res, { user:{
-    ...user.toObject(),
-    additionalDetails: profile.toObject(),
-    password: undefined,
-    refreshToken: undefined,
-  } }, "Profile picture updated successfully");
+  ApiResponse.success(
+    res,
+    {
+      user: {
+        ...user.toObject(),
+        additionalDetails: profile.toObject(),
+        password: undefined,
+        refreshToken: undefined,
+      },
+    },
+    "Profile picture updated successfully",
+  );
 });
 export const createUser = asyncHandler(async (req, res) => {
   const userInput = signupInputSchema.safeParse(req.body);
@@ -162,3 +177,109 @@ export const getStudents = asyncHandler(async (req, res) => {
   );
   ApiResponse.success(res, { users }, "Students fetched successfully");
 });
+export const reactivateAccount = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw AppError.badRequest("Email is required");
+  }
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+  });
+  if (!user) {
+    throw AppError.notFound("User not found with this email");
+  }
+  if (!user.isDeleted) {
+    throw AppError.badRequest("This account is not deactivated");
+  }
+  const otp = generateOTP();
+  await saveOTP({
+    email,
+    otp,
+    data: {
+      otpType: "recovery",
+    },
+  });
+
+  await emailQueue.add("send-otp", { email, otp });
+  return ApiResponse.success<{ email: string }>(
+    res,
+    { email },
+    "OTP sent successfully",
+    StatusCode.Success,
+    [
+      {
+        name: "otp_data",
+        value: JSON.stringify({ email, type: "recovery" }),
+        options: OTPDatacookieOptions,
+      },
+    ],
+  );
+});
+export const reactivateAccountOTPVerification = asyncHandler(
+  async (req, res) => {
+    const parsedInput = forgetOTPVerificationSchema.safeParse(req.body);
+    if (!parsedInput.success) {
+      throw AppError.badRequest(
+        parsedInput.error?.issues[0]?.message || "OTP/Password is required",
+      );
+    }
+    const { otp } = parsedInput.data;
+    const { email, type } = JSON.parse(req.cookies.otp_data);
+    if (!email || type !== "recovery") {
+      throw AppError.badRequest("Invalid Request");
+    }
+    const lowerCaseEmail = email.toLowerCase();
+    const otpData = await verifyOTP({
+      email: lowerCaseEmail,
+      userOtp: otp.toString(),
+      otpType: "recovery",
+    });
+
+    if (!otpData || otpData.otpType !== "recovery") {
+      throw AppError.badRequest("Invalid OTP");
+    }
+
+    const user = await User.findOne({ email: lowerCaseEmail, isDeleted: true });
+    if (!user) {
+      throw AppError.notFound("User not found with this email");
+    }
+
+    user.isDeleted = false;
+    user.deletedAt = null;
+    await user.save();
+    await CourseEnrollment.updateMany(
+      { userId: user._id },
+      { $set: { isActive: true } },
+    );
+    await Profile.findOneAndUpdate(
+      { userId: user._id },
+      { $set: { isDeleted: false } },
+    );
+    const isInstructor = user.accountType === "instructor";
+
+  if (isInstructor) {
+    // 1. Reclaim orphaned published courses
+    const orphanedCourses = await Course.updateMany(
+      { instructorId: user._id, isOrphaned: true },
+      {
+        $set: {
+          isOrphaned: false,
+          instructorName: `${user.firstName} ${user.lastName}`,
+        }
+      }
+    );
+
+    // 2. Restore soft deleted draft courses
+    await Course.updateMany(
+      { instructorId: user._id, status: "Removed" },
+      { $set: { status: "Draft", isActive: true } }
+    );
+  }
+    return ApiResponse.success(
+      res,
+      {},
+      "Account reactivated successfully",
+      StatusCode.Success,
+    );
+  },
+);

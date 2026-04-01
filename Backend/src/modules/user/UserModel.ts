@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose, { Schema, type HydratedDocument, type InferSchemaType } from "mongoose";
 
-export const userSchema = new Schema(
+export const UserSchema = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
@@ -18,15 +18,16 @@ export const userSchema = new Schema(
     method: {
       type: String,
       enum: {
-        values: ["local", "google"],
+        values: ["local", "google","github"],
         message: "{VALUE} is not supported",
       },
       default: "local",
     },
-    email: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, trim: true },
     refreshToken: { type: String },
     isBanned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
   },
   {
     methods: {
@@ -56,9 +57,18 @@ export const userSchema = new Schema(
   }
 );
 
-export type IUser = InferSchemaType<typeof userSchema>;
+UserSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { isDeleted: false },
+  }
+);
+
+
+export type IUser = InferSchemaType<typeof UserSchema>;
 export type UserDocument = HydratedDocument<IUser>;
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", UserSchema);
 
 export default User;

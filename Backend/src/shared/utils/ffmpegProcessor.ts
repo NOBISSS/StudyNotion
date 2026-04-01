@@ -1,5 +1,6 @@
 // backend/ffmpegProcessor.js
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import dotenv from "dotenv";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -8,6 +9,7 @@ import path from "path";
 import { s3 } from "../config/s3Config.js";
 dotenv.config();
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 const BUCKET = process.env.AWS_BUCKET_NAME;
 

@@ -39,6 +39,22 @@ export class ApiResponse {
   ): Response {
     return ApiResponse.success(res, data, message, 201, cookies);
   }
+  static processing<T>(
+    res: Response,
+    data: T,
+    message = "Processing",
+    cookies?: CookieType[],
+  ): Response {
+    return ApiResponse.success(res, data, message, 202, cookies);
+  }
+  static error<T>(
+    res: Response,
+    data: T,
+    message = "Error",
+    cookies?: CookieType[],
+  ): Response {
+    return ApiResponse.success(res, data, message, 403, cookies);
+  }
 
   static paginated<T>(
     res: Response,
