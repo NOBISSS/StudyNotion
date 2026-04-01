@@ -108,6 +108,11 @@ export const createCourse = asyncHandler(async (req, res) => {
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const parsedCourseData = courseInputSchema.safeParse(req.body);
+  const {scheduledPublishAt}=parsedCourseData.data;
+
+  const publishAt=scheduledPublishAt ? new Date(scheduledPublishAt) : null;
+
+
   if (!parsedCourseData.success) {
     throw AppError.badRequest(
       parsedCourseData.error.issues[0]?.message || "Invalid course data",
@@ -172,6 +177,26 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   //   order: 1,
   //   subSectionIds: [],
   // });
+  let job=null;
+
+  if(publishAt){
+    job=await schedulePublish(
+      {
+        courseId:course._id.toString(),
+        instructorId:instructorId.toString(),
+        courseName:course.courseName,
+        scheduledAt:new Date().toISOString(),
+      },
+      publishAt
+    );
+
+    course.scheduledPublishAt=publishAt;
+    course.isScheduled=true;
+    course.scheduledJobId=job.id;
+
+    await course.save();
+  }
+
   ApiResponse.created(res, { course }, "Course created successfully");
   await embeddingQueue.add(
     "embed-course",

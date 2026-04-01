@@ -1,80 +1,83 @@
-//Flow:
-//      1.Flip course status->Published
-//      2.Fetch all Students who wishlisted this course
-//      3.Enqueue one email per student(Resuing emailQueue)
+import { Worker } from "bullmq";
+import redis from "../config/redis.js";
 
-import { email } from "zod";
 import { Course } from "../../modules/course/CourseModel.js";
 import User from "../../modules/user/UserModel.js";
 import Wishlist from "../../modules/wishlist/wishlistModel.js";
+
 import { emailQueue } from "../queue/emailQueue.js";
-import { scheduleQueue,type SchedulePublishPayload } from "../queue/scheduleQueue.js";
 import { coursePublishedTemplate } from "../templates/coursePublishedTemplate.js";
-import type {Job} from "bull"
+import mongoose from "mongoose";
 
+//await mongoose.connect("mongodb+srv://parthchauhan220:oyjK42JFXL9ky0rw@clusterone.earhqof.mongodb.net/StudyNotion");
+//console.log("✅ Worker DB connected");
 
-// Flow- (1)
-scheduleQueue.process(async (job:Job<SchedulePublishPayload>)=>{
-    const {courseId,courseName}=job.data
+new Worker(
+  "publish-course",
+  async (job) => {
+    console.log(" ✅JOB RECEIVED :",job.data);
+    const { courseId, courseName } = job.data;
 
-    //publish course
-    const course=await Course.findByIdAndUpdate(
-        courseId,
-        {
-            status:"Published",
-            isScheduled:false,
-            scheduledPublishAt:null,
-            scheduledJobId:null
-        },
-        {new:true}
-    )
+    // 1️ Publish course
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        status: "Published",
+        isScheduled: false,
+        scheduledPublishAt: null,
+        scheduledJobId: null,
+      },
+      { new: true }
+    );
 
-    if(!course){
-        console.warn(`[scheduledWorker] Course $[courseId] not found. Skipping`)
-        return 
+    if (!course) {
+      console.warn(`[scheduleWorker] Course ${courseId} not found`);
+      return;
     }
 
-    //Flow (2)
-    const wishlists=await Wishlist.find({courseIds:courseId,status:"active"}).select("userId").lean()
+    // 2️ Get wishlisted users
+    const wishlists = await Wishlist.find({
+      courseIds: courseId,
+      status: "active",
+    })
+      .select("userId")
+      .lean();
 
-    if(wishlists.length===0) return
+    if (wishlists.length === 0) return;
 
-    const userIds=wishlists.map((w)=>w.userId)
-    const users=await User.find({_id:{$in:userIds}}).select("email firstName").lean()
+    const userIds = wishlists.map((w) => w.userId);
 
-    //Flow - (3) 
-    // //email Enquee
-    const emailJobs=users.map((user)=>
-        emailQueue.add({
-            to:user.email,
-            subject:`"${courseName}" is now live on StudyNotion!`,
-            html:coursePublishedTemplate({
-                firstName:user.firstName,
-                courseName,
-                courseUrl:`${process.env.FRONTEND_URL}/courses/${courseId}`,
-                thumbnailUrl:course.thumbnailUrl,
+    const users = await User.find({ _id: { $in: userIds } })
+      .select("email firstName")
+      .lean();
+
+    //  Send emails (batched)
+    const chunkSize = 100;
+
+    for (let i = 0; i < users.length; i += chunkSize) {
+      const chunk = users.slice(i, i + chunkSize);
+
+      await Promise.all(
+        chunk.map((user) =>
+          emailQueue.add("publish-course", {
+            to: user.email,
+            subject: `"${courseName}" is now live on StudyNotion!`,
+            html: coursePublishedTemplate({
+              firstName: user.firstName,
+              courseName,
+              courseUrl: `${process.env.FRONTEND_URL || "FRONTEND URL"}/courses/${courseId}`,
+              thumbnailUrl: course.thumbnailUrl,
             }),
-        })
-    )
+          })
+        )
+      );
+    }
 
-
-    await Promise.allSettled(emailJobs)
-
-    console.log(`[scheduleWorker] Published course "${courseName}" (${courseId})` + `Notified ${users.length} wishlisted students`)
-
-})
-
-//error handlers
-scheduleQueue.on("failed",(job,err)=>{
-    console.error(
-        `[scheduleWorker] Job ${job.id} failed for course ${job.data.courseId}`,err.message
-    )
-})
-
-scheduleQueue.on("completed",(job)=>{
     console.log(
-        `[scheduleWorker Job ${job.id} completed -- course ${job.data.courseId} published]`
-    )
-})
-
-
+      `[scheduleWorker] Published "${courseName}" (${courseId}) & notified ${users.length} users`
+    );
+  },
+  {
+    connection: redis,
+  }
+);
