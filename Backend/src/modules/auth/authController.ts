@@ -397,15 +397,6 @@ export const googleSignin = asyncHandler(async (req, res) => {
     isDeleted: false,
   });
   if (!user) {
-    //     data: {
-    //     id: '100612055580398392690',
-    //     email: 'mansuriarafat302@gmail.com',
-    //     verified_email: true,
-    //     name: 'Arafat Mansuri',
-    //     given_name: 'Arafat',
-    //     family_name: 'Mansuri',
-    //     picture: 'https://lh3.googleusercontent.com/a/ACg8ocJrM6TzMclHa2mnjSgqcxvMpGVyYCKQ9_UUxJruMNLmiUVZcI3k=s96-c'
-    //   }
     user = await User.create({
       firstName: userRes.data.name.split(" ")[0],
       lastName: userRes.data.name.split(" ").slice(1).join(" "),
@@ -426,6 +417,80 @@ export const googleSignin = asyncHandler(async (req, res) => {
   }
   const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
   return ApiResponse.success(
+    res,
+    {
+      user: {
+        ...user.toObject(),
+        refreshToken: undefined,
+        password: undefined,
+        additionalDetails: userProfile,
+      },
+      accessToken,
+      refreshToken,
+    },
+    "Signin successful",
+    StatusCode.Success,
+    [
+      {
+        name: "accessToken",
+        value: accessToken,
+        options: accessTokenCookieOptions,
+      },
+      {
+        name: "refreshToken",
+        value: refreshToken,
+        options: refreshTokenCookieOptions,
+      },
+    ],
+  );
+});
+export const githubSignin = asyncHandler(async (req, res) => {
+  const code = req.query.code;
+  const response = await axios.get("https://github.com/login/oauth/access_token", {
+    params: {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code: code,
+      redirect_uri: process.env.GITHUB_REDIRECT_URI,
+    },
+    headers: {
+      Accept: "application/json",
+      "Accept-Encoding": "application/json",
+    },
+  });
+
+  const access_token = response.data.access_token;
+
+  const userRes = await axios.get("https://api.github.com/user", {
+    headers: {
+      Authorization: `token ${access_token}`,
+    },
+  });
+  let user = await User.findOneAndUpdate({
+    email: userRes.data.email,
+    isDeleted: false,
+  }, { method: "github" }, { new: true });
+  if (!user) {
+    user = await User.create({
+      firstName: userRes.data.name.split(" ")[0],
+      lastName: userRes.data.name.split(" ").slice(1).join(" "),
+      email: userRes.data.email,
+      method: "github",
+    });
+  }
+  let userProfile = await Profile.findOneAndUpdate(
+    { userId: user._id },
+    { profilePicture: userRes.data.avatar_url },
+    { new: true },
+  );
+  if (!userProfile) {
+    userProfile = await Profile.create({
+      userId: user._id,
+      profilePicture: userRes.data.avatar_url,
+    });
+  }
+  const { accessToken, refreshToken } = user.generateAccessAndRefreshToken();
+  ApiResponse.success(
     res,
     {
       user: {

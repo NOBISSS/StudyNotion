@@ -3,6 +3,8 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import { logout } from '../../../services/operations/authAPI'
+import { BACKEND_URL } from '../../../utils/constants'
+import axios from 'axios'
 
 // ─── Menu items ───────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
@@ -91,7 +93,8 @@ const ProfileDropDown = () => {
     ? [...INSTRUCTOR_ITEMS, ...MENU_ITEMS.filter(m => m.label === 'Settings')]
     : MENU_ITEMS
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await axios.post(`${BACKEND_URL}/auth/logout`, {},{withCredentials:true});
     dispatch(logout(navigate))
   }
 

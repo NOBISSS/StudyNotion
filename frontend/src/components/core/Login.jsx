@@ -1,15 +1,16 @@
 // components/core/Login.jsx
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEye } from "react-icons/io5";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import Lines from "../../assets/Lines2.png";
-import Image from "../../assets/LoginGirlImage.webp";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { login } from "../../services/operations/authAPI";
 import GoogleLoginButton from "../../utils/GoogleLogin";
 import { HighlightText } from "./HomePage/HighlightText";
+import { endPoints } from "../../services/apis";
+
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,19 @@ export const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(login(email, password, navigate));
+  };
+  const handleGithubLogin = () => {
+    // create a CSRF token and store it locally
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const randomHex = Array.from(array)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    localStorage.setItem("latestCSRFToken", randomHex);
+
+    // redirect the user to github
+    const link = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&response_type=code&scop=read:user&redirect_uri=${import.meta.env.VITE_FRONTEND_URL}&state=${randomHex}`;
+    window.location.assign(link);
   };
 
   return (
@@ -51,6 +65,7 @@ export const Login = () => {
             {/* GitHub */}
             <button
               type="button"
+              onClick={handleGithubLogin}
               className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-[#2C333F] bg-[#161D29] py-2.5 text-sm font-medium text-[#AFB2BF] transition-all hover:border-[#FFD60A] hover:text-white"
             >
               <svg

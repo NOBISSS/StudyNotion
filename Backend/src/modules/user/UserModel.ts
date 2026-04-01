@@ -18,7 +18,7 @@ export const UserSchema = new Schema(
     method: {
       type: String,
       enum: {
-        values: ["local", "google"],
+        values: ["local", "google","github"],
         message: "{VALUE} is not supported",
       },
       default: "local",

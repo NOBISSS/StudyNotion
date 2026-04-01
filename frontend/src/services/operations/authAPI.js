@@ -1,18 +1,17 @@
 import toast from "react-hot-toast";
-import { apiConnector } from "../apiconnector";
 import {
   setLoading,
   setOTPVerified,
   setSignUpData,
   setToken,
 } from "../../slices/authSlice";
+import { apiConnector } from "../apiconnector";
 //import {resetCart} from '../../slices/cartSlice';
-import { setProfilePicture, setUser } from "../../slices/profileSlice";
-import { endPoints, settingsEndPoints } from "../apis";
-import { updateUserState } from "../../utils/updateUserState";
 import axios from "axios";
-import { BACKEND_URL } from "../../utils/constants";
 import { resetCart } from "../../slices/cartSlice";
+import { setProfilePicture, setUser } from "../../slices/profileSlice";
+import { BACKEND_URL } from "../../utils/constants";
+import { endPoints, settingsEndPoints } from "../apis";
 
 const {
   SENDOTP_API,
@@ -387,9 +386,13 @@ export function reactivateAccountSendOTP(email, setEmailSent, navigate) {
   return async (dispatch) => {
     dispatch(setLoading(true));
     try {
-      const response = await apiConnector("POST", REACTIVATE_ACCOUNT_SEND_OTP_API, {
-        email,
-      });
+      const response = await apiConnector(
+        "POST",
+        REACTIVATE_ACCOUNT_SEND_OTP_API,
+        {
+          email,
+        },
+      );
       if (!response.response.data.success) {
         throw new Error(response.response.data.message);
       }
@@ -398,7 +401,10 @@ export function reactivateAccountSendOTP(email, setEmailSent, navigate) {
       dispatch(setSignUpData({ email, otpPurpose: "reactivate" }));
       navigate("/reactivate-account/verify", { state: { email } });
     } catch (error) {
-      toast.error( error.response.data.message ||"Failed to send email for reactivating account");
+      toast.error(
+        error.response.data.message ||
+          "Failed to send email for reactivating account",
+      );
     }
     dispatch(setLoading(false));
   };
@@ -407,9 +413,13 @@ export function reactivateAccountOTPVerification(otp, navigate) {
   return async (dispatch) => {
     dispatch(setLoading(true));
     try {
-      const response = await apiConnector("POST", REACTIVATE_ACCOUNT_VERIFY_API, {
-        otp: Number(otp),
-      });
+      const response = await apiConnector(
+        "POST",
+        REACTIVATE_ACCOUNT_VERIFY_API,
+        {
+          otp: Number(otp),
+        },
+      );
 
       if (!response.data.success) {
         throw new Error(response.data.message);

@@ -14,6 +14,7 @@ export const endPoints={
     LOGOUT_API:BACKEND_URL+"/auth/logout",
     REACTIVATE_ACCOUNT_SEND_OTP_API:BACKEND_URL+"/users/reactivate",
     REACTIVATE_ACCOUNT_VERIFY_API:BACKEND_URL+"/users/reactivate/verify",
+    GITHUB_AUTH_API:BACKEND_URL+"/auth/github?code=",
 }
 
 export const contactUsEndpoints={

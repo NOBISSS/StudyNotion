@@ -26,6 +26,7 @@ const Login             = lazy(() => import('../core/Login').then(m => ({ defaul
 const Signup            = lazy(() => import('../core/Signup').then(m => ({ default: m.Signup })))
 const ForgotPassword    = lazy(() => import('../../pages/ForgotPassword'))
 const ReactivateAccount = lazy(() => import('../../pages/ReactivateAccount'))
+const GithubRedirect     = lazy(() => import('../../pages/GithubRedirect'))
 const UpdatePassword    = lazy(() => import('../../pages/UpdatePassword'))
 const VerifyEmail       = lazy(() => import('../../pages/VerifyEmail'))
 const ResetPassword     = lazy(() => import('../../pages/ResetPassword'))
@@ -86,6 +87,7 @@ const AppRoutes = () => {
         <Route path="/forgotpassword/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
         <Route path="/reactivate-account"   element={<OpenRoute><ReactivateAccount /></OpenRoute>} />
         <Route path="/reactivate-account/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
+        <Route path="/auth/github"   element={<OpenRoute><GithubRedirect /></OpenRoute>} />
         <Route path="/update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>} />
         <Route path="/resetpassword"    element={<OpenRoute><ResetPassword /></OpenRoute>} />
 

@@ -5,6 +5,7 @@ import {
   forgetOTPPasswordReset,
   forgetOTPVerification,
   forgetWithOTP,
+  githubSignin,
   googleSignin,
   refreshTokens,
   resendOTP,
@@ -23,6 +24,7 @@ authRouter.route("/forgotpassword/reset").post(forgetOTPPasswordReset);
 authRouter.route("/resendotp").post(resendOTP);
 authRouter.route("/login").post(signin);
 authRouter.route("/google").get(googleSignin);
+authRouter.route("/github").get(githubSignin);
 authRouter.route("/refreshtoken").post(refreshTokens);
 
 authRouter.use(userMiddleware);
