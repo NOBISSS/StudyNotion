@@ -14,9 +14,11 @@ import {
   getCourseDetails,
   getInstructorCourseDetails,
   getInstructorCourses,
+  getScheduledCourses,
   publishCourse,
   searchCourses,
   updateCourse,
+  scheduleCoursePublish,
 } from "./courseController.js";
 
 const courseRouter = Router();
@@ -38,5 +40,7 @@ courseRouter.route("/delete/:courseId").delete(deleteCourse);
 courseRouter.route("/update/:courseId").put(upload.single("thumbnail"), updateCourse);
 courseRouter.route("/publish/:courseId").put(publishCourse);
 courseRouter.route("/draft/:courseId").put(draftCourse);
+courseRouter.route("/scheduled").get(getScheduledCourses);
+courseRouter.route("/schedule/:courseId").post(scheduleCoursePublish);
 
 export { courseRouter };
