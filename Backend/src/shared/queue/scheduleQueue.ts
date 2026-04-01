@@ -2,7 +2,7 @@
 //Jobs live in redis they survive server restarts and are never processed twice
 
 import {Queue} from "bullmq"
-import redis from "../config/redis.js"
+import { createRedisConnection } from "../config/redis.js"
 
 export interface SchedulePublishPayload{
     courseId:string
@@ -10,6 +10,8 @@ export interface SchedulePublishPayload{
     courseName:string
     scheduledAt:string
 }
+
+const redis=createRedisConnection();
 
 export const scheduleQueue=new Queue<SchedulePublishPayload>(
     "schedule-publish",
@@ -32,16 +34,19 @@ export const scheduleQueue=new Queue<SchedulePublishPayload>(
 
 //These Function Will Add a job in queue and return the job
 
-export const schedulePublish=async(
-    payload:SchedulePublishPayload,
-    publishAt:Date
-)=>{
-    const delay=publishAt.getTime()-Date.now()
-    if(delay<=0) throw new Error("scheduledPublishAt must be in the future")
+export const schedulePublish = async (
+  payload: SchedulePublishPayload,
+  publishAt: Date
+) => {
+  const delay = publishAt.getTime() - Date.now();
+  if (!delay || delay <= 0 || isNaN(delay))
+    throw new Error("scheduledPublishAt must be in the future");
 
-    const job=await scheduleQueue.add("publish-course",payload,{delay})
-    return job
-}
+  console.log(`📬 schedulePublish called, delay: ${Math.round(delay/1000)}s`, payload);
+  const job = await scheduleQueue.add("publish-course", payload, { delay });
+  console.log(`✅ Job queued with ID: ${job.id}`);
+  return job;
+};
 
 
 //These Funtion will cancel the Schedule and remove the job from the queue

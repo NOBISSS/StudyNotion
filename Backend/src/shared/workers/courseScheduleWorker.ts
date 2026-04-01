@@ -1,5 +1,6 @@
+console.log("📁 scheduleWorker FILE LOADED");
 import { Worker } from "bullmq";
-import redis from "../config/redis.js";
+import { createRedisConnection } from "../config/redis.js";
 
 import { Course } from "../../modules/course/CourseModel.js";
 import User from "../../modules/user/UserModel.js";
@@ -7,13 +8,11 @@ import Wishlist from "../../modules/wishlist/wishlistModel.js";
 
 import { emailQueue } from "../queue/emailQueue.js";
 import { coursePublishedTemplate } from "../templates/coursePublishedTemplate.js";
-import mongoose from "mongoose";
 
-//await mongoose.connect("mongodb+srv://parthchauhan220:oyjK42JFXL9ky0rw@clusterone.earhqof.mongodb.net/StudyNotion");
-//console.log("✅ Worker DB connected");
+const redis=createRedisConnection();
 
-new Worker(
-  "publish-course",
+const worker=new Worker(
+  "schedule-publish",
   async (job) => {
     console.log(" ✅JOB RECEIVED :",job.data);
     const { courseId, courseName } = job.data;
@@ -81,3 +80,18 @@ new Worker(
     connection: redis,
   }
 );
+
+worker.on("active", (job) => console.log("Job active:", job.id, job.name));
+worker.on("ready", () => console.log("🟢 Worker is ready and listening"));
+
+
+worker.on("completed", (job) => {
+  console.log(`Job ${job.id} completed`);
+});
+worker.on("failed", (job, err) => {
+  console.error(`Job ${job ? job.id : "unknown"} failed:`, err.message);
+});
+
+worker.on("error", (err) => console.error("Worker error:", err));
+
+console.log("Schedule Worker Initiated");

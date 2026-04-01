@@ -20,16 +20,31 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
-import { schedulePublish,cancelScheduledPublish, reschedulePublish } from "../../shared/queue/scheduleQueue.js";
+import { schedulePublish, cancelScheduledPublish, reschedulePublish } from "../../shared/queue/scheduleQueue.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
+  if (typeof req.body.tag === "string") {
+    req.body.tag = JSON.parse(req.body.tag);
+  }
+
+  if (typeof req.body.instructions === "string") {
+    req.body.instructions = JSON.parse(req.body.instructions);
+  }
   const parsedCourseData = courseInputSchema.safeParse(req.body);
   if (!parsedCourseData.success) {
     throw AppError.badRequest(
       parsedCourseData.error.issues[0]?.message || "Invalid course data",
     );
   }
+
+    const { scheduledPublishAt } = parsedCourseData.data;
+  const publishAt = scheduledPublishAt ? new Date(scheduledPublishAt) : null;
+
+  if(publishAt && isNaN(publishAt.getTime())){
+    throw AppError.badRequest("Invalid scheduledPublishAt Date");
+  }
+
   const thumbnail = req.file;
   if (!thumbnail) {
     throw AppError.badRequest("Thumbnail image is required");
@@ -99,19 +114,35 @@ export const createCourse = asyncHandler(async (req, res) => {
   //   order: 1,
   //   subSectionIds: [],
   // });
-  ApiResponse.created(res, { course }, "Course created successfully");
-  await embeddingQueue.add(
-    "embed-course",
-    { course: course.toObject() },
-  );
-});
+  let job = null;
+
+  if (publishAt) {
+    job = await schedulePublish(
+      {
+        courseId: course._id.toString(),
+        instructorId: instructorId.toString(),
+        courseName: course.courseName,
+        scheduledAt: new Date().toISOString(),
+      },
+      publishAt
+    );
+
+    course.scheduledPublishAt = publishAt;
+    course.isScheduled = true;
+    course.scheduledJobId = job.id;
+
+    await course.save();
+  }
+    ApiResponse.created(res, { course }, "Course created successfully");
+    await embeddingQueue.add(
+      "embed-course",
+      { course: course.toObject() },
+    );
+  });
+
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const parsedCourseData = courseInputSchema.safeParse(req.body);
-  const {scheduledPublishAt}=parsedCourseData.data;
-
-  const publishAt=scheduledPublishAt ? new Date(scheduledPublishAt) : null;
-
 
   if (!parsedCourseData.success) {
     throw AppError.badRequest(
@@ -177,32 +208,13 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   //   order: 1,
   //   subSectionIds: [],
   // });
-  let job=null;
-
-  if(publishAt){
-    job=await schedulePublish(
-      {
-        courseId:course._id.toString(),
-        instructorId:instructorId.toString(),
-        courseName:course.courseName,
-        scheduledAt:new Date().toISOString(),
-      },
-      publishAt
-    );
-
-    course.scheduledPublishAt=publishAt;
-    course.isScheduled=true;
-    course.scheduledJobId=job.id;
-
-    await course.save();
-  }
 
   ApiResponse.created(res, { course }, "Course created successfully");
-  await embeddingQueue.add(
-    "embed-course",
-    { course: course.toObject() },
-    { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
-  );
+await embeddingQueue.add(
+  "embed-course",
+  { course: course.toObject() },
+  { attempts: 3, backoff: { type: "exponential", delay: 5000 } },
+);
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
   const courses = await Course.find({ isActive: true, status: "Published" }).populate(
@@ -312,19 +324,19 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
       "Courses retrieved successfully",
     );
   });
-export const getInstructorCourses:Handler = asyncHandler(async (req, res) => {
+export const getInstructorCourses: Handler = asyncHandler(async (req, res) => {
   const instructorId = req.userId;
   if (!instructorId) {
     throw AppError.unauthorized("Instructor ID is required");
   }
-  const courses = await Course.find({ instructorId,isActive: true }).populate("categoryId", "name").sort({ createdAt: -1 });
+  const courses = await Course.find({ instructorId, isActive: true }).populate("categoryId", "name").sort({ createdAt: -1 });
   ApiResponse.success(res, { courses }, "Instructor courses retrieved successfully");
 });
 export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   const userId = req.userId;
   const course = await Course.findById(courseId);
-  if(!userId)
+  if (!userId)
     throw AppError.unauthorized("User ID is required to delete the course");
   if (!course) {
     throw AppError.notFound("Course not found");
@@ -476,7 +488,7 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
 export const getInstructorCourseDetails: Handler = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { userId } = req;
-  if(!userId)
+  if (!userId)
     throw AppError.unauthorized("User ID is required to get course details");
   if (!courseId || !Types.ObjectId.isValid(courseId)) {
     throw AppError.badRequest("Invalid course ID");
@@ -540,7 +552,7 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
         AIFilteredCourses.some(
           (filtered) => filtered.courseId.toString() === course._id.toString(),
         ),
-    ),
+      ),
 
     },
     "Search results retrieved successfully",
@@ -598,94 +610,94 @@ export const draftCourse: Handler = asyncHandler(async (req, res) => {
 });
 
 
-export const scheduleCoursePublish:Handler=asyncHandler(async (req,res)=>{
-  const {courseId}=req.params;
-  const {scheduledPublishAt}=req.body;
+export const scheduleCoursePublish: Handler = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+  const { scheduledPublishAt } = req.body;
 
-  if(!Types.ObjectId.isValid(courseId)){
+  if (!Types.ObjectId.isValid(courseId)) {
     throw AppError.badRequest("Invalid course ID")
   }
 
-  const course=await Course.findOne({_id:courseId,isActive:true})
-  if(!course) throw AppError.notFound("Course not Found")
+  const course = await Course.findOne({ _id: courseId, isActive: true })
+  if (!course) throw AppError.notFound("Course not Found")
 
-  
-  if(course.instructorId.toString() !== req.userId){
+
+  if (course.instructorId.toString() !== req.userId) {
     throw AppError.unauthorized("Not Authorized to Schedule this course")
   }
 
   //cancel existing schedule
-  if(!scheduledPublishAt){
-    if(course.scheduledJobId){
+  if (!scheduledPublishAt) {
+    if (course.scheduledJobId) {
       await cancelScheduledPublish(course.scheduledJobId)
     }
 
-    await Course.findByIdAndUpdate(courseId,{
-      isScheduled:false,
-      scheduledPublishAt:null,
-      scheduledJobId:null
+    await Course.findByIdAndUpdate(courseId, {
+      isScheduled: false,
+      scheduledPublishAt: null,
+      scheduledJobId: null
     })
 
-    return ApiResponse.success(res,{},"Scheduled publish cancelled")
+    return ApiResponse.success(res, {}, "Scheduled publish cancelled")
   }
 
   //Validate the Date
 
-  const publishAt=new Date(scheduledPublishAt)
-  if(isNaN(publishAt.getTime())){
+  const publishAt = new Date(scheduledPublishAt)
+  if (isNaN(publishAt.getTime())) {
     throw AppError.badRequest("Invalid Date Format For ScheduledPublishAt")
   }
 
-  if(publishAt <= new Date()){
+  if (publishAt <= new Date()) {
     throw AppError.badRequest("scheduledPublishAt must be a future date")
   }
 
 
   //enqueu 
-  const job=await reschedulePublish(
+  const job = await reschedulePublish(
     course.scheduledJobId ?? undefined,
     {
-      courseId:courseId,
-      instructorId:req.userId,
-      courseName:course.courseName,
-      scheduledAt:publishAt.toISOString(),
+      courseId: courseId,
+      instructorId: req.userId,
+      courseName: course.courseName,
+      scheduledAt: publishAt.toISOString(),
     },
     publishAt
   )
 
 
-  await Course.findByIdAndUpdate(courseId,{
-    isScheduled:true,
-    scheduledPublishAt:publishAt,
-    scheduledJobId:String(job.id),
-    status:"Draft",
+  await Course.findByIdAndUpdate(courseId, {
+    isScheduled: true,
+    scheduledPublishAt: publishAt,
+    scheduledJobId: String(job.id),
+    status: "Draft",
   })
 
   ApiResponse.success(
     res,
     {
-      scheduledPublishAt:publishAt,
-      jobId:job.id,
+      scheduledPublishAt: publishAt,
+      jobId: job.id,
     },
     `Course Scheduled To Publish On ${publishAt.toUTCString()}`
   )
 })
 
-export const getScheduledCourses:Handler=asyncHandler(async (req,res)=>{
-  const instructorId=req.userId
+export const getScheduledCourses: Handler = asyncHandler(async (req, res) => {
+  const instructorId = req.userId
 
-  const courses=await Course.find({
+  const courses = await Course.find({
     instructorId,
-    isScheduled:true,
-    isActive:true
+    isScheduled: true,
+    isActive: true
   })
-  .select("courseName thumbnailUrl scheduledPublishat scheduleJobId level")
-  .sort({scheduledPublishAt:1})
-  .lean()
+    .select("courseName thumbnailUrl scheduledPublishat scheduleJobId level")
+    .sort({ scheduledPublishAt: 1 })
+    .lean()
 
   ApiResponse.success(
     res,
-    {courses},
+    { courses },
     "Scheduled Courses retrived successfully"
   )
 })
