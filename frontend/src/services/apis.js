@@ -63,7 +63,7 @@ export const courseEndpoints={
     CREATE_COURSE_MULTER_API:BACKEND_URL+"/courses/create",//with MULTER For Thumbnail
     
     GET_ALL_INSTRUCTOR_COURSE_API:BACKEND_URL+"/courses/instructor/getall",
-    EDIT_COURSE_API:BACKEND_URL+"/courses/editCourse",  
+    EDIT_COURSE_API:BACKEND_URL+"/courses/update/:courseId",  
     PUT_PUBLISH_COURSE_API:BACKEND_URL+"/courses/publish/:courseId",
     PUT_DRAFT_COURSE_API:BACKEND_URL+"/courses/draft/:courseId",
 }

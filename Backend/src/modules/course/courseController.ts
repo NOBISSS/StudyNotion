@@ -5,6 +5,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { embeddingQueue } from "../../shared/queue/embeddingQueue.js";
 import type { Handler } from "../../shared/types.js";
+import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 import { uploadToCloudinary } from "../../shared/utils/cloudinaryUpload.js";
 import { vectorSearchCourses } from "../../shared/vector/searchCourses.js";
 import { Category } from "../category/CategoryModel.js";
@@ -13,13 +14,12 @@ import { RatingAndReview } from "../rating/RatingAndReview.js";
 import { Section } from "../section/SectionModel.js";
 import { SubSection } from "../subsection/SubSectionModel.js";
 import { Material } from "../subsection/material/MaterialModel.js";
+import { isValidInstructor } from "../subsection/material/materialController.js";
 import { Quiz } from "../subsection/quiz/QuizModel.js";
 import Video from "../subsection/video/VideoModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
-import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
-import { isValidInstructor } from "../subsection/material/materialController.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -98,11 +98,8 @@ export const createCourse = asyncHandler(async (req, res) => {
   //   order: 1,
   //   subSectionIds: [],
   // });
+  await embeddingQueue.add("embed-course", { course: course.toObject() });
   ApiResponse.created(res, { course }, "Course created successfully");
-  await embeddingQueue.add(
-    "embed-course",
-    { course: course.toObject() },
-  );
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -179,10 +176,10 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
   );
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
-  const courses = await Course.find({ isActive: true, status: "Published" }).populate(
-    "categoryId",
-    "name",
-  );
+  const courses = await Course.find({
+    isActive: true,
+    status: "Published",
+  }).populate("categoryId", "name");
   ApiResponse.success(
     res,
     {
@@ -194,10 +191,10 @@ export const getAllCourse = asyncHandler(async (req, res) => {
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
     const userId = req.userId;
-    const courses = await Course.find({ isActive: true, status: "Published" }).populate(
-      "categoryId",
-      "name",
-    );
+    const courses = await Course.find({
+      isActive: true,
+      status: "Published",
+    }).populate("categoryId", "name");
     const coursesWithEnrollmentCount = await Promise.all(
       courses.map(async (c) => ({
         ...c.toObject(),
@@ -286,24 +283,33 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
       "Courses retrieved successfully",
     );
   });
-export const getInstructorCourses:Handler = asyncHandler(async (req, res) => {
+export const getInstructorCourses: Handler = asyncHandler(async (req, res) => {
   const instructorId = req.userId;
   if (!instructorId) {
     throw AppError.unauthorized("Instructor ID is required");
   }
-  const courses = await Course.find({ instructorId,isActive: true }).populate("categoryId", "name").sort({ createdAt: -1 });
-  ApiResponse.success(res, { courses }, "Instructor courses retrieved successfully");
+  const courses = await Course.find({ instructorId, isActive: true })
+    .populate("categoryId", "name")
+    .sort({ createdAt: -1 });
+  ApiResponse.success(
+    res,
+    { courses },
+    "Instructor courses retrieved successfully",
+  );
 });
 export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
   const userId = req.userId;
   const course = await Course.findById(courseId);
-  if(!userId)
+  if (!userId)
     throw AppError.unauthorized("User ID is required to delete the course");
   if (!course) {
     throw AppError.notFound("Course not found");
   }
-  if (course.instructorId.toString() != userId.toString() && req.accountType !== "admin") {
+  if (
+    course.instructorId.toString() != userId.toString() &&
+    req.accountType !== "admin"
+  ) {
     throw AppError.unauthorized("You are not authorized to delete this course");
   }
   course.isActive = false;
@@ -346,9 +352,14 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
   if (courseId && !Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID");
   }
+  const userId = req.userId;
+  if (!userId)
+    throw AppError.unauthorized("User ID is required to update the course");
   const parsedCourseData = courseInputSchema.safeParse(req.body);
   if (!parsedCourseData.success) {
-    throw AppError.badRequest("Invalid course data");
+    throw AppError.badRequest(
+      parsedCourseData.error.issues[0]?.message || "Invalid course data",
+    );
   }
   const {
     courseName,
@@ -357,6 +368,9 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
     price,
     level,
     tag,
+    instructions,
+    whatYouWillLearn,
+    category: categoryId,
   } = parsedCourseData.data;
   let typeOfCourse = "Paid";
   if (price == "0") {
@@ -369,7 +383,10 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
   if (!course) {
     throw AppError.notFound("Course not found");
   }
-  if (course.instructorId !== req.userId) {
+  if (
+    course.instructorId.toString() !== userId.toString() &&
+    req.accountType !== "admin"
+  ) {
     throw AppError.unauthorized("You are not authorized to update this course");
   }
   const updatedCourse = await Course.findByIdAndUpdate(
@@ -382,6 +399,9 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
       originalPrice: price || 0,
       level,
       tag: tag || [],
+      instructions: instructions || [],
+      whatYouWillLearn: [whatYouWillLearn || ""],
+      categoryId: categoryId ? new Types.ObjectId(categoryId) : null,
     },
     { new: true, runValidators: true },
   );
@@ -447,35 +467,37 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
     "Course details retrieved successfully",
   );
 });
-export const getInstructorCourseDetails: Handler = asyncHandler(async (req, res) => {
-  const { courseId } = req.params;
-  const { userId } = req;
-  if(!userId)
-    throw AppError.unauthorized("User ID is required to get course details");
-  if (!courseId || !Types.ObjectId.isValid(courseId)) {
-    throw AppError.badRequest("Invalid course ID");
-  }
+export const getInstructorCourseDetails: Handler = asyncHandler(
+  async (req, res) => {
+    const { courseId } = req.params;
+    const { userId } = req;
+    if (!userId)
+      throw AppError.unauthorized("User ID is required to get course details");
+    if (!courseId || !Types.ObjectId.isValid(courseId)) {
+      throw AppError.badRequest("Invalid course ID");
+    }
 
-  const courseObjectId = new Types.ObjectId(courseId);
+    const courseObjectId = new Types.ObjectId(courseId);
 
-  const course = await Course.findOne({
-    _id: courseObjectId,
-    isActive: true,
-    instructorId: userId,
-  }).populate("categoryId", "name");
+    const course = await Course.findOne({
+      _id: courseObjectId,
+      isActive: true,
+      instructorId: userId,
+    }).populate("categoryId", "name");
 
-  if (!course) {
-    throw AppError.notFound("Course not found");
-  }
+    if (!course) {
+      throw AppError.notFound("Course not found");
+    }
 
-  ApiResponse.success(
-    res,
-    {
-      course,
-    },
-    "Course details retrieved successfully",
-  );
-});
+    ApiResponse.success(
+      res,
+      {
+        course,
+      },
+      "Course details retrieved successfully",
+    );
+  },
+);
 export const searchCourses: Handler = asyncHandler(async (req, res) => {
   const { query } = req.query;
   if (!query || typeof query !== "string") {
@@ -495,7 +517,8 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
       (review) => review.courseId.toString() === course._id.toString(),
     );
     const averageRating =
-      courseReviews.reduce((sum, review) => sum + review.rating, 0) / courseReviews.length || 0;
+      courseReviews.reduce((sum, review) => sum + review.rating, 0) /
+        courseReviews.length || 0;
     const vectorSearchResult = vecotorSearchResults.find(
       (result) => result.courseId.toString() === course._id.toString(),
     );
@@ -505,17 +528,21 @@ export const searchCourses: Handler = asyncHandler(async (req, res) => {
       vectorScore: vectorSearchResult ? vectorSearchResult.score : 0,
     };
   });
-  const AIFilteredCourses = await filterCoursesByAI(coursesWithRatingsAndScores, query);
+  const AIFilteredCourses = await filterCoursesByAI(
+    coursesWithRatingsAndScores,
+    query,
+  );
   ApiResponse.success(
     res,
     {
-      courses: coursesWithRatingsAndScores.sort((a, b) => b.vectorScore - a.vectorScore),
+      courses: coursesWithRatingsAndScores.sort(
+        (a, b) => b.vectorScore - a.vectorScore,
+      ),
       AIFilteredCourses: coursesWithRatingsAndScores.filter((course) =>
         AIFilteredCourses.some(
           (filtered) => filtered.courseId.toString() === course._id.toString(),
         ),
-    ),
-
+      ),
     },
     "Search results retrieved successfully",
   );
@@ -533,17 +560,19 @@ export const publishCourse: Handler = asyncHandler(async (req, res) => {
   if (!oldcourse) {
     throw AppError.notFound("Course not found");
   }
-  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  const instuctorValid = await isValidInstructor(
+    new Types.ObjectId(courseId),
+    new Types.ObjectId(userId),
+  );
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId, { status: "Published" }, { new: true });
-  ApiResponse.success(
-    res,
-    { course },
-    "Course published successfully",
+  const course = await Course.findByIdAndUpdate(
+    courseId,
+    { status: "Published" },
+    { new: true },
   );
-
+  ApiResponse.success(res, { course }, "Course published successfully");
 });
 export const draftCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
@@ -558,15 +587,17 @@ export const draftCourse: Handler = asyncHandler(async (req, res) => {
   if (!oldcourse) {
     throw AppError.notFound("Course not found");
   }
-  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  const instuctorValid = await isValidInstructor(
+    new Types.ObjectId(courseId),
+    new Types.ObjectId(userId),
+  );
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { new: true });
-  ApiResponse.success(
-    res,
-    { course },
-    "Course drafted successfully",
+  const course = await Course.findByIdAndUpdate(
+    courseId,
+    { status: "Draft" },
+    { new: true },
   );
-
+  ApiResponse.success(res, { course }, "Course drafted successfully");
 });

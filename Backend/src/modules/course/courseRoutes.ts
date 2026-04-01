@@ -35,7 +35,7 @@ courseRouter.route("/instructor/getall").get(getInstructorCourses);
 courseRouter.route("/create").post(upload.single("thumbnail"), createCourse);
 courseRouter.route("/createcourse").post(createCourseWithThumbnailURL);
 courseRouter.route("/delete/:courseId").delete(deleteCourse);
-courseRouter.route("/update/:courseId").put(updateCourse);
+courseRouter.route("/update/:courseId").put(upload.single("thumbnail"), updateCourse);
 courseRouter.route("/publish/:courseId").put(publishCourse);
 courseRouter.route("/draft/:courseId").put(draftCourse);
 

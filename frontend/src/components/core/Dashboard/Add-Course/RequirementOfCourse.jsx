@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 
-const RequirementOfCourse = ({ label, register, errors, setValue }) => {
+const RequirementOfCourse = ({ label, register, errors, setValue, requirements: initialRequirements }) => {
   const [requirement, setRequirement] = useState('')
-  const [requirements, setRequirements] = useState([])
+  const [requirements, setRequirements] = useState(initialRequirements || [])
 
   useEffect(() => {
     register('courseRequirements', {

@@ -29,11 +29,11 @@ const {
     POST_SIGNATURE_CLOUDINARY_API
 }=SignatureEndpoints;
 
-export const editCourseDetails = async (data) => {
+export const editCourseDetails = async (data,courseId) => {
   const toastId = toast.loading("Updating course...")
   let result = null
   try {
-    const response = await apiConnector("PUT", EDIT_COURSE_API, data)
+    const response = await apiConnector("PUT", EDIT_COURSE_API.replace(":courseId", courseId), data)
     if (!response?.data?.success) throw new Error("Could not update course")
     toast.success("Course updated successfully")
     result = response.data.data || response.data
