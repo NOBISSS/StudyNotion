@@ -37,7 +37,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force"
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "tests/testSchedule.ts"],
 
   // Only exclude node_modules and compiled output.
   // Removed **/*.test.ts and **/*.spec.ts exclusions — those prevented
