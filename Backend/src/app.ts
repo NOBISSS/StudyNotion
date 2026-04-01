@@ -17,6 +17,8 @@ import userRouter from "./modules/user/userRoutes.js";
 import wishlistRouter from "./modules/wishlist/wishlistRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 import announcementRouter from "./modules/announcement/announcementRoutes.js";
+import "./shared/workers/courseScheduleWorker.js";
+
 dotenv.config();
 
 const app = express();

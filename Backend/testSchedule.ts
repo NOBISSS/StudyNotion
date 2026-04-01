@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { Course } from "./src/modules/course/CourseModel.js";
 import { schedulePublish } from "./src/shared/queue/scheduleQueue.js";
 
-await mongoose.connect("mongodb+srv://parthchauhan220:oyjK42JFXL9ky0rw@clusterone.earhqof.mongodb.net/StudyNotion");
 
 // 1️⃣ Create dummy course (no file upload headache)
 const course = await Course.create({
