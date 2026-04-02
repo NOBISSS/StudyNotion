@@ -145,6 +145,9 @@ export const changeSectionOrder = asyncHandler(
 );
 export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   const { name } = req.body;
+  if (!name) {
+    throw AppError.badRequest("Section name is required");
+  }
   const sectionId = req.params.sectionId;
   const instructorId = req.userId;
   if (!sectionId) {
