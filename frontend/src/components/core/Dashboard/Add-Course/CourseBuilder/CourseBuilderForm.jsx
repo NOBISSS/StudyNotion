@@ -34,9 +34,7 @@ const CourseBuilderForm = ({ courseId }) => {
     editingName: "",
   });
   const [sections, setSections] = useState(course?.sections || []);
-  const [expandedSection, setExpandedSection] = useState(
-    course?.sections?.length > 0 ? course.sections[0]._id : null,
-  );
+  const [expandedSection, setExpandedSection] = useState(sections[0] ? [sections[0]._id] : []);
   const subsectionDetailsRef = useRef(false); // To store details of subsections when fetched, to avoid refetching
   const [subsections, setSubSections] = useState([]);
   const demoSubsection = [
@@ -48,11 +46,13 @@ const CourseBuilderForm = ({ courseId }) => {
         "This lecture covers the basics of React, including components, state, and props.",
     },
   ];
-  async function loadSections(sectionId) {
-    setExpandedSection(expandedSection === sectionId ? null : sectionId);
-    if (courseId) {
+  async function loadSections(sectionId,isExpanded) {
+    if (isExpanded) {
+      setExpandedSection(prev => [...prev,sectionId]);
       const res = await getAllSubsections(sectionId);
       setSubSections(res.subsections);
+    }else{
+      setExpandedSection(prev => prev.filter(s => s !== sectionId));
     }
   }
   useEffect(() => {
@@ -223,10 +223,10 @@ const CourseBuilderForm = ({ courseId }) => {
                   <TrashIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => loadSections(section._id)}
+                  onClick={() => loadSections(section._id, !expandedSection.includes(section._id))}
                   className="p-1.5 text-[#838894] hover:text-white transition-colors"
                 >
-                  {expandedSection === section._id ? (
+                  {expandedSection.includes(section._id) ? (
                     <ChevronUpIcon className="w-4 h-4" />
                   ) : (
                     <ChevronDownIcon className="w-4 h-4" />
@@ -236,7 +236,7 @@ const CourseBuilderForm = ({ courseId }) => {
             </div>
 
             {/* Expanded: lectures */}
-            {expandedSection === section._id && (
+            {expandedSection.includes(section._id) && (
               <div className="bg-[#161D29] flex flex-col">
                 {subsections
                   .filter((s) => s.sectionId === section._id)

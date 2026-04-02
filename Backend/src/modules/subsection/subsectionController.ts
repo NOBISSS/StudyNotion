@@ -106,22 +106,24 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
     subsectionId: new Types.ObjectId(subsectionId as string),
   });
   if (subsectionVideo) {
+    const keysToDelete = [
+      { Key: subsectionVideo.videoS3Key },
+      subsectionVideo.originalVideoS3Key != null ? {
+        Key: subsectionVideo.originalVideoS3Key
+          ? subsectionVideo.originalVideoS3Key
+          : undefined,
+      } : null,
+    ];
+
     const deleteCommand = new DeleteObjectsCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Delete: {
-        Objects: [
-          { Key: subsectionVideo.videoS3Key },
-          {
-            Key: subsectionVideo.originalVideoS3Key
-              ? subsectionVideo.originalVideoS3Key
-              : undefined,
-          },
-        ],
+        Objects: keysToDelete.filter((key) => key !== null) as { Key: string }[],
       },
     });
     await s3.send(deleteCommand);
     subsectionVideo.isActive = false;
-    await subsectionVideo.save();
+    await subsectionVideo.save({validateBeforeSave: false});
   }
   const subsectionMaterial = await Material.findOne({
     subsectionId: new Types.ObjectId(subsectionId as string),
