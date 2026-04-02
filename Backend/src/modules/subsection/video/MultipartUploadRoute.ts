@@ -20,6 +20,8 @@ multipartUploadRoute
   .route("/multipart/:uploadId/complete")
   .post(completeVideoUpload);
 multipartUploadRoute.route("/multipart/:uploadId/abort").post(abortVideoUpload);
+multipartUploadRoute.route("/multipart/:uploadId").delete(abortVideoUpload);
+multipartUploadRoute.route("/multipart/:uploadId").get(abortVideoUpload);
 multipartUploadRoute.route("/multipart/:uploadId/batch").get(videoBatchHandler);
 
 export default multipartUploadRoute;

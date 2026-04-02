@@ -117,6 +117,13 @@ export async function processVideo({
       if (!video) {
         throw new Error("Video not found");
       }
+      if(!video.isNew){
+        video.videoName = video.tempVideoName as string;
+        video.originalVideoS3Key = video.tempVideoS3Key as string;
+        video.tempVideoName = null;
+        video.tempVideoS3Key = null;
+        await video.save({validateBeforeSave:false});
+      }
       // await Section.findByIdAndUpdate(video.sectionId, {
       //   $push: { subsections: video.subsectionId },
       // });

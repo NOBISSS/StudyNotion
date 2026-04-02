@@ -59,6 +59,7 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     courseId: new Types.ObjectId(metadata.courseId),
     sectionId: new Types.ObjectId(metadata.sectionId),
     subsectionId: subsection._id,
+    isNew: true,
   });
   await Section.findByIdAndUpdate(metadata.sectionId, {
     $push: { subSectionIds: subsection._id },
@@ -77,21 +78,10 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
   }
   newVideo = await Video.findOneAndUpdate(
     { subsectionId: new Types.ObjectId(metadata.subsectionId) },
-    { $set: { videoName: filename, videoS3Key: key, originalVideoS3Key: key, type, status: "processing" } },
+    { $set: { tempVideoName:filename, tempVideoS3Key:key, type, status: "processing",isNew:false } },
   );
-  if(newVideo){
-    const deleteCommand = new DeleteObjectsCommand({
-          Bucket: process.env.AWS_BUCKET_NAME,
-          Delete: {
-            Objects: [
-              { Key: newVideo.videoS3Key },
-              { Key: newVideo.originalVideoS3Key ? newVideo.originalVideoS3Key : undefined },
-            ],
-          },
-        });
-        await s3.send(deleteCommand);
-  }else 
-    throw AppError.notFound("Video not found for the given subsection ID");
+  if(!newVideo)
+    throw AppError.notFound("Video not found for the given subsection ID");  
 }
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
@@ -251,14 +241,33 @@ export const videoBatchHandler = asyncHandler(async (req, res) => {
 });
 export const abortVideoUpload = asyncHandler(async (req, res) => {
   const { uploadId } = req.params;
-  const { key } = req.body;
-  if (!uploadId || typeof uploadId !== "string" || !key) throw AppError.badRequest("Missing params");
+  const { key } = req.query;
+  if (!uploadId || typeof uploadId !== "string" || !key || typeof key !== "string") throw AppError.badRequest("Missing params");
   const abortCmd = new AbortMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
     UploadId: uploadId,
   });
   await s3.send(abortCmd);
+  const video = await Video.findOne({tempVideoS3Key:key});
+  if (!video) {
+    throw AppError.internal("Something went wrong while aborting video upload");
+  }
+  const subsection = await SubSection.findOne({_id:video.subsectionId});
+  if(!subsection)
+    throw AppError.internal("Something went wrong while aborting video upload");
+  if(video.isNew){
+  subsection.isActive = false;
+  video.isActive = false;
+  const section = await Section.findOneAndUpdate({_id:subsection.sectionId},{$pull: { subSectionIds: subsection._id },})
+}else{
+  video.tempVideoName = null;
+  video.tempVideoS3Key = null;
+  video.status = "ready";
+  subsection.isAvailable = true;
+}
+await video.save({validateBeforeSave:false});
+await subsection.save({validateBeforeSave:false})
   res.json({ ok: true });
 });
 export const getVideo = asyncHandler(async (req, res) => {
