@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { MdCloudUpload } from 'react-icons/md'
 import { IoClose } from 'react-icons/io5'
 import VideoUploaderUppy from '../../../../Course/VideoUploaderUppy'
+import { updateSubsection } from '../../../../../services/operations/courseDetailsAPI'
+import toast from 'react-hot-toast'
 
 const EditLectureModal = ({ lecture, onClose, onSave }) => {
   const [title, setTitle] = useState(lecture?.title || '')
@@ -13,19 +15,16 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
   // const [seconds, setSeconds] = useState(lecture?.seconds || '')
   const [videoPreview, setVideoPreview] = useState(lecture?.videoURL || null)
   
-  const handleSave = () => {
-    if (!title.trim()) return
-    onSave(lecture.sectionId, {
-      ...lecture,
-      title,
-      description,
-      // hours,
-      // minutes,
-      // seconds,
-      videoUrl: videoPreview,
-      isNew: lecture.isNew,
-      isEditing: isEditing,
-    })
+  const handleSave = async () => {
+    if(title == lecture.title && description == lecture.description && isPreview == lecture.isPreview) {
+      toast.error("No changes detected");
+      return;
+    }
+    if(!title.trim() || !description.trim()) {
+      toast.error("Title and description cannot be empty");
+      return;
+    }
+    await onSave(lecture._id,{...lecture, title, description, isPreview});
   }
   useEffect(() => {
     setTitle(lecture?.title || '')
@@ -138,47 +137,54 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
               className="w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors resize-none"
             />
           </div>
+          {isEditing && <button
+              onClick={handleSave}
+              className="px-6 py-2.5 rounded-lg bg-[#FFD60A] text-black text-sm font-semibold hover:bg-yellow-300 transition-colors"
+            >
+              Save Edits
+            </button>}
           {/* Lecture Video Upload */}
-          <div className='flex gap-3 w-full'>{lecture.isEditing && (
-            <div className="flex flex-col gap-2 w-[50%]">
-              <label className="text-sm font-medium text-white">
-                Lecture Video <sup className="text-pink-400">*</sup>
-              </label>
-              <label className="cursor-pointer">
-                <div className="w-full rounded-xl border-2 border-dashed border-[#424854] bg-[#2C333F] flex flex-col items-center justify-center gap-3 py-10 hover:border-[#FFD60A] transition-colors">
-                  {
-                    videoPreview && (
-                      <video
-                        src={videoPreview}
-                        className="max-h-40 rounded-lg"
-                        controls
-                      />
-                    )
-                    // : (
-                    //   <>
-                    //     <div className="w-12 h-12 rounded-full bg-[#161D29] flex items-center justify-center">
-                    //       <MdCloudUpload className="text-2xl text-white" />
-                    //     </div>
-                    //     <div className="text-center">
-                    //       <p className="text-[#AFB2BF] text-sm">
-                    //         Drag and drop an image, or{" "}
-                    //         <span className="text-[#FFD60A] font-medium">
-                    //           Browse
-                    //         </span>
-                    //       </p>
-                    //       <p className="text-[#838894] text-xs mt-1">
-                    //         Max 6MB each (12MB for videos)
-                    //       </p>
-                    //     </div>
-                    //     <div className="flex gap-8 text-xs text-[#838894]">
-                    //       <span>• Aspect ratio 16:9</span>
-                    //       <span>• Recommended size 1024×576</span>
-                    //     </div>
-                    //   </>
-                    // )
-                  }
-                </div>
-                {/* <input
+          <div className="flex gap-3 w-full">
+            {lecture.isEditing && (
+              <div className="flex flex-col gap-2 w-[50%]">
+                <label className="text-sm font-medium text-white">
+                  Lecture Video <sup className="text-pink-400">*</sup>
+                </label>
+                <label className="cursor-pointer">
+                  <div className="w-full rounded-xl border-2 border-dashed border-[#424854] bg-[#2C333F] flex flex-col items-center justify-center gap-3 py-10 hover:border-[#FFD60A] transition-colors">
+                    {
+                      videoPreview && (
+                        <video
+                          src={videoPreview}
+                          className="max-h-40 rounded-lg"
+                          controls
+                        />
+                      )
+                      // : (
+                      //   <>
+                      //     <div className="w-12 h-12 rounded-full bg-[#161D29] flex items-center justify-center">
+                      //       <MdCloudUpload className="text-2xl text-white" />
+                      //     </div>
+                      //     <div className="text-center">
+                      //       <p className="text-[#AFB2BF] text-sm">
+                      //         Drag and drop an image, or{" "}
+                      //         <span className="text-[#FFD60A] font-medium">
+                      //           Browse
+                      //         </span>
+                      //       </p>
+                      //       <p className="text-[#838894] text-xs mt-1">
+                      //         Max 6MB each (12MB for videos)
+                      //       </p>
+                      //     </div>
+                      //     <div className="flex gap-8 text-xs text-[#838894]">
+                      //       <span>• Aspect ratio 16:9</span>
+                      //       <span>• Recommended size 1024×576</span>
+                      //     </div>
+                      //   </>
+                      // )
+                    }
+                  </div>
+                  {/* <input
                 type="file"
                 accept="video/*"
                 className="hidden"
@@ -187,21 +193,24 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
                   if (file) setVideoPreview(URL.createObjectURL(file));
                 }}
               /> */}
+                </label>
+              </div>
+            )}
+            <div className={`${lecture.isEditing ? "w-[50%]" : "w-full"}`}>
+              <label className="text-sm font-medium text-white">
+                {isEditing ? "Edit Lecture Video" : "Lecture Video"} <sup className="text-pink-400">*</sup>
               </label>
+              <VideoUploaderUppy
+                title={title}
+                description={description}
+                isPreview={isPreview}
+                sectionId={lecture.sectionId}
+                courseId={lecture.courseId}
+                isEditing={isEditing}
+                subsectionId={lecture._id}
+              />
             </div>
-          )}
-          <div className={`${lecture.isEditing ? "w-[50%]" : "w-full"}`}><label className="text-sm font-medium text-white">
-            Change Lecture Video <sup className="text-pink-400">*</sup>
-          </label>
-          <VideoUploaderUppy
-            title={title}
-            description={description}
-            isPreview={isPreview}
-            sectionId={lecture.sectionId}
-            courseId={lecture.courseId}
-            isEditing={isEditing}
-            subsectionId={lecture._id}
-          /></div></div>
+          </div>
           {/* Footer buttons */}
           <div className="flex justify-end gap-3 pt-2">
             <button
@@ -210,12 +219,6 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
             >
               Cancel
             </button>
-            {/* <button
-              onClick={handleSave}
-              className="px-6 py-2.5 rounded-lg bg-[#FFD60A] text-black text-sm font-semibold hover:bg-yellow-300 transition-colors"
-            >
-              Save Edits
-            </button> */}
           </div>
         </div>
       </div>

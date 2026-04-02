@@ -1,14 +1,15 @@
+import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { Types } from "mongoose";
+import { s3 } from "../../shared/config/s3Config.js";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import CourseProgress from "../course/CourseProgress.js";
 import { SubSection } from "./SubSectionModel.js";
-import { isValidInstructor } from "./material/materialController.js";
-import Video from "./video/VideoModel.js";
 import { Material } from "./material/MaterialModel.js";
-import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
-import { s3 } from "../../shared/config/s3Config.js";
+import { isValidInstructor } from "./material/materialController.js";
+import { updateSubSectionSchema } from "./subsectionValidation.js";
+import Video from "./video/VideoModel.js";
 
 export const getAllSubsections = asyncHandler(async (req, res) => {
   const sectionId = req.params.sectionId;
@@ -24,7 +25,7 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
   ApiResponse.success(
     res,
     {
-      subsections
+      subsections,
     },
     "SubSections fetched successfully",
   );
@@ -47,7 +48,11 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
       userId: new Types.ObjectId(userId),
       courseId: new Types.ObjectId(subsection.courseId),
     },
-    { $push: { completedSubsections: new Types.ObjectId(subsectionId as string) } },
+    {
+      $push: {
+        completedSubsections: new Types.ObjectId(subsectionId as string),
+      },
+    },
     { new: true },
   );
   if (!courseProgress)
@@ -82,24 +87,35 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
   if (!instructorId) {
     throw AppError.unauthorized("Instructor ID is required");
   }
-    const subsection = await SubSection.findById(subsectionId);
+  const subsection = await SubSection.findById(subsectionId);
   if (!subsection) {
     throw AppError.notFound("SubSection not found");
   }
-  const validInstructor = await isValidInstructor(subsection.courseId, instructorId);
+  const validInstructor = await isValidInstructor(
+    subsection.courseId,
+    instructorId,
+  );
   if (!validInstructor) {
-    throw AppError.unauthorized("You are not authorized to delete this subsection");
+    throw AppError.unauthorized(
+      "You are not authorized to delete this subsection",
+    );
   }
   subsection.isActive = false;
   await subsection.save();
-  const subsectionVideo = await Video.findOne({ subsectionId: new Types.ObjectId(subsectionId as string) });
+  const subsectionVideo = await Video.findOne({
+    subsectionId: new Types.ObjectId(subsectionId as string),
+  });
   if (subsectionVideo) {
     const deleteCommand = new DeleteObjectsCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Delete: {
         Objects: [
           { Key: subsectionVideo.videoS3Key },
-          { Key: subsectionVideo.originalVideoS3Key ? subsectionVideo.originalVideoS3Key : undefined },
+          {
+            Key: subsectionVideo.originalVideoS3Key
+              ? subsectionVideo.originalVideoS3Key
+              : undefined,
+          },
         ],
       },
     });
@@ -107,14 +123,20 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
     subsectionVideo.isActive = false;
     await subsectionVideo.save();
   }
-  const subsectionMaterial = await Material.findOne({ subsectionId: new Types.ObjectId(subsectionId as string) });
+  const subsectionMaterial = await Material.findOne({
+    subsectionId: new Types.ObjectId(subsectionId as string),
+  });
   if (subsectionMaterial) {
     const deleteCommand = new DeleteObjectsCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Delete: {
         Objects: [
           { Key: subsectionMaterial.materialS3Key },
-          { Key: subsectionMaterial.originalMaterialS3Key ? subsectionMaterial.originalMaterialS3Key : undefined },
+          {
+            Key: subsectionMaterial.originalMaterialS3Key
+              ? subsectionMaterial.originalMaterialS3Key
+              : undefined,
+          },
         ],
       },
     });
@@ -129,5 +151,46 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
       subsection,
     },
     "SubSection deleted successfully",
+  );
+});
+export const updateSubsection = asyncHandler(async (req, res) => {
+  const subsectionId = req.params.subsectionId;
+  const instructorId = req.userId;
+  if (!subsectionId) {
+    throw AppError.badRequest("SubSection ID is required");
+  }
+  if (!instructorId) {
+    throw AppError.unauthorized("Instructor ID is required");
+  }
+  const parsedData = updateSubSectionSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    throw AppError.badRequest(
+      parsedData?.error?.issues[0]?.message || "Invalid input",
+    );
+  }
+  const subsection = await SubSection.findById(subsectionId);
+  if (!subsection) {
+    throw AppError.notFound("SubSection not found");
+  }
+  const validInstructor = await isValidInstructor(
+    subsection.courseId,
+    instructorId,
+  );
+  if (!validInstructor) {
+    throw AppError.unauthorized(
+      "You are not authorized to update this subsection",
+    );
+  }
+  const { description, title, isPreview } = parsedData.data;
+  subsection.title = title;
+  subsection.description = description;
+  subsection.isPreview = isPreview;
+  await subsection.save();
+  ApiResponse.success(
+    res,
+    {
+      subsection,
+    },
+    "SubSection updated successfully",
   );
 });

@@ -54,8 +54,8 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
         inline: true,
         target: "#uppy-dashboard",
         showProgressDetails: true,
-        note: "Select or drop large video(s).",
-        height: 300,
+        note: "Select or drop lecture video.",
+        height: 220,
       });
       uppy.setMeta({ type: "video" }); // example of setting metadata for all uploads
     } else {
@@ -109,6 +109,6 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
   }, []);
 
   return (
-    <div id="uppy-dashboard" style={{ margin: "0 auto", width: `100%` }} />
+    <div id="uppy-dashboard" style={{ margin: "0 auto", width: `100%`,marginTop:"3px" }} />
   );
 }
