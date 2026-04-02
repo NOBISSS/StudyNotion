@@ -5,7 +5,9 @@ import {
   DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListPartsCommand,
   UploadPartCommand,
+  type Part,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Types } from "mongoose";
@@ -22,7 +24,7 @@ import VideoProgress from "./VideoProgressModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
 import { Section } from "../../section/SectionModel.js";
 
-const BUCKET = process.env.AWS_BUCKET_NAME;
+const BUCKET = process.env.AWS_BUCKET_NAME as string;
 
 export const addVideo = asyncHandler(async (req, res) => {});
 
@@ -270,6 +272,50 @@ await video.save({validateBeforeSave:false});
 await subsection.save({validateBeforeSave:false})
   res.json({ ok: true });
 });
+export const RestartVideoUpload = asyncHandler(async (req, res, next) => {
+  const { uploadId } = req.params;
+  const { key } = req.query;
+
+  if (
+    !uploadId ||
+    typeof uploadId !== "string" ||
+    !key ||
+    typeof key !== "string"
+  ) {
+    throw AppError.badRequest("Missing params");
+  }
+
+  const parts: Part[] = [];
+
+  function listPartsPage(startsAt: number | undefined = undefined) {
+    // ← number not string
+    s3.send(
+      new ListPartsCommand({
+        Bucket: BUCKET,
+        Key: key as string,
+        UploadId: uploadId as string,
+        PartNumberMarker: startsAt?.toString(),
+      }),
+      (err, data) => {
+        if (err) {
+          next(err);
+          return;
+        }
+        if (data && data.Parts) {
+          parts.push(...data.Parts);
+        }
+
+        if (data?.IsTruncated && data?.NextPartNumberMarker) {
+          listPartsPage(Number(data.NextPartNumberMarker)); // ← cast to number
+        } else {
+          res.json(parts);
+        }
+      },
+    );
+  }
+
+  listPartsPage();
+});
 export const getVideo = asyncHandler(async (req, res) => {
   // const { start, end } = req.query;
   const { subsectionId } = req.params;
@@ -367,7 +413,7 @@ export const saveVideoProgress = asyncHandler(async (req, res) => {
       ),
     },
     {
-      new: true,
+      returnDocument: "after",  
     },
   );
   if (!videoProgress) {
