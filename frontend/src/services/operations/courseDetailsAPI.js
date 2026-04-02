@@ -21,6 +21,7 @@ const {
   GET_SECTION_API,
   CREATE_SECTION_API,
   DELETE_SECTION_API,
+  EDIT_SECTION_API,
 } = sectionEndpoints;
 
 
@@ -215,6 +216,18 @@ export const deleteSection = async (data) => {
     toast.success("Section deleted");
   } catch (error) {
     toast.error(error.message || "Failed to delete section");
+  } finally {
+    toast.dismiss(toastId);
+  }
+}
+export const updateSection = async (data) => {
+  const toastId = toast.loading("Updating section...")
+  try {
+    const response = await apiConnector("PUT", EDIT_SECTION_API.replace(":sectionId", data.sectionId), { name: data.sectionName });
+    if (!response?.data?.success) throw new Error("Could not update section");
+    toast.success("Section updated");
+  } catch (error) {
+    toast.error(error.message || "Failed to update section");
   } finally {
     toast.dismiss(toastId);
   }

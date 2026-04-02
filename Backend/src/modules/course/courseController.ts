@@ -280,8 +280,11 @@ export const getAllCourseByEnrollmentsAndRatingsAndCategory: Handler =
   asyncHandler(async (req, res) => {
     const userId = req.userId;
     const categoryId = req.params.categoryId;
+    if(!categoryId){
+      throw AppError.badRequest("Invalid category ID")
+    }
     const courses = await Course.find({
-      categoryId: new Types.ObjectId(categoryId),
+      categoryId: new Types.ObjectId(categoryId as string),
       isActive: true,
       status: "Published",
     }).populate("categoryId", "name");
@@ -334,6 +337,9 @@ export const getInstructorCourses: Handler = asyncHandler(async (req, res) => {
 });
 export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   const courseId = req.params.courseId;
+  if (!courseId) {
+    throw AppError.badRequest("Invalid course ID");
+  }
   const userId = req.userId;
   const course = await Course.findById(courseId);
   if (!userId)
@@ -347,34 +353,34 @@ export const deleteCourse: Handler = asyncHandler(async (req, res) => {
   course.isActive = false;
   await course.save({ validateBeforeSave: false });
   await RatingAndReview.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   await CourseEnrollment.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   await Section.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isRemoved: true },
   );
   await Category.findByIdAndUpdate(course.categoryId, {
     $pull: { courses: course._id },
   });
   await SubSection.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   await Material.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   await Quiz.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   await Video.updateMany(
-    { courseId: new Types.ObjectId(courseId) },
+    { courseId: new Types.ObjectId(courseId as string) },
     { isActive: false },
   );
   ApiResponse.success(res, {}, "Course deleted successfully");
@@ -409,7 +415,7 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
     typeOfCourse = "Free";
   }
   const course = await Course.findOne({
-    _id: new Types.ObjectId(courseId),
+    _id: new Types.ObjectId(courseId as string),
     isActive: true,
   });
   if (!course) {
@@ -447,11 +453,11 @@ export const getCourseDetails: Handler = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const { userId } = req;
 
-  if (!courseId || !Types.ObjectId.isValid(courseId)) {
+  if (!courseId) {
     throw AppError.badRequest("Invalid course ID");
   }
 
-  const courseObjectId = new Types.ObjectId(courseId);
+  const courseObjectId = new Types.ObjectId(courseId as string);
 
   const course = await Course.findOne({
     _id: courseObjectId,
@@ -504,11 +510,11 @@ export const getInstructorCourseDetails: Handler = asyncHandler(async (req, res)
   const { userId } = req;
   if (!userId)
     throw AppError.unauthorized("User ID is required to get course details");
-  if (!courseId || !Types.ObjectId.isValid(courseId)) {
+  if (!courseId) {
     throw AppError.badRequest("Invalid course ID");
   }
 
-  const courseObjectId = new Types.ObjectId(courseId);
+  const courseObjectId = new Types.ObjectId(courseId as string);
 
   const course = await Course.findOne({
     _id: courseObjectId,
@@ -579,17 +585,17 @@ export const publishCourse: Handler = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid course ID or user ID");
   }
   const oldcourse = await Course.findOne({
-    _id: new Types.ObjectId(courseId),
+    _id: new Types.ObjectId(courseId as string),
     isActive: true,
   });
   if (!oldcourse) {
     throw AppError.notFound("Course not found");
   }
-  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId as string), new Types.ObjectId(userId));
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId, { status: "Published" }, { new: true });
+  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Published" }, { new: true });
   ApiResponse.success(
     res,
     { course },
@@ -604,17 +610,17 @@ export const draftCourse: Handler = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid course ID or user ID");
   }
   const oldcourse = await Course.findOne({
-    _id: new Types.ObjectId(courseId),
+    _id: new Types.ObjectId(courseId as string),
     isActive: true,
   });
   if (!oldcourse) {
     throw AppError.notFound("Course not found");
   }
-  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId), new Types.ObjectId(userId));
+  const instuctorValid = await isValidInstructor(new Types.ObjectId(courseId as string), new Types.ObjectId(userId));
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { new: true });
+  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Draft" }, { new: true });
   ApiResponse.success(
     res,
     { course },
@@ -631,11 +637,11 @@ export const scheduleCoursePublish: Handler = asyncHandler(async (req, res) => {
   if (!courseId || !userId) {
     throw AppError.badRequest("Course ID and User ID are required");
   }
-  if (!Types.ObjectId.isValid(courseId)) {
+  if (!Types.ObjectId.isValid(courseId as string)) {
     throw AppError.badRequest("Invalid course ID")
   }
 
-  const course = await Course.findOne({ _id: courseId, isActive: true })
+  const course = await Course.findOne({ _id: courseId as string, isActive: true })
   if (!course) throw AppError.notFound("Course not Found")
 
 

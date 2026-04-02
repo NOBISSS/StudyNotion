@@ -150,8 +150,8 @@ export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   }
   const sectionId = req.params.sectionId;
   const instructorId = req.userId;
-  if (!sectionId) {
-    throw AppError.badRequest("Section ID is required");
+  if (!sectionId || !instructorId) {
+    throw AppError.badRequest("Section ID and Instructor ID are required");
   }
   const currentSection = await Section.findOne({
     _id: sectionId,
@@ -170,10 +170,10 @@ export const updateSection = asyncHandler(async (req, res): Promise<void> => {
   }
   if (
     // @ts-ignore
-    existingSection?.courseId.instructorId.toString() != instructorId || req.accountType !== "admin"
+    existingSection?.courseId.instructorId.toString() != instructorId.toString() && req.accountType !== "admin"
   ) {
     throw AppError.unauthorized(
-      "You are not authorized to add sections to this course",
+      "You are not authorized to update sections to this course",
     );
   }
   currentSection.name = name || currentSection.name;
@@ -190,7 +190,7 @@ export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
   const instructorId = req.userId;
   const courseId = req.params.courseId;
   const sections = await Section.find({
-    courseId: new Types.ObjectId(courseId),
+    courseId: new Types.ObjectId(courseId as string),
     isRemoved: false,
   }).sort({ order: 1 });
   ApiResponse.success(
@@ -204,16 +204,22 @@ export const getAllSections = asyncHandler(async (req, res): Promise<void> => {
 export const getRemovedSections = asyncHandler(
   async (req, res): Promise<void> => {
     const instructorId = req.userId;
+    if (!instructorId) {
+      throw AppError.badRequest("Instructor ID is required");
+    }
     const courseId = req.params.courseId;
+    if (!courseId) {
+      throw AppError.badRequest("Course ID is required");
+    }
     const sections = await Section.find({
-      courseId: new Types.ObjectId(courseId),
+      courseId: new Types.ObjectId(courseId as string),
       isRemoved: true,
     }).sort({ order: 1 });
     if (sections.length === 0) {
       throw AppError.notFound("No removed sections found for this course");
     }
-    const existingCourse = await Course.findOne({ _id: courseId });
-    if (existingCourse?.instructorId.toString() != instructorId) {
+    const existingCourse = await Course.findOne({ _id: courseId as string });
+    if (existingCourse?.instructorId.toString() != instructorId.toString() && req.accountType !== "admin") {
       throw AppError.unauthorized(
         "You are not authorized to view removed sections of this course",
       );
@@ -239,7 +245,7 @@ export const undoRemoveSection = asyncHandler(
       });
     } else {
       existingSection = await Section.findOne({
-        courseId: new Types.ObjectId(courseId),
+        courseId: new Types.ObjectId(courseId as string),
         isRemoved: true,
       }).sort({ order: -1 });
     }

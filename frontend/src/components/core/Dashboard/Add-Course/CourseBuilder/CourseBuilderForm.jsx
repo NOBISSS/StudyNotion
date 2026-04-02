@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { VscAdd, VscChevronLeft, VscChevronRight } from 'react-icons/vsc'
-import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { setStep, setCourse } from '../../../../../slices/courseSlice'
 import toast from 'react-hot-toast'
 import EditLectureModal from './EditLectureModal'
-import { createSection, deleteSection, fetchCourseSections, getAllSubsections, removeSubsection } from '../../../../../services/operations/courseDetailsAPI'
+import { createSection, deleteSection, fetchCourseSections, getAllSubsections, removeSubsection, updateSection } from '../../../../../services/operations/courseDetailsAPI'
 import { useSearchParams } from 'react-router-dom'
 
 const CourseBuilderForm = ({courseId}) => {
@@ -13,6 +13,7 @@ const CourseBuilderForm = ({courseId}) => {
   const { course } = useSelector((state) => state.course)
   const [searchParams, setSearchParams] = useSearchParams();
   const [sectionName, setSectionName] = useState('')
+  const [editingSection, setEditingSection] = useState({sectionId:null,isEditing:false,editingName:""})
   const [sections, setSections] = useState(course?.sections || [])
   const [expandedSection, setExpandedSection] = useState(
     course?.sections?.length > 0 ? course.sections[0]._id : null
@@ -25,8 +26,6 @@ const CourseBuilderForm = ({courseId}) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId);
     if (courseId) {
       const res = await getAllSubsections(sectionId)  
-      console.log("Fetched subsections for section:", res);
-      console.log("Current subsections state:", res.subsections);
       setSubSections(res.subsections); 
     }
   }
@@ -66,6 +65,17 @@ const CourseBuilderForm = ({courseId}) => {
     if (expandedSection === sectionId) setExpandedSection(null)
   }
 
+  const handleSectionUpdate = async (sectionId) => {
+    await updateSection({ sectionId, sectionName: editingSection.editingName })
+    setEditingSection({ sectionId: null, isEditing: false, editingName: "" });
+    setSections((prev) =>
+      prev.map((s) =>
+        s._id === sectionId
+          ? { ...s, name: editingSection.editingName }
+          : s,
+      ),
+    );
+  }
   const handleDeleteLecture = async (sectionId, lectureId) => {
     await removeSubsection(lectureId);
     setSubSections((prev) => prev.filter((l) => l._id !== lectureId))
@@ -90,12 +100,26 @@ const CourseBuilderForm = ({courseId}) => {
             <div className="flex items-center justify-between px-4 py-3 bg-[#2C333F]">
               <div className="flex items-center gap-3">
                 <span className="text-[#838894] text-base">☰</span>
-                <span className="text-white font-semibold text-sm">{section.name}</span>
+                {editingSection?.isEditing && editingSection.sectionId === section._id ? (
+                  <input
+                    type="text"
+                    value={editingSection.editingName}
+                    onChange={(e) => setEditingSection({ ...editingSection, editingName: e.target.value })}
+                    className="bg-[#2C333F] text-white placeholder:text-[#838894] border border-[#838894] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                ) : (
+                  <span className="text-white font-semibold text-sm">{section.name}</span>
+                )}
               </div>
               <div className="flex items-center gap-1">
-                <button className="p-1.5 text-[#838894] hover:text-white transition-colors">
+                {!editingSection.isEditing ? <button className="p-1.5 text-[#838894] hover:text-white transition-colors" onClick={()=>setEditingSection({sectionId:section._id,isEditing:true,editingName:section.name})}>
                   <PencilIcon className="w-4 h-4" />
                 </button>
+                : editingSection.isEditing && editingSection.sectionId === section._id && <button className="p-1.5 text-[#838894] hover:text-green-400 transition-colors" onClick={() => handleSectionUpdate(section._id)}>
+                  <CheckIcon className="w-4 h-4" />
+                </button>
+                }
                 <button onClick={() => handleDeleteSection(section._id)}
                   className="p-1.5 text-[#838894] hover:text-red-400 transition-colors">
                   <TrashIcon className="w-4 h-4" />
