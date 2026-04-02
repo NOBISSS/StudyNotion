@@ -80,6 +80,7 @@ export const sectionEndpoints={
 //have to check
 export const subSectionVideoEndpoints={
     GET_SUBSECTION_API:BACKEND_URL+"/subsections/getall/:sectionId",//has to be updated while calling
+    GET_SUBSECTION_DETAILS_API:BACKEND_URL+"/subsections/video/getone/:subsectionId",//has to be updated while calling
     CREATE_SUBSECTION_API:BACKEND_URL+"/subsections/create",
     EDIT_SUBSECTION_API:BACKEND_URL+"/subsections/edit",
     DELETE_SUBSECTION_API:BACKEND_URL+"/subsections/delete/:subsectionId",

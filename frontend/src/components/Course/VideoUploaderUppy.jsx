@@ -1,18 +1,19 @@
 import { useEffect, useRef } from "react";
 import { BACKEND_URL } from "../../utils/constants";
 
-export default function VideoUploaderUppy({title, description, isPreview, sectionId, courseId}) {
+export default function VideoUploaderUppy({title, description, isPreview, sectionId, courseId, isEditing, subsectionId}) {
   const metaRef = useRef({
     title,
     description,
     isPreview,
     sectionId,
     courseId,
+    isEditing,
+    subsectionId,
   });
   useEffect(() => {
-    metaRef.current = { title, description, isPreview, sectionId, courseId };
-  }, [title, description, isPreview, sectionId, courseId]);
-  console.log("UPPY FILE IS IN USED");
+    metaRef.current = { title, description, isPreview, sectionId, courseId, isEditing, subsectionId };
+  }, [title, description, isPreview, sectionId, courseId, isEditing, subsectionId]);
   useEffect(() => {
     // Robustly get Uppy and plugin objects from window (support multiple naming possibilities)
     const UppyGlobal = window.Uppy?.default ?? window.Uppy;
@@ -54,6 +55,7 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
         target: "#uppy-dashboard",
         showProgressDetails: true,
         note: "Select or drop large video(s).",
+        height: 300,
       });
       uppy.setMeta({ type: "video" }); // example of setting metadata for all uploads
     } else {
@@ -73,9 +75,10 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
       );
     }
     uppy.on("upload", () => {
-      const { title, description, isPreview, sectionId, courseId } =
+      const { title, description, isPreview, sectionId, courseId, isEditing, subsectionId } =
         metaRef.current;
-      uppy.setMeta({ title, description, isPreview, sectionId, courseId });
+      console.log("Uppy upload started with metadata:", metaRef.current);
+      uppy.setMeta({ title, description, isPreview, sectionId, courseId, isEditing, subsectionId });
     });
     uppy.on("complete", (result) => {
       uppy.setMeta({
@@ -106,6 +109,6 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
   }, []);
 
   return (
-    <div id="uppy-dashboard" style={{ margin: "0 auto", width: "100%", }} />
+    <div id="uppy-dashboard" style={{ margin: "0 auto", width: `100%` }} />
   );
 }

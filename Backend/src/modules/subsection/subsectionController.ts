@@ -99,7 +99,7 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
       Delete: {
         Objects: [
           { Key: subsectionVideo.videoS3Key },
-          { Key: subsectionVideo.videoS3Key.replace("compressed", "original") },
+          { Key: subsectionVideo.originalVideoS3Key ? subsectionVideo.originalVideoS3Key : undefined },
         ],
       },
     });
@@ -114,7 +114,7 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
       Delete: {
         Objects: [
           { Key: subsectionMaterial.materialS3Key },
-          { Key: subsectionMaterial.materialS3Key.replace("compressed", "original") },
+          { Key: subsectionMaterial.originalMaterialS3Key ? subsectionMaterial.originalMaterialS3Key : undefined },
         ],
       },
     });

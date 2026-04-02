@@ -20,5 +20,10 @@ export const videoUploadSchema = z.object({
       .default("false")
       .transform((val) => val === "true"),
     description: z.string().optional(),
+    isEditing: z
+      .enum(["true", "false"], { error: "isEditing must be a boolean value" })
+      .default("false")
+      .transform((val) => val === "true"),
+    subsectionId: z.string().optional(),
   }),
 });

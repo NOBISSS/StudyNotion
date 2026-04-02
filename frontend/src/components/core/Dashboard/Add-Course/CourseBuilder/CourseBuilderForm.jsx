@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { VscAdd, VscChevronLeft, VscChevronRight } from 'react-icons/vsc'
 import { PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { setStep, setCourse } from '../../../../../slices/courseSlice'
 import toast from 'react-hot-toast'
 import EditLectureModal from './EditLectureModal'
-import { createSection, deleteSection, fetchCourseSections, getAllSubsections, removeSubsection, updateSection } from '../../../../../services/operations/courseDetailsAPI'
+import { createSection, deleteSection, fetchCourseSections, getAllSubsections, getSubsectionDetails, removeSubsection, updateSection } from '../../../../../services/operations/courseDetailsAPI'
 import { useSearchParams } from 'react-router-dom'
 
 const CourseBuilderForm = ({courseId}) => {
@@ -18,6 +18,7 @@ const CourseBuilderForm = ({courseId}) => {
   const [expandedSection, setExpandedSection] = useState(
     course?.sections?.length > 0 ? course.sections[0]._id : null
   )
+  const subsectionDetailsRef = useRef(false); // To store details of subsections when fetched, to avoid refetching
   const [subsections, setSubSections] = useState([]);
   const demoSubsection =[
     {sectionId:"1", _id:"1", title:"Lecture 1: Introduction to React", content:"This lecture covers the basics of React, including components, state, and props."},
@@ -80,7 +81,19 @@ const CourseBuilderForm = ({courseId}) => {
     await removeSubsection(lectureId);
     setSubSections((prev) => prev.filter((l) => l._id !== lectureId))
   }
-
+  const getSubSectionDetails = async (subsectionId) => {
+    const res = await getSubsectionDetails(subsectionId);
+    setEditingLecture({ ...editingLecture, ...res.subsection, videoURL: res.link, isEditing: true });
+    console.log(res.link);
+    // return res.subsection;
+  }
+  useEffect(() => {
+    if (editingLecture && !editingLecture.isNew && !subsectionDetailsRef.current) {
+        subsectionDetailsRef.current = true; // Mark as fetched to prevent future refetches
+        console.log("Fetching details for lecture", editingLecture);
+        getSubSectionDetails(editingLecture._id);
+    }
+  }, [editingLecture]);
   const handleNext = () => {
     if (sections.length === 0) { toast.error('Add at least one section'); return }
     dispatch(setCourse({ ...course, sections }))
@@ -146,7 +159,7 @@ const CourseBuilderForm = ({courseId}) => {
                       <span>{lecture.title}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => { setEditingLecture({ ...lecture, sectionId: section._id, courseId }); setShowModal(true) }}
+                      <button onClick={() => { setEditingLecture({ ...lecture, sectionId: section._id, courseId, isEditing: true }); setShowModal(true) }}
                         className="p-1.5 text-[#838894] hover:text-white transition-colors">
                         <PencilIcon className="w-3.5 h-3.5" />
                       </button>
@@ -158,13 +171,21 @@ const CourseBuilderForm = ({courseId}) => {
                   </div>
                 ))}
                 {/* Add Lecture */}
-                <button
+                <div className='flex justify-start'><button
                   onClick={() => { setEditingLecture({ sectionId: section._id, isNew: true, courseId }); setShowModal(true) }}
-                  className="flex items-center gap-2 px-8 py-3 text-[#FFD60A] text-sm font-medium hover:text-yellow-300 transition-colors w-fit"
+                  className="flex items-center gap-2 pl-8 py-3 text-[#FFD60A] text-sm font-medium hover:text-yellow-300 transition-colors w-fit"
                 >
                   <VscAdd />
                   Add Lecture
                 </button>
+                <button
+                  onClick={() => { setEditingLecture({ sectionId: section._id, isNew: true, courseId }); setShowModal(true) }}
+                  className="flex items-center gap-2 px-5 py-3 text-[#75e033] text-sm font-medium transition-colors w-fit"
+                >
+                  <VscAdd />
+                  Add Material
+                </button>
+                </div>
               </div>
             )}
           </div>
@@ -209,7 +230,7 @@ const CourseBuilderForm = ({courseId}) => {
       {showModal && (
         <EditLectureModal
           lecture={editingLecture}
-          onClose={() => { setShowModal(false); setEditingLecture(null) }}
+          onClose={() => { setShowModal(false); setEditingLecture(null); subsectionDetailsRef.current = false; }}
           onSave={(sectionId, lectureData) => {
             setSections((prev) => prev.map((s) => {
               if (s._id !== sectionId) return s

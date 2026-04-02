@@ -98,7 +98,7 @@ export const removeSection = asyncHandler(async (req, res): Promise<void> => {
       Delete: {
         Objects: existingVideos.flatMap((video) => [
           { Key: video.videoS3Key },
-          { Key: video.videoS3Key.replace("compressed", "original") },
+          { Key: video.originalVideoS3Key ? video.originalVideoS3Key : undefined },
         ]),
       },
       });
@@ -115,7 +115,7 @@ export const removeSection = asyncHandler(async (req, res): Promise<void> => {
       Delete: {
         Objects: existingMaterials.flatMap((material) => [
           { Key: material.materialS3Key },
-          { Key: material.materialS3Key.replace("compressed", "original") },
+          { Key: material.originalMaterialS3Key ? material.originalMaterialS3Key : undefined },
         ]),
       },
       });

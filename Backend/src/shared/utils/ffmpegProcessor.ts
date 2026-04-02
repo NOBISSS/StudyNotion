@@ -42,10 +42,13 @@ import { convertSecondsToReadingTime } from "../../modules/subsection/video/vide
 export async function processVideo({
   key,
   videoName,
+  s3Location,
 }: {
   key: string;
   videoName: string;
+  s3Location: string;
 }) {
+  console.log("S3 location:", s3Location);
   const tempDir = path.resolve("./temp");
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
@@ -76,9 +79,10 @@ export async function processVideo({
 
     // 3) Upload compressed to S3
     const fileStream = fs.createReadStream(outputPath);
+    const compressedKey = `compressed/${path.basename(outputPath)}`;
     const putCmd = new PutObjectCommand({
       Bucket: BUCKET,
-      Key: `compressed/${path.basename(outputPath)}`, // compressed/<filename>
+      Key: compressedKey, // compressed/<filename>
       Body: fileStream,
       ContentType: "video/mp4",
     });
@@ -101,14 +105,14 @@ export async function processVideo({
         { videoS3Key: key },
         {
           $set: {
-            videoS3Key: `compressed/${path.basename(outputPath)}`,
+            videoS3Key: compressedKey,
             URLExpiration: Date.now(),
             videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
             duration: videoDuration,
             status: "ready",
           },
         },
-        { new: true },
+        { returnDocument: "after" },
       );
       if (!video) {
         throw new Error("Video not found");

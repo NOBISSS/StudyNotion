@@ -2,6 +2,7 @@ import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
   UploadPartCommand,
@@ -36,6 +37,8 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
   const { filename, type, metadata } = parsedVideoData.data;
 
   const key = `originals/${Date.now()}-${path.basename(filename)}`;
+  let newVideo;
+  if(!metadata.isEditing){
   const subsection = await SubSection.create({
     title: metadata.title,
     isPreview: metadata.isPreview,
@@ -46,9 +49,10 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     isActive: true,
     isAvailable: false,
   });
-  const newVideo = await Video.create({
+  newVideo = await Video.create({
     videoName: filename,
     videoS3Key: key,
+    originalVideoS3Key: key,
     // videoURL,
     type,
     status: "processing",
@@ -59,6 +63,36 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
   await Section.findByIdAndUpdate(metadata.sectionId, {
     $push: { subSectionIds: subsection._id },
   });
+} else {
+  if (!metadata.subsectionId) {
+    throw AppError.badRequest("subsectionId is required for editing");
+  }
+  const subsection = await SubSection.findOneAndUpdate(
+    { _id: new Types.ObjectId(metadata.subsectionId), isActive: true },
+    { $set: { title: metadata.title, description: metadata.description, isPreview: metadata.isPreview, isAvailable:false } },
+    { new: true }
+  );
+  if (!subsection) {
+    throw AppError.notFound("Subsection not found for editing");
+  }
+  newVideo = await Video.findOneAndUpdate(
+    { subsectionId: new Types.ObjectId(metadata.subsectionId) },
+    { $set: { videoName: filename, videoS3Key: key, originalVideoS3Key: key, type, status: "processing" } },
+  );
+  if(newVideo){
+    const deleteCommand = new DeleteObjectsCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Delete: {
+            Objects: [
+              { Key: newVideo.videoS3Key },
+              { Key: newVideo.originalVideoS3Key ? newVideo.originalVideoS3Key : undefined },
+            ],
+          },
+        });
+        await s3.send(deleteCommand);
+  }else 
+    throw AppError.notFound("Video not found for the given subsection ID");
+}
   const createCmd = new CreateMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
@@ -82,7 +116,7 @@ export const generateMultipartPresignedURL = asyncHandler(async (req, res) => {
 
   if (!uploadId || !partNumber || !key)
     throw AppError.badRequest("uploadId, partNumber, and key are required");
-  if (!uploadId || !partNumber || !key)
+  if (!uploadId || typeof uploadId !== "string" || !partNumber || !key)
     throw AppError.badRequest("Missing params");
 
   const cmd = new UploadPartCommand({
@@ -106,7 +140,7 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
   const key = req.body.key || req.query.key;
   const parts = req.body.parts || req.body.uploadParts || req.body.partsList;
 
-  if (!uploadId || !key || !parts) {
+  if (!uploadId || typeof uploadId !== "string" || !key || !parts) {
     throw AppError.badRequest("Missing params");
   }
 
@@ -149,7 +183,9 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
 export const videoBatchHandler = asyncHandler(async (req, res) => {
   const { uploadId } = req.params;
   let { key, partNumbers } = req.query || {};
-
+  if (!uploadId || typeof uploadId !== "string") {
+    throw AppError.badRequest("uploadId is required");
+  }
   // fallback: parse from originalUrl (robustness for strange clients)
   if ((!partNumbers || !key) && req.originalUrl) {
     const idx = req.originalUrl.indexOf("?");
@@ -216,7 +252,7 @@ export const videoBatchHandler = asyncHandler(async (req, res) => {
 export const abortVideoUpload = asyncHandler(async (req, res) => {
   const { uploadId } = req.params;
   const { key } = req.body;
-  if (!uploadId || !key) throw AppError.badRequest("Missing params");
+  if (!uploadId || typeof uploadId !== "string" || !key) throw AppError.badRequest("Missing params");
   const abortCmd = new AbortMultipartUploadCommand({
     Bucket: BUCKET,
     Key: key,
@@ -233,6 +269,9 @@ export const getVideo = asyncHandler(async (req, res) => {
   //     .status(400)
   //     .json({ message: "start and end query params are required" });
   // }
+  if (!subsectionId || typeof subsectionId !== "string") {
+    throw AppError.badRequest("SubSection ID is required");
+  }
   const subsection = await SubSection.findOne({
     _id: new Types.ObjectId(subsectionId),
     isActive: true,

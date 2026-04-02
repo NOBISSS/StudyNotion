@@ -25,7 +25,7 @@ const {
 } = sectionEndpoints;
 
 
-const {GET_SUBSECTION_API,DELETE_SUBSECTION_API} = subSectionVideoEndpoints;
+const {GET_SUBSECTION_API,GET_SUBSECTION_DETAILS_API,DELETE_SUBSECTION_API} = subSectionVideoEndpoints;
 const {
     POST_SIGNATURE_CLOUDINARY_API
 }=SignatureEndpoints;
@@ -284,6 +284,20 @@ export const removeSubsection = async (subsectionId) => {
     return result;
   } catch (error) {
     toast.error(error.message || "Failed to delete subsection");
+  } finally {
+    toast.dismiss(toastId);
+  }
+}
+export const getSubsectionDetails = async (subsectionId) => {
+  const toastId = toast.loading("Fetching subsection details...");
+  let result = [];
+  try {
+    const response = await apiConnector("GET", GET_SUBSECTION_DETAILS_API.replace(":subsectionId", subsectionId));
+    if (!response?.data?.success) throw new Error("Could not fetch subsection details");
+    result = response?.data?.data || [];
+    return result;
+  } catch (error) {
+    toast.error(error.message || "Failed to fetch subsection details");
   } finally {
     toast.dismiss(toastId);
   }
