@@ -6,6 +6,11 @@ import { StatusCode } from "../../shared/types.js";
 import { Course } from "../course/CourseModel.js";
 import { Section } from "./SectionModel.js";
 import { createSectionSchema } from "./sectionValidation.js";
+import Video from "../subsection/video/VideoModel.js";
+import { DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { s3 } from "../../shared/config/s3Config.js";
+import { Material } from "../subsection/material/MaterialModel.js";
+import { SubSection } from "../subsection/SubSectionModel.js";
 
 export const createSection = asyncHandler(async (req, res): Promise<void> => {
   const parsedData = createSectionSchema.safeParse(req.body);
@@ -82,6 +87,45 @@ export const removeSection = asyncHandler(async (req, res): Promise<void> => {
     { _id: sectionId },
     { isRemoved: true, order: -1, lastOrder: existingSection.order },
   );
+  await SubSection.updateMany(
+    { sectionId: new Types.ObjectId(sectionId as string) },
+    { isActive: false },
+  );
+  const existingVideos = await Video.find({ sectionId: new Types.ObjectId(sectionId as string) });
+  if (existingVideos.length > 0) {
+    const deleteCommand = new DeleteObjectsCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Delete: {
+        Objects: existingVideos.flatMap((video) => [
+          { Key: video.videoS3Key },
+          { Key: video.videoS3Key.replace("compressed", "original") },
+        ]),
+      },
+      });
+    await s3.send(deleteCommand);
+    await Video.updateMany(
+      { sectionId: new Types.ObjectId(sectionId as string) },
+      { isActive: false },
+    );
+  }
+  const existingMaterials = await Material.find({ sectionId: new Types.ObjectId(sectionId as string) });
+  if (existingMaterials.length > 0) {
+    const deleteCommand = new DeleteObjectsCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Delete: {
+        Objects: existingMaterials.flatMap((material) => [
+          { Key: material.materialS3Key },
+          { Key: material.materialS3Key.replace("compressed", "original") },
+        ]),
+      },
+      });
+    await s3.send(deleteCommand);
+    await Material.updateMany(
+      { sectionId: new Types.ObjectId(sectionId as string) },
+      { isActive: false },
+    );
+  }
+
   ApiResponse.success(
     res,
     {

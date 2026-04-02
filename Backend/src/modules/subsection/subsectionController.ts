@@ -5,6 +5,10 @@ import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import CourseProgress from "../course/CourseProgress.js";
 import { SubSection } from "./SubSectionModel.js";
 import { isValidInstructor } from "./material/materialController.js";
+import Video from "./video/VideoModel.js";
+import { Material } from "./material/MaterialModel.js";
+import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { s3 } from "../../shared/config/s3Config.js";
 
 export const getAllSubsections = asyncHandler(async (req, res) => {
   const sectionId = req.params.sectionId;
@@ -43,7 +47,7 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
       userId: new Types.ObjectId(userId),
       courseId: new Types.ObjectId(subsection.courseId),
     },
-    { $push: { completedSubsections: new Types.ObjectId(subsectionId) } },
+    { $push: { completedSubsections: new Types.ObjectId(subsectionId as string) } },
     { new: true },
   );
   if (!courseProgress)
@@ -52,7 +56,7 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
       userId: new Types.ObjectId(userId),
       progress: 0,
       completed: false,
-      completedSubsections: [new Types.ObjectId(subsectionId)],
+      completedSubsections: [new Types.ObjectId(subsectionId as string)],
     });
   const totalSubsections = await SubSection.countDocuments({
     courseId: subsection.courseId,
@@ -88,6 +92,37 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
   }
   subsection.isActive = false;
   await subsection.save();
+  const subsectionVideo = await Video.findOne({ subsectionId: new Types.ObjectId(subsectionId as string) });
+  if (subsectionVideo) {
+    const deleteCommand = new DeleteObjectsCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: [
+          { Key: subsectionVideo.videoS3Key },
+          { Key: subsectionVideo.videoS3Key.replace("compressed", "original") },
+        ],
+      },
+    });
+    await s3.send(deleteCommand);
+    subsectionVideo.isActive = false;
+    await subsectionVideo.save();
+  }
+  const subsectionMaterial = await Material.findOne({ subsectionId: new Types.ObjectId(subsectionId as string) });
+  if (subsectionMaterial) {
+    const deleteCommand = new DeleteObjectsCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Delete: {
+        Objects: [
+          { Key: subsectionMaterial.materialS3Key },
+          { Key: subsectionMaterial.materialS3Key.replace("compressed", "original") },
+        ],
+      },
+    });
+    await s3.send(deleteCommand);
+
+    subsectionMaterial.isActive = false;
+    await subsectionMaterial.save();
+  }
   ApiResponse.success(
     res,
     {
