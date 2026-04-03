@@ -87,6 +87,9 @@ export const createQuiz = asyncHandler(async (req, res) => {
 });
 export const deleteQuiz = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subSectionId;
+  if(!subsectionId || typeof subsectionId !== "string") {
+    throw AppError.badRequest("Subsection ID is required");
+  }
   const subsection = await SubSection.findById(subsectionId);
   if (!subsection) {
     throw AppError.notFound("Subsection not found.");
@@ -120,6 +123,9 @@ export const deleteQuiz = asyncHandler(async (req, res) => {
 });
 export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
   const subSectionId = req.params.subSectionId;
+  if(!subSectionId || typeof subSectionId !== "string") {
+    throw AppError.badRequest("Subsection ID is required");
+  }
   const userId = new Types.ObjectId(req.userId);
   // const quiz = await Quiz.findOne({
   //   subSectionId: new Types.ObjectId(subSectionId),
@@ -149,10 +155,8 @@ export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
 export const updateQuiz = asyncHandler(async (req, res) => {
   const parsedQuizData = updateQuizSchema.safeParse(req.body);
   const subsectionId = req.params.subSectionId;
-  if (!subsectionId) {
-    throw AppError.badRequest(
-      "Quiz/Subsection ID is required in the URL parameters.",
-    );
+  if(!subsectionId || typeof subsectionId !== "string") {
+    throw AppError.badRequest("Subsection ID is required");
   }
   if (!parsedQuizData.success) {
     throw AppError.badRequest(
@@ -271,10 +275,10 @@ export const attemptQuiz = asyncHandler(async (req, res) => {
 export const getQuizAttemptByUser = asyncHandler(async (req, res) => {
   const userId = new Types.ObjectId(req.userId);
   const quizId = req.params.quizId;
-  if (!quizId || !userId) {
+  if (!quizId || !userId || typeof quizId !== "string") {
     throw AppError.badRequest("Quiz ID and User ID are required.");
   }
-  const quizAttempts = await QuizAttempt.find({ userId, quizId })
+  const quizAttempts = await QuizAttempt.find({ userId, quizId: new Types.ObjectId(quizId) })
     .populate("quizId", "title")
     .sort({ createdAt: -1, score: -1 });
   ApiResponse.success(

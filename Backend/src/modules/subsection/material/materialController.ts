@@ -122,6 +122,9 @@ export const getMaterial = asyncHandler(async (req, res) => {
 });
 export const deleteMaterial = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
+  if(!subsectionId || typeof subsectionId !== "string") {
+    throw AppError.badRequest("Subsection ID is required");
+  }
   const subsection = await SubSection.findById(subsectionId);
   if (!subsection) {
     throw AppError.notFound("Subsection not found");
@@ -160,6 +163,9 @@ export const deleteMaterial = asyncHandler(async (req, res) => {
 });
 export const updateMaterial = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
+  if(!subsectionId || typeof subsectionId !== "string") {
+    throw AppError.badRequest("Subsection ID is required");
+  }
   const parsedMaterialData = materialSchema.partial().safeParse(req.body);
   if (!parsedMaterialData.success) {
     throw AppError.badRequest(
