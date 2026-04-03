@@ -50,9 +50,9 @@ declare const Announcement: import("mongoose").Model<{
     createdBy: Types.ObjectId;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     message: string;
     isDeleted: boolean;
     courseId: Types.ObjectId;
@@ -65,35 +65,7 @@ declare const Announcement: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        message: string;
-        isDeleted: boolean;
-        courseId: Types.ObjectId;
-        title: string;
-        readedBy: Types.ObjectId[];
-        createdBy: Types.ObjectId;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        message: string;
-        isDeleted: boolean;
-        courseId: Types.ObjectId;
-        title: string;
-        readedBy: Types.ObjectId[];
-        createdBy: Types.ObjectId;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     message: string;
     isDeleted: boolean;
     courseId: Types.ObjectId;

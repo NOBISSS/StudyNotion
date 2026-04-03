@@ -1,6 +1,8 @@
 import z from "zod";
-export const forgetInputSchema = z.object({
+export const forgetOTPVerificationSchema = z.object({
     otp: z.number({ error: "OTP is required" }),
+});
+export const forgetPasswordResetSchema = z.object({
     password: z
         .string({ error: "Password is required" })
         .regex(/[A-Z]/, {
@@ -16,6 +18,9 @@ export const forgetInputSchema = z.object({
         error: "Password should include atlist 1 special character",
     })
         .min(8, { error: "Password length shouldn't be less than 8" }),
+    confirmPassword: z.string({ error: "Confirm password is required" }),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
 });
 export const signupInputSchema = z.object({
     firstName: z

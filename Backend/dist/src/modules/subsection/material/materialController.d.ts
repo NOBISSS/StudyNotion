@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types.ObjectId, accountType?: string) => Promise<(import("mongoose").Document<unknown, {}, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -16,14 +16,19 @@ export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, {
@@ -31,7 +36,7 @@ export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types
 }> & Omit<{
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -45,14 +50,19 @@ export declare const isValidInstructor: (courseId: Types.ObjectId, userId: Types
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
 } & {

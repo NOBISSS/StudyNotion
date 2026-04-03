@@ -2,7 +2,7 @@ import { Schema, Types } from "mongoose";
 export declare const Course: import("mongoose").Model<{
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -16,20 +16,25 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps, {}, {}, {
     id: string;
 }, import("mongoose").Document<unknown, {}, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -43,14 +48,19 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, {
@@ -58,7 +68,7 @@ export declare const Course: import("mongoose").Model<{
 }> & Omit<{
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -72,14 +82,19 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
 } & {
@@ -91,7 +106,7 @@ export declare const Course: import("mongoose").Model<{
 }, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -105,18 +120,23 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -130,22 +150,27 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -159,88 +184,29 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        description: string;
-        isActive: boolean;
-        status: "Draft" | "Published";
-        courseName: string;
-        instructorName: string;
-        instructorId: Types.ObjectId;
-        typeOfCourse: "Free" | "Paid";
-        totalDuration: number;
-        totalLectures: number;
-        totalMaterials: number;
-        totalQuizzes: number;
-        totalSubsections: number;
-        totalDurationFormatted: string;
-        originalPrice: number;
-        discountPrice: number;
-        whatYouWillLearn: string[];
-        tag: string[];
-        slug: string;
-        categoryId: Types.ObjectId;
-        level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
-        isBoosted: boolean;
-        sections: Types.ObjectId[];
-        coursePlan?: Types.ObjectId | null;
-        thumbnailUrl?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        description: string;
-        isActive: boolean;
-        status: "Draft" | "Published";
-        courseName: string;
-        instructorName: string;
-        instructorId: Types.ObjectId;
-        typeOfCourse: "Free" | "Paid";
-        totalDuration: number;
-        totalLectures: number;
-        totalMaterials: number;
-        totalQuizzes: number;
-        totalSubsections: number;
-        totalDurationFormatted: string;
-        originalPrice: number;
-        discountPrice: number;
-        whatYouWillLearn: string[];
-        tag: string[];
-        slug: string;
-        categoryId: Types.ObjectId;
-        level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
-        isBoosted: boolean;
-        sections: Types.ObjectId[];
-        coursePlan?: Types.ObjectId | null;
-        thumbnailUrl?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -254,14 +220,19 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
@@ -271,7 +242,7 @@ export declare const Course: import("mongoose").Model<{
 }>, {
     description: string;
     isActive: boolean;
-    status: "Draft" | "Published";
+    status: "Draft" | "Published" | "Removed";
     courseName: string;
     instructorName: string;
     instructorId: Types.ObjectId;
@@ -285,14 +256,19 @@ export declare const Course: import("mongoose").Model<{
     originalPrice: number;
     discountPrice: number;
     whatYouWillLearn: string[];
+    instructions: string[];
     tag: string[];
     slug: string;
     categoryId: Types.ObjectId;
     level: "Beginner" | "Intermediate" | "Advance" | "Beginner-to-Advance";
+    isScheduled: boolean;
     isBoosted: boolean;
+    isOrphaned: boolean;
     sections: Types.ObjectId[];
     coursePlan?: Types.ObjectId | null;
     thumbnailUrl?: string | null;
+    scheduledPublishAt?: NativeDate | null;
+    scheduledJobId?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {

@@ -11,6 +11,8 @@ interface PaginationMeta {
 export declare class ApiResponse {
     static success<T>(res: Response, data: T, message?: string, statusCode?: number, cookies?: CookieType[]): Response;
     static created<T>(res: Response, data: T, message?: string, cookies?: CookieType[]): Response;
+    static processing<T>(res: Response, data: T, message?: string, cookies?: CookieType[]): Response;
+    static error<T>(res: Response, data: T, message?: string, cookies?: CookieType[]): Response;
     static paginated<T>(res: Response, data: T[], pagination: PaginationMeta, message?: string): Response;
     static noContent(res: Response): Response;
 }

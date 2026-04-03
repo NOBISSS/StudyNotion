@@ -1,48 +1,60 @@
 import { Schema } from "mongoose";
 declare const Video: import("mongoose").Model<{
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps, {}, {}, {
     id: string;
 }, import("mongoose").Document<unknown, {}, {
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, {
     timestamps: true;
 }> & Omit<{
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
@@ -53,47 +65,59 @@ declare const Video: import("mongoose").Model<{
 }, Schema<any, import("mongoose").Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
 }, {
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
 } & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
@@ -101,58 +125,22 @@ declare const Video: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        isActive: boolean;
-        subsectionId: import("mongoose").Types.ObjectId;
-        courseId: import("mongoose").Types.ObjectId;
-        sectionId: import("mongoose").Types.ObjectId;
-        videoS3Key: string;
-        type?: string | null;
-        status?: string | null;
-        URLExpiration?: NativeDate | null;
-        videoName?: string | null;
-        duration?: number | null;
-        videoSize?: number | null;
-        videoURL?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        isActive: boolean;
-        subsectionId: import("mongoose").Types.ObjectId;
-        courseId: import("mongoose").Types.ObjectId;
-        sectionId: import("mongoose").Types.ObjectId;
-        videoS3Key: string;
-        type?: string | null;
-        status?: string | null;
-        URLExpiration?: NativeDate | null;
-        videoName?: string | null;
-        duration?: number | null;
-        videoSize?: number | null;
-        videoURL?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;
@@ -161,17 +149,21 @@ declare const Video: import("mongoose").Model<{
 } & {
     __v: number;
 }>, {
+    isNew: boolean;
     isActive: boolean;
     subsectionId: import("mongoose").Types.ObjectId;
     courseId: import("mongoose").Types.ObjectId;
     sectionId: import("mongoose").Types.ObjectId;
     videoS3Key: string;
+    originalVideoS3Key: string;
     type?: string | null;
     status?: string | null;
     URLExpiration?: NativeDate | null;
     videoName?: string | null;
+    tempVideoName?: string | null;
     duration?: number | null;
     videoSize?: number | null;
+    tempVideoS3Key?: string | null;
     videoURL?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;

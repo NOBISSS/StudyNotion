@@ -5,7 +5,7 @@ export type OTPData = {
     lastName?: string | undefined;
     accountType?: "admin" | "instructor" | "student" | undefined;
     password?: string | undefined;
-    otpType?: "registration" | "forgot" | undefined;
+    otpType?: "registration" | "forgot" | "recovery" | undefined;
 };
 export declare const saveOTP: ({ email, otp, data, }: {
     email: string;
@@ -17,6 +17,6 @@ export declare const canResendOTP: (email: string) => Promise<boolean>;
 export declare const verifyOTP: ({ email, userOtp, otpType, }: {
     email: string;
     userOtp: string;
-    otpType: "registration" | "forgot";
+    otpType: "registration" | "forgot" | "recovery";
 }) => Promise<OTPData | null>;
 //# sourceMappingURL=otp.service.d.ts.map

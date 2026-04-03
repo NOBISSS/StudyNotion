@@ -18,11 +18,23 @@ import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
 import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 import { isValidInstructor } from "../subsection/material/materialController.js";
+import { schedulePublish, cancelScheduledPublish, reschedulePublish } from "../../shared/queue/scheduleQueue.js";
 export const createCourse = asyncHandler(async (req, res) => {
     const userId = req.userId;
+    if (typeof req.body.tag === "string") {
+        req.body.tag = JSON.parse(req.body.tag);
+    }
+    if (typeof req.body.instructions === "string") {
+        req.body.instructions = JSON.parse(req.body.instructions);
+    }
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
         throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course data");
+    }
+    const { scheduledPublishAt } = parsedCourseData.data;
+    const publishAt = scheduledPublishAt ? new Date(scheduledPublishAt) : null;
+    if (publishAt && isNaN(publishAt.getTime())) {
+        throw AppError.badRequest("Invalid scheduledPublishAt Date");
     }
     const thumbnail = req.file;
     if (!thumbnail) {
@@ -40,7 +52,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     }
     const instructorId = req.accountType === "instructor"
         ? userId
-        : parsedCourseData.data.instructorId;
+        : new Types.ObjectId(parsedCourseData.data.instructorId);
     if (!instructorId) {
         throw AppError.badRequest("Instructor ID is required for course creation");
     }
@@ -48,7 +60,7 @@ export const createCourse = asyncHandler(async (req, res) => {
     if (!instructor) {
         throw AppError.notFound("Instructor not found");
     }
-    const { category: categoryId, courseName, courseDescription: description, coursePlan, price, level, tag, whatYouWillLearn, } = parsedCourseData.data;
+    const { category: categoryId, courseName, courseDescription: description, coursePlan, price, level, tag, whatYouWillLearn, instructions, } = parsedCourseData.data;
     let typeOfCourse = "Paid";
     if (price === "0") {
         typeOfCourse = "Free";
@@ -67,12 +79,26 @@ export const createCourse = asyncHandler(async (req, res) => {
         thumbnailUrl: thumbnailImage.secure_url,
         slug: `${instructor?.firstName} ${instructor?.lastName}/${courseName}`,
         whatYouWillLearn: [whatYouWillLearn || ""],
+        instructions: instructions || [],
     });
     await Category.findByIdAndUpdate(categoryId, {
         $push: { courses: course._id },
     });
+    let job = null;
+    if (publishAt) {
+        job = await schedulePublish({
+            courseId: course._id,
+            instructorId: new Types.ObjectId(instructorId),
+            courseName: course.courseName,
+            scheduledAt: new Date().toISOString(),
+        }, publishAt);
+        course.scheduledPublishAt = publishAt;
+        course.isScheduled = true;
+        course.scheduledJobId = job.id || null;
+        await course.save();
+    }
+    await embeddingQueue.add("embed-course", { course: course.toObject() });
     ApiResponse.created(res, { course }, "Course created successfully");
-    await embeddingQueue.add("embed-course", { course: course.toObject() }, { attempts: 3, backoff: { type: "exponential", delay: 5000 } });
 });
 export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     const userId = req.userId;
@@ -81,8 +107,8 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
         throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course data");
     }
     const instructorId = req.accountType === "instructor"
-        ? userId
-        : parsedCourseData.data.instructorId;
+        ? new Types.ObjectId(userId)
+        : new Types.ObjectId(parsedCourseData.data.instructorId);
     if (!instructorId) {
         throw AppError.badRequest("Instructor ID is required for course creation");
     }
@@ -90,7 +116,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     if (!instructor) {
         throw AppError.notFound("Instructor not found");
     }
-    const { category: categoryId, courseName, courseDescription: description, coursePlan, price, level, tag, thumbnailImage: thumbnailUrl, whatYouWillLearn, } = parsedCourseData.data;
+    const { category: categoryId, courseName, courseDescription: description, coursePlan, price, level, tag, thumbnailImage: thumbnailUrl, whatYouWillLearn, instructions, } = parsedCourseData.data;
     if (!thumbnailUrl) {
         throw AppError.badRequest("Thumbnail URL is required for course creation");
     }
@@ -115,6 +141,7 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)+/g, "") + `-${Date.now()}`,
         whatYouWillLearn: [whatYouWillLearn || ""],
+        instructions: instructions || [],
     });
     await Category.findByIdAndUpdate(categoryId, {
         $push: { courses: course._id },
@@ -167,6 +194,9 @@ export const getAllCourseByEnrollmentsAndRatings = asyncHandler(async (req, res)
 export const getAllCourseByEnrollmentsAndRatingsAndCategory = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const categoryId = req.params.categoryId;
+    if (!categoryId) {
+        throw AppError.badRequest("Invalid category ID");
+    }
     const courses = await Course.find({
         categoryId: new Types.ObjectId(categoryId),
         isActive: true,
@@ -215,6 +245,9 @@ export const getInstructorCourses = asyncHandler(async (req, res) => {
 });
 export const deleteCourse = asyncHandler(async (req, res) => {
     const courseId = req.params.courseId;
+    if (!courseId) {
+        throw AppError.badRequest("Invalid course ID");
+    }
     const userId = req.userId;
     const course = await Course.findById(courseId);
     if (!userId)
@@ -244,11 +277,14 @@ export const updateCourse = asyncHandler(async (req, res) => {
     if (courseId && !Types.ObjectId.isValid(courseId)) {
         throw AppError.badRequest("Invalid course ID");
     }
+    const userId = req.userId;
+    if (!userId)
+        throw AppError.unauthorized("User ID is required to update the course");
     const parsedCourseData = courseInputSchema.safeParse(req.body);
     if (!parsedCourseData.success) {
-        throw AppError.badRequest("Invalid course data");
+        throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course data");
     }
-    const { courseName, courseDescription: description, coursePlan, price, level, tag, } = parsedCourseData.data;
+    const { courseName, courseDescription: description, coursePlan, price, level, tag, instructions, whatYouWillLearn, category: categoryId, } = parsedCourseData.data;
     let typeOfCourse = "Paid";
     if (price == "0") {
         typeOfCourse = "Free";
@@ -260,7 +296,8 @@ export const updateCourse = asyncHandler(async (req, res) => {
     if (!course) {
         throw AppError.notFound("Course not found");
     }
-    if (course.instructorId !== req.userId) {
+    if (course.instructorId.toString() !== userId.toString() &&
+        req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to update this course");
     }
     const updatedCourse = await Course.findByIdAndUpdate(courseId, {
@@ -271,13 +308,16 @@ export const updateCourse = asyncHandler(async (req, res) => {
         originalPrice: price || 0,
         level,
         tag: tag || [],
+        instructions: instructions || [],
+        whatYouWillLearn: [whatYouWillLearn || ""],
+        categoryId: categoryId ? new Types.ObjectId(categoryId) : null,
     }, { new: true, runValidators: true });
     ApiResponse.success(res, { course: updatedCourse }, "Course updated successfully");
 });
 export const getCourseDetails = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
     const { userId } = req;
-    if (!courseId || !Types.ObjectId.isValid(courseId)) {
+    if (!courseId) {
         throw AppError.badRequest("Invalid course ID");
     }
     const courseObjectId = new Types.ObjectId(courseId);
@@ -314,6 +354,27 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
         enrollmentsCount,
         reviews,
         isUserEnrolled,
+    }, "Course details retrieved successfully");
+});
+export const getInstructorCourseDetails = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const { userId } = req;
+    if (!userId)
+        throw AppError.unauthorized("User ID is required to get course details");
+    if (!courseId) {
+        throw AppError.badRequest("Invalid course ID");
+    }
+    const courseObjectId = new Types.ObjectId(courseId);
+    const course = await Course.findOne({
+        _id: courseObjectId,
+        isActive: true,
+        instructorId: userId,
+    }).populate("categoryId", "name");
+    if (!course) {
+        throw AppError.notFound("Course not found");
+    }
+    ApiResponse.success(res, {
+        course,
     }, "Course details retrieved successfully");
 });
 export const searchCourses = asyncHandler(async (req, res) => {
@@ -385,5 +446,71 @@ export const draftCourse = asyncHandler(async (req, res) => {
     }
     const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { new: true });
     ApiResponse.success(res, { course }, "Course drafted successfully");
+});
+export const scheduleCoursePublish = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const userId = req.userId;
+    const { scheduledPublishAt } = req.body;
+    if (!courseId || !userId) {
+        throw AppError.badRequest("Course ID and User ID are required");
+    }
+    if (!Types.ObjectId.isValid(courseId)) {
+        throw AppError.badRequest("Invalid course ID");
+    }
+    const course = await Course.findOne({ _id: courseId, isActive: true });
+    if (!course)
+        throw AppError.notFound("Course not Found");
+    if (course.instructorId.toString() !== userId.toString()) {
+        throw AppError.unauthorized("Not Authorized to Schedule this course");
+    }
+    if (!scheduledPublishAt) {
+        if (course.scheduledJobId) {
+            await cancelScheduledPublish(course.scheduledJobId);
+        }
+        await Course.findByIdAndUpdate(courseId, {
+            isScheduled: false,
+            scheduledPublishAt: null,
+            scheduledJobId: null
+        });
+        return ApiResponse.success(res, {}, "Scheduled publish cancelled");
+    }
+    const publishAt = new Date(scheduledPublishAt);
+    if (isNaN(publishAt.getTime())) {
+        throw AppError.badRequest("Invalid Date Format For ScheduledPublishAt");
+    }
+    if (publishAt <= new Date()) {
+        throw AppError.badRequest("scheduledPublishAt must be a future date");
+    }
+    const job = await reschedulePublish(course.scheduledJobId ?? undefined, {
+        courseId: course._id,
+        instructorId: userId,
+        courseName: course.courseName,
+        scheduledAt: publishAt.toISOString(),
+    }, publishAt);
+    await Course.findByIdAndUpdate(courseId, {
+        isScheduled: true,
+        scheduledPublishAt: publishAt,
+        scheduledJobId: String(job.id),
+        status: "Draft",
+    });
+    ApiResponse.success(res, {
+        scheduledPublishAt: publishAt,
+        jobId: job.id,
+    }, `Course Scheduled To Publish On ${publishAt.toUTCString()}`);
+});
+export const getScheduledCourses = asyncHandler(async (req, res) => {
+    const instructorId = req.userId;
+    if (!instructorId) {
+        throw AppError.unauthorized("Instructor ID is required");
+    }
+    const courses = await Course.find({
+        instructorId,
+        isScheduled: true,
+        isActive: true
+    })
+        .select("courseName thumbnailUrl scheduledPublishat scheduleJobId level")
+        .sort({ scheduledPublishAt: 1 })
+        .lean();
+    ApiResponse.success(res, { courses }, "Scheduled Courses retrived successfully");
 });
 //# sourceMappingURL=courseController.js.map

@@ -20,6 +20,7 @@ const courseSchema = new Schema({
     discountPrice: { type: Number, default: 0 },
     thumbnailUrl: { type: String },
     whatYouWillLearn: { type: [String], default: [] },
+    instructions: { type: [String], default: [] },
     tag: { type: [String], default: [] },
     slug: { type: String, required: true, unique: true },
     categoryId: { type: Types.ObjectId, ref: "Category", required: true },
@@ -30,11 +31,15 @@ const courseSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["Draft", "Published"],
+        enum: ["Draft", "Published", "Removed"],
         default: "Draft",
     },
+    scheduledPublishAt: { type: Date, default: null, index: true },
+    isScheduled: { type: Boolean, default: false, index: true },
+    scheduledJobId: { type: String, default: null },
     isBoosted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isOrphaned: { type: Boolean, default: false },
     sections: [{ type: Types.ObjectId, ref: "Section" }],
 }, { timestamps: true });
 export const Course = model("Course", courseSchema);

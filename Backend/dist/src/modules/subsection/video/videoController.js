@@ -1,4 +1,4 @@
-import { AbortMultipartUploadCommand, CompleteMultipartUploadCommand, CreateMultipartUploadCommand, GetObjectCommand, HeadObjectCommand, UploadPartCommand, } from "@aws-sdk/client-s3";
+import { AbortMultipartUploadCommand, CompleteMultipartUploadCommand, CreateMultipartUploadCommand, DeleteObjectsCommand, GetObjectCommand, HeadObjectCommand, ListPartsCommand, UploadPartCommand, } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Types } from "mongoose";
 import path from "path";
@@ -22,28 +22,45 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
     }
     const { filename, type, metadata } = parsedVideoData.data;
     const key = `originals/${Date.now()}-${path.basename(filename)}`;
-    const subsection = await SubSection.create({
-        title: metadata.title,
-        isPreview: metadata.isPreview,
-        contentType: "video",
-        courseId: new Types.ObjectId(metadata.courseId),
-        sectionId: new Types.ObjectId(metadata.sectionId),
-        description: metadata.description || "",
-        isActive: true,
-        isAvailable: false,
-    });
-    const newVideo = await Video.create({
-        videoName: filename,
-        videoS3Key: key,
-        type,
-        status: "processing",
-        courseId: new Types.ObjectId(metadata.courseId),
-        sectionId: new Types.ObjectId(metadata.sectionId),
-        subsectionId: subsection._id,
-    });
-    await Section.findByIdAndUpdate(metadata.sectionId, {
-        $push: { subSectionIds: subsection._id },
-    });
+    let newVideo;
+    if (!metadata.isEditing) {
+        const subsection = await SubSection.create({
+            title: metadata.title,
+            isPreview: metadata.isPreview,
+            contentType: "video",
+            courseId: new Types.ObjectId(metadata.courseId),
+            sectionId: new Types.ObjectId(metadata.sectionId),
+            description: metadata.description || "",
+            isActive: true,
+            isAvailable: false,
+        });
+        newVideo = await Video.create({
+            videoName: filename,
+            videoS3Key: key,
+            originalVideoS3Key: key,
+            type,
+            status: "processing",
+            courseId: new Types.ObjectId(metadata.courseId),
+            sectionId: new Types.ObjectId(metadata.sectionId),
+            subsectionId: subsection._id,
+            isNew: true,
+        });
+        await Section.findByIdAndUpdate(metadata.sectionId, {
+            $push: { subSectionIds: subsection._id },
+        });
+    }
+    else {
+        if (!metadata.subsectionId) {
+            throw AppError.badRequest("subsectionId is required for editing");
+        }
+        const subsection = await SubSection.findOneAndUpdate({ _id: new Types.ObjectId(metadata.subsectionId), isActive: true }, { $set: { title: metadata.title, description: metadata.description, isPreview: metadata.isPreview, isAvailable: false } }, { new: true });
+        if (!subsection) {
+            throw AppError.notFound("Subsection not found for editing");
+        }
+        newVideo = await Video.findOneAndUpdate({ subsectionId: new Types.ObjectId(metadata.subsectionId) }, { $set: { tempVideoName: filename, tempVideoS3Key: key, type, status: "processing", isNew: false } });
+        if (!newVideo)
+            throw AppError.notFound("Video not found for the given subsection ID");
+    }
     const createCmd = new CreateMultipartUploadCommand({
         Bucket: BUCKET,
         Key: key,
@@ -65,7 +82,7 @@ export const generateMultipartPresignedURL = asyncHandler(async (req, res) => {
     const key = req.query.key;
     if (!uploadId || !partNumber || !key)
         throw AppError.badRequest("uploadId, partNumber, and key are required");
-    if (!uploadId || !partNumber || !key)
+    if (!uploadId || typeof uploadId !== "string" || !partNumber || !key)
         throw AppError.badRequest("Missing params");
     const cmd = new UploadPartCommand({
         Bucket: BUCKET,
@@ -80,7 +97,7 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
     const { uploadId } = req.params;
     const key = req.body.key || req.query.key;
     const parts = req.body.parts || req.body.uploadParts || req.body.partsList;
-    if (!uploadId || !key || !parts) {
+    if (!uploadId || typeof uploadId !== "string" || !key || !parts) {
         throw AppError.badRequest("Missing params");
     }
     const sortedParts = parts
@@ -106,6 +123,9 @@ export const completeVideoUpload = asyncHandler(async (req, res) => {
 export const videoBatchHandler = asyncHandler(async (req, res) => {
     const { uploadId } = req.params;
     let { key, partNumbers } = req.query || {};
+    if (!uploadId || typeof uploadId !== "string") {
+        throw AppError.badRequest("uploadId is required");
+    }
     if ((!partNumbers || !key) && req.originalUrl) {
         const idx = req.originalUrl.indexOf("?");
         if (idx !== -1) {
@@ -155,8 +175,8 @@ export const videoBatchHandler = asyncHandler(async (req, res) => {
 });
 export const abortVideoUpload = asyncHandler(async (req, res) => {
     const { uploadId } = req.params;
-    const { key } = req.body;
-    if (!uploadId || !key)
+    const { key } = req.query;
+    if (!uploadId || typeof uploadId !== "string" || !key || typeof key !== "string")
         throw AppError.badRequest("Missing params");
     const abortCmd = new AbortMultipartUploadCommand({
         Bucket: BUCKET,
@@ -164,10 +184,67 @@ export const abortVideoUpload = asyncHandler(async (req, res) => {
         UploadId: uploadId,
     });
     await s3.send(abortCmd);
+    const video = await Video.findOne({ tempVideoS3Key: key });
+    if (!video) {
+        throw AppError.internal("Something went wrong while aborting video upload");
+    }
+    const subsection = await SubSection.findOne({ _id: video.subsectionId });
+    if (!subsection)
+        throw AppError.internal("Something went wrong while aborting video upload");
+    if (video.isNew) {
+        subsection.isActive = false;
+        video.isActive = false;
+        const section = await Section.findOneAndUpdate({ _id: subsection.sectionId }, { $pull: { subSectionIds: subsection._id }, });
+    }
+    else {
+        video.tempVideoName = null;
+        video.tempVideoS3Key = null;
+        video.status = "ready";
+        subsection.isAvailable = true;
+    }
+    await video.save({ validateBeforeSave: false });
+    await subsection.save({ validateBeforeSave: false });
     res.json({ ok: true });
+});
+export const RestartVideoUpload = asyncHandler(async (req, res, next) => {
+    const { uploadId } = req.params;
+    const { key } = req.query;
+    if (!uploadId ||
+        typeof uploadId !== "string" ||
+        !key ||
+        typeof key !== "string") {
+        throw AppError.badRequest("Missing params");
+    }
+    const parts = [];
+    function listPartsPage(startsAt = undefined) {
+        s3.send(new ListPartsCommand({
+            Bucket: BUCKET,
+            Key: key,
+            UploadId: uploadId,
+            PartNumberMarker: startsAt?.toString(),
+        }), (err, data) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            if (data && data.Parts) {
+                parts.push(...data.Parts);
+            }
+            if (data?.IsTruncated && data?.NextPartNumberMarker) {
+                listPartsPage(Number(data.NextPartNumberMarker));
+            }
+            else {
+                res.json(parts);
+            }
+        });
+    }
+    listPartsPage();
 });
 export const getVideo = asyncHandler(async (req, res) => {
     const { subsectionId } = req.params;
+    if (!subsectionId || typeof subsectionId !== "string") {
+        throw AppError.badRequest("SubSection ID is required");
+    }
     const subsection = await SubSection.findOne({
         _id: new Types.ObjectId(subsectionId),
         isActive: true,
@@ -236,7 +313,7 @@ export const saveVideoProgress = asyncHandler(async (req, res) => {
         isCompleted,
         watchedPercentage: Math.floor((currentTime / (video?.duration || duration || 0)) * 100),
     }, {
-        new: true,
+        returnDocument: "after",
     });
     if (!videoProgress) {
         videoProgress = await VideoProgress.create({

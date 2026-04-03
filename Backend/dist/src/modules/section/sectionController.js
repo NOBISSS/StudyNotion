@@ -6,6 +6,11 @@ import { StatusCode } from "../../shared/types.js";
 import { Course } from "../course/CourseModel.js";
 import { Section } from "./SectionModel.js";
 import { createSectionSchema } from "./sectionValidation.js";
+import Video from "../subsection/video/VideoModel.js";
+import { DeleteObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { s3 } from "../../shared/config/s3Config.js";
+import { Material } from "../subsection/material/MaterialModel.js";
+import { SubSection } from "../subsection/SubSectionModel.js";
 export const createSection = asyncHandler(async (req, res) => {
     const parsedData = createSectionSchema.safeParse(req.body);
     const instructorId = req.userId;
@@ -57,6 +62,35 @@ export const removeSection = asyncHandler(async (req, res) => {
         order: { $gt: existingSection.order },
     }, { $inc: { order: -1 } });
     const section = await Section.updateOne({ _id: sectionId }, { isRemoved: true, order: -1, lastOrder: existingSection.order });
+    await SubSection.updateMany({ sectionId: new Types.ObjectId(sectionId) }, { isActive: false });
+    const existingVideos = await Video.find({ sectionId: new Types.ObjectId(sectionId) });
+    if (existingVideos.length > 0) {
+        const deleteCommand = new DeleteObjectsCommand({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Delete: {
+                Objects: existingVideos.flatMap((video) => [
+                    { Key: video.videoS3Key },
+                    { Key: video.originalVideoS3Key ? video.originalVideoS3Key : undefined },
+                ]),
+            },
+        });
+        await s3.send(deleteCommand);
+        await Video.updateMany({ sectionId: new Types.ObjectId(sectionId) }, { isActive: false });
+    }
+    const existingMaterials = await Material.find({ sectionId: new Types.ObjectId(sectionId) });
+    if (existingMaterials.length > 0) {
+        const deleteCommand = new DeleteObjectsCommand({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Delete: {
+                Objects: existingMaterials.flatMap((material) => [
+                    { Key: material.materialS3Key },
+                    { Key: material.originalMaterialS3Key ? material.originalMaterialS3Key : undefined },
+                ]),
+            },
+        });
+        await s3.send(deleteCommand);
+        await Material.updateMany({ sectionId: new Types.ObjectId(sectionId) }, { isActive: false });
+    }
     ApiResponse.success(res, {
         section,
     }, "Section removed successfully");
@@ -109,10 +143,13 @@ export const changeSectionOrder = asyncHandler(async (req, res) => {
 });
 export const updateSection = asyncHandler(async (req, res) => {
     const { name } = req.body;
+    if (!name) {
+        throw AppError.badRequest("Section name is required");
+    }
     const sectionId = req.params.sectionId;
     const instructorId = req.userId;
-    if (!sectionId) {
-        throw AppError.badRequest("Section ID is required");
+    if (!sectionId || !instructorId) {
+        throw AppError.badRequest("Section ID and Instructor ID are required");
     }
     const currentSection = await Section.findOne({
         _id: sectionId,
@@ -127,8 +164,8 @@ export const updateSection = asyncHandler(async (req, res) => {
     if (existingSection && existingSection.name === name) {
         throw AppError.conflict("Section with this name already exists for the course");
     }
-    if (existingSection?.courseId.instructorId.toString() != instructorId || req.accountType !== "admin") {
-        throw AppError.unauthorized("You are not authorized to add sections to this course");
+    if (existingSection?.courseId.instructorId.toString() != instructorId.toString() && req.accountType !== "admin") {
+        throw AppError.unauthorized("You are not authorized to update sections to this course");
     }
     currentSection.name = name || currentSection.name;
     await currentSection.save();
@@ -149,7 +186,13 @@ export const getAllSections = asyncHandler(async (req, res) => {
 });
 export const getRemovedSections = asyncHandler(async (req, res) => {
     const instructorId = req.userId;
+    if (!instructorId) {
+        throw AppError.badRequest("Instructor ID is required");
+    }
     const courseId = req.params.courseId;
+    if (!courseId) {
+        throw AppError.badRequest("Course ID is required");
+    }
     const sections = await Section.find({
         courseId: new Types.ObjectId(courseId),
         isRemoved: true,
@@ -158,7 +201,7 @@ export const getRemovedSections = asyncHandler(async (req, res) => {
         throw AppError.notFound("No removed sections found for this course");
     }
     const existingCourse = await Course.findOne({ _id: courseId });
-    if (existingCourse?.instructorId.toString() != instructorId) {
+    if (existingCourse?.instructorId.toString() != instructorId.toString() && req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to view removed sections of this course");
     }
     ApiResponse.success(res, {

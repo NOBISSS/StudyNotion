@@ -23,12 +23,16 @@ export const embeddingQueue = new Queue("embedding-queue", {
         removeOnFail: false,
     },
 });
-new Worker("course-embedding", async (job) => {
+const worker = new Worker("embedding-queue", async (job) => {
     const { course } = job.data;
+    console.log(`Processing embedding for course: ${course.courseName}`);
     await generateCourseEmbedding(course);
 }, {
     connection: redis,
     concurrency: 2,
+});
+worker.on("completed", (job) => {
+    console.log(`Embedding Job - ${job.id} completed`);
 });
 process.on("SIGINT", async () => {
     await embeddingQueue.close();

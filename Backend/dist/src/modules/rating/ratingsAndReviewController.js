@@ -44,7 +44,7 @@ export const rateAndReviewCourse = asyncHandler(async (req, res) => {
 });
 export const getAllReviews = asyncHandler(async (req, res) => {
     const courseId = req.params.courseId;
-    if (!courseId) {
+    if (!courseId || typeof courseId !== "string") {
         throw AppError.badRequest("Course ID is required");
     }
     const courseReviews = await RatingAndReview.find({
@@ -71,7 +71,7 @@ export const updateReview = asyncHandler(async (req, res) => {
     if (!parsedCourseData.success) {
         throw AppError.badRequest(parsedCourseData.error.issues[0]?.message || "Invalid course Id");
     }
-    if (!reviewId) {
+    if (!reviewId || typeof reviewId !== "string") {
         throw AppError.badRequest("Review ID is required");
     }
     const { courseId, rating, review } = parsedCourseData.data;
@@ -98,7 +98,7 @@ export const updateReview = asyncHandler(async (req, res) => {
 export const deleteReview = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const reviewId = req.params.reviewId;
-    if (!reviewId) {
+    if (!reviewId || typeof reviewId !== "string") {
         throw AppError.badRequest("Review ID is required");
     }
     const existingReview = await RatingAndReview.findOneAndUpdate({

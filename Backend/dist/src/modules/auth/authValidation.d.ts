@@ -1,7 +1,10 @@
 import z from "zod";
-export declare const forgetInputSchema: z.ZodObject<{
+export declare const forgetOTPVerificationSchema: z.ZodObject<{
     otp: z.ZodNumber;
+}, z.z.core.$strip>;
+export declare const forgetPasswordResetSchema: z.ZodObject<{
     password: z.ZodString;
+    confirmPassword: z.ZodString;
 }, z.z.core.$strip>;
 export declare const signupInputSchema: z.ZodObject<{
     firstName: z.ZodString;
