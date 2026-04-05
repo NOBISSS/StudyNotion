@@ -1,12 +1,11 @@
 console.log("📁 scheduleWorker FILE LOADED");
 import { Worker } from "bullmq";
-import { createRedisConnection } from "../config/redis.js";
+import redis from "../config/redis.js";
 import { Course } from "../../modules/course/CourseModel.js";
 import User from "../../modules/user/UserModel.js";
 import Wishlist from "../../modules/wishlist/wishlistModel.js";
 import { emailQueue } from "../queue/emailQueue.js";
 import { coursePublishedTemplate } from "../templates/coursePublishedTemplate.js";
-const redis = createRedisConnection();
 const worker = new Worker("schedule-publish", async (job) => {
     console.log(" ✅JOB RECEIVED :", job.data);
     const { courseId, courseName } = job.data;

@@ -386,6 +386,7 @@ export const forgetOTPPasswordReset = asyncHandler(async (req, res) => {
 });
 export const googleSignin = asyncHandler(async (req, res) => {
   const code = req.query.code;
+  console.log(`Request from: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
   const googleResponse = await oAuth2Client.getToken(code as string);
   oAuth2Client.setCredentials(googleResponse.tokens);
   const userRes = await axios.get(

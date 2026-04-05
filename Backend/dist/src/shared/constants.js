@@ -32,4 +32,5 @@ export const ROLES = {
     INSTRUCTOR: "instructor",
     ADMIN: "admin",
 };
+export const NODE_ENV = process.env.NODE_ENV || "development";
 //# sourceMappingURL=constants.js.map

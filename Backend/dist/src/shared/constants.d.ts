@@ -10,4 +10,5 @@ export declare const ROLES: {
     readonly ADMIN: "admin";
 };
 export type Role = (typeof ROLES)[keyof typeof ROLES];
+export declare const NODE_ENV: string;
 //# sourceMappingURL=constants.d.ts.map
