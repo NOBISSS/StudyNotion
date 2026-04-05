@@ -61,14 +61,16 @@ export const deleteCategory = asyncHandler(async (req, res) => {
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");
   }
-  const generateCategory = await Category.findOne({name: "Uncategorized"});
+  const generateCategory = await Category.findOne({ name: "Uncategorized" });
 
-  if(!generateCategory){
-    throw AppError.internal("Something went wrong from our end. Please try again later.");
+  if (!generateCategory) {
+    throw AppError.internal(
+      "Something went wrong from our end. Please try again later.",
+    );
   }
   await Course.updateMany(
     { categoryId: categoryId },
-    { $set: { categoryId: generateCategory._id } }
+    { $set: { categoryId: generateCategory._id } },
   );
   generateCategory.courses.push(...categoryDetails.courses);
   await generateCategory.save();
@@ -96,7 +98,13 @@ export const getAllCategory = asyncHandler(async (req, res) => {
 export const categoryPageDetails = asyncHandler(async (req, res) => {
   const { categoryId } = req.params;
   const selectedCategory = await Category.findById(categoryId)
-    .populate({ path: "courses", match: { status: "Published", isActive: true } })
+    .populate({
+      path: "courses",
+      match: {
+        $or: [{ status: "Published" }, { isScheduled: true }],
+        isActive: true,
+      },
+    })
     .exec();
 
   if (!selectedCategory) {
@@ -106,7 +114,10 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
   //get courses for other categories
   const categoriesExceptSelected = await Category.find({
     _id: { $ne: categoryId },
-  }).populate({path:"courses",match:{status:"Published", isActive: true}});
+  }).populate({
+    path: "courses",
+    match: { $or: [{ status: "Published" }, { isScheduled : true}], isActive: true },
+  });
 
   let differenceCourses = [];
   for (const category of categoriesExceptSelected) {
@@ -116,7 +127,7 @@ export const categoryPageDetails = asyncHandler(async (req, res) => {
   //get Top-selling courses across all categories
   const allCategories = await Category.find().populate({
     path: "courses",
-    match: { status: "Published", isActive: true },
+    match: { $or: [{ status: "Published" }, { isScheduled : true}], isActive: true },
   });
   const allCourse = allCategories.flatMap((category) => category.courses);
   const mostSellingCourses = allCourse
