@@ -46,7 +46,7 @@ export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
   await Wishlist.findOneAndUpdate(
     { userId },
     { $pull: { courseIds: courseId } },
-    { new: true },
+    { returnDocument: "after" },
   );
   ApiResponse.success(
     res,

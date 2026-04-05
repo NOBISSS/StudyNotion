@@ -61,7 +61,7 @@ export const updateComment = asyncHandler(async (req, res) => {
   const comment = await Comment.findOneAndUpdate(
     { _id: new Types.ObjectId(commentId), userId },
     { message, isEdited: true },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!comment) {
     throw AppError.notFound("Comment not found");
@@ -85,7 +85,7 @@ export const deleteComment = asyncHandler(async (req, res) => {
   const comment = await Comment.findOneAndUpdate(
     { _id: new Types.ObjectId(commentId), userId },
     { isDeleted: true },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!comment) {
     throw AppError.notFound("Comment not found");

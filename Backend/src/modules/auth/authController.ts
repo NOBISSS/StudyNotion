@@ -408,7 +408,7 @@ export const googleSignin = asyncHandler(async (req, res) => {
   let userProfile = await Profile.findOneAndUpdate(
     { userId: user._id },
     { profilePicture: userRes.data.picture },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!userProfile) {
     userProfile = await Profile.create({
@@ -474,7 +474,7 @@ export const githubSignin = asyncHandler(async (req, res) => {
   let user = await User.findOneAndUpdate({
     email: userRes.data.email,
     isDeleted: false,
-  }, { method: "github" }, { new: true });
+  }, { method: "github" }, { returnDocument: "after" });
   if (!user) {
     user = await User.create({
       firstName: userRes.data.name.split(" ")[0],
@@ -486,7 +486,7 @@ export const githubSignin = asyncHandler(async (req, res) => {
   let userProfile = await Profile.findOneAndUpdate(
     { userId: user._id },
     { profilePicture: userRes.data.avatar_url },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!userProfile) {
     userProfile = await Profile.create({

@@ -133,7 +133,7 @@ export const deleteReview = asyncHandler(async (req, res) => {
       _id: new Types.ObjectId(reviewId),
     },
     { isActive: false },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!existingReview) {
     throw AppError.notFound("Review not found or user not authorized");

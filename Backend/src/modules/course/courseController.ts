@@ -441,7 +441,7 @@ export const updateCourse: Handler = asyncHandler(async (req, res) => {
       whatYouWillLearn: [whatYouWillLearn || ""],
       categoryId: categoryId ? new Types.ObjectId(categoryId) : null,
     },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
   ApiResponse.success(
     res,
@@ -595,7 +595,7 @@ export const publishCourse: Handler = asyncHandler(async (req, res) => {
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Published" }, { new: true });
+  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Published" }, { returnDocument: "after" });
   ApiResponse.success(
     res,
     { course },
@@ -620,7 +620,7 @@ export const draftCourse: Handler = asyncHandler(async (req, res) => {
   if (!instuctorValid) {
     throw AppError.forbidden("You are not the instructor of this course");
   }
-  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Draft" }, { new: true });
+  const course = await Course.findByIdAndUpdate(courseId as string, { status: "Draft" }, { returnDocument: "after" });
   ApiResponse.success(
     res,
     { course },

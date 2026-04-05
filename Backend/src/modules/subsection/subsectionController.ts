@@ -53,7 +53,7 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
         completedSubsections: new Types.ObjectId(subsectionId as string),
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!courseProgress)
     courseProgress = await CourseProgress.create({

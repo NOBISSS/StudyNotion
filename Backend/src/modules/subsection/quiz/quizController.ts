@@ -200,12 +200,12 @@ export const updateQuiz = asyncHandler(async (req, res) => {
   const subsection = await SubSection.findByIdAndUpdate(
     subsectionId,
     { title, description },
-    { new: true },
+    { returnDocument: "after" },
   );
   const quiz = await Quiz.findOneAndUpdate(
     { subSectionId: new Types.ObjectId(subsectionId) },
     { title, description, questions: questionsWithIds },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!quiz) {
     throw AppError.notFound("Quiz not found for the given subsection ID.");

@@ -37,7 +37,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
           lastName: lastName,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).select("-password -refreshToken");
     if (!updatedUser) {
       throw AppError.notFound("User not found");
@@ -54,7 +54,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
           birthdate: new Date(additionalDetails.dateOfBirth || ""),
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!updatedProfile) {
       updatedProfile = await Profile.create({
@@ -121,7 +121,7 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
   const profile = await Profile.findOneAndUpdate(
     { userId: req.userId! },
     { profilePicture: avatar.secure_url },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!profile) {
     if (avatar) await deleteFromCloudinary(avatar.public_id);

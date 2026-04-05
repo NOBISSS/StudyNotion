@@ -34,7 +34,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
       name: name,
       description: description,
     },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");
@@ -56,7 +56,7 @@ export const deleteCategory = asyncHandler(async (req, res) => {
   const categoryDetails = await Category.findByIdAndUpdate(
     categoryId,
     { isActive: false },
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!categoryDetails) {
     throw AppError.notFound("Category not found");

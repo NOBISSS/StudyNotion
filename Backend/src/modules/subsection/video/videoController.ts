@@ -73,7 +73,7 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
   const subsection = await SubSection.findOneAndUpdate(
     { _id: new Types.ObjectId(metadata.subsectionId), isActive: true },
     { $set: { title: metadata.title, description: metadata.description, isPreview: metadata.isPreview, isAvailable:false } },
-    { new: true }
+    { returnDocument: "after" }
   );
   if (!subsection) {
     throw AppError.notFound("Subsection not found for editing");
