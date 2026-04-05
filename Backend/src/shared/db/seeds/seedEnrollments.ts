@@ -61,4 +61,4 @@ async function addEnrollments() {
   }
 }
 
-addEnrollments().then(()=> console.log("Enrollment seeding completed"));
+// addEnrollments().then(()=> console.log("Enrollment seeding completed"));
