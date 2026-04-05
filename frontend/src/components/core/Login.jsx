@@ -10,6 +10,7 @@ import { login } from "../../services/operations/authAPI";
 import GoogleLoginButton from "../../utils/GoogleLogin";
 import { HighlightText } from "./HomePage/HighlightText";
 import { endPoints } from "../../services/apis";
+import { githubClientId, githubRedirectUri, googleClientId } from "../../utils/constants";
 
 
 export const Login = () => {
@@ -33,7 +34,7 @@ export const Login = () => {
     localStorage.setItem("latestCSRFToken", randomHex);
 
     // redirect the user to github
-    const link = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&response_type=code&scop=read:user&redirect_uri=${import.meta.env.VITE_FRONTEND_URL}&state=${randomHex}`;
+    const link = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&scop=read:user&redirect_uri=${githubRedirectUri}&state=${randomHex}`;
     window.location.assign(link);
   };
 
@@ -57,7 +58,7 @@ export const Login = () => {
           <div className="mb-6 flex gap-3">
             {/* Google */}
             <GoogleOAuthProvider
-              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+              clientId={googleClientId}
             >
               <GoogleLoginButton />
             </GoogleOAuthProvider>
