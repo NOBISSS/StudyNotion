@@ -27,7 +27,7 @@ if (location.hostname === "localhost") {
   if (import.meta.env.VITE_BACKEND_URL) {
     API_URL = import.meta.env.VITE_BACKEND_URL;
   } else {
-    API_URL = "https://apistudynotion.mohammedarafat.me/api/v1";
+    API_URL = "/api/v1";
   }
 }
 export const BACKEND_URL = API_URL;
