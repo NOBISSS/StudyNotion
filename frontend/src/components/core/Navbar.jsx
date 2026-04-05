@@ -14,7 +14,6 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
   const categories     = useSelector(state => state.catalog.categories);
   const { token }      = useSelector(state => state.auth);
   const { user }       = useSelector(state => state.profile);
@@ -65,10 +64,11 @@ const Navbar = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden md:block">
-            <ul className="flex flex-row items-center gap-x-8">
-              {NavBarLinks.map((link, index) => (
-                <li key={index} className="relative">
-                  {link.title === "Catalog" ? (
+            
+              <ul className="flex flex-row items-center gap-x-8">
+                {NavBarLinks.filter(l=> l.title == "Catalog" && user.accountType === "student").filter((link) => link.for.includes(user?.accountType)).map((link, index) => (
+                  <li key={index} className="relative">
+                    {link.title === "Catalog" ? (
 
                     // ── Catalog trigger — dropdown anchored to full navbar width ──
                     <div className="group relative flex cursor-pointer items-center gap-1 py-4">

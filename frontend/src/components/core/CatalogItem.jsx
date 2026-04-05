@@ -16,6 +16,7 @@ const CatalogItem = () => {
   );
 
   const [activeTab, setActiveTab] = useState("all");
+  
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
 

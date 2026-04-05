@@ -4,6 +4,7 @@ import {
   ChevronUpIcon,
   PencilIcon,
   TrashIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -34,7 +35,9 @@ const CourseBuilderForm = ({ courseId }) => {
     editingName: "",
   });
   const [sections, setSections] = useState(course?.sections || []);
-  const [expandedSection, setExpandedSection] = useState(sections[0] ? [sections[0]._id] : []);
+  const [expandedSection, setExpandedSection] = useState(
+    sections[0] ? [sections[0]._id] : [],
+  );
   const subsectionDetailsRef = useRef(false); // To store details of subsections when fetched, to avoid refetching
   const [subsections, setSubSections] = useState([]);
   const demoSubsection = [
@@ -46,13 +49,13 @@ const CourseBuilderForm = ({ courseId }) => {
         "This lecture covers the basics of React, including components, state, and props.",
     },
   ];
-  async function loadSections(sectionId,isExpanded) {
+  async function loadSections(sectionId, isExpanded) {
     if (isExpanded) {
-      setExpandedSection(prev => [...prev,sectionId]);
+      setExpandedSection((prev) => [...prev, sectionId]);
       const res = await getAllSubsections(sectionId);
       setSubSections(res.subsections);
-    }else{
-      setExpandedSection(prev => prev.filter(s => s !== sectionId));
+    } else {
+      setExpandedSection((prev) => prev.filter((s) => s !== sectionId));
     }
   }
   useEffect(() => {
@@ -96,9 +99,16 @@ const CourseBuilderForm = ({ courseId }) => {
     setSections((prev) => prev.filter((s) => s._id !== sectionId));
     if (expandedSection === sectionId) setExpandedSection(null);
   };
-
+  
   const handleSectionUpdate = async (sectionId) => {
-    await updateSection({ sectionId, sectionName: editingSection.editingName });
+    if (editingSection.editingName == sections.find((s) => s._id == sectionId).name){
+      toast.error("No changes detected");
+      return;
+    }
+      await updateSection({
+        sectionId,
+        sectionName: editingSection.editingName,
+      });
     setEditingSection({ sectionId: null, isEditing: false, editingName: "" });
     setSections((prev) =>
       prev.map((s) =>
@@ -208,12 +218,22 @@ const CourseBuilderForm = ({ courseId }) => {
                 ) : (
                   editingSection.isEditing &&
                   editingSection.sectionId === section._id && (
-                    <button
+                    <div className="flex gap-2">
+                      <button
                       className="p-1.5 text-[#838894] hover:text-green-400 transition-colors"
                       onClick={() => handleSectionUpdate(section._id)}
                     >
                       <CheckIcon className="w-4 h-4" />
                     </button>
+                      <button
+                      className="p-1.5 text-[#838894] hover:text-green-400 transition-colors"
+                      onClick={() => {
+                        setEditingSection({sectionId:null,isEditing:false,editingName:""});
+                      }}
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                    </div>
                   )
                 )}
                 <button
@@ -223,7 +243,12 @@ const CourseBuilderForm = ({ courseId }) => {
                   <TrashIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => loadSections(section._id, !expandedSection.includes(section._id))}
+                  onClick={() =>
+                    loadSections(
+                      section._id,
+                      !expandedSection.includes(section._id),
+                    )
+                  }
                   className="p-1.5 text-[#838894] hover:text-white transition-colors"
                 >
                   {expandedSection.includes(section._id) ? (
