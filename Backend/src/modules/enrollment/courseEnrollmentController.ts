@@ -28,13 +28,18 @@ export const EnrollInCourse: Handler = asyncHandler(async (req, res) => {
     throw AppError.conflict("User is already enrolled in this course");
   }
   const course = await Course.findById(new Types.ObjectId(courseId));
-
+  if(!course || !course.isActive || course.status !== "Published"){
+    throw AppError.notFound("Course not found or not available for enrollment");
+  }
   if (course?.instructorId == userId && user?.accountType !== "admin") {
     throw AppError.badRequest("Instructor cannot enroll in their own course");
   }
   const courseEnrollment = await CourseEnrollment.create({
     userId: new Types.ObjectId(userId),
     courseId: new Types.ObjectId(courseId),
+    enrolledAt: new Date(),
+    amountPaid: course.originalPrice,
+    instructorId: course.instructorId,
   });
   const courseProgress = await CourseProgress.create({
     userId: new Types.ObjectId(userId),

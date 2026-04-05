@@ -18,6 +18,7 @@ import wishlistRouter from "./modules/wishlist/wishlistRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 import announcementRouter from "./modules/announcement/announcementRoutes.js";
 import "./shared/workers/courseScheduleWorker.js";
+import dashboardRouter from "./modules/dashboard/dashboardRoutes.js";
 
 dotenv.config();
 
@@ -75,6 +76,7 @@ app.use(`${baseRoute}/comments`, CommentRouter);
 app.use(`${baseRoute}/wishlists`, wishlistRouter);
 app.use(`${baseRoute}/announcements`,announcementRouter);
 app.use(`${baseRoute}/signatures`, SignatureGenerationRouter);
+app.use(`${baseRoute}/dashboards`, dashboardRouter);
 
 app.use(globalErrorHandler);
 
