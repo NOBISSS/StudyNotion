@@ -139,3 +139,8 @@ export const settingsEndPoints = {
   CHANGE_PASSWORD_API: BACKEND_URL + "/profile/changepassword",
   DELETE_PROFILE_API: BACKEND_URL + "/profile/deleteaccount",
 };
+
+export const dashboardEndpoints = {
+  INSTRUCTOR_DASHBOARD_API: BACKEND_URL + "/dashboards/instructor",
+  STUDENT_DASHBOARD_API: BACKEND_URL + "/dashboards/student",
+}
