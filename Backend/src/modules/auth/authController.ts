@@ -447,9 +447,9 @@ export const googleSignin = asyncHandler(async (req, res) => {
 export const githubSignin = asyncHandler(async (req, res) => {
   const code = req.query.code;
   const NODE_ENV = process.env.NODE_ENV || "development";
-  const GITHUB_CLIENT_ID = NODE_ENV === "production" ? process.env.GITHUB_CLIENT_ID : process.env.GITHUB_CLIENT_ID_DEV;
-  const GITHUB_CLIENT_SECRET = NODE_ENV === "production" ? process.env.GITHUB_CLIENT_SECRET : process.env.GITHUB_CLIENT_SECRET_DEV;
-  const GITHUB_REDIRECT_URI = NODE_ENV === "production" ? process.env.GITHUB_REDIRECT_URI : process.env.GITHUB_REDIRECT_URI_DEV;
+  const GITHUB_CLIENT_ID = NODE_ENV === "production" ? process.env.GITHUB_CLIENT_ID_PROD : process.env.GITHUB_CLIENT_ID_DEV;
+  const GITHUB_CLIENT_SECRET = NODE_ENV === "production" ? process.env.GITHUB_CLIENT_SECRET_PROD : process.env.GITHUB_CLIENT_SECRET_DEV;
+  const GITHUB_REDIRECT_URI = NODE_ENV === "production" ? process.env.GITHUB_REDIRECT_URI_PROD : process.env.GITHUB_REDIRECT_URI_DEV;
   const response = await axios.get("https://github.com/login/oauth/access_token", {
     params: {
       client_id: GITHUB_CLIENT_ID,

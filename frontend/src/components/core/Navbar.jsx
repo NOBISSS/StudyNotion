@@ -66,7 +66,7 @@ const Navbar = () => {
           <nav className="hidden md:block">
             
               <ul className="flex flex-row items-center gap-x-8">
-                {NavBarLinks.filter(l=> l.title == "Catalog" && user.accountType === "student").filter((link) => link.for.includes(user?.accountType)).map((link, index) => (
+                {NavBarLinks.filter((link) => link.for.includes(user?.accountType ? user.accountType : "student")).map((link, index) => (
                   <li key={index} className="relative">
                     {link.title === "Catalog" ? (
 

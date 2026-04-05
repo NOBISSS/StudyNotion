@@ -2,17 +2,7 @@ import React from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { VscChevronLeft } from 'react-icons/vsc'
 import RenderSteps from './RenderSteps'
-
-const tips = [
-  'Set the Course Price option or make it free.',
-  'Standard size for the course thumbnail is 1024×576.',
-  'Video section controls the course overview video.',
-  'Course Builder is where you create & organize a course.',
-  'Add Topics in the Course Builder section to create lessons, quizzes, and assignments.',
-  'Information from the Additional Data section shows up on the course single page.',
-  'Make Announcements to notify any important updates.',
-  'Notes to all enrolled students at once.',
-]
+import { tips } from '../../../../utils/constants'
 
 const AddCourse = () => {
   const navigate = useNavigate()

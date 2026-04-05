@@ -160,39 +160,8 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
                           controls
                         />
                       )
-                      // : (
-                      //   <>
-                      //     <div className="w-12 h-12 rounded-full bg-[#161D29] flex items-center justify-center">
-                      //       <MdCloudUpload className="text-2xl text-white" />
-                      //     </div>
-                      //     <div className="text-center">
-                      //       <p className="text-[#AFB2BF] text-sm">
-                      //         Drag and drop an image, or{" "}
-                      //         <span className="text-[#FFD60A] font-medium">
-                      //           Browse
-                      //         </span>
-                      //       </p>
-                      //       <p className="text-[#838894] text-xs mt-1">
-                      //         Max 6MB each (12MB for videos)
-                      //       </p>
-                      //     </div>
-                      //     <div className="flex gap-8 text-xs text-[#838894]">
-                      //       <span>• Aspect ratio 16:9</span>
-                      //       <span>• Recommended size 1024×576</span>
-                      //     </div>
-                      //   </>
-                      // )
                     }
                   </div>
-                  {/* <input
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) setVideoPreview(URL.createObjectURL(file));
-                }}
-              /> */}
                 </label>
               </div>
             )}
