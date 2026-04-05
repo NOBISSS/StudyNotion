@@ -55,9 +55,9 @@ export declare const CoursePlan: import("mongoose").Model<{
     endDate: NativeDate;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     status: "Available" | "Not Available";
     instructorId: Types.ObjectId;
     categoryId: Types.ObjectId;
@@ -71,37 +71,7 @@ export declare const CoursePlan: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        status: "Available" | "Not Available";
-        instructorId: Types.ObjectId;
-        categoryId: Types.ObjectId;
-        courseId: Types.ObjectId;
-        plan: string[];
-        startDate: NativeDate;
-        endDate: NativeDate;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        status: "Available" | "Not Available";
-        instructorId: Types.ObjectId;
-        categoryId: Types.ObjectId;
-        courseId: Types.ObjectId;
-        plan: string[];
-        startDate: NativeDate;
-        endDate: NativeDate;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     status: "Available" | "Not Available";
     instructorId: Types.ObjectId;
     categoryId: Types.ObjectId;

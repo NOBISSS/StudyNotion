@@ -8,7 +8,10 @@ export declare const getInstructorCourses: Handler;
 export declare const deleteCourse: Handler;
 export declare const updateCourse: Handler;
 export declare const getCourseDetails: Handler;
+export declare const getInstructorCourseDetails: Handler;
 export declare const searchCourses: Handler;
 export declare const publishCourse: Handler;
 export declare const draftCourse: Handler;
+export declare const scheduleCoursePublish: Handler;
+export declare const getScheduledCourses: Handler;
 //# sourceMappingURL=courseController.d.ts.map

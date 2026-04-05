@@ -15,6 +15,12 @@ export class ApiResponse {
     static created(res, data, message = "Created", cookies) {
         return ApiResponse.success(res, data, message, 201, cookies);
     }
+    static processing(res, data, message = "Processing", cookies) {
+        return ApiResponse.success(res, data, message, 202, cookies);
+    }
+    static error(res, data, message = "Error", cookies) {
+        return ApiResponse.success(res, data, message, 403, cookies);
+    }
     static paginated(res, data, pagination, message = "Success") {
         return res.status(200).json({
             success: true,

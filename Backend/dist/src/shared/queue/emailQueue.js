@@ -12,10 +12,23 @@ export const emailQueue = new Queue("email-queue", {
     },
 });
 new Worker("email-queue", async (job) => {
-    const { email, otp } = job.data;
-    const html = OtpTemp(otp);
-    await sendMail(email, "Your StudyNotion OTP Code", html);
-    console.log(`OTP email sent to ${email}`);
+    switch (job.name) {
+        case "send-otp": {
+            const { email, otp } = job.data;
+            const html = OtpTemp(otp);
+            await sendMail(email, "Your StudyNotion OTP Code", html);
+            console.log(`OTP email sent to ${email}`);
+            break;
+        }
+        case "publish-course": {
+            const { to, subject, html } = job.data;
+            await sendMail(to, subject, html);
+            console.log("Course Email send to " + to);
+            break;
+        }
+        default:
+            throw new Error(`Unknown email job type`);
+    }
 }, {
     connection: redis,
     concurrency: 10,

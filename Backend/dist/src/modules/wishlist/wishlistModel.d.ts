@@ -50,9 +50,9 @@ declare const Wishlist: import("mongoose").Model<{
     notes?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     priority: number;
     userId: Types.ObjectId;
     courseIds: Types.ObjectId[];
@@ -65,35 +65,7 @@ declare const Wishlist: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        priority: number;
-        userId: Types.ObjectId;
-        courseIds: Types.ObjectId[];
-        bundleIds: Types.ObjectId[];
-        status: "active" | "purchased";
-        notes?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        priority: number;
-        userId: Types.ObjectId;
-        courseIds: Types.ObjectId[];
-        bundleIds: Types.ObjectId[];
-        status: "active" | "purchased";
-        notes?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     priority: number;
     userId: Types.ObjectId;
     courseIds: Types.ObjectId[];

@@ -60,9 +60,9 @@ export declare const SubSection: import("mongoose").Model<{
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     isActive: boolean;
     courseId: Types.ObjectId;
     title: string;
@@ -77,39 +77,7 @@ export declare const SubSection: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        isActive: boolean;
-        courseId: Types.ObjectId;
-        title: string;
-        contentType: "video" | "material" | "quiz";
-        isPreview: boolean;
-        sectionId: Types.ObjectId;
-        isAvailable: boolean;
-        description?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        isActive: boolean;
-        courseId: Types.ObjectId;
-        title: string;
-        contentType: "video" | "material" | "quiz";
-        isPreview: boolean;
-        sectionId: Types.ObjectId;
-        isAvailable: boolean;
-        description?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     isActive: boolean;
     courseId: Types.ObjectId;
     title: string;

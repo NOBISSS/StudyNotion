@@ -6,6 +6,7 @@ const MaterialSchema = new Schema({
     materialType: { type: String, required: true },
     materialSize: { type: Number },
     materialS3Key: { type: String, required: true },
+    originalMaterialS3Key: { type: String, required: true },
     URLExpiration: { type: Date },
     subsectionId: { type: Types.ObjectId, ref: "SubSection", required: true },
     isActive: { type: Boolean, default: true },

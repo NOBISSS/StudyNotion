@@ -52,7 +52,7 @@ export const getCommentsBySubSectionId = asyncHandler(async (req, res) => {
 export const updateComment = asyncHandler(async (req, res) => {
   const commentId = req.params.commentId;
   const userId = req.userId;
-  if (!userId || !commentId) {
+  if (!userId || !commentId || typeof commentId !== "string") {
     throw AppError.unauthorized(
       "Unauthorized. User ID or Comment ID is missing.",
     );
@@ -77,7 +77,7 @@ export const updateComment = asyncHandler(async (req, res) => {
 export const deleteComment = asyncHandler(async (req, res) => {
   const commentId = req.params.commentId;
   const userId = req.userId;
-  if (!userId || !commentId) {
+  if (!userId || !commentId || typeof commentId !== "string") {
     throw AppError.unauthorized(
       "Unauthorized. User ID or Comment ID is missing.",
     );

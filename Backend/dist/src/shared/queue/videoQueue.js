@@ -20,5 +20,8 @@ worker.on("failed", (job, err) => {
     console.error(`Job ${job ? job.id : "unknown"} failed:`, err.message);
 });
 worker.on("error", (err) => console.error("Worker error:", err));
-console.log("Worker initialized");
+process.on("SIGINT", async () => {
+    await videoQueue.close();
+    process.exit();
+});
 //# sourceMappingURL=videoQueue.js.map

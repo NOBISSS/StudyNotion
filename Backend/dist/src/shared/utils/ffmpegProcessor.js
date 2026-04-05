@@ -1,4 +1,5 @@
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import dotenv from "dotenv";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -7,6 +8,7 @@ import path from "path";
 import { s3 } from "../config/s3Config.js";
 dotenv.config();
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 const BUCKET = process.env.AWS_BUCKET_NAME;
 async function downloadFromS3(key, dest) {
     return new Promise((resolve, reject) => {
@@ -28,7 +30,8 @@ import { Section } from "../../modules/section/SectionModel.js";
 import { SubSection } from "../../modules/subsection/SubSectionModel.js";
 import Video from "../../modules/subsection/video/VideoModel.js";
 import { convertSecondsToReadingTime } from "../../modules/subsection/video/videoUtils.js";
-export async function processVideo({ key, videoName, }) {
+export async function processVideo({ key, videoName, s3Location, }) {
+    console.log("S3 location:", s3Location);
     const tempDir = path.resolve("./temp");
     if (!fs.existsSync(tempDir))
         fs.mkdirSync(tempDir, { recursive: true });
@@ -53,9 +56,10 @@ export async function processVideo({ key, videoName, }) {
                 .save(outputPath);
         });
         const fileStream = fs.createReadStream(outputPath);
+        const compressedKey = `compressed/${path.basename(outputPath)}`;
         const putCmd = new PutObjectCommand({
             Bucket: BUCKET,
-            Key: `compressed/${path.basename(outputPath)}`,
+            Key: compressedKey,
             Body: fileStream,
             ContentType: "video/mp4",
         });
@@ -78,15 +82,22 @@ export async function processVideo({ key, videoName, }) {
             const videoDuration = await getVideoDuration(outputPath);
             const video = await Video.findOneAndUpdate({ videoS3Key: key }, {
                 $set: {
-                    videoS3Key: `compressed/${path.basename(outputPath)}`,
+                    videoS3Key: compressedKey,
                     URLExpiration: Date.now(),
                     videoSize: s.Size || fs.readFileSync(outputPath).byteLength,
                     duration: videoDuration,
                     status: "ready",
                 },
-            }, { new: true });
+            }, { returnDocument: "after" });
             if (!video) {
                 throw new Error("Video not found");
+            }
+            if (!video.isNew) {
+                video.videoName = video.tempVideoName;
+                video.originalVideoS3Key = video.tempVideoS3Key;
+                video.tempVideoName = null;
+                video.tempVideoS3Key = null;
+                await video.save({ validateBeforeSave: false });
             }
             await SubSection.findByIdAndUpdate(video.subsectionId, {
                 $set: { isAvailable: true },

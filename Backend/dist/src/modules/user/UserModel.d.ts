@@ -1,27 +1,29 @@
 import mongoose, { type HydratedDocument, type InferSchemaType } from "mongoose";
-export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any, any>, {
+export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any, any>, {
     comparePassword: (this: mongoose.Document<unknown, {}, {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -33,24 +35,26 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -62,24 +66,26 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -96,24 +102,26 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -125,24 +133,26 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -154,24 +164,26 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -187,122 +199,97 @@ export declare const userSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, mongoose.Document<unknown, {}, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, {
     id: string;
-}, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+}, mongoose.DefaultSchemaOptions> & Omit<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: mongoose.SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: mongoose.SchemaDefinitionProperty<any, any, mongoose.Document<unknown, {}, {
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-    }, {
-        id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }>;
-export type IUser = InferSchemaType<typeof userSchema>;
+export type IUser = InferSchemaType<typeof UserSchema>;
 export type UserDocument = HydratedDocument<IUser>;
 declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, {}, {
     comparePassword: (this: mongoose.Document<unknown, {}, {
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -314,24 +301,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -343,24 +332,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -377,12 +368,13 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, {
     id: string;
 }, {
@@ -391,24 +383,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -420,24 +414,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -449,24 +445,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -482,12 +480,13 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -499,24 +498,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -528,24 +529,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -557,24 +560,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -590,24 +595,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -619,24 +626,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -648,24 +657,26 @@ declare const User: mongoose.Model<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
+        method: "local" | "google" | "github";
         email: string;
         isBanned: boolean;
         isDeleted: boolean;
         password?: string | null;
         refreshToken?: string | null;
+        deletedAt?: NativeDate | null;
     } & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -682,24 +693,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -711,24 +724,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -740,24 +755,26 @@ declare const User: mongoose.Model<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
-            method: "local" | "google";
+            method: "local" | "google" | "github";
             email: string;
             isBanned: boolean;
             isDeleted: boolean;
             password?: string | null;
             refreshToken?: string | null;
+            deletedAt?: NativeDate | null;
         } & {
             _id: mongoose.Types.ObjectId;
         } & {
@@ -773,82 +790,54 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, mongoose.Document<unknown, {}, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 }, {
     id: string;
-}, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+}, mongoose.DefaultSchemaOptions> & Omit<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: mongoose.SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: mongoose.SchemaDefinitionProperty<any, any, mongoose.Document<unknown, {}, {
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-    }, {
-        id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -857,12 +846,13 @@ declare const User: mongoose.Model<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
-    method: "local" | "google";
+    method: "local" | "google" | "github";
     email: string;
     isBanned: boolean;
     isDeleted: boolean;
     password?: string | null;
     refreshToken?: string | null;
+    deletedAt?: NativeDate | null;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

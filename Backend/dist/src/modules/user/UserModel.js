@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose, { Schema } from "mongoose";
-export const userSchema = new Schema({
+export const UserSchema = new Schema({
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     password: { type: String },
@@ -16,15 +16,16 @@ export const userSchema = new Schema({
     method: {
         type: String,
         enum: {
-            values: ["local", "google"],
+            values: ["local", "google", "github"],
             message: "{VALUE} is not supported",
         },
         default: "local",
     },
-    email: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, trim: true },
     refreshToken: { type: String },
     isBanned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
 }, {
     methods: {
         comparePassword(inputPassword) {
@@ -43,6 +44,10 @@ export const userSchema = new Schema({
         },
     },
 });
-const User = mongoose.model("User", userSchema);
+UserSchema.index({ email: 1 }, {
+    unique: true,
+    partialFilterExpression: { isDeleted: false },
+});
+const User = mongoose.model("User", UserSchema);
 export default User;
 //# sourceMappingURL=UserModel.js.map

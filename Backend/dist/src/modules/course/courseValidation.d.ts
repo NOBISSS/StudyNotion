@@ -16,5 +16,6 @@ export declare const courseInputSchema: z.ZodObject<{
     tag: z.ZodOptional<z.ZodArray<z.ZodString>>;
     instructorId: z.ZodOptional<z.ZodString>;
     instructions: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    scheduledPublishAt: z.ZodOptional<z.ZodString>;
 }, z.z.core.$strip>;
 //# sourceMappingURL=courseValidation.d.ts.map
