@@ -50,9 +50,9 @@ export declare const Section: import("mongoose").Model<{
     lastOrder?: number | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
+}, import("mongoose").ResolveSchemaOptions<{
     timestamps: true;
-}> & Omit<{
+}>> & Omit<{
     name: string;
     courseId: Types.ObjectId;
     order: number;
@@ -65,7 +65,35 @@ export declare const Section: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        name: string;
+        courseId: Types.ObjectId;
+        order: number;
+        subSectionIds: Types.ObjectId[];
+        isRemoved: boolean;
+        lastOrder?: number | null;
+    } & import("mongoose").DefaultTimestampProps, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<{
+        timestamps: true;
+    }>> & Omit<{
+        name: string;
+        courseId: Types.ObjectId;
+        order: number;
+        subSectionIds: Types.ObjectId[];
+        isRemoved: boolean;
+        lastOrder?: number | null;
+    } & import("mongoose").DefaultTimestampProps & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     name: string;
     courseId: Types.ObjectId;
     order: number;

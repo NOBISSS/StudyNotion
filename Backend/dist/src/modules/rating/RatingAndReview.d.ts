@@ -45,9 +45,9 @@ export declare const RatingAndReview: import("mongoose").Model<{
     review: string;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
+}, import("mongoose").ResolveSchemaOptions<{
     timestamps: true;
-}> & Omit<{
+}>> & Omit<{
     isActive: boolean;
     userId: Types.ObjectId;
     courseId: Types.ObjectId;
@@ -59,7 +59,33 @@ export declare const RatingAndReview: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        isActive: boolean;
+        userId: Types.ObjectId;
+        courseId: Types.ObjectId;
+        rating: number;
+        review: string;
+    } & import("mongoose").DefaultTimestampProps, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<{
+        timestamps: true;
+    }>> & Omit<{
+        isActive: boolean;
+        userId: Types.ObjectId;
+        courseId: Types.ObjectId;
+        rating: number;
+        review: string;
+    } & import("mongoose").DefaultTimestampProps & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     isActive: boolean;
     userId: Types.ObjectId;
     courseId: Types.ObjectId;

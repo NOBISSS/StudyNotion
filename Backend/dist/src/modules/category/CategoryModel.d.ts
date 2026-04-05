@@ -36,7 +36,7 @@ export declare const Category: import("mongoose").Model<{
     description?: string | null;
 }, {
     id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<{
+}, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
     name: string;
     isActive: boolean;
     courses: import("mongoose").Types.ObjectId[];
@@ -47,7 +47,29 @@ export declare const Category: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        name: string;
+        isActive: boolean;
+        courses: import("mongoose").Types.ObjectId[];
+        description?: string | null;
+    }, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+        name: string;
+        isActive: boolean;
+        courses: import("mongoose").Types.ObjectId[];
+        description?: string | null;
+    } & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     name: string;
     isActive: boolean;
     courses: import("mongoose").Types.ObjectId[];

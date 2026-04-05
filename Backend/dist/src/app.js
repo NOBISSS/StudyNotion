@@ -47,6 +47,10 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
     res.send("Hello, StudyNotion!");
 });
+app.get("/api/v1/health", (req, res) => {
+    console.log(`Health check requested from: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    res.json({ status: "ok", timestamp: new Date().toISOString(), message: "StudyNotion API is healthy!" });
+});
 const baseRoute = "/api/v1";
 app.use(`${baseRoute}/auth`, authRouter);
 app.use(`${baseRoute}/profile`, profileRouter);

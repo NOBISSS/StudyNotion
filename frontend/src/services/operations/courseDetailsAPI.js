@@ -310,6 +310,25 @@ export const draftCourse = async (courseId) => {
     toast.dismiss(toastId);
   }
 };
+
+
+export const scheduleCourse = async (courseId) => {
+  const toastId = toast.loading("Drafting course...");
+  try {
+    const response = await apiConnector(
+      "PUT",
+      PUT_DRAFT_COURSE_API.replace(":courseId", courseId),
+    );
+    if (!response?.data?.success) throw new Error("Could not draft course");
+    toast.success("Course drafted");
+    return response?.data?.data.course;
+  } catch (error) {
+    toast.error(error.message || "Failed to draft course");
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
+
 export const getAllSubsections = async (sectionId) => {
   const toastId = toast.loading("Loading...");
   let result = [];

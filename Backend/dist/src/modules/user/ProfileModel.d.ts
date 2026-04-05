@@ -61,7 +61,7 @@ declare const Profile: import("mongoose").Model<{
     birthdate?: NativeDate | null;
 }, {
     id: string;
-}, import("mongoose").DefaultSchemaOptions> & Omit<{
+}, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
     isDeleted: boolean;
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;
@@ -77,7 +77,39 @@ declare const Profile: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        isDeleted: boolean;
+        userId: import("mongoose").Types.ObjectId;
+        about?: string | null;
+        contactNumber?: string | null;
+        gender?: "male" | "female" | "other" | null;
+        city?: string | null;
+        country?: string | null;
+        profilePicture?: string | null;
+        birthdate?: NativeDate | null;
+    }, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+        isDeleted: boolean;
+        userId: import("mongoose").Types.ObjectId;
+        about?: string | null;
+        contactNumber?: string | null;
+        gender?: "male" | "female" | "other" | null;
+        city?: string | null;
+        country?: string | null;
+        profilePicture?: string | null;
+        birthdate?: NativeDate | null;
+    } & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     isDeleted: boolean;
     userId: import("mongoose").Types.ObjectId;
     about?: string | null;

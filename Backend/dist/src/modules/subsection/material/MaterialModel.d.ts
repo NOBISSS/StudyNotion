@@ -70,9 +70,9 @@ export declare const Material: import("mongoose").Model<{
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
+}, import("mongoose").ResolveSchemaOptions<{
     timestamps: true;
-}> & Omit<{
+}>> & Omit<{
     isActive: boolean;
     subsectionId: Types.ObjectId;
     courseId: Types.ObjectId;
@@ -89,7 +89,43 @@ export declare const Material: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        isActive: boolean;
+        subsectionId: Types.ObjectId;
+        courseId: Types.ObjectId;
+        contentUrl: string;
+        materialType: string;
+        materialS3Key: string;
+        originalMaterialS3Key: string;
+        materialName?: string | null;
+        materialSize?: number | null;
+        URLExpiration?: NativeDate | null;
+    } & import("mongoose").DefaultTimestampProps, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<{
+        timestamps: true;
+    }>> & Omit<{
+        isActive: boolean;
+        subsectionId: Types.ObjectId;
+        courseId: Types.ObjectId;
+        contentUrl: string;
+        materialType: string;
+        materialS3Key: string;
+        originalMaterialS3Key: string;
+        materialName?: string | null;
+        materialSize?: number | null;
+        URLExpiration?: NativeDate | null;
+    } & import("mongoose").DefaultTimestampProps & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     isActive: boolean;
     subsectionId: Types.ObjectId;
     courseId: Types.ObjectId;

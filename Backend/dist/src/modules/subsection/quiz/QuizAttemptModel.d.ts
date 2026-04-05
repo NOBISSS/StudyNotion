@@ -15,7 +15,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -39,7 +39,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -65,7 +65,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -95,7 +95,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -117,7 +117,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -125,9 +125,9 @@ declare const QuizAttempt: import("mongoose").Model<{
     }>;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
+}, import("mongoose").ResolveSchemaOptions<{
     timestamps: true;
-}> & Omit<{
+}>> & Omit<{
     userId: import("mongoose").Types.ObjectId;
     score: number;
     quizId: import("mongoose").Types.ObjectId;
@@ -143,7 +143,7 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    }> & {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
@@ -155,7 +155,65 @@ declare const QuizAttempt: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, unknown, {
+}, {
+    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
+} | {
+    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
+        userId: import("mongoose").Types.ObjectId;
+        score: number;
+        quizId: import("mongoose").Types.ObjectId;
+        adaptiveData: any[];
+        attemptedAt: NativeDate;
+        answers: import("mongoose").Types.DocumentArray<{
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }> & {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }>;
+    } & import("mongoose").DefaultTimestampProps, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<{
+        timestamps: true;
+    }>> & Omit<{
+        userId: import("mongoose").Types.ObjectId;
+        score: number;
+        quizId: import("mongoose").Types.ObjectId;
+        adaptiveData: any[];
+        attemptedAt: NativeDate;
+        answers: import("mongoose").Types.DocumentArray<{
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }> & {
+            questionId: import("mongoose").Types.ObjectId;
+            answer: import("mongoose").Types.ObjectId;
+            isCorrect: boolean;
+            answeredAt: NativeDate;
+        }>;
+    } & import("mongoose").DefaultTimestampProps & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+}, {
     userId: import("mongoose").Types.ObjectId;
     score: number;
     quizId: import("mongoose").Types.ObjectId;
@@ -166,17 +224,35 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }, import("mongoose").Types.Subdocument<string | import("bson").ObjectId, unknown, {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }> & ({
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }>;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    })>;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
@@ -194,17 +270,35 @@ declare const QuizAttempt: import("mongoose").Model<{
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, import("mongoose").Types.Subdocument<import("bson").ObjectId, unknown, {
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }, import("mongoose").Types.Subdocument<string | import("bson").ObjectId, unknown, {
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }, {}, {}> & {
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    }> & ({
         questionId: import("mongoose").Types.ObjectId;
         answer: import("mongoose").Types.ObjectId;
         isCorrect: boolean;
         answeredAt: NativeDate;
-    }>;
+    } | {
+        questionId: string;
+        answer: string;
+        isCorrect: boolean;
+        answeredAt: NativeDate;
+        _id: string;
+    })>;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
