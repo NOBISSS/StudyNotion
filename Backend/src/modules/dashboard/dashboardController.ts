@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
@@ -308,8 +307,122 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
     topCourses: courses,
   });
 });
-const DUMMY = {
+const RequiredInstructorDashboardData = {
   avgQuizScore: 74,
   dropOffData: [88, 75, 62, 54, 48, 41, 38],
   dropOffLabels: ["Intro", "Ch.2", "Ch.3", "Ch.4", "Ch.5", "Ch.6", "Ch.7"],
+};
+export const studentDashboard: Handler = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  if(!userId) throw AppError.unauthorized("User ID is required");
+
+  const totalCourses = await CourseEnrollment.countDocuments({ userId, isActive: true });
+  const completedCourses = await CourseProgress.countDocuments({ userId, completed: true });
+  const hoursLearnedAgg = await CourseProgress.aggregate([
+    { $match: { userId } },
+    { $lookup: {
+        from: "courses",
+        localField: "courseId",
+        foreignField: "_id",
+        as: "course"
+    }},
+    { $unwind: "$course" },
+    { $group: {
+        _id: null,
+        totalHours: { $sum: "$course.totalHours" }
+    }},
+    { $project: { _id: 0, totalHours: 1 } }
+  ]);
+  const hoursLearned = hoursLearnedAgg[0]?.totalHours || 0;
+  const enrolledCourses = await CourseEnrollment.find({ userId, isActive: true })
+    .populate("courseId", "courseName instructorId instructorName thumbnailUrl")
+    .sort({ enrolledAt: -1 })
+  ApiResponse.success(res, {
+    totalCourses,
+    completedCourses,
+    hoursLearned,
+    enrolledCourses
+  });
+});
+
+const RequiredStudentDashboardData = {
+  name: "Aryan Mehta",
+  streak: 12,
+  totalCourses: 6,
+  completedCourses: 2,
+  hoursLearned: 47,
+  avgQuizScore: 78,
+  certificates: 2,
+  enrolledCourses: [
+    {
+      id: 1,
+      name: "Complete MERN Stack",
+      instructor: "Arafat Mansuri",
+      progress: 82,
+      thumbnail:
+        "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=200&q=60",
+      lastAccessed: "2h ago",
+      totalVideos: 48,
+      completedVideos: 39,
+    },
+    {
+      id: 2,
+      name: "React.js from Scratch",
+      instructor: "Arafat Mansuri",
+      progress: 55,
+      thumbnail:
+        "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200&q=60",
+      lastAccessed: "1d ago",
+      totalVideos: 32,
+      completedVideos: 18,
+    },
+    {
+      id: 3,
+      name: "JavaScript Fundamentals",
+      instructor: "Arafat Mansuri",
+      progress: 100,
+      thumbnail:
+        "https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=200&q=60",
+      lastAccessed: "3d ago",
+      totalVideos: 24,
+      completedVideos: 24,
+    },
+    {
+      id: 4,
+      name: "Node.js & Express",
+      instructor: "Arafat Mansuri",
+      progress: 28,
+      thumbnail:
+        "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200&q=60",
+      lastAccessed: "5d ago",
+      totalVideos: 40,
+      completedVideos: 11,
+    },
+  ],
+  weeklyActivity: [2.5, 1.0, 3.5, 0.5, 4.0, 2.0, 1.5],
+  quizHistory: [
+    { name: "JS Basics", score: 85, date: "Jan 5" },
+    { name: "React Hooks", score: 72, date: "Jan 8" },
+    { name: "Node APIs", score: 68, date: "Jan 11" },
+    { name: "MongoDB", score: 90, date: "Jan 14" },
+    { name: "Express MW", score: 76, date: "Jan 17" },
+  ],
+  recentActivity: [
+    {
+      type: "video",
+      text: 'Completed "JWT Authentication" in Node.js',
+      time: "2h ago",
+    },
+    { type: "quiz", text: "Scored 90% on MongoDB Quiz", time: "5h ago" },
+    {
+      type: "enroll",
+      text: "Enrolled in Node.js & Express Backend Mastery",
+      time: "1d ago",
+    },
+    {
+      type: "cert",
+      text: "Earned certificate for JavaScript Fundamentals",
+      time: "3d ago",
+    },
+  ],
 };

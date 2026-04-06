@@ -87,7 +87,7 @@ const AppRoutes = () => {
         <Route path="/forgotpassword/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
         <Route path="/reactivate-account"   element={<OpenRoute><ReactivateAccount /></OpenRoute>} />
         <Route path="/reactivate-account/verify"   element={<OpenRoute><VerifyEmail /></OpenRoute>} />
-        <Route path="/auth/github"   element={<OpenRoute><GithubRedirect /></OpenRoute>} />
+        <Route path="/auth/github/callback"   element={<OpenRoute><GithubRedirect /></OpenRoute>} />
         <Route path="/update-password/:id" element={<OpenRoute><UpdatePassword /></OpenRoute>} />
         <Route path="/resetpassword"    element={<OpenRoute><ResetPassword /></OpenRoute>} />
 

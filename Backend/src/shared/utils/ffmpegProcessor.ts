@@ -130,11 +130,11 @@ export async function processVideo({
       await SubSection.findByIdAndUpdate(video.subsectionId, {
         $set: { isAvailable: true },
       });
-      const course = await Course.findById(video.courseId,);
+      const course = await Course.findById(video.courseId);
       if (course) {
         course.totalDuration = (course.totalDuration || 0) + videoDuration;
-        course.totalLectures ? course.totalLectures += 1 : course.totalLectures = 1;
-        course.totalSubsections ? course.totalSubsections += 1 : course.totalSubsections = 1;
+        course.totalLectures >= 0 ? course.totalLectures += 1 : course.totalLectures = 1;
+        course.totalSubsections >= 0 ? course.totalSubsections += 1 : course.totalSubsections = 1;
         await course.save();
         course.totalDurationFormatted = convertSecondsToReadingTime(
           course.totalDuration,
