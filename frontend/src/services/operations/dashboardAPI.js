@@ -4,13 +4,13 @@ import { apiConnector } from "../apiconnector";
 
 const {INSTRUCTOR_DASHBOARD_API} = dashboardEndpoints;
 
-export const instructorDashboard = async (instructorId) => {
+export const instructorDashboard = async () => {
   const toastId = toast.loading("Fetching instructor dashboard details...");
   let result = [];
   try {
     const response = await apiConnector(
       "GET",
-      INSTRUCTOR_DASHBOARD_API + `?instructorId=${instructorId}`,
+      INSTRUCTOR_DASHBOARD_API
     );
     if (!response?.data?.success)
       throw new Error("Could not fetch instructor dashboard details");

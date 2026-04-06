@@ -339,7 +339,7 @@ export default function InstructorDashboard() {
   
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const data = await instructorDashboard("");
+      const data = await instructorDashboard();
       setDashboardData(data);
       console.log("Fetched dashboard data is ", data);
       console.log("Top courses in dashboard data ", data?.topCourses[0].completion.toFixed(2));
