@@ -34,19 +34,19 @@ const RequirementOfCourse = ({ label, register, errors, setValue, requirements: 
       </label>
 
       {/* Input + Add button */}
-      <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
         <input
           type="text"
           value={requirement}
           onChange={(e) => setRequirement(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addRequirement(e)}
           placeholder="Enter Benefits of the course"
-          className="w-full px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors"
+          className="w-1/2 px-4 py-3 rounded-lg bg-[#2C333F] border border-transparent text-white placeholder-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors"
         />
         <button
           type="button"
           onClick={addRequirement}
-          className="text-[#FFD60A] text-sm font-semibold w-fit hover:text-yellow-300 transition-colors"
+          className="bg-[#FFD60A] px-5 py-1 rounded-2xl text-black text-sm font-semibold w-fit hover:bg-yellow-300 transition-colors"
         >
           Add
         </button>
