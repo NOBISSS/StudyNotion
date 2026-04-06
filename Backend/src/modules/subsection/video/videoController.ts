@@ -23,6 +23,7 @@ import Video from "./VideoModel.js";
 import VideoProgress from "./VideoProgressModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
 import { Section } from "../../section/SectionModel.js";
+import { updateUserStreak } from "../../../shared/utils/updateStreak.js";
 
 const BUCKET = process.env.AWS_BUCKET_NAME as string;
 
@@ -413,7 +414,7 @@ export const saveVideoProgress = asyncHandler(async (req, res) => {
       ),
     },
     {
-      returnDocument: "after",  
+      returnDocument: "after",
     },
   );
   if (!videoProgress) {
@@ -430,6 +431,10 @@ export const saveVideoProgress = asyncHandler(async (req, res) => {
       duration: video.duration || duration || 0,
     });
   }
-
+  // In your VideoProgress update controller
+  await updateUserStreak(
+    req.user._id,
+    ((video.duration || duration || 0) - currentTime) / 3600, // convert to hours
+  );
   ApiResponse.success(res, videoProgress, "Video progress updated");
 });

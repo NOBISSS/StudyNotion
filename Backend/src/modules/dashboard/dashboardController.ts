@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
@@ -6,6 +7,10 @@ import { Course } from "../course/CourseModel.js";
 import CourseProgress from "../course/CourseProgress.js";
 import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { RatingAndReview } from "../rating/RatingAndReview.js";
+import QuizAttempt from "../subsection/quiz/QuizAttemptModel.js";
+import VideoProgress from "../subsection/video/VideoProgressModel.js";
+import { UserStreak } from "../user/UserStreakModel.js";
+import { formatTimeAgo } from "../../shared/utils/formatTimeAgo.js";
 const monthNames = [
   "Jan",
   "Feb",
@@ -314,39 +319,214 @@ const RequiredInstructorDashboardData = {
 };
 export const studentDashboard: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  if(!userId) throw AppError.unauthorized("User ID is required");
+  if (!userId) throw AppError.unauthorized("User ID is required");
 
-  const totalCourses = await CourseEnrollment.countDocuments({ userId, isActive: true });
-  const completedCourses = await CourseProgress.countDocuments({ userId, completed: true });
-  const hoursLearnedAgg = await CourseProgress.aggregate([
-    { $match: { userId } },
-    { $lookup: {
-        from: "courses",
-        localField: "courseId",
-        foreignField: "_id",
-        as: "course"
-    }},
-    { $unwind: "$course" },
-    { $group: {
-        _id: null,
-        totalHours: { $sum: "$course.totalHours" }
-    }},
-    { $project: { _id: 0, totalHours: 1 } }
+  const userObjectId = new Types.ObjectId(userId);
+
+  // ── Enrollments ───────────────────────────────────────────────────────────
+  const enrollments = await CourseEnrollment.find({
+    userId: userObjectId,
+    isActive: true,
+  }).lean();
+
+  const courseIds = enrollments.map((e) => e.courseId);
+  const totalCourses = enrollments.length;
+
+  // ── Course Progress ───────────────────────────────────────────────────────
+  const allProgress = await CourseProgress.find({
+    userId: userObjectId,
+    courseId: { $in: courseIds },
+  }).lean();
+
+  const progressMap = new Map(
+    allProgress.map((p) => [p.courseId.toString(), p]),
+  );
+
+  const completedCourses = allProgress.filter((p) => p.completed).length;
+
+  // ── Hours Learned (from VideoProgress) ───────────────────────────────────
+  const hoursLearnedAgg = await VideoProgress.aggregate([
+    { $match: { userId: userObjectId, isCompleted: true } },
+    { $group: { _id: null, totalSeconds: { $sum: "$duration" } } },
+    { $project: { _id: 0, totalSeconds: 1 } },
   ]);
-  const hoursLearned = hoursLearnedAgg[0]?.totalHours || 0;
-  const enrolledCourses = await CourseEnrollment.find({ userId, isActive: true })
-    .populate("courseId", "courseName instructorId instructorName thumbnailUrl")
-    .sort({ enrolledAt: -1 })
-  ApiResponse.success(res, {
-    totalCourses,
-    completedCourses,
-    hoursLearned,
-    enrolledCourses
+  const hoursLearned = parseFloat(
+    ((hoursLearnedAgg[0]?.totalSeconds || 0) / 3600).toFixed(1),
+  );
+
+  // ── Quiz Stats ────────────────────────────────────────────────────────────
+  const quizAttempts = await QuizAttempt.find({ userId: userObjectId })
+    .populate("quizId", "title")
+    .sort({ attemptedAt: -1 })
+    .lean();
+
+  const avgQuizScore =
+    quizAttempts.length > 0
+      ? Math.round(
+          quizAttempts.reduce((acc, q) => acc + q.score, 0) /
+            quizAttempts.length,
+        )
+      : 0;
+
+  // Last 5 quiz attempts for the chart
+  const quizHistory = quizAttempts.slice(0, 5).map((q) => ({
+    name: (q.quizId as any)?.title || "Quiz",
+    score: q.score,
+    date: new Date(q.attemptedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    }),
+  }));
+
+  // ── Certificates ──────────────────────────────────────────────────────────
+  // Certificate model not implemented yet — derive from completed courses
+  const certificates = completedCourses;
+
+  // ── Streak & Weekly Activity ──────────────────────────────────────────────
+  const streakDoc = await UserStreak.findOne({ userId: userObjectId }).lean();
+  const streak = streakDoc?.currentStreak || 0;
+
+  // weeklyActivity: shift so index 0 = 6 days ago, index 6 = today
+  const rawWeekly = streakDoc?.weeklyActivity || [0, 0, 0, 0, 0, 0, 0];
+  // Rotate so the array always represents Mon→Sun relative to today
+  const todayDayIndex = new Date().getDay(); // 0=Sun, 6=Sat
+  const weeklyActivity = Array.from({ length: 7 }, (_, i) => {
+    const dayOffset = (todayDayIndex - 6 + i + 7) % 7;
+    return rawWeekly[dayOffset] || 0;
   });
+
+  // ── Enrolled Courses with Progress ───────────────────────────────────────
+  const courses = await Course.find({
+    _id: { $in: courseIds },
+    isActive: true,
+    status: "Published",
+  }).lean();
+
+  const courseMap = new Map(courses.map((c) => [c._id.toString(), c]));
+
+  // Get last video activity per course for "lastAccessed"
+  const lastVideoActivity = await VideoProgress.aggregate([
+    { $match: { userId: userObjectId, courseId: { $in: courseIds } } },
+    { $sort: { updatedAt: -1 } },
+    { $group: { _id: "$courseId", lastAccessed: { $first: "$updatedAt" } } },
+  ]);
+  const lastAccessMap = new Map(
+    lastVideoActivity.map((v) => [v._id.toString(), v.lastAccessed]),
+  );
+
+  const enrolledCourses = enrollments
+    .map((enrollment) => {
+      const course = courseMap.get(enrollment.courseId.toString());
+      if (!course) return null;
+
+      const progress = progressMap.get(enrollment.courseId.toString());
+      const lastAccessed = lastAccessMap.get(enrollment.courseId.toString());
+
+      return {
+        id: course._id,
+        name: course.courseName,
+        instructor: course.instructorName,
+        thumbnail: course.thumbnailUrl,
+        progress: progress?.progress || 0,
+        completed: progress?.completed || false,
+        totalVideos: course.totalLectures || 0,
+        completedVideos: progress?.completedSubsections?.length || 0,
+        lastAccessed: lastAccessed
+          ? formatTimeAgo(lastAccessed)
+          : "Not started",
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      // Sort by lastAccessed — most recent first
+      const aTime = lastAccessMap.get(a!.id.toString())?.getTime() || 0;
+      const bTime = lastAccessMap.get(b!.id.toString())?.getTime() || 0;
+      return bTime - aTime;
+    });
+
+  // ── Recent Activity ───────────────────────────────────────────────────────
+  // Pull from VideoProgress, QuizAttempt, CourseEnrollment and merge + sort
+  const [recentVideos, recentQuizzes, recentEnrollments] = await Promise.all([
+    VideoProgress.find({ userId: userObjectId, isCompleted: true })
+      .populate("subSectionId", "title")
+      .populate("courseId", "courseName")
+      .sort({ updatedAt: -1 })
+      .limit(5)
+      .lean(),
+
+    QuizAttempt.find({ userId: userObjectId })
+      .sort({ attemptedAt: -1 })
+      .limit(5)
+      .lean(),
+
+    CourseEnrollment.find({ userId: userObjectId, isActive: true })
+      .populate("courseId", "courseName")
+      .sort({ enrolledAt: -1 })
+      .limit(5)
+      .lean(),
+  ]);
+
+  const recentActivity = [
+    ...recentVideos.map((v) => ({
+      type: "video" as const,
+      text: `Completed "${(v.subSectionId as any)?.title || "a lecture"}" in ${(v.courseId as any)?.courseName || "a course"}`,
+      time: formatTimeAgo(v.updatedAt),
+      timestamp: v.updatedAt,
+    })),
+    ...recentQuizzes.map((q) => ({
+      type: "quiz" as const,
+      text: `Scored ${q.score}% on a quiz`,
+      time: formatTimeAgo(q.attemptedAt),
+      timestamp: q.attemptedAt,
+    })),
+    ...recentEnrollments.map((e) => ({
+      type: "enroll" as const,
+      text: `Enrolled in ${(e.courseId as any)?.courseName || "a course"}`,
+      time: formatTimeAgo(e.enrolledAt),
+      timestamp: e.enrolledAt,
+    })),
+    // Certificates from completed courses
+    ...allProgress
+      .filter((p) => p.completed && p.completionDate)
+      .map((p) => ({
+        type: "cert" as const,
+        text: `Earned certificate for ${courseMap.get(p.courseId.toString())?.courseName || "a course"}`,
+        time: formatTimeAgo(p.completionDate!),
+        timestamp: p.completionDate!,
+      })),
+  ]
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    )
+    .slice(0, 10)
+    .map(({ timestamp, ...rest }) => rest); // strip internal timestamp field
+
+  // ── Response ──────────────────────────────────────────────────────────────
+  ApiResponse.success(
+    res,
+    {
+      // Stats
+      streak,
+      totalCourses,
+      completedCourses,
+      hoursLearned,
+      avgQuizScore,
+      certificates,
+
+      // Charts
+      weeklyActivity,
+      quizHistory,
+
+      // Lists
+      enrolledCourses,
+      recentActivity,
+    },
+    "Student dashboard retrieved successfully",
+  );
 });
 
 const RequiredStudentDashboardData = {
-  name: "Aryan Mehta",
   streak: 12,
   totalCourses: 6,
   completedCourses: 2,

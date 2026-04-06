@@ -486,8 +486,12 @@ export default function InstructorDashboard() {
                       {r.userId.firstName[0]}
                     </div>
                     <div>
-                      <p className="text-white text-xs font-medium">{r.userId.firstName} {r.userId.lastName}</p>
-                      <p className="text-[#6B7280] text-xs">{r.courseId.courseName}</p>
+                      <p className="text-white text-xs font-medium">
+                        {r.userId.firstName} {r.userId.lastName}
+                      </p>
+                      <p className="text-[#6B7280] text-xs">
+                        {r.courseId.courseName}
+                      </p>
                     </div>
                   </div>
                   <Stars rating={r.rating} />
@@ -532,9 +536,14 @@ export default function InstructorDashboard() {
               {dashboardData?.topCourses?.map((c) => (
                 <tr
                   key={c.name}
-                  className="border-b border-[#2C333F] hover:bg-[#1D2532] transition-colors"
+                  className="border-b border-[#2C333F] hover:bg-[#1D2532] transition-colors cursor-pointer"
+                  onClick={() =>
+                    navigate(
+                      `/dashboard/add-course?courseId=${c._id}`,
+                    )
+                  }
                 >
-                  <td className="py-3 pr-4">
+                  <td className="py-3 pr-4 pl-1">
                     <div className="flex items-center gap-3">
                       <img
                         src={c.thumbnail}

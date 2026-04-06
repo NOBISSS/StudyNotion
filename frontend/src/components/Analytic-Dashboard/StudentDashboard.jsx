@@ -1,8 +1,9 @@
 // components/core/Dashboard/StudentDashboard.jsx
-import { useRef, useEffect, useDebugValue } from 'react'
+import { useRef, useEffect, useDebugValue, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Chart, registerables } from 'chart.js'
 import { useNavigate } from 'react-router-dom'
+import { studentDashboard } from '../../services/operations/dashboardAPI'
 
 // ✅ Register once at module level
 Chart.register(...registerables)
@@ -40,7 +41,7 @@ const DUMMY = {
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // ── WatchTimeChart ────────────────────────────────────────────────────────────
-function WatchTimeChart() {
+function WatchTimeChart({ weeklyActivity }) {
   const canvasRef = useRef(null)
   const chartRef  = useRef(null)
 
@@ -55,7 +56,7 @@ function WatchTimeChart() {
         labels: DAYS,
         datasets: [{
           label: 'Hours',
-          data: DUMMY.weeklyActivity,
+          data: weeklyActivity,
           backgroundColor: '#FFD60A',
           borderRadius: 6,
           borderSkipped: false,
@@ -76,13 +77,13 @@ function WatchTimeChart() {
     })
 
     return () => { chartRef.current?.destroy(); chartRef.current = null }
-  }, [])
+  }, [weeklyActivity])
 
   return <div style={{ position: 'relative', height: '180px' }}><canvas ref={canvasRef} /></div>
 }
 
 // ── QuizChart ─────────────────────────────────────────────────────────────────
-function QuizChart() {
+function QuizChart({ quizHistory }) {
   const canvasRef = useRef(null)
   const chartRef  = useRef(null)
 
@@ -93,10 +94,10 @@ function QuizChart() {
     chartRef.current = new Chart(canvasRef.current.getContext('2d'), {
       type: 'line',
       data: {
-        labels: DUMMY.quizHistory.map((q) => q.name),
+        labels: quizHistory.map((q) => q.name),
         datasets: [{
           label: 'Score',
-          data: DUMMY.quizHistory.map((q) => q.score),
+          data: quizHistory.map((q) => q.score),
           borderColor: '#FFD60A',
           backgroundColor: 'rgba(255,214,10,0.08)',
           pointBackgroundColor: '#FFD60A',
@@ -120,7 +121,7 @@ function QuizChart() {
     })
 
     return () => { chartRef.current?.destroy(); chartRef.current = null }
-  }, [])
+  }, [quizHistory])
 
   return <div style={{ position: 'relative', height: '180px' }}><canvas ref={canvasRef} /></div>
 }
@@ -149,6 +150,19 @@ export default function StudentDashboard() {
   const { user } = useSelector((state) => state.profile)
   const name = user?.firstName || 'Student';
   const navigate=useNavigate();
+  if(!user) {
+      navigate("/login");
+    }
+    const [dashboardData, setDashboardData] = useState({});
+    
+    useEffect(() => {
+      const fetchDashboardData = async () => {
+        const data = await studentDashboard();
+        setDashboardData(data);
+        console.log("Fetched dashboard data is ", data);
+      };
+      fetchDashboardData();
+    }, []);
   return (
     <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
 
@@ -160,7 +174,7 @@ export default function StudentDashboard() {
         </div>
         <div className="flex items-center gap-2 bg-[#1D2532] border border-[#2C333F] rounded-xl px-4 py-2">
           <span className="text-[#FFD60A] text-lg">🔥</span>
-          <span className="text-white font-semibold">{DUMMY.streak}</span>
+          <span className="text-white font-semibold">{dashboardData?.streak}</span>
           <span className="text-[#838894] text-sm">day streak</span>
         </div>
       </div>
@@ -168,10 +182,10 @@ export default function StudentDashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Courses Enrolled', value: DUMMY.totalCourses,        sub: `${DUMMY.completedCourses} completed`,  color: '#FFD60A' },
-          { label: 'Hours Learned',    value: `${DUMMY.hoursLearned}h`,  sub: 'Total watch time',                     color: '#60a5fa' },
-          { label: 'Avg Quiz Score',   value: `${DUMMY.avgQuizScore}%`,  sub: 'Across all quizzes',                   color: '#4ade80' },
-          { label: 'Certificates',     value: DUMMY.certificates,        sub: 'Earned so far',                        color: '#c084fc' },
+          { label: 'Courses Enrolled', value: dashboardData.totalCourses,        sub: `${dashboardData.completedCourses} completed`,  color: '#FFD60A' },
+          { label: 'Hours Learned',    value: `${dashboardData.hoursLearned}h`,  sub: 'Total watch time',                     color: '#60a5fa' },
+          { label: 'Avg Quiz Score',   value: `${dashboardData.avgQuizScore}%`,  sub: 'Across all quizzes',                   color: '#4ade80' },
+          { label: 'Certificates',     value: dashboardData.certificates,        sub: 'Earned so far',                        color: '#c084fc' },
         ].map((s) => (
           <div key={s.label} className="bg-[#161D29] border border-[#2C333F] rounded-xl p-4">
             <p className="text-[#838894] text-xs mb-1">{s.label}</p>
@@ -188,14 +202,14 @@ export default function StudentDashboard() {
             <p className="text-sm font-semibold text-white">Weekly Watch Time</p>
             <span className="text-xs text-[#838894]">This week</span>
           </div>
-          <WatchTimeChart />
+          <WatchTimeChart weeklyActivity={dashboardData?.weeklyActivity || []} />
         </div>
 
         {/* Course progress */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <p className="text-sm font-semibold text-white mb-4">Course Progress</p>
           <div className="flex flex-col gap-3">
-            {DUMMY.enrolledCourses.slice(0, 4).map((c) => (
+            {dashboardData.enrolledCourses?.slice(0, 4).map((c) => (
               <div key={c.id} className="flex items-center gap-3">
                 <ProgressRing pct={c.progress} size={48} stroke={4} color={c.progress === 100 ? '#4ade80' : '#FFD60A'} />
                 <div className="min-w-0 flex-1">
@@ -215,14 +229,14 @@ export default function StudentDashboard() {
             <p className="text-sm font-semibold text-white">Quiz Performance</p>
             <span className="text-xs bg-[#FFD60A]/10 text-[#FFD60A] px-2 py-1 rounded-full">Last 5 quizzes</span>
           </div>
-          <QuizChart />
+          <QuizChart quizHistory={dashboardData?.quizHistory || []} />
         </div>
 
         {/* Recent activity */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <p className="text-sm font-semibold text-white mb-4">Recent Activity</p>
           <div className="flex flex-col gap-3">
-            {DUMMY.recentActivity.map((a, i) => (
+            {dashboardData?.recentActivity?.map((a, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
                   style={{ background: activityColor[a.type] + '20', color: activityColor[a.type] }}>
@@ -245,8 +259,8 @@ export default function StudentDashboard() {
           <button className="text-[#FFD60A] text-xs hover:text-yellow-300 transition-colors cursor-pointer" onClick={()=>navigate('/dashboard/enrolled-courses')}>View all →</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {DUMMY.enrolledCourses.map((c) => (
-            <div key={c.id} className="bg-[#0F1117] border border-[#2C333F] rounded-xl overflow-hidden hover:border-[#FFD60A]/40 transition-colors cursor-pointer">
+          {dashboardData?.enrolledCourses?.map((c) => (
+            <div key={c.id} className="bg-[#0F1117] border border-[#2C333F] rounded-xl overflow-hidden hover:border-[#FFD60A]/40 transition-colors cursor-pointer" onClick={()=>navigate(`/courses/${c.id}`)}>
               <div className="relative">
                 <img src={c.thumbnail} alt={c.name} className="w-full h-28 object-cover" />
                 {c.progress === 100 && (
