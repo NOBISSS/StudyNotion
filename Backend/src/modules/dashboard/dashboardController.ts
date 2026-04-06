@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
@@ -22,20 +23,26 @@ const monthNames = [
 ];
 
 export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
-  let instructorId;
-  if (req.query.instructorId && req.query.instructorId != "") {
-    instructorId = req.query.instructorId as string;
-  } else {
-    instructorId = req.userId;
-  }
-  if (!instructorId) {
-    throw AppError.unauthorized("Instructor ID is required");
-  }
+  const instructorId = req.userId;
 
+  if (!instructorId) throw AppError.unauthorized("Instructor ID is required");
+
+  const instructorCourses = await Course.find({
+    instructorId,
+    isActive: true,
+  });
+
+  const totalCourses = instructorCourses.length;
+  const publishedCourses = instructorCourses.filter(
+    (c) => c.status === "Published"
+  ).length;
+  const draftCourses = totalCourses - publishedCourses;
+  const courseIds = instructorCourses.map((c) => c._id);
   const totalStudents = await CourseEnrollment.countDocuments({
     instructorId,
     isActive: true,
   });
+
   const currentMonthEnrolledStudents = await CourseEnrollment.countDocuments({
     instructorId,
     isActive: true,
@@ -44,8 +51,19 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
       $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
     },
   });
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+  twelveMonthsAgo.setDate(1);
+  twelveMonthsAgo.setHours(0, 0, 0, 0);
+
   const monthlyEnrollments = await CourseEnrollment.aggregate([
-    { $match: { instructorId, isActive: true } },
+    {
+      $match: {
+        instructorId,
+        isActive: true,
+        enrolledAt: { $gte: twelveMonthsAgo },
+      },
+    },
     {
       $group: {
         _id: {
@@ -56,57 +74,57 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
       },
     },
     { $sort: { "_id.year": 1, "_id.month": 1 } },
-    { $project: { month: "$_id.month", year: "$_id.year", count: 1, _id: 0 } },
-    { $limit: 7 },
-  ]);
-  const totalRevenue = await CourseEnrollment.aggregate([
-    { $match: { instructorId, isActive: true } },
-    { $group: { _id: null, total: { $sum: "$amountPaid" } } },
     {
       $project: {
-        total: 1,
         _id: 0,
+        month: "$_id.month",
+        year: "$_id.year",
+        count: 1,
       },
     },
   ]);
-  const monthlyRevenue = await CourseEnrollment.aggregate([
+  const totalRevenueAgg = await CourseEnrollment.aggregate([
     { $match: { instructorId, isActive: true } },
+    { $group: { _id: null, total: { $sum: "$amountPaid" } } },
+    { $project: { _id: 0, total: 1 } },
+  ]);
+
+  const monthlyRevenue = await CourseEnrollment.aggregate([
+    {
+      $match: {
+        instructorId,
+        isActive: true,
+        enrolledAt: { $gte: twelveMonthsAgo },
+      },
+    },
     {
       $group: {
         _id: {
           month: { $month: "$enrolledAt" },
           year: { $year: "$enrolledAt" },
         },
-        total: { $sum: "$amountPaid" },
+        revenue: { $sum: "$amountPaid" },
+        count: { $sum: 1 },
       },
     },
     { $sort: { "_id.year": 1, "_id.month": 1 } },
     {
       $project: {
+        _id: 0,
         month: "$_id.month",
         year: "$_id.year",
+        revenue: 1,
         count: 1,
-        _id: 0,
-        revenue: "$total",
       },
     },
   ]);
-  const instructorCourses = await Course.find({
-    instructorId,
-    isActive: true,
-  });
-  const totalCourses = instructorCourses.length;
-  const publishedCourses = instructorCourses.filter(
-    (course) => course.status == "Published",
-  ).length;
-  const draftCourses = totalCourses - publishedCourses;
   const overAllCompletionRate = await CourseProgress.aggregate([
-    { $match: { courseId: { $in: instructorCourses.map((c) => c._id) } } },
+    { $match: { courseId: { $in: courseIds } } },
     {
       $group: {
         _id: null,
         total: { $sum: 1 },
-        completed: { $sum: { $cond: ["$completed", 1, 0] } },
+        completed: { $sum: { $cond: [{ $eq: ["$completed", true] }, 1, 0] } },
       },
     },
     {
@@ -115,7 +133,8 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
         completionRate: {
           $cond: [
             { $gt: ["$total", 0] },
-            { $multiply: [{ $divide: ["$completed", totalStudents] }, 100] },
+            // Fix: divide by $total not totalStudents variable
+            { $multiply: [{ $divide: ["$completed", "$total"] }, 100] },
             0,
           ],
         },
@@ -132,19 +151,18 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
         as: "user",
       },
     },
-    { $unwind: "$user" },
-    { $group: { _id: "$user.country", pct: { $sum: 1 } } },
-    { $sort: { pct: -1 } },
+    { $unwind: { path: "$user",preserveNullAndEmptyArrays:false } },
+    { $group: { _id: "$user.country", count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
     {
       $project: {
-        country: "$_id",
         _id: 0,
+        country: { $ifNull: ["$_id", "Unknown"] },
+        count: 1,
         pct: {
           $cond: [
-            { $gt: ["$pct", 0] },
-            {
-              $multiply: [{ $divide: ["$pct", totalStudents] }, 100],
-            },
+            { $gt: [totalStudents, 0] },
+            { $multiply: [{ $divide: ["$count", totalStudents] }, 100] },
             0,
           ],
         },
@@ -152,26 +170,23 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
     },
   ]);
   const recentReviews = await RatingAndReview.find({
-    courseId: { $in: instructorCourses.map((c) => c._id) },
+    courseId: { $in: courseIds },
     isActive: true,
   })
     .populate("courseId", "courseName")
     .populate("userId", "firstName lastName")
-    .sort({ enrolledAt: -1 })
+    .sort({ createdAt: -1 })
     .limit(5);
+
   const totalReviews = await RatingAndReview.countDocuments({
-    courseId: { $in: instructorCourses.map((c) => c._id) },
+    courseId: { $in: courseIds },
     isActive: true,
   });
-  const averageRating = await RatingAndReview.aggregate([
-    {
-      $match: {
-        courseId: { $in: instructorCourses.map((c) => c._id) },
-        isActive: true,
-      },
-    },
+
+  const averageRatingAgg = await RatingAndReview.aggregate([
+    { $match: { courseId: { $in: courseIds }, isActive: true } },
     { $group: { _id: null, average: { $avg: "$rating" } } },
-    { $project: { _id: 0, average: 1 } },
+    { $project: { _id: 0, average: { $round: ["$average", 1] } } },
   ]);
   const courses = await Course.aggregate([
     { $match: { instructorId, isActive: true } },
@@ -180,6 +195,7 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
         from: "courseenrollments",
         localField: "_id",
         foreignField: "courseId",
+        pipeline: [{ $match: { isActive: true } }],
         as: "enrollments",
       },
     },
@@ -188,6 +204,7 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
         from: "ratingandreviews",
         localField: "_id",
         foreignField: "courseId",
+        pipeline: [{ $match: { isActive: true } }],
         as: "reviews",
       },
     },
@@ -205,14 +222,26 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
         averageRating: { $avg: "$reviews.rating" },
         totalRevenue: { $sum: "$enrollments.amountPaid" },
         averageProgress: { $avg: "$progresses.progress" },
-        completionRate: { $sum: { $cond: ["$progresses.completed", 1, 0] } },
+        // Fix: correctly count completed progresses using $filter
+        completedCount: {
+          $size: {
+            $filter: {
+              input: "$progresses",
+              as: "p",
+              cond: { $eq: ["$$p.completed", true] },
+            },
+          },
+        },
       },
     },
     {
       $project: {
+        _id: 1,
         name: "$courseName",
+        thumbnail: "$thumbnailUrl",
+        status: 1,
         students: "$totalStudents",
-        rating: { $ifNull: ["$averageRating", 0] },
+        rating: { $ifNull: [{ $round: ["$averageRating", 1] }, 0] },
         revenue: {
           $cond: {
             if: { $eq: ["$typeOfCourse", "Paid"] },
@@ -220,44 +249,62 @@ export const instructorDashboard: Handler = asyncHandler(async (req, res) => {
             else: "Free",
           },
         },
-        _id: 1,
-        averageProgress: { $ifNull: ["$averageProgress", 0] },
+        averageProgress: { $ifNull: [{ $round: ["$averageProgress", 1] }, 0] },
+        // Fix: completion rate as percentage
         completion: {
           $cond: [
             { $gt: ["$totalStudents", 0] },
             {
-              $multiply: [
-                { $divide: ["$completionRate", "$totalStudents"] },
-                100,
+              $round: [
+                {
+                  $multiply: [
+                    { $divide: ["$completedCount", "$totalStudents"] },
+                    100,
+                  ],
+                },
+                1,
               ],
             },
             0,
           ],
         },
-        thumbnail: "$thumbnailUrl",
       },
     },
+    { $sort: { students: -1 } },
   ]);
   ApiResponse.success(res, {
+    // Students
     totalStudents,
     newStudentsThisMonth: currentMonthEnrolledStudents,
-    monthlyEnrollments,
-    totalRevenue: totalRevenue[0]?.total || 0,
-    totalReviews,
-    revenueThisMonth: monthlyRevenue[monthlyRevenue.length - 1]?.revenue || 0,
+
+    // Courses
     totalCourses,
-    // monthLabels,
+    publishedCourses,
+    draftCourses,
+
+    // Revenue
+    totalRevenue: totalRevenueAgg[0]?.total || 0,
+    revenueThisMonth: monthlyRevenue[monthlyRevenue.length - 1]?.revenue || 0,
+
+    // Charts
     monthLabels: monthlyRevenue.map(
-      (m) => monthNames[m.month - 1] + " " + m.year,
+      (m) => monthNames[m.month - 1] + " " + m.year
     ),
     monthlyRevenue: monthlyRevenue.map((m) => m.revenue),
     enrollmentTrend: monthlyEnrollments.map((m) => m.count),
-    publishedCourses,
-    draftCourses,
+
+    // Completion
     completionRate: overAllCompletionRate[0]?.completionRate || 0,
+
+    // Geography
     studentLocations: countryWiseEnrollments,
+
+    // Reviews
+    totalReviews,
     recentReviews,
-    avgCourseRating: averageRating[0]?.average || 0,
+    avgCourseRating: averageRatingAgg[0]?.average || 0,
+
+    // Per-course breakdown
     topCourses: courses,
   });
 });
