@@ -1,8 +1,5 @@
 import toast from "react-hot-toast";
 import { apiConnector } from "../apiconnector";
-import { subSectionMaterialEndpoints } from '../apis';
-
-
 
 import {
   courseEndpoints,
@@ -10,7 +7,6 @@ import {
   SignatureEndpoints,
   subSectionVideoEndpoints,
 } from "../apis";
-import axios from "axios";
 
 const {
   GET_ALL_COURSE_API,
@@ -42,14 +38,6 @@ const {
   EDIT_SUBSECTION_API
 } = subSectionVideoEndpoints;
 const { POST_SIGNATURE_CLOUDINARY_API } = SignatureEndpoints;
-
-const {
-    CREATE_MATERIAL_API,
-    GET_MATERIAL_API,
-    UPDATE_MATERIAL_API,
-    DELETE_MATERIAL_API,
-} = subSectionMaterialEndpoints;
-
 
 export const editCourseDetails = async (data, courseId) => {
   const toastId = toast.loading("Updating course...");
@@ -452,107 +440,4 @@ export const updateSubsection = async (subsectionId, data) => {
   } finally {
     toast.dismiss(toastId);
   }
-};
-
-// ─── Helper: build auth headers ───────────────────────────────────────────────
-const authHeaders = (token) => ({
-    headers: { Authorization: `Bearer ${token}` },
-});
-
-// ─── Add Material ─────────────────────────────────────────────────────────────
-// Body: { title, description, courseId, sectionId, materialType, materialSize, materialS3Key }
-// Backend creates SubSection + Material documents, then pushes to Section.subSectionIds
-export const addMaterial = async (materialData, token) => {
-    const toastId = toast.loading('Adding material...');
-    try {
-        const response = await axios.post(
-            CREATE_MATERIAL_API,
-            materialData,          // plain JSON — no FormData needed
-            authHeaders(token)
-        );
-
-        if (!response.data?.success) {
-            throw new Error(response.data?.message || 'Failed to add material');
-        }
-
-        toast.success('Material added successfully', { id: toastId });
-        return response.data.data; // { material }
-    } catch (err) {
-        console.error('addMaterial error:', err);
-        toast.error(
-            err?.response?.data?.message || err.message || 'Failed to add material',
-            { id: toastId }
-        );
-        return null;
-    }
-};
-
-// ─── Get Material ─────────────────────────────────────────────────────────────
-// Returns material with a fresh signed URL if the old one has expired
-export const getMaterial = async (materialId, token) => {
-    try {
-        const url = GET_MATERIAL_API.replace(':materialId', materialId);
-        const response = await axios.get(url, authHeaders(token));
-
-        if (!response.data?.success) {
-            throw new Error(response.data?.message || 'Failed to fetch material');
-        }
-
-        return response.data.data.material;
-    } catch (err) {
-        console.error('getMaterial error:', err);
-        toast.error(err?.response?.data?.message || 'Failed to fetch material');
-        return null;
-    }
-};
-
-// ─── Update Material ──────────────────────────────────────────────────────────
-// PATCH /subsections/material/update/:subsectionId
-// Body (all optional): { title, description, materialType, materialSize, materialS3Key }
-export const updateMaterial = async (subsectionId, materialData, token) => {
-    const toastId = toast.loading('Updating material...');
-    try {
-        const url = UPDATE_MATERIAL_API.replace(':subsectionId', subsectionId);
-        const response = await axios.patch(url, materialData, authHeaders(token));
-
-        if (!response.data?.success) {
-            throw new Error(response.data?.message || 'Failed to update material');
-        }
-
-        toast.success('Material updated', { id: toastId });
-        return response.data.data.material;
-    } catch (err) {
-        console.error('updateMaterial error:', err);
-        toast.error(
-            err?.response?.data?.message || err.message || 'Failed to update material',
-            { id: toastId }
-        );
-        return null;
-    }
-};
-
-// ─── Delete Material ──────────────────────────────────────────────────────────
-// DELETE /subsections/material/delete/:subsectionId
-// Backend: deletes Material from DB, removes file from S3, soft-deletes SubSection,
-//          pulls from Section.subSectionIds, decrements course counters
-export const deleteMaterial = async (subsectionId, token) => {
-    const toastId = toast.loading('Deleting material...');
-    try {
-        const url = DELETE_MATERIAL_API.replace(':subsectionId', subsectionId);
-        const response = await axios.delete(url, authHeaders(token));
-
-        if (!response.data?.success) {
-            throw new Error(response.data?.message || 'Failed to delete material');
-        }
-
-        toast.success('Material deleted', { id: toastId });
-        return true;
-    } catch (err) {
-        console.error('deleteMaterial error:', err);
-        toast.error(
-            err?.response?.data?.message || err.message || 'Failed to delete material',
-            { id: toastId }
-        );
-        return false;
-    }
 };
