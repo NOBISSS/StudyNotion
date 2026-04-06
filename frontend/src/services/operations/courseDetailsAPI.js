@@ -19,6 +19,7 @@ const {
   CREATE_COURSE_MULTER_API,
   PUT_PUBLISH_COURSE_API,
   PUT_DRAFT_COURSE_API,
+  PUT_SCHEDULE_COURSE_API,
   INSTRUCTOR_COURSE_DETAILS_API,
 } = courseEndpoints;
 
@@ -278,56 +279,90 @@ export const updateSection = async (data) => {
     toast.dismiss(toastId);
   }
 };
+// export const publishCourse = async (courseId) => {
+//   const toastId = toast.loading("Publishing course...");
+//   try {
+//     const response = await apiConnector(
+//       "PUT",
+//       PUT_PUBLISH_COURSE_API.replace(":courseId", courseId),
+//     );
+//     if (!response?.data?.success) throw new Error("Could not publish course");
+//     toast.success("Course published");
+//     return response?.data?.data.course;
+//   } catch (error) {
+//     toast.error(error.message || "Failed to publish course");
+//   } finally {
+//     toast.dismiss(toastId);
+//   }
+// };
+// Add these to your existing courseDetailsAPI.js
+
+// ─── Schedule course publish ───────────────────────────────────────────────
+// POST /courses/schedule/:courseId
+// body: { scheduledPublishAt: "2026-04-20T10:30:00.000Z" }
+//   or  { scheduledPublishAt: null }  → cancels the schedule
+//
+// Response: { success, data: { scheduledPublishAt, jobId } }
+export const scheduleCourse = async (courseId, body) => {
+  const toastId = toast.loading(
+    body?.scheduledPublishAt ? 'Scheduling course...' : 'Cancelling schedule...'
+  )
+  let result = null
+  try {
+    const url = PUT_SCHEDULE_COURSE_API.replace(':courseId', courseId)
+    const response = await apiConnector('PUT', url, body)
+    if (!response?.data?.success) throw new Error('Could not schedule course')
+    toast.success(
+      body?.scheduledPublishAt
+        ? 'Course scheduled successfully'
+        : 'Schedule cancelled'
+    )
+    result = response.data.data
+  } catch (error) {
+    toast.error(error.message || 'Failed to schedule course')
+  } finally {
+    toast.dismiss(toastId)
+  }
+  return result
+}
+
+// ─── Publish course immediately ────────────────────────────────────────────
+// POST /courses/publish/:courseId
 export const publishCourse = async (courseId) => {
-  const toastId = toast.loading("Publishing course...");
+  const toastId = toast.loading('Publishing course...')
+  let result = null
   try {
-    const response = await apiConnector(
-      "PUT",
-      PUT_PUBLISH_COURSE_API.replace(":courseId", courseId),
-    );
-    if (!response?.data?.success) throw new Error("Could not publish course");
-    toast.success("Course published");
-    return response?.data?.data.course;
+    const url = PUT_PUBLISH_COURSE_API.replace(':courseId', courseId)
+    const response = await apiConnector('PUT', url)
+    if (!response?.data?.success) throw new Error('Could not publish course')
+    toast.success('Course published successfully')
+    result = response.data.data?.course || response.data.data
   } catch (error) {
-    toast.error(error.message || "Failed to publish course");
+    toast.error(error.message || 'Failed to publish course')
   } finally {
-    toast.dismiss(toastId);
+    toast.dismiss(toastId)
   }
-};
+  return result
+}
+
+// ─── Save as draft ─────────────────────────────────────────────────────────
+// POST /courses/draft/:courseId
 export const draftCourse = async (courseId) => {
-  const toastId = toast.loading("Drafting course...");
+  const toastId = toast.loading('Saving draft...')
+  let result = null
   try {
-    const response = await apiConnector(
-      "PUT",
-      PUT_DRAFT_COURSE_API.replace(":courseId", courseId),
-    );
-    if (!response?.data?.success) throw new Error("Could not draft course");
-    toast.success("Course drafted");
-    return response?.data?.data.course;
+    const url = PUT_DRAFT_COURSE_API.replace(':courseId', courseId)
+    const response = await apiConnector('PUT', url)
+    if (!response?.data?.success) throw new Error('Could not save draft')
+    toast.success('Course saved as draft')
+    result = response.data.data?.course || response.data.data
   } catch (error) {
-    toast.error(error.message || "Failed to draft course");
+    toast.error(error.message || 'Failed to save draft')
   } finally {
-    toast.dismiss(toastId);
+    toast.dismiss(toastId)
   }
-};
-
-
-export const scheduleCourse = async (courseId) => {
-  const toastId = toast.loading("Drafting course...");
-  try {
-    const response = await apiConnector(
-      "PUT",
-      PUT_DRAFT_COURSE_API.replace(":courseId", courseId),
-    );
-    if (!response?.data?.success) throw new Error("Could not draft course");
-    toast.success("Course drafted");
-    return response?.data?.data.course;
-  } catch (error) {
-    toast.error(error.message || "Failed to draft course");
-  } finally {
-    toast.dismiss(toastId);
-  }
-};
+  return result
+}
 
 export const getAllSubsections = async (sectionId) => {
   const toastId = toast.loading("Loading...");

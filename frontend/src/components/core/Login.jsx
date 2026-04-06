@@ -1,17 +1,13 @@
 // components/core/Login.jsx
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEye } from "react-icons/io5";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../services/operations/authAPI";
 import GoogleLoginButton from "../../utils/GoogleLogin";
 import { HighlightText } from "./HomePage/HighlightText";
-import { endPoints } from "../../services/apis";
-import { githubClientId, githubRedirectUri, googleClientId } from "../../utils/constants";
-
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -34,7 +30,7 @@ export const Login = () => {
     localStorage.setItem("latestCSRFToken", randomHex);
 
     // redirect the user to github
-    const link = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&scop=read:user&redirect_uri=${githubRedirectUri}&state=${randomHex}`;
+    const link = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&response_type=code&scop=read:user&redirect_uri=${import.meta.env.VITE_GITHUB_URL}&state=${randomHex}`;
     window.location.assign(link);
   };
 
@@ -58,7 +54,7 @@ export const Login = () => {
           <div className="mb-6 flex gap-3">
             {/* Google */}
             <GoogleOAuthProvider
-              clientId={googleClientId}
+              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
             >
               <GoogleLoginButton />
             </GoogleOAuthProvider>

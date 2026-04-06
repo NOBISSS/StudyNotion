@@ -66,6 +66,10 @@ export const courseEndpoints={
     EDIT_COURSE_API:BACKEND_URL+"/courses/update/:courseId",  
     PUT_PUBLISH_COURSE_API:BACKEND_URL+"/courses/publish/:courseId",
     PUT_DRAFT_COURSE_API:BACKEND_URL+"/courses/draft/:courseId",
+
+    //SCHEDULE COURSE
+    GET_SCHEDULE_COURSE_API:BACKEND_URL+"/courses/scheduled",
+    PUT_SCHEDULE_COURSE_API:BACKEND_URL+"/courses/schedule/:courseId"
 }
 
 export const sectionEndpoints={

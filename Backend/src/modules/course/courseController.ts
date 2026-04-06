@@ -677,8 +677,7 @@ export const scheduleCoursePublish: Handler = asyncHandler(async (req, res) => {
 
 
   //enqueu 
-  const job = await reschedulePublish(
-    course.scheduledJobId ?? undefined,
+  const job = await schedulePublish(
     {
       courseId: course._id,
       instructorId: userId,

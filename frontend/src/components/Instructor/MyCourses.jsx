@@ -83,7 +83,7 @@ const MyCourses = () => {
           </div>
 
           {/* Rows */}
-          {courses.length>0 && courses.map((course, idx) => (
+          {courses.length > 0 && courses.map((course, idx) => (
             <div
               key={course._id}
               className={`grid px-6 py-5 items-center bg-[#0F1117] hover:bg-[#161D29] transition-colors ${idx !== courses.length - 1 ? 'border-b border-[#2C333F]' : ''}`}
@@ -114,13 +114,16 @@ const MyCourses = () => {
                       hour: '2-digit', minute: '2-digit'
                     })}
                   </p>
-                  <span className={`inline-flex items-center gap-1.5 w-fit px-3 py-1 rounded-full text-xs font-medium mt-0.5 ${
-                    course.status === 'Published'
+                  <span className={`inline-flex items-center gap-1.5 w-fit px-3 py-1 rounded-full text-xs font-medium mt-0.5 ${course.status === 'Published'
                       ? 'bg-[#1C3829] text-[#4ade80]'
                       : 'bg-[#2D1B27] text-[#f472b6]'
-                  }`}>
+                    }`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${course.status === 'Published' ? 'bg-[#4ade80]' : 'bg-[#f472b6]'}`} />
-                    {course.status || 'Drafted'}
+                    {course.status === 'Published'
+                      ? 'Published'
+                      : course.scheduledJobId
+                        ? 'Scheduled'
+                        : 'Draft'}
                   </span>
                 </div>
               </div>

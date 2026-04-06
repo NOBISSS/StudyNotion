@@ -41,6 +41,6 @@ courseRouter.route("/update/:courseId").put(upload.single("thumbnail"), updateCo
 courseRouter.route("/publish/:courseId").put(publishCourse);
 courseRouter.route("/draft/:courseId").put(draftCourse);
 courseRouter.route("/scheduled").get(getScheduledCourses);
-courseRouter.route("/schedule/:courseId").post(scheduleCoursePublish);
+courseRouter.route("/schedule/:courseId").put(scheduleCoursePublish);
 
 export { courseRouter };
