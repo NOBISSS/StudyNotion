@@ -76,11 +76,14 @@ export const addMaterial = asyncHandler(async (req, res) => {
     materialType,
     materialSize: materialSize || null,
     materialS3Key,
+    originalMaterialS3Key:materialS3Key,
+    courseId:courseId,
     URLExpiration: new Date(Date.now() + 3600000),
     subsectionId: subsection._id,
   });
+  
   await Section.findByIdAndUpdate(sectionId, {
-    $push: { subSectionIds: material._id },
+    $push: { subSectionIds: subsection._id },
   });
   await Course.findByIdAndUpdate(courseId, {
     $inc: { totalMaterials: 1, totalSubsections: 1 },
