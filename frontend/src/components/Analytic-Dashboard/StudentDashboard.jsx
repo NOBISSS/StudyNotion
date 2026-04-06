@@ -147,7 +147,7 @@ const activityColor = { video: '#FFD60A', quiz: '#4ade80', enroll: '#60a5fa', ce
 
 export default function StudentDashboard() {
   const { user } = useSelector((state) => state.profile)
-  const name = user?.firstName || DUMMY.name
+  const name = user?.firstName || 'Student';
   const navigate=useNavigate();
   return (
     <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
