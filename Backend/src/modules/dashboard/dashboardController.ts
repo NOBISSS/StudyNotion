@@ -11,6 +11,7 @@ import QuizAttempt from "../subsection/quiz/QuizAttemptModel.js";
 import VideoProgress from "../subsection/video/VideoProgressModel.js";
 import { UserStreak } from "../user/UserStreakModel.js";
 import { formatTimeAgo } from "../../shared/utils/formatTimeAgo.js";
+import { SubSection } from "../subsection/SubSectionModel.js";
 const monthNames = [
   "Jan",
   "Feb",
@@ -401,7 +402,10 @@ export const studentDashboard: Handler = asyncHandler(async (req, res) => {
     isActive: true,
     status: "Published",
   }).lean();
-
+  const totalLecturesMap = await SubSection.aggregate([
+    { $match: { courseId: { $in: courseIds }, isActive: true } },
+    { $group: { _id: "$courseId", totalLectures: { $sum: 1 } } },
+  ]);
   const courseMap = new Map(courses.map((c) => [c._id.toString(), c]));
 
   // Get last video activity per course for "lastAccessed"
@@ -429,7 +433,7 @@ export const studentDashboard: Handler = asyncHandler(async (req, res) => {
         thumbnail: course.thumbnailUrl,
         progress: progress?.progress || 0,
         completed: progress?.completed || false,
-        totalVideos: course.totalLectures || 0,
+        totalVideos: totalLecturesMap.find((c) => c._id.toString() === course._id.toString())?.totalLectures || 0,
         completedVideos: progress?.completedSubsections?.length || 0,
         lastAccessed: lastAccessed
           ? formatTimeAgo(lastAccessed)

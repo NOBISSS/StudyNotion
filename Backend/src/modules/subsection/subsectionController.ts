@@ -10,8 +10,9 @@ import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
 import { updateSubSectionSchema } from "./subsectionValidation.js";
 import Video from "./video/VideoModel.js";
+import type { Handler } from "../../shared/types.js";
 
-export const getAllSubsections = asyncHandler(async (req, res) => {
+export const getAllSubsections:Handler = asyncHandler(async (req, res) => {
   const sectionId = req.params.sectionId;
   if (!sectionId) {
     throw AppError.badRequest("Section ID is required");
@@ -30,7 +31,7 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
     "SubSections fetched successfully",
   );
 });
-export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
+export const markSubsectionAsCompleted:Handler = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
   const userId = req.userId;
   if (!userId) {
@@ -43,18 +44,14 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
   if (!subsection) {
     throw AppError.notFound("SubSection not found");
   }
-  let courseProgress = await CourseProgress.findOneAndUpdate(
+  let courseProgress = await CourseProgress.findOne(
     {
       userId: new Types.ObjectId(userId),
       courseId: new Types.ObjectId(subsection.courseId),
     },
-    {
-      $push: {
-        completedSubsections: new Types.ObjectId(subsectionId as string),
-      },
-    },
-    { returnDocument: "after" },
   );
+  console.log("Course Progress before update:", courseProgress?.completedSubsections);
+  console.log("Course Progress", courseProgress);
   if (!courseProgress)
     courseProgress = await CourseProgress.create({
       courseId: new Types.ObjectId(subsection.courseId),
@@ -63,13 +60,22 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
       completed: false,
       completedSubsections: [new Types.ObjectId(subsectionId as string)],
     });
+  else if (!courseProgress.completedSubsections.includes(subsection._id)) {
+    courseProgress.completedSubsections.push(subsection._id);
+  }
   const totalSubsections = await SubSection.countDocuments({
     courseId: subsection.courseId,
     isActive: true,
   });
+  console.log("Total Subsections:", totalSubsections);
   const completedSubsections = courseProgress.completedSubsections.length || 0;
+  console.log("Completed Subsections:", completedSubsections);
   const progress = (completedSubsections / totalSubsections) * 100;
   courseProgress.progress = progress;
+  if(totalSubsections > 0 && completedSubsections === totalSubsections) {
+    courseProgress.completed = true;
+    courseProgress.completionDate = new Date();
+  }
   await courseProgress.save();
 
   ApiResponse.success(
@@ -78,7 +84,7 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
     "SubSection marked as completed and course progress updated successfully",
   );
 });
-export const deleteSubsection = asyncHandler(async (req, res) => {
+export const deleteSubsection:Handler = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
   const instructorId = req.userId;
   if (!subsectionId) {
@@ -155,7 +161,7 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
     "SubSection deleted successfully",
   );
 });
-export const updateSubsection = asyncHandler(async (req, res) => {
+export const updateSubsection:Handler = asyncHandler(async (req, res) => {
   const subsectionId = req.params.subsectionId;
   const instructorId = req.userId;
   if (!subsectionId) {

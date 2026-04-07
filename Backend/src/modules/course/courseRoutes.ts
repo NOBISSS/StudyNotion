@@ -19,6 +19,7 @@ import {
   searchCourses,
   updateCourse,
   scheduleCoursePublish,
+  getCourseProgress,
 } from "./courseController.js";
 
 const courseRouter = Router();
@@ -29,8 +30,9 @@ courseRouter
   .route("/get-top/:categoryId")
   .get(getAllCourseByEnrollmentsAndRatingsAndCategory);
 courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
-courseRouter.route("/search").get(searchCourses); 
+courseRouter.route("/search").get(searchCourses);
 courseRouter.use(userMiddleware);
+courseRouter.route("/getprogress/:courseId").get(getCourseProgress);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/getinstructorcourse/:courseId").get(getInstructorCourseDetails);
 courseRouter.route("/instructor/getall").get(getInstructorCourses);
