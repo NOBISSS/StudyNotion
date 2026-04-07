@@ -22,6 +22,7 @@ const {
   PUT_DRAFT_COURSE_API,
   PUT_SCHEDULE_COURSE_API,
   INSTRUCTOR_COURSE_DETAILS_API,
+  GET_COURSE_PROGRESS_API,
 } = courseEndpoints;
 
 const {
@@ -35,7 +36,7 @@ const {
   GET_SUBSECTION_API,
   GET_SUBSECTION_DETAILS_API,
   DELETE_SUBSECTION_API,
-  EDIT_SUBSECTION_API
+  EDIT_SUBSECTION_API,
 } = subSectionVideoEndpoints;
 const { POST_SIGNATURE_CLOUDINARY_API } = SignatureEndpoints;
 
@@ -306,64 +307,66 @@ export const updateSection = async (data) => {
 // Response: { success, data: { scheduledPublishAt, jobId } }
 export const scheduleCourse = async (courseId, body) => {
   const toastId = toast.loading(
-    body?.scheduledPublishAt ? 'Scheduling course...' : 'Cancelling schedule...'
-  )
-  let result = null
+    body?.scheduledPublishAt
+      ? "Scheduling course..."
+      : "Cancelling schedule...",
+  );
+  let result = null;
   try {
-    const url = PUT_SCHEDULE_COURSE_API.replace(':courseId', courseId)
-    const response = await apiConnector('PUT', url, body)
-    if (!response?.data?.success) throw new Error('Could not schedule course')
+    const url = PUT_SCHEDULE_COURSE_API.replace(":courseId", courseId);
+    const response = await apiConnector("PUT", url, body);
+    if (!response?.data?.success) throw new Error("Could not schedule course");
     toast.success(
       body?.scheduledPublishAt
-        ? 'Course scheduled successfully'
-        : 'Schedule cancelled'
-    )
-    result = response.data.data
+        ? "Course scheduled successfully"
+        : "Schedule cancelled",
+    );
+    result = response.data.data;
   } catch (error) {
-    toast.error(error.message || 'Failed to schedule course')
+    toast.error(error.message || "Failed to schedule course");
   } finally {
-    toast.dismiss(toastId)
+    toast.dismiss(toastId);
   }
-  return result
-}
+  return result;
+};
 
 // ─── Publish course immediately ────────────────────────────────────────────
 // POST /courses/publish/:courseId
 export const publishCourse = async (courseId) => {
-  const toastId = toast.loading('Publishing course...')
-  let result = null
+  const toastId = toast.loading("Publishing course...");
+  let result = null;
   try {
-    const url = PUT_PUBLISH_COURSE_API.replace(':courseId', courseId)
-    const response = await apiConnector('PUT', url)
-    if (!response?.data?.success) throw new Error('Could not publish course')
-    toast.success('Course published successfully')
-    result = response.data.data?.course || response.data.data
+    const url = PUT_PUBLISH_COURSE_API.replace(":courseId", courseId);
+    const response = await apiConnector("PUT", url);
+    if (!response?.data?.success) throw new Error("Could not publish course");
+    toast.success("Course published successfully");
+    result = response.data.data?.course || response.data.data;
   } catch (error) {
-    toast.error(error.message || 'Failed to publish course')
+    toast.error(error.message || "Failed to publish course");
   } finally {
-    toast.dismiss(toastId)
+    toast.dismiss(toastId);
   }
-  return result
-}
+  return result;
+};
 
 // ─── Save as draft ─────────────────────────────────────────────────────────
 // POST /courses/draft/:courseId
 export const draftCourse = async (courseId) => {
-  const toastId = toast.loading('Saving draft...')
-  let result = null
+  const toastId = toast.loading("Saving draft...");
+  let result = null;
   try {
-    const url = PUT_DRAFT_COURSE_API.replace(':courseId', courseId)
-    const response = await apiConnector('PUT', url)
-    if (!response?.data?.success) throw new Error('Could not save draft')
-    toast.success('Course saved as draft')
-    result = response.data.data?.course || response.data.data
+    const url = PUT_DRAFT_COURSE_API.replace(":courseId", courseId);
+    const response = await apiConnector("PUT", url);
+    if (!response?.data?.success) throw new Error("Could not save draft");
+    toast.success("Course saved as draft");
+    result = response.data.data?.course || response.data.data;
   } catch (error) {
-    toast.error(error.message || 'Failed to save draft')
+    toast.error(error.message || "Failed to save draft");
   } finally {
-    toast.dismiss(toastId)
+    toast.dismiss(toastId);
   }
-  return result
-}
+  return result;
+};
 
 export const getAllSubsections = async (sectionId) => {
   const toastId = toast.loading("Loading...");
@@ -437,6 +440,24 @@ export const updateSubsection = async (subsectionId, data) => {
     return result;
   } catch (error) {
     toast.error(error.message || "Failed to update subsection");
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
+export const getCourseProgress = async (courseId) => {
+  const toastId = toast.loading("Loading...");
+  let result = [];
+  try {
+    const response = await apiConnector(
+      "GET",
+      GET_COURSE_PROGRESS_API.replace(":courseId", courseId),
+    );
+    if (!response?.data?.success)
+      throw new Error("Could not fetch course progress");
+    result = response?.data?.data || [];
+    return result;
+  } catch (error) {
+    toast.error(error.message || "Failed to fetch course progress");
   } finally {
     toast.dismiss(toastId);
   }

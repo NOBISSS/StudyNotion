@@ -19,6 +19,8 @@ import Footer from "../core/Footer";
 import { addCourseReview } from "../../services/operations/progressAPI";
 import PlyrPlayer from "./PlyrPlayer";
 import { BACKEND_URL } from "../../utils/constants";
+import { getCourseProgress } from "../../services/operations/courseDetailsAPI";
+import { markSubsectionAsCompleted } from "../../services/operations/subsectionAPI";
 
 
 const COURSE_DETAIL_API = (id) => `${BACKEND_URL}/courses/getdetails/${id}`;
@@ -167,14 +169,19 @@ function ReviewModal({ courseId, user, token, onClose }) {
 }
 
 // ─── Sidebar Section (lazy subsection fetch, cached) ─────────────────────────
-function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defaultOpen, token }) {
+function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, onSelectSub, defaultOpen, token }) {
   const [open, setOpen] = useState(defaultOpen);
   const [subs, setSubs] = useState(null);   // null = not yet fetched
   const [loading, setLoading] = useState(false);
   const fetchedRef = useRef(false);     // cache flag — never re-fetches
 
   const toggle = () => setOpen(o => !o);
-
+  const markAsCompleted = async (subsectionId) => {
+    const res = await markSubsectionAsCompleted(subsectionId);
+    if (res) {
+      setCompletedIds(prev => new Set([...prev, subsectionId]));
+    }
+  }
   // Lazy fetch: only on first open, never again
   useEffect(() => {
     if (!open || fetchedRef.current) return;
@@ -201,6 +208,13 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
     load();
     return () => { cancelled = true; };
   }, [open, section._id, token]);
+  useEffect(() => {
+    const setProgress = async () => {
+      const res = await getCourseProgress(section.courseId);
+      setCompletedIds(new Set(res?.courseProgress?.completedSubsections || []));
+    };
+    setProgress();
+  }, []);
 
   // Count to show in header (use subSectionIds length before fetch)
   const subsCount = subs !== null ? subs.length : (section.subSectionIds?.length ?? 0);
@@ -277,7 +291,9 @@ function SidebarSection({ section, activeSubId, completedIds, onSelectSub, defau
                   border: `1.5px solid ${isCompleted ? "#06B6D4" : "#374151"}`,
                   background: isCompleted ? "#06B6D4" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
+                }}
+                onClick={()=>markAsCompleted(sub._id)}
+                >
                   {isCompleted && (
                     <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5">
                       <polyline points="2,6 5,9 10,3" />
@@ -328,7 +344,7 @@ export default function VideoDetail() {
   const [sections, setSections] = useState([]);
   const [activeSub, setActiveSub] = useState(null);
   const [videoSrc, setVideoSrc] = useState(null);
-  const [completedIds] = useState(new Set()); // future: load from backend
+  const [completedIds,setCompletedIds] = useState(new Set()); // future: load from backend
   const [loadingCourse, setLoadingCourse] = useState(true);
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -489,6 +505,7 @@ export default function VideoDetail() {
             section={section}
             activeSubId={activeSub?._id}
             completedIds={completedIds}
+            setCompletedIds={setCompletedIds}
             onSelectSub={(id) => {
               loadVideoById(id);
               setIsSidebarOpen(false); // 🔥 auto close on mobile
