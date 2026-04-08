@@ -11,12 +11,15 @@ import {
   fetchAllEnrollmentsStart,
   fetchAllEnrollmentsSuccess,
   fetchAllEnrollmentsFailure,
+  enrollWishlistSuccess,
 } from "../../slices/enrollmentSlice";
+import { resetCart } from "../../slices/cartSlice";
 
 const {
   ENROLL_COURSE_API,
   GET_ALL_ENROLLED_COURSES_STUDENT_API,
   GET_ALL_ENROLLED_COURSES_ADMIN_API,
+  ENROLL_WISHLIST_COURSE_API,
 } = CourseEnrollmentEndPoints;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,6 +73,36 @@ export const enrollInCourse = (courseId, token, navigate) => async (dispatch) =>
     toast.dismiss(toastId);
   }
 };
+export const enrollInWishlist = (navigate) => async (dispatch) => {
+    const toastId = toast.loading("Enrolling in wishlist...");
+    dispatch(enrollStart());
+
+    try {
+      const response = await apiConnector(
+        "POST",
+        ENROLL_WISHLIST_COURSE_API,
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+      const enrollments = response.data.data.enrollments;
+      dispatch(enrollWishlistSuccess(enrollments));
+      toast.success("Enrolled successfully!");
+
+      dispatch(resetCart());
+      if (navigate) navigate(`/dashboard/enrolled-courses`);
+
+      return enrollments;
+    } catch (error) {
+      console.log("ENROLL_WISHLIST_COURSE_API ERROR", error);
+      toast.error(error?.response?.data?.message || "Enrollment failed. Please try again.");
+      dispatch(enrollFailure(error?.response?.data?.message || "Enrollment failed."));
+      return null;
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. Get enrolled courses for the logged-in student

@@ -81,6 +81,24 @@ const enrollmentSlice = createSlice({
           : enrollment.courseId;
       if (cid) state.enrolledCourseIds[cid] = true;
     },
+    enrollWishlistSuccess(state, action) {
+      state.enrolling = false;
+      const enrollments = action.payload;
+
+      // Add to enrolledCourses list.
+      // courseId here is a raw string (not populated), so we store a minimal
+      // stub; the full populated data comes on the next getmy call.
+      // We mark enrolledCoursesFetched = false so the next getmy call refreshes.
+      state.enrolledCourses = state.enrolledCourses.concat(enrollments);
+      state.enrolledCoursesFetched = false; // invalidate cache → force re-fetch
+
+      // Register the courseId in the fast-lookup map
+      const cid =
+        typeof enrollments.some((e) => e.courseId) === "object"
+          ? enrollments[0].courseId?._id
+          : enrollments[0].courseId;
+      if (cid) state.enrolledCourseIds[cid] = true;
+    },
 
     enrollFailure(state, action) {
       state.enrolling   = false;
@@ -156,6 +174,7 @@ const enrollmentSlice = createSlice({
 export const {
   enrollStart,
   enrollSuccess,
+  enrollWishlistSuccess,
   enrollFailure,
   fetchEnrolledCoursesStart,
   fetchEnrolledCoursesSuccess,

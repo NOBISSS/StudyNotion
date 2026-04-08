@@ -114,7 +114,8 @@ export const subSectionQuizEndpoints={
 }
 
 export const CourseEnrollmentEndPoints={
-    ENROLL_COURSE_API:BACKEND_URL+"/enrollments/enroll",//for student
+    ENROLL_COURSE_API:BACKEND_URL+"/enrollments/enroll",
+    ENROLL_WISHLIST_COURSE_API:BACKEND_URL+"/enrollments/wishlist/enroll",
     GET_ALL_ENROLLED_COURSES_STUDENT_API:BACKEND_URL+"/enrollments/getmy",//student
     GET_ALL_ENROLLED_COURSES_ADMIN_API:BACKEND_URL+"/enrollments/getall",//admin
     //UPDATE_PROGRESS_API:BACKEND_URL+"/enrollments/updateProgress",
