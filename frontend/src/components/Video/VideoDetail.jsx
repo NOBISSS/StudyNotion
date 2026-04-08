@@ -421,29 +421,7 @@ export default function VideoDetail() {
     setLoadingVideo(true);
 
     navigate(`/courses/${courseId}/learn/${subId}`, { replace: true });
-
-    try {
-      const res = await axios.get(VIDEO_API(subId), {
-        withCredentials: true
-      });
-      // Normalize: { data: { link } } | { link } | { video: { link } }
-      const link =
-        res.data?.data?.link ??
-        res.data?.link ??
-        res.data?.video?.link ??
-        null;
-      setVideoSrc(link);
-
-      // Also update activeSub with full object if we only had an ID
-      if (typeof sub === "string" && res.data?.data) {
-        setActiveSub(prev => ({ ...prev, ...res.data.data }));
-      }
-    } catch (err) {
-      console.error("VIDEO FETCH ERROR:", err);
-      setVideoSrc(null);
-    } finally {
-      setLoadingVideo(false);
-    }
+    setVideoSrc({subsectionId:subId});
   }, [courseId, navigate, token]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const completedCount = completedIds.size;
@@ -562,7 +540,7 @@ export default function VideoDetail() {
       )}
 
       {/* PLAYER */}
-        <PlyrPlayer src={videoSrc} />
+        <PlyrPlayer setCompletedIds={setCompletedIds} videoSrc={videoSrc} setVideoSrc={setVideoSrc} setLoadingVideo={setLoadingVideo} setActiveSub={setActiveSub} />
 
       {/* EMPTY */}
       {!loadingVideo && !videoSrc && (

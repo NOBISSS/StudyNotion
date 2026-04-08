@@ -88,7 +88,8 @@ export const sectionEndpoints={
 export const subSectionVideoEndpoints={
     GET_SUBSECTION_API:BACKEND_URL+"/subsections/getall/:sectionId",
     PUT_MARK_SUBSECTION_COMPLETED_API:BACKEND_URL+"/subsections/markcompleted/:subsectionId",
-    GET_SUBSECTION_DETAILS_API:BACKEND_URL+"/subsections/video/getone/:subsectionId",//has to be updated while calling
+    GET_SUBSECTION_DETAILS_API:BACKEND_URL+"/subsections/video/getone/:subsectionId",
+    POST_SAVE_VIDEO_PROGRESS_API:BACKEND_URL+"/subsections/video/saveprogress",
     CREATE_SUBSECTION_API:BACKEND_URL+"/subsections/create",
     EDIT_SUBSECTION_API:BACKEND_URL+"/subsections/update/:subsectionId",
     DELETE_SUBSECTION_API:BACKEND_URL+"/subsections/delete/:subsectionId",

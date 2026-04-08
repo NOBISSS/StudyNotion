@@ -426,13 +426,14 @@ export const studentDashboard: Handler = asyncHandler(async (req, res) => {
       const progress = progressMap.get(enrollment.courseId.toString());
       const lastAccessed = lastAccessMap.get(enrollment.courseId.toString());
       const progressPercentage = ((progress?.completedSubsections?.length || 0) / (totalLecturesMap.find((c) => c._id.toString() === course._id.toString())?.totalLectures || 1)) * 100;
+      const isCompleted = progress?.completedSubsections?.length === (totalLecturesMap.find((c) => c._id.toString() === course._id.toString())?.totalLectures || 0);
       return {
         id: course._id,
         name: course.courseName,
         instructor: course.instructorName,
         thumbnail: course.thumbnailUrl,
         progress: Math.round(progressPercentage),
-        completed: progress?.completed || false,
+        completed: isCompleted,
         totalVideos: totalLecturesMap[0]?.totalLectures || 0,
         completedVideos: progress?.completedSubsections?.length || 0,
         lastAccessed: lastAccessed
