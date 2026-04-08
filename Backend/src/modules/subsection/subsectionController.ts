@@ -24,10 +24,12 @@ export const getAllSubsections: Handler = asyncHandler(async (req, res) => {
   if (!subsections) {
     throw AppError.notFound("SubSections not found");
   }
+  const materials = await Material.find({subsectionId: {$in: subsections.map(s => s._id)}, isActive: true}).select("-contentUrl -materialS3Key -originalMaterialS3Key");
   ApiResponse.success(
     res,
     {
       subsections,
+      materials
     },
     "SubSections fetched successfully",
   );

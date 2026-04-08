@@ -11,6 +11,8 @@ import {
 import { BACKEND_URL } from "../../utils/constants";
 import { addCourseToWishList } from "../../services/operations/cartAPI";
 import Footer from "./Footer"
+import { MaterialIcon } from "./Dashboard/Add-Course/CourseBuilder/CourseBuilderForm";
+import { getAllSubsections } from "../../services/operations/courseDetailsAPI";
 
 
 const globalStyles = `
@@ -236,6 +238,8 @@ function AccordionSection({ section, forceOpen }) {
   // Open by default if it's order=1 (first section)
   const [open, setOpen] = useState(section.order === 1);
   const [subSections, setSubSections] = useState(null); // null = not yet fetched
+  const [lecturesMap,setLecturesMap] = useState({});
+  const [materialMap,setMaterialMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const prevForce = useRef(undefined);
@@ -253,14 +257,16 @@ function AccordionSection({ section, forceOpen }) {
     setFetchError(null);
 
     try {
-      const res = await axios.get(
-        `${BACKEND_URL}/subSections/getall/${section._id}`
-      );
+      const res = await getAllSubsections(section._id);
 
-      const data =
-        res?.data?.data?.subsections ?? res?.data?.subsections;
-
+      const data = res?.subsections || [];
+      const materialData = res?.materials || [];
+      console.log(materialData);
       setSubSections(Array.isArray(data) ? data : []);
+      const lectures = data.filter((s) => s.contentType !== "material");
+      const materials = materialData; // Use the fetched materials data
+      setLecturesMap((prev) => ({ ...prev, [section._id]: lectures }));
+      setMaterialMap((prev) => ({ ...prev, [section._id]: materials }));
     } catch (err) {
       setFetchError("Failed to load lectures.");
     } finally {
@@ -357,36 +363,91 @@ function AccordionSection({ section, forceOpen }) {
           )}
 
           {/* Lecture rows */}
-          {!loading && !fetchError && subSections?.map((lec, i) => (
-            <div key={lec._id || i} style={{
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              padding: "10px 20px 10px 48px",
-              borderBottom: i < subSections.length - 1 ? "1px solid #1C2333" : "none",
-            }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", flex: 1 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                  stroke="#AFB2BF" strokeWidth="1.8"
-                  style={{ marginTop: 2, flexShrink: 0 }}>
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                  <line x1="8" y1="21" x2="16" y2="21" />
-                  <line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
-                <div>
-                  {/* SubSection API fields: title / subSectionName */}
-                  <p style={{ color: "#AFB2BF", fontSize: 13, lineHeight: 1.5, marginBottom: lec.description ? 3 : 0 }}>
-                    {lec.title || lec.subSectionName || "Untitled Lecture"}
-                  </p>
-                  {lec.description && (
-                    <p style={{ color: "#6B7280", fontSize: 12, lineHeight: 1.5 }}>{lec.description}</p>
+          {!loading && !fetchError && subSections?.map((lec, i) => { 
+            const material = materialMap[section._id]?.find(m => m.subsectionId === lec._id);
+            console.log("Material for lecture", lec._id, material);
+            return (
+              <div
+                key={lec._id || i}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  padding: "10px 20px 10px 48px",
+                  borderBottom:
+                    i < subSections.length - 1 ? "1px solid #1C2333" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "flex-start",
+                    flex: 1,
+                  }}
+                >
+                  {lec.contentType == "video" ? (
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#AFB2BF"
+                      strokeWidth="1.8"
+                      style={{ marginTop: 2, flexShrink: 0 }}
+                    >
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                  ) : (
+                    <div className="flex items-center gap-3 text-sm text-[#AFB2BF] flex-1 min-w-0">
+                      <MaterialIcon type={material?.materialType || ""} />
+                      <span className="truncate">{lec.title}</span>
+                      {/* Badge to distinguish materials from lectures */}
+                      <span className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#47A992]/10 text-[#47A992] capitalize">
+                        {material?.materialType || "material"}
+                      </span>
+                    </div>
                   )}
+                  <div>
+                    {/* SubSection API fields: title / subSectionName */}
+                    {lec.contentType == "video" && <p
+                      style={{
+                        color: "#AFB2BF",
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        marginBottom: lec.description ? 3 : 0,
+                      }}
+                    >
+                      {lec.title || lec.subSectionName || "Untitled Lecture"}
+                    </p>}
+                    {lec.description && (
+                      <p
+                        style={{
+                          color: "#6B7280",
+                          fontSize: 12,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {lec.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
+                {/* SubSection API fields: timeDuration / duration */}
+                <span
+                  style={{
+                    color: "#6B7280",
+                    fontSize: 12,
+                    flexShrink: 0,
+                    marginLeft: 16,
+                  }}
+                >
+                  {lec.timeDuration || lec.duration || ""}
+                </span>
               </div>
-              {/* SubSection API fields: timeDuration / duration */}
-              <span style={{ color: "#6B7280", fontSize: 12, flexShrink: 0, marginLeft: 16 }}>
-                {lec.timeDuration || lec.duration || ""}
-              </span>
-            </div>
-          ))}
+            );})}
 
           {/* Empty state */}
           {!loading && !fetchError && subSections?.length === 0 && (

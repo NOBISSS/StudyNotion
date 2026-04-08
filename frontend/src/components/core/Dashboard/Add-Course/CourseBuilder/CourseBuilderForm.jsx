@@ -37,7 +37,7 @@ const TYPE_ICONS = {
   other:    MdInsertDriveFile,
 };
 
-function MaterialIcon({ type }) {
+export function MaterialIcon({ type }) {
   const Icon = TYPE_ICONS[type] || MdInsertDriveFile;
   return <Icon className="text-[#FFD60A] text-sm flex-shrink-0" />;
 }

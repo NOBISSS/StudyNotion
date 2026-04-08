@@ -231,7 +231,7 @@ export default function StudentDashboard() {
         {/* Course progress */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <p className="text-sm font-semibold text-white mb-4">Course Progress</p>
-          <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-3">
             {dashboardData.enrolledCourses?.slice(0, 4).map((c) => (
               <div key={c.id} className="flex items-center gap-3">
                 <ProgressRing pct={c.progress.toFixed(0)} size={48} stroke={4} color={c.progress === 100 ? '#4ade80' : '#FFD60A'} />
@@ -300,7 +300,7 @@ export default function StudentDashboard() {
                     style={{ width: `${c.progress}%`, background: c.progress === 100 ? '#4ade80' : '#FFD60A' }} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="text-[#6B7280] text-xs">{c.progress.toFixed(2)}% complete</p>
+                  <p className="text-[#6B7280] text-xs">{c.progress.toFixed(0)}% complete</p>
                   <p className="text-[#6B7280] text-xs">{c.lastAccessed}</p>
                 </div>
               </div>

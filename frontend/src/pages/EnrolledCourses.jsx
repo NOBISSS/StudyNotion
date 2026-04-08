@@ -137,7 +137,7 @@ function EmptyState({ navigate }) {
 // ─── Course Row ────────────────────────────────────────────────────────────────
 function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
     const navigate   = useNavigate()
-    const progress   = course.progressPercentage || 0
+    const progress   = course.progress || 0
     const isLast     = index === total - 1
 
     return (
@@ -288,6 +288,7 @@ const EnrolledCourses = () => {
     const getEnrolledCourses = async () => {
         try {
             const response = await getUserEnrolledCourses(token);
+            console.log("res: ", response)
             setEnrolledCourses(response.courseEnrollments)
         } catch (error) {
             console.log(error)
