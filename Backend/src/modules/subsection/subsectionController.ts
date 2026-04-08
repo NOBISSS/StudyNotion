@@ -4,13 +4,13 @@ import { s3 } from "../../shared/config/s3Config.js";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import type { Handler } from "../../shared/types.js";
 import CourseProgress from "../course/CourseProgress.js";
 import { SubSection } from "./SubSectionModel.js";
 import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
 import { updateSubSectionSchema } from "./subsectionValidation.js";
 import Video from "./video/VideoModel.js";
-import type { Handler } from "../../shared/types.js";
 
 export const getAllSubsections:Handler = asyncHandler(async (req, res) => {
   const sectionId = req.params.sectionId;
@@ -50,8 +50,6 @@ export const markSubsectionAsCompleted:Handler = asyncHandler(async (req, res) =
       courseId: new Types.ObjectId(subsection.courseId),
     },
   );
-  console.log("Course Progress before update:", courseProgress?.completedSubsections);
-  console.log("Course Progress", courseProgress);
   if (!courseProgress)
     courseProgress = await CourseProgress.create({
       courseId: new Types.ObjectId(subsection.courseId),
@@ -63,13 +61,16 @@ export const markSubsectionAsCompleted:Handler = asyncHandler(async (req, res) =
   else if (!courseProgress.completedSubsections.includes(subsection._id)) {
     courseProgress.completedSubsections.push(subsection._id);
   }
+  else if (courseProgress.completedSubsections.includes(subsection._id)) {
+    courseProgress.completedSubsections = courseProgress.completedSubsections.filter(
+      (id) => !id.equals(subsection._id),
+    );
+  }
   const totalSubsections = await SubSection.countDocuments({
     courseId: subsection.courseId,
     isActive: true,
   });
-  console.log("Total Subsections:", totalSubsections);
   const completedSubsections = courseProgress.completedSubsections.length || 0;
-  console.log("Completed Subsections:", completedSubsections);
   const progress = (completedSubsections / totalSubsections) * 100;
   courseProgress.progress = progress;
   if(totalSubsections > 0 && completedSubsections === totalSubsections) {

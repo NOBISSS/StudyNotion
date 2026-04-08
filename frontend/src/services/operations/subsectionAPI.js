@@ -10,7 +10,6 @@ export const markSubsectionAsCompleted = async (subsectionId) => {
     const url = PUT_MARK_SUBSECTION_COMPLETED_API.replace(":subsectionId", subsectionId);
     const response = await apiConnector("PUT", url);
     if (!response?.data?.success) throw new Error("Could not mark subsection as completed");
-    toast.success("Subsection marked as completed");
     result = response.data.data;
   } catch (error) {
     toast.error(error.message || "Failed to mark subsection as completed");

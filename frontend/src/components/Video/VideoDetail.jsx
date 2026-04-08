@@ -21,6 +21,7 @@ import PlyrPlayer from "./PlyrPlayer";
 import { BACKEND_URL } from "../../utils/constants";
 import { getCourseProgress } from "../../services/operations/courseDetailsAPI";
 import { markSubsectionAsCompleted } from "../../services/operations/subsectionAPI";
+import toast from "react-hot-toast";
 
 
 const COURSE_DETAIL_API = (id) => `${BACKEND_URL}/courses/getdetails/${id}`;
@@ -179,7 +180,18 @@ function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, o
   const markAsCompleted = async (subsectionId) => {
     const res = await markSubsectionAsCompleted(subsectionId);
     if (res) {
+      if(completedIds.has(subsectionId)){ 
+        setCompletedIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(subsectionId);
+        return newSet;
+      });
+      toast.success("Subsection marked as incomplete");
+    }
+      else{
       setCompletedIds(prev => new Set([...prev, subsectionId]));
+      toast.success("Subsection marked as completed");
+    }
     }
   }
   // Lazy fetch: only on first open, never again

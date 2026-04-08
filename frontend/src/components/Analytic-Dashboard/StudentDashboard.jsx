@@ -132,15 +132,38 @@ function ProgressRing({ pct, size = 56, stroke = 5, color = '#FFD60A' }) {
   const circ = 2 * Math.PI * r
   return (
     <svg width={size} height={size} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2C333F" strokeWidth={stroke} />
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
-        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct / 100)}
-        strokeLinecap="round" transform={`rotate(-90 ${size / 2} ${size / 2})`} />
-      <text x={size / 2} y={size / 2 + 5} textAnchor="middle" fill="#F1F2FF" fontSize="12" fontWeight="500">
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="#2C333F"
+        strokeWidth={stroke}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeDasharray={circ}
+        strokeDashoffset={circ * (1 - pct / 100)}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+      <text
+        x={size / 2}
+        y={size / 2 + 5}
+        textAnchor="middle"
+        fill="#F1F2FF"
+        fontSize="12"
+        fontWeight="500"
+      >
         {pct}%
       </text>
     </svg>
-  )
+  );
 }
 
 const activityIcon  = { video: '▶', quiz: '✦', enroll: '＋', cert: '✓' }
@@ -211,7 +234,7 @@ export default function StudentDashboard() {
           <div className="flex flex-col gap-3">
             {dashboardData.enrolledCourses?.slice(0, 4).map((c) => (
               <div key={c.id} className="flex items-center gap-3">
-                <ProgressRing pct={c.progress} size={48} stroke={4} color={c.progress === 100 ? '#4ade80' : '#FFD60A'} />
+                <ProgressRing pct={c.progress.toFixed(0)} size={48} stroke={4} color={c.progress === 100 ? '#4ade80' : '#FFD60A'} />
                 <div className="min-w-0 flex-1">
                   <p className="text-white text-xs font-medium truncate">{c.name}</p>
                   <p className="text-[#6B7280] text-xs">{c.completedVideos}/{c.totalVideos} lectures</p>
@@ -277,7 +300,7 @@ export default function StudentDashboard() {
                     style={{ width: `${c.progress}%`, background: c.progress === 100 ? '#4ade80' : '#FFD60A' }} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="text-[#6B7280] text-xs">{c.progress}% complete</p>
+                  <p className="text-[#6B7280] text-xs">{c.progress.toFixed(2)}% complete</p>
                   <p className="text-[#6B7280] text-xs">{c.lastAccessed}</p>
                 </div>
               </div>
