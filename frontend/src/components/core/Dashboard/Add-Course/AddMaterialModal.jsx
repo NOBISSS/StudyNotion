@@ -4,7 +4,7 @@ import { MdCloudUpload, MdClose, MdEdit, MdDelete, MdInsertDriveFile,
          MdVideoFile, MdAudioFile, MdImage, MdPictureAsPdf } from 'react-icons/md';
 import { VscChevronRight } from 'react-icons/vsc';
 import { addMaterial, updateMaterial } from '../../../../services/operations/MaterialAPI';
-import { useS3Upload } from '../../../../hooks/useS3Upload';
+import { useS3Upload } from '../../../../hooks/UseS3Upload.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const MATERIAL_TYPES = ['video', 'audio', 'pdf', 'image', 'document', 'other'];
