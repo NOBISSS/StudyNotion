@@ -434,7 +434,7 @@ export const studentDashboard: Handler = asyncHandler(async (req, res) => {
         thumbnail: course.thumbnailUrl,
         progress: Math.round(progressPercentage),
         completed: isCompleted,
-        totalVideos: totalLecturesMap[0]?.totalLectures || 0,
+        totalVideos: totalLecturesMap.find((c) => c._id.toString() === course._id.toString())?.totalLectures || 0,
         completedVideos: progress?.completedSubsections?.length || 0,
         lastAccessed: lastAccessed
           ? formatTimeAgo(lastAccessed)

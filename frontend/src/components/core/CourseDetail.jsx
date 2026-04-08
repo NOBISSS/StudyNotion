@@ -571,7 +571,7 @@ export default function CourseDetail() {
   // ── Render: Loading ───────────────────────────────────────────────────────
   if (isLoading) return (
     <>
-      <style>{globalStyles}</style>
+      {/* <style>{globalStyles}</style> */}
       <div style={{ background: "#0A0F1C", minHeight: "100vh" }}>
         <PageLoader />
       </div>
@@ -581,7 +581,7 @@ export default function CourseDetail() {
   // ── Render: Error ─────────────────────────────────────────────────────────
   if (error) return (
     <>
-      <style>{globalStyles}</style>
+      {/* <style>{globalStyles}</style> */}
       <div style={{ background: "#0A0F1C", minHeight: "100vh" }}>
         <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
           <p style={{ color: "#FC8181", fontSize: 15 }}>{error}</p>
@@ -597,7 +597,7 @@ export default function CourseDetail() {
   // ── Render: Main ──────────────────────────────────────────────────────────
   return (
     <>
-      <style>{globalStyles}</style>
+      {/* <style>{globalStyles}</style> */}
       <div style={{ background: "#0A0F1C", minHeight: "100vh", fontFamily: "'Inter','Segoe UI',system-ui,sans-serif", color: "#F1F2FF" }}>
 
         {/* ── Hero Header ── */}

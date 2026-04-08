@@ -252,9 +252,9 @@ function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, o
           {section.name || section.sectionName}
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-          <span style={{ color: "#6B7280", fontSize: 10.5, whiteSpace: "nowrap" }}>
+          {/* <span style={{ color: "#6B7280", fontSize: 10.5, whiteSpace: "nowrap" }}>
             {subsCount > 0 ? `${subsCount * 5}min` : ""}
-          </span>
+          </span> */}
           {/* Chevron */}
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
             stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round"
@@ -286,7 +286,11 @@ function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, o
             return (
               <div
                 key={sub._id}
-                onClick={() => onSelectSub(sub)}
+                onClick={(e) => {
+                  if(e.target.className.includes("checkbox"))
+                    return;
+                  onSelectSub(sub)
+                }}
                 style={{
                   display: "flex", alignItems: "flex-start", gap: 9,
                   padding: "9px 14px 9px 10px", cursor: "pointer",
@@ -304,11 +308,12 @@ function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, o
                   background: isCompleted ? "#06B6D4" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
+                className="checkbox"
                 onClick={()=>markAsCompleted(sub._id)}
                 >
                   {isCompleted && (
-                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5">
-                      <polyline points="2,6 5,9 10,3" />
+                    <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" className="checkbox">
+                      <polyline points="2,6 5,9 10,3" className="checkbox" />
                     </svg>
                   )}
                 </div>

@@ -231,7 +231,7 @@ export default function StudentDashboard() {
         {/* Course progress */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <p className="text-sm font-semibold text-white mb-4">Course Progress</p>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto pr-1">
             {dashboardData.enrolledCourses?.slice(0, 4).map((c) => (
               <div key={c.id} className="flex items-center gap-3">
                 <ProgressRing pct={c.progress.toFixed(0)} size={48} stroke={4} color={c.progress === 100 ? '#4ade80' : '#FFD60A'} />
@@ -258,7 +258,7 @@ export default function StudentDashboard() {
         {/* Recent activity */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <p className="text-sm font-semibold text-white mb-4">Recent Activity</p>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto pr-1">
             {dashboardData?.recentActivity?.map((a, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"

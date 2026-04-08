@@ -131,7 +131,7 @@ export const markSubsectionAsCompleted: Handler = asyncHandler(
     const totalSubsections = await SubSection.countDocuments({
       courseId: subsection.courseId,
       isActive: true,
-      isAvailable: true, // only count available subsections
+      // isAvailable: true, // only count available subsections
     });
 
     const completedCount = courseProgress.completedSubsections.length;
