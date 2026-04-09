@@ -23,7 +23,7 @@ export const instructorDashboard = async () => {
   }
 };
 export const studentDashboard = async () => {
-  const toastId = toast.loading("Fetching student dashboard details...");
+  const toastId = toast
   let result = [];
   try {
     const response = await apiConnector(

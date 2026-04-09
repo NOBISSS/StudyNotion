@@ -176,17 +176,20 @@ export default function StudentDashboard() {
   if(!user) {
       navigate("/login");
     }
+    const [loading,setLoading]=useState(false);
     const [dashboardData, setDashboardData] = useState({});
     
     useEffect(() => {
       const fetchDashboardData = async () => {
+        setLoading(true);
         const data = await studentDashboard();
         setDashboardData(data);
+        setLoading(false);
         console.log("Fetched dashboard data is ", data);
       };
       fetchDashboardData();
     }, []);
-  return (
+  return !loading && (
     <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
 
       {/* Header */}
