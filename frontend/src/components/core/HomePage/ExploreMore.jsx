@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {HomePageExplore} from "../../../data/homepage-explore"
-import { HighlightText } from './HighlightText';
 import { Card } from './Card';
 
 export const ExploreMore = ({element,isCards=false,customCss}) => {

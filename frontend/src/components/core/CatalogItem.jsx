@@ -16,7 +16,7 @@ const CatalogItem = () => {
   );
 
   const [activeTab, setActiveTab] = useState("all");
-  
+
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
 
@@ -40,7 +40,6 @@ const CatalogItem = () => {
   const visibleCourses = displayedCourses.slice(0, visibleCount);
   const hasMore = visibleCount < displayedCourses.length;
 
-  // Loading skeleton
   if (loading && !catalogData) {
     return (
       <div className="min-h-screen bg-[#000814] text-white">
@@ -51,7 +50,6 @@ const CatalogItem = () => {
             <div className="h-4 bg-[#2C333F] rounded w-32" />
           </div>
         </div>
-        {/* Grid skeleton */}
         <div className="px-4 sm:px-8 lg:px-[8.5vw] mt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -70,7 +68,6 @@ const CatalogItem = () => {
     );
   }
 
-  // Error / no data
   if (!catalogData) {
     return (
       <div className="min-h-screen bg-[#000814] flex flex-col items-center justify-center gap-3">
@@ -86,8 +83,6 @@ const CatalogItem = () => {
 
   return (
     <div className="text-white min-h-screen bg-[#000814]">
-
-      {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="bg-[#161D29] border-b border-[#2C3244] py-8 sm:py-10 px-4 sm:px-8 lg:px-[8.5vw]">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
           {catalogData?.categoryName ?? "All Courses"}
@@ -101,11 +96,7 @@ const CatalogItem = () => {
           {allCourses.length} {allCourses.length === 1 ? "course" : "courses"} available
         </p>
       </div>
-
-      {/* ── Body ────────────────────────────────────────────────────── */}
       <div className="px-4 sm:px-8 lg:px-[8.5vw] mt-6 sm:mt-8">
-
-        {/* Tabs */}
         <div className="flex gap-4 sm:gap-6 border-b border-[#2C3244] mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
           <TabButton
             label={`All Courses`}
@@ -120,16 +111,12 @@ const CatalogItem = () => {
             onClick={() => setActiveTab("mostSelling")}
           />
         </div>
-
-        {/* Result count */}
         {displayedCourses.length > 0 && (
           <p className="text-xs text-[#6B7280] mb-4">
             Showing {Math.min(visibleCount, displayedCourses.length)} of{" "}
             {displayedCourses.length} courses
           </p>
         )}
-
-        {/* Course grid */}
         {displayedCourses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <p className="text-[#6B7280] text-lg">No courses found</p>
@@ -144,8 +131,6 @@ const CatalogItem = () => {
                 <CourseCard key={course._id} course={course} />
               ))}
             </div>
-
-            {/* Load more */}
             {hasMore && (
               <div className="flex justify-center mt-10 mb-6">
                 <button
@@ -158,8 +143,6 @@ const CatalogItem = () => {
                 </button>
               </div>
             )}
-
-            {/* End of list */}
             {!hasMore && displayedCourses.length > COURSES_PER_PAGE && (
               <p className="text-center text-[#4B5563] text-xs py-8">
                 You've seen all {displayedCourses.length} courses
@@ -167,15 +150,12 @@ const CatalogItem = () => {
             )}
           </>
         )}
-
-        {/* Bottom padding */}
         <div className="pb-16" />
       </div>
     </div>
   );
 };
 
-// ── Tab Button ──────────────────────────────────────────────────────────────
 function TabButton({ label, count, active, onClick }) {
   return (
     <button

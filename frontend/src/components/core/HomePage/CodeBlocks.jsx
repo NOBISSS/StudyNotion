@@ -1,6 +1,4 @@
-import React from 'react'
 import {CTAButton} from "../HomePage/Button"
-import { HighlightText } from './HighlightText'
 import { FaArrowRight } from 'react-icons/fa'
 import { TypeAnimation } from 'react-type-animation'
 export const CodeBlocks = ({
@@ -8,8 +6,6 @@ export const CodeBlocks = ({
 }) => {
   return (
     <div className={`flex ${position} my-20 justify-between gap-10`}>
-
-    {/*Section 1 */}
     <div className='w-[50%] flex flex-col gap-8 '>
         {heading}
         <div className='text-[#838894] font-bold'>

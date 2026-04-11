@@ -1,7 +1,6 @@
-// components/core/Navbar.jsx
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "../../assets/logo.png";
-import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
+import { Link, matchPath, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { TiArrowSortedDown } from "react-icons/ti";
@@ -12,7 +11,6 @@ import { fetchAllCategories } from "../../services/operations/CatalogAPI";
 
 const Navbar = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const location = useLocation();
   const categories     = useSelector(state => state.catalog.categories);
   const { token }      = useSelector(state => state.auth);
@@ -26,7 +24,6 @@ const Navbar = () => {
   const profileRef = useRef(null);
   const navbarRef  = useRef(null);
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target))
@@ -36,12 +33,10 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Fetch categories once
   useEffect(() => {
     if (!categories?.length) dispatch(fetchAllCategories());
   }, [categories, dispatch]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
     setMobileCatOpen(false);
@@ -51,26 +46,18 @@ const Navbar = () => {
 
   const profilePic  = user?.additionalDetails?.profilePicture || user?.image || null;
   const userInitial = user?.firstName?.charAt(0).toUpperCase() || "U";
-
   return (
     <>
       <div ref={navbarRef} className="sticky top-0 z-50 border-b border-[#2C333F] bg-[#161D29]">
         <div className="mx-auto flex h-14 w-full items-center justify-between px-[8.5vw]">
-
-          {/* Logo */}
           <Link to="/" className="flex-shrink-0">
             <img src={logo} loading="lazy" alt="StudyNotion Logo" className="h-8 w-auto object-contain" />
           </Link>
-
-          {/* Desktop Nav */}
           <nav className="hidden md:block">
-            
               <ul className="flex flex-row items-center gap-x-8">
                 {NavBarLinks.filter((link) => link.for.includes(user?.accountType ? user.accountType : "student")).map((link, index) => (
                   <li key={index} className="relative">
                     {link.title === "Catalog" ? (
-
-                    // ── Catalog trigger — dropdown anchored to full navbar width ──
                     <div className="group relative flex cursor-pointer items-center gap-1 py-4">
                       <span className={`text-sm font-medium transition-colors group-hover:text-[#FFD60A] ${
                         matchRoute("/catalog/:catalogName/:catalogId") ? "text-[#FFD60A]" : "text-[#DBDDEA]"
@@ -80,14 +67,7 @@ const Navbar = () => {
                       <TiArrowSortedDown className={`text-xs transition-all duration-200 group-hover:rotate-180 group-hover:text-[#FFD60A] ${
                         matchRoute("/catalog/:catalogName/:catalogId") ? "text-[#FFD60A]" : "text-[#DBDDEA]"
                       }`} />
-
-                      {/* 
-                        KEY FIX: Instead of centering on the "Catalog" text (which overflows),
-                        we anchor the panel to the LEFT edge of the viewport using fixed positioning.
-                        The panel spans the full navbar width with left/right based on px-[8.5vw].
-                      */}
                       <div className="pointer-events-none invisible absolute top-full left-1/2 -translate-x-1/2 opacity-0 transition-all duration-200 ease-out group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 z-50">
-
                         {/* Caret */}
                         <div className="flex justify-center">
                           <div className="h-0 w-0"
@@ -99,8 +79,6 @@ const Navbar = () => {
                             style={{ borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderBottom: "7px solid #1F2937" }}
                           />
                         </div>
-
-                        {/* Panel — wide enough to fit all categories in a grid, capped & scrollable */}
                         <div className="rounded-xl border border-[#2C333F] bg-[#1F2937] shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
                           style={{ width: "min(700px, 88vw)" }}
                         >

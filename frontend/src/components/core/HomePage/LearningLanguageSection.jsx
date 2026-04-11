@@ -1,4 +1,3 @@
-import React from 'react'
 import { HighlightText } from './HighlightText'
 import Know_your_progress from "../../../assets/Know_your_progress.png"
 import Plan_your_lessons from "../../../assets/Plan_your_lessons.svg"

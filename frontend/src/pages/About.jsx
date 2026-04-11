@@ -1,10 +1,10 @@
 import React from 'react'
 import { HighlightText } from '../components/core/HomePage/HighlightText'
-import About3 from "../assets/About3.jpg";
 import About4 from "../assets/About4.jpg";
 import { CTAButton } from '../components/core/HomePage/Button';
 import { LearningGrid } from '../components/core/AboutPage/LearningGrid';
 import ContactFormSection from './ContactFormSection';
+import { getImage } from '../utils/constants';
 const About = () => {
 const AboutData=[
     {
@@ -57,10 +57,10 @@ const AboutData1=[
             <p className='text-sm md:text-lg mt-4 max-w-[800px] text-[#838894]'>Studynotion is at the forefront of driving innovation in online education. We're passionate about creating a brighter future by offering cutting-edge courses, leveraging emerging technologies, and nurturing a vibrant learning community.</p>
             {/*Responsive Images */}
             <div className='photos mt-10 flex justify-center gap-6 md:h-[200px]'>
-            <img src={About3} className='w-auto h-[270px] shadow-md'
+            <img src={getImage("About3_nmyw4k.jpg")} className='w-auto h-[270px] shadow-md'
              alt="A3"/>
-            <img src={About3} alt="A3" className='w-auto h-[270px] shadow-md'/>
-            <img src={About3} alt="A3" className='w-auto h-[270px] shadow-md'/>
+            <img src={getImage("About3_nmyw4k.jpg")} alt="A3" className='w-auto h-[270px] shadow-md'/>
+            <img src={getImage("About3_nmyw4k.jpg")} alt="A3" className='w-auto h-[270px] shadow-md'/>
             </div>
         </div>
         {/**SECTION 2 */}

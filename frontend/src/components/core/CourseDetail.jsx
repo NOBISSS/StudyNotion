@@ -14,16 +14,6 @@ import Footer from "./Footer"
 import { MaterialIcon } from "./Dashboard/Add-Course/CourseBuilder/CourseBuilderForm";
 import { getAllSubsections } from "../../services/operations/courseDetailsAPI";
 
-
-const globalStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #0A0F1C; color: #F1F2FF; }
-  @keyframes spin        { to { transform: rotate(360deg); } }
-  @keyframes shimmer     { to { background-position: -200% 0; } }
-  @keyframes sectionSpin { to { transform: rotate(360deg); } }
-`;
-
 export function StarRating({ rating = 0, size = 14 }) {
   const clamped = Math.min(5, Math.max(0, rating));
   return (
@@ -50,7 +40,6 @@ export function StarRating({ rating = 0, size = 14 }) {
   );
 }
 
-// ─── Page Loader ──────────────────────────────────────────────────────────────
 function PageLoader() {
   return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -62,8 +51,6 @@ function PageLoader() {
     </div>
   );
 }
-
-
 
 function PurchaseCard({
   courseId,
@@ -84,7 +71,6 @@ function PurchaseCard({
     { icon: "📱", text: "Access on Mobile and TV" },
     { icon: "🏆", text: "Certificate of completion" },
   ];
-
 
   const dispatch = useDispatch();
   const handleCartClick = () => {
@@ -148,8 +134,6 @@ function PurchaseCard({
               </>
             )}
           </div>
-
-          {/* Primary CTA */}
           <button
             onClick={handleCartClick}
             disabled={enrolling}
@@ -181,8 +165,6 @@ function PurchaseCard({
               </>
             ) : ctaLabel()}
           </button>
-
-          {/* Buy Now — paid & not enrolled only */}
           {!isFree && !isEnrolled && (
             <button
               onClick={() => onEnroll?.()}
@@ -231,11 +213,7 @@ function PurchaseCard({
   );
 }
 
-// ─── Accordion Section ─────────────────────────────────────────────────────────
-// section shape from API: { _id, name, order, subSectionIds: [...], courseId, ... }
-// SubSections fetched lazily from: GET /sections/:sectionId/subSections
 function AccordionSection({ section, forceOpen }) {
-  // Open by default if it's order=1 (first section)
   const [open, setOpen] = useState(section.order === 1);
   const [subSections, setSubSections] = useState(null); // null = not yet fetched
   const [lecturesMap,setLecturesMap] = useState({});

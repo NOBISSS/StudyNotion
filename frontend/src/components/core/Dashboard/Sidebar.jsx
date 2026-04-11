@@ -1,4 +1,3 @@
-// components/core/Dashboard/Sidebar.jsx
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +29,6 @@ const Sidebar = () => {
         className="flex h-[calc(100vh-3.5rem)] flex-col border-r border-r-[#1C2333] bg-[#161D29]"
         style={{ width: collapsed ? 56 : 220 }}
       >
-        {/* ── Top: toggle button ── */}
         <div
           className={`flex items-center border-b border-[#1C2333] py-3 ${collapsed ? "justify-center px-0" : "justify-end px-3"}`}
         >
@@ -40,7 +38,6 @@ const Sidebar = () => {
             className="flex h-8 w-8 items-center justify-center rounded-md text-[#6B7280] transition-all hover:bg-[#2C333F] hover:text-white"
           >
             {collapsed ? (
-              /* Expand — chevron right */
               <svg
                 width="16"
                 height="16"
@@ -53,7 +50,6 @@ const Sidebar = () => {
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             ) : (
-              /* Collapse — chevron left */
               <svg
                 width="16"
                 height="16"
@@ -68,8 +64,6 @@ const Sidebar = () => {
             )}
           </button>
         </div>
-
-        {/* ── Nav links ── */}
         <div className="flex flex-1 flex-col overflow-y-auto py-4">
           <div className="flex flex-col">
             {sidebarLinks.map((link, index) => {
@@ -84,14 +78,10 @@ const Sidebar = () => {
               );
             })}
           </div>
-
-          {/* Divider */}
           <div
             className="mx-auto my-5 h-px bg-[#1C2333]"
             style={{ width: collapsed ? 32 : "83%" }}
           />
-
-          {/* Settings */}
           <div className="flex flex-col">
             <SideBarLink
               link={{ name: "Settings", path: "/dashboard/settings" }}
@@ -100,8 +90,6 @@ const Sidebar = () => {
             />
           </div>
         </div>
-
-        {/* ── User info at bottom (hidden when collapsed) ── */}
         {!collapsed && user && (
           <div
             className="flex items-center gap-3 border-t border-[#1C2333] px-4 py-4 cursor-pointer"

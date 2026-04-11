@@ -1,4 +1,3 @@
-// components/core/Login.jsx
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import {  useState } from "react";
 import { FaEyeSlash } from "react-icons/fa";
@@ -8,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../services/operations/authAPI";
 import GoogleLoginButton from "../../utils/GoogleLogin";
 import { HighlightText } from "./HomePage/HighlightText";
+import { getImage } from "../../utils/constants";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,9 +37,6 @@ export const Login = () => {
   return (
     <div className="min-h-[calc(100vh-56px)] bg-[#0A0F1C] text-white">
       <div className="mx-auto flex min-h-[calc(100vh-56px)] max-w-[1200px] flex-col-reverse items-center justify-center gap-10 px-6 py-14 md:flex-row md:gap-16 md:px-12">
-        {/* ══════════════════════════════════════════
-            LEFT — Form
-        ══════════════════════════════════════════ */}
         <div className="flex w-full flex-col md:w-1/2">
           {/* Heading */}
           <h1 className="mb-2 text-[28px] font-bold leading-tight text-[#F1F2FF] sm:text-[32px]">
@@ -208,7 +205,7 @@ export const Login = () => {
           {/* Lines background — decorative */}
           <img
             src={
-              "https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"
+              getImage("Lines2_ivrvvm.png")
             }
             alt=""
             aria-hidden="true"
@@ -217,7 +214,7 @@ export const Login = () => {
           {/* Main illustration */}
           <img
             src={
-              "https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845888/LoginGirlImage_glszxk.webp"
+              getImage("LoginGirlImage_glszxk.webp")
             }
             alt="Student learning online"
             className="relative z-10 h-[260px] w-auto sm:h-[320px] md:h-[400px] drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"

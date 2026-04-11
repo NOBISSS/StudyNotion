@@ -10,6 +10,9 @@ export const COURSE_STATUS = {
   SCHEDULED:"Scheduled",
 };
 
+export const getImage = (name) =>
+  `https://res.cloudinary.com/dc9ukfxel/image/upload/v1774845893/${name}`;
+
 export const LEVEL=["Beginner", "Intermediate", "Advance", "Beginner-to-Advance"];
 
 // let API_URL;

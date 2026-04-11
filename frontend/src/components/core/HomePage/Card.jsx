@@ -1,21 +1,13 @@
-import React from 'react'
-
 export const Card = ({ cardData, currentCard, setCurrentCard }) => {
-
     const isActive = currentCard === cardData;
-
     return (
         <div
             className='relative w-full max-w-[300px] h-full cursor-pointer'
             onClick={() => setCurrentCard(cardData)}
         >
-
-            {/* Background Layer (offset) */}
             {isActive && (
                 <div className='absolute inset-0 translate-x-3 translate-y-3 bg-yellow-400 rounded-xl z-0 transition-all duration-300'></div>
             )}
-
-            {/* Main Card */}
             <div
                 className={`relative z-10 w-full h-full rounded-xl p-5 flex flex-col justify-between transition-all duration-300
         ${isActive
@@ -23,8 +15,6 @@ export const Card = ({ cardData, currentCard, setCurrentCard }) => {
                         : "bg-[#161D29] text-white hover:scale-95"}
         `}
             >
-
-                {/* Content */}
                 <div className='flex flex-col gap-4'>
                     <h1 className='text-lg font-semibold leading-snug'>
                         {cardData.heading}
@@ -34,18 +24,14 @@ export const Card = ({ cardData, currentCard, setCurrentCard }) => {
                         {cardData.description}
                     </p>
                 </div>
-
-                {/* Footer */}
                 <div className='flex justify-between items-center border-t border-dashed border-[#2C333F] pt-3 text-xs'>
                     <span className={`${isActive ? "text-blue-600" : "text-blue-400"}`}>
                         {cardData.level}
                     </span>
-
                     <span className={`${isActive ? "text-blue-600" : "text-blue-400"}`}>
                         {cardData.lessonNumber} Lessons
                     </span>
                 </div>
-
             </div>
         </div>
     )
