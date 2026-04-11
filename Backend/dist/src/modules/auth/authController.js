@@ -338,35 +338,48 @@ export const googleSignin = asyncHandler(async (req, res) => {
 });
 export const githubSignin = asyncHandler(async (req, res) => {
     const code = req.query.code;
-    const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-    const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-    const GITHUB_REDIRECT_URI = process.env.GITHUB_REDIRECT_URI;
+    if (!code || typeof code !== "string") {
+        throw new Error("Invalid GitHub code");
+    }
     const response = await axios.post("https://github.com/login/oauth/access_token", {
-        params: {
-            client_id: GITHUB_CLIENT_ID,
-            client_secret: GITHUB_CLIENT_SECRET,
-            code: code,
-            redirect_uri: GITHUB_REDIRECT_URI,
-        },
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: process.env.GITHUB_REDIRECT_URI,
+    }, {
         headers: {
             Accept: "application/json",
         },
     });
     const access_token = response.data.access_token;
+    if (!access_token) {
+        console.log("TOKEN RESPONSE:", response.data);
+        throw new Error("GitHub access_token missing");
+    }
     const userRes = await axios.get("https://api.github.com/user", {
         headers: {
             Authorization: `token ${access_token}`,
         },
     });
-    let user = await User.findOneAndUpdate({
-        email: userRes.data.email,
-        isDeleted: false,
-    }, { method: "github" }, { returnDocument: "after" });
+    const emailsRes = await axios.get("https://api.github.com/user/emails", {
+        headers: {
+            Authorization: `token ${access_token}`,
+        },
+    });
+    const primaryEmail = emailsRes.data.find((e) => e.primary)?.email ||
+        emailsRes.data[0]?.email;
+    if (!primaryEmail) {
+        throw new Error("No email found from GitHub");
+    }
+    const fullName = userRes.data.name || "GitHub User";
+    const firstName = fullName.split(" ")[0];
+    const lastName = fullName.split(" ").slice(1).join(" ");
+    let user = await User.findOneAndUpdate({ email: primaryEmail, isDeleted: false }, { method: "github" }, { returnDocument: "after" });
     if (!user) {
         user = await User.create({
-            firstName: userRes.data.name.split(" ")[0],
-            lastName: userRes.data.name.split(" ").slice(1).join(" "),
-            email: userRes.data.email,
+            firstName,
+            lastName,
+            email: primaryEmail,
             method: "github",
         });
     }
