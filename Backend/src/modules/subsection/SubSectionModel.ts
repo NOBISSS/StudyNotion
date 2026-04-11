@@ -8,16 +8,11 @@ const subSectionSchema = new Schema({
         required: true,
     },
     isPreview: { type: Boolean, default: false },
-    // contentUrl: { type: String, required: true },
-    // videoLength: { type: String },
-    // materialType: { type: String },
     description: { type: String },
-    // thumbnailUrl: { type: String },
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
     sectionId: { type: Types.ObjectId, ref: "Section", required: true },
     isActive: { type: Boolean, default: true },
     isAvailable: { type: Boolean, default: false },
-    // videoAssetId: { type: Types.ObjectId, ref: "VideoAsset" },
 }, { timestamps: true });
 
 export const SubSection = model("SubSection", subSectionSchema);

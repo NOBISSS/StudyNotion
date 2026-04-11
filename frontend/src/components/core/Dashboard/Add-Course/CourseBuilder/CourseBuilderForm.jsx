@@ -23,7 +23,7 @@ import {
   updateSubsection,
 } from "../../../../../services/operations/courseDetailsAPI";
 import { setCourse, setStep } from "../../../../../slices/courseSlice";
-import EditLectureModal from "./EditLectureModal";
+import EditLectureModal from "./EditLectureModal1";
 import AddMaterialModal from "../AddMaterialModal";
 import DeleteMaterialModal from "../DeleteMaterialModal";
 
