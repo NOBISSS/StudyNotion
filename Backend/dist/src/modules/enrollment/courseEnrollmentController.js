@@ -26,12 +26,18 @@ export const EnrollInCourse = asyncHandler(async (req, res) => {
         throw AppError.conflict("User is already enrolled in this course");
     }
     const course = await Course.findById(new Types.ObjectId(courseId));
+    if (!course || !course.isActive || course.status !== "Published") {
+        throw AppError.notFound("Course not found or not available for enrollment");
+    }
     if (course?.instructorId == userId && user?.accountType !== "admin") {
         throw AppError.badRequest("Instructor cannot enroll in their own course");
     }
     const courseEnrollment = await CourseEnrollment.create({
         userId: new Types.ObjectId(userId),
         courseId: new Types.ObjectId(courseId),
+        enrolledAt: new Date(),
+        amountPaid: course.originalPrice,
+        instructorId: course.instructorId,
     });
     const courseProgress = await CourseProgress.create({
         userId: new Types.ObjectId(userId),
@@ -40,10 +46,61 @@ export const EnrollInCourse = asyncHandler(async (req, res) => {
         completed: false,
         completedSubsections: [],
     });
-    await Wishlist.findOneAndUpdate({ userId }, { $pull: { courseIds: courseId } }, { new: true });
+    await Wishlist.findOneAndUpdate({ userId }, { $pull: { courseIds: courseId } }, { returnDocument: "after" });
     ApiResponse.success(res, {
         courseEnrollment,
     }, "Course enrollment created successfully");
+});
+export const EnrollInWishlist = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    const user = req.user;
+    if (!userId)
+        throw AppError.unauthorized("User ID is required to enroll in course");
+    const wishlist = await Wishlist.findOne({ userId });
+    if (!wishlist || wishlist.courseIds.length === 0) {
+        throw AppError.badRequest("Wishlist is empty, no courses to enroll");
+    }
+    const existingEnrollment = await CourseEnrollment.find({
+        userId: new Types.ObjectId(userId),
+        courseId: { $in: wishlist.courseIds.map((id) => new Types.ObjectId(id)) },
+    });
+    if (existingEnrollment.length == wishlist.courseIds.length) {
+        throw AppError.conflict("User is already enrolled in this courses");
+    }
+    const courses = await Course.find({
+        _id: { $in: wishlist.courseIds },
+        isActive: true,
+        status: "Published",
+    });
+    if (!courses) {
+        throw AppError.notFound("Course not found or not available for enrollment");
+    }
+    const enrollments = [];
+    for (const course of courses) {
+        if (existingEnrollment.some((enrollment) => enrollment.courseId.equals(course._id))) {
+            continue;
+        }
+        if (course.instructorId.equals(userId) && user?.accountType !== "admin") {
+            continue;
+        }
+        const courseEnrollment = await CourseEnrollment.create({
+            userId: new Types.ObjectId(userId),
+            courseId: new Types.ObjectId(course._id),
+            enrolledAt: new Date(),
+            amountPaid: course.originalPrice,
+            instructorId: course.instructorId,
+        });
+        enrollments.push(courseEnrollment);
+        const courseProgress = await CourseProgress.create({
+            userId: new Types.ObjectId(userId),
+            courseId: new Types.ObjectId(course._id),
+            progress: 0,
+            completed: false,
+            completedSubsections: [],
+        });
+        await Wishlist.findOneAndUpdate({ userId }, { $pull: { courseIds: course._id } }, { returnDocument: "after" });
+    }
+    ApiResponse.success(res, { enrollments }, "Wishlist enrollment created successfully");
 });
 export const getUserEnrollments = asyncHandler(async (req, res) => {
     const userId = req.userId;

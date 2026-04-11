@@ -1,5 +1,6 @@
-export declare const getAllSubsections: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
-export declare const markSubsectionAsCompleted: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
-export declare const deleteSubsection: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
-export declare const updateSubsection: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;
+import type { Handler } from "../../shared/types.js";
+export declare const getAllSubsections: Handler;
+export declare const markSubsectionAsCompleted: Handler;
+export declare const deleteSubsection: Handler;
+export declare const updateSubsection: Handler;
 //# sourceMappingURL=subsectionController.d.ts.map

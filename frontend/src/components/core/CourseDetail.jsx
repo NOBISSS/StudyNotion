@@ -13,6 +13,8 @@ import { addCourseToWishList } from "../../services/operations/cartAPI";
 import Footer from "./Footer"
 import { MaterialIcon } from "./Dashboard/Add-Course/CourseBuilder/CourseBuilderForm";
 import { getAllSubsections } from "../../services/operations/courseDetailsAPI";
+import PaymentButton from "./Payment/PaymentButton";
+
 
 export function StarRating({ rating = 0, size = 14 }) {
   const clamped = Math.min(5, Math.max(0, rating));
@@ -166,19 +168,12 @@ function PurchaseCard({
             ) : ctaLabel()}
           </button>
           {!isFree && !isEnrolled && (
-            <button
-              onClick={() => onEnroll?.()}
-              disabled={enrolling}
-              style={{
-                width: "100%", padding: 13, borderRadius: 6,
-                border: "1px solid #2C3244", background: "transparent",
-                color: "#F1F2FF", fontWeight: 700, fontSize: 15,
-                cursor: enrolling ? "not-allowed" : "pointer",
-                marginBottom: 14, fontFamily: "inherit",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#1C2333"; e.currentTarget.style.borderColor = "#AFB2BF"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "#2C3244"; }}
-            >Buy now</button>
+            <PaymentButton
+              courseId={courseId}
+              label="Buy Now"
+              fullWidth
+              className="mt-0 mb-3 rounded-md"  // match existing button spacing
+            />
           )}
 
           <p style={{ color: "#6B7280", fontSize: 12, textAlign: "center", marginBottom: 18 }}>
@@ -216,8 +211,8 @@ function PurchaseCard({
 function AccordionSection({ section, forceOpen }) {
   const [open, setOpen] = useState(section.order === 1);
   const [subSections, setSubSections] = useState(null); // null = not yet fetched
-  const [lecturesMap,setLecturesMap] = useState({});
-  const [materialMap,setMaterialMap] = useState({});
+  const [lecturesMap, setLecturesMap] = useState({});
+  const [materialMap, setMaterialMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const prevForce = useRef(undefined);
@@ -257,7 +252,7 @@ function AccordionSection({ section, forceOpen }) {
     if (open && subSections === null) {
       fetchSubSections();
     }
-  }, [open]);
+  }, [open,fetchSubSections,subSections]);
 
   const retry = (e) => {
     e.stopPropagation();
@@ -341,7 +336,7 @@ function AccordionSection({ section, forceOpen }) {
           )}
 
           {/* Lecture rows */}
-          {!loading && !fetchError && subSections?.map((lec, i) => { 
+          {!loading && !fetchError && subSections?.map((lec, i) => {
             const material = materialMap[section._id]?.find(m => m.subsectionId === lec._id);
             console.log("Material for lecture", lec._id, material);
             return (
@@ -425,7 +420,8 @@ function AccordionSection({ section, forceOpen }) {
                   {lec.timeDuration || lec.duration || ""}
                 </span>
               </div>
-            );})}
+            );
+          })}
 
           {/* Empty state */}
           {!loading && !fetchError && subSections?.length === 0 && (

@@ -45,9 +45,9 @@ declare const Comment: import("mongoose").Model<{
     isEdited: boolean;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     message: string;
     isDeleted: boolean;
     userId: import("mongoose").Types.ObjectId;
@@ -59,33 +59,7 @@ declare const Comment: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        message: string;
-        isDeleted: boolean;
-        userId: import("mongoose").Types.ObjectId;
-        subSectionId: import("mongoose").Types.ObjectId;
-        isEdited: boolean;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        message: string;
-        isDeleted: boolean;
-        userId: import("mongoose").Types.ObjectId;
-        subSectionId: import("mongoose").Types.ObjectId;
-        isEdited: boolean;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     message: string;
     isDeleted: boolean;
     userId: import("mongoose").Types.ObjectId;

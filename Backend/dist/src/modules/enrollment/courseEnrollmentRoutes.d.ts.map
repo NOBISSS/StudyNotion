@@ -1,1 +1,1 @@
-{"version":3,"file":"courseEnrollmentRoutes.d.ts","sourceRoot":"","sources":["../../../../src/modules/enrollment/courseEnrollmentRoutes.ts"],"names":[],"mappings":"AAUA,QAAA,MAAM,sBAAsB,4CAAW,CAAC;AASxC,OAAO,EAAE,sBAAsB,EAAE,CAAC"}
+{"version":3,"file":"courseEnrollmentRoutes.d.ts","sourceRoot":"","sources":["../../../../src/modules/enrollment/courseEnrollmentRoutes.ts"],"names":[],"mappings":"AAWA,QAAA,MAAM,sBAAsB,4CAAW,CAAC;AAUxC,OAAO,EAAE,sBAAsB,EAAE,CAAC"}

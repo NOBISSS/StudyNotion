@@ -10,6 +10,7 @@ import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
 import { updateSubSectionSchema } from "./subsectionValidation.js";
 import Video from "./video/VideoModel.js";
+import VideoProgress from "./video/VideoProgressModel.js";
 export const getAllSubsections = asyncHandler(async (req, res) => {
     const sectionId = req.params.sectionId;
     if (!sectionId) {
@@ -19,48 +20,99 @@ export const getAllSubsections = asyncHandler(async (req, res) => {
     if (!subsections) {
         throw AppError.notFound("SubSections not found");
     }
+    const materials = await Material.find({ subsectionId: { $in: subsections.map(s => s._id) }, isActive: true }).select("-contentUrl -materialS3Key -originalMaterialS3Key");
     ApiResponse.success(res, {
         subsections,
+        materials
     }, "SubSections fetched successfully");
 });
 export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
-    const subsectionId = req.params.subsectionId;
+    const { subsectionId } = req.params;
     const userId = req.userId;
-    if (!userId) {
+    if (!userId)
         throw AppError.unauthorized("User ID is required");
-    }
-    if (!subsectionId) {
+    if (!subsectionId || typeof subsectionId !== "string")
         throw AppError.badRequest("SubSection ID is required");
-    }
     const subsection = await SubSection.findById(subsectionId);
-    if (!subsection) {
+    if (!subsection)
         throw AppError.notFound("SubSection not found");
-    }
-    let courseProgress = await CourseProgress.findOneAndUpdate({
-        userId: new Types.ObjectId(userId),
-        courseId: new Types.ObjectId(subsection.courseId),
-    }, {
-        $push: {
-            completedSubsections: new Types.ObjectId(subsectionId),
-        },
-    }, { new: true });
-    if (!courseProgress)
+    const courseObjectId = new Types.ObjectId(subsection.courseId);
+    const userObjectId = new Types.ObjectId(userId);
+    const subsectionObjectId = new Types.ObjectId(subsectionId);
+    let courseProgress = await CourseProgress.findOne({
+        userId: userObjectId,
+        courseId: courseObjectId,
+    });
+    if (!courseProgress) {
         courseProgress = await CourseProgress.create({
-            courseId: new Types.ObjectId(subsection.courseId),
-            userId: new Types.ObjectId(userId),
+            courseId: courseObjectId,
+            userId: userObjectId,
             progress: 0,
             completed: false,
-            completedSubsections: [new Types.ObjectId(subsectionId)],
+            completedSubsections: [],
         });
+    }
+    const alreadyCompleted = courseProgress.completedSubsections.some((id) => id.equals(subsectionObjectId));
+    if (!alreadyCompleted) {
+        courseProgress.completedSubsections.push(subsectionObjectId);
+        if (subsection.contentType === "video") {
+            const video = await Video.findOne({ subsectionId: subsectionObjectId });
+            if (!video)
+                throw AppError.notFound("Video not found for this subsection");
+            await VideoProgress.findOneAndUpdate({
+                userId: userObjectId,
+                videoId: video._id,
+                courseId: courseObjectId,
+                subSectionId: subsectionObjectId,
+            }, {
+                $set: {
+                    isCompleted: true,
+                    currentTime: video.duration || 0,
+                    watchedPercentage: 100,
+                    duration: video.duration || 0,
+                },
+            }, { upsert: true, new: true });
+        }
+    }
+    else if (alreadyCompleted && req.query.toggle !== "true") {
+        courseProgress.completedSubsections =
+            courseProgress.completedSubsections.filter((id) => !id.equals(subsectionObjectId));
+        if (subsection.contentType === "video") {
+            const video = await Video.findOne({ subsectionId: subsectionObjectId });
+            if (!video)
+                throw AppError.notFound("Video not found for this subsection");
+            await VideoProgress.findOneAndUpdate({
+                userId: userObjectId,
+                videoId: video._id,
+                courseId: courseObjectId,
+                subSectionId: subsectionObjectId,
+            }, {
+                $set: {
+                    isCompleted: false,
+                    currentTime: 0,
+                    watchedPercentage: 0,
+                },
+            });
+        }
+    }
     const totalSubsections = await SubSection.countDocuments({
         courseId: subsection.courseId,
         isActive: true,
     });
-    const completedSubsections = courseProgress.completedSubsections.length || 0;
-    const progress = (completedSubsections / totalSubsections) * 100;
-    courseProgress.progress = progress;
+    const completedCount = courseProgress.completedSubsections.length;
+    courseProgress.progress =
+        totalSubsections > 0
+            ? Math.round((completedCount / totalSubsections) * 100)
+            : 0;
+    if (totalSubsections > 0 && completedCount === totalSubsections) {
+        courseProgress.completed = true;
+        courseProgress.completionDate = new Date();
+    }
+    else {
+        courseProgress.completed = false;
+    }
     await courseProgress.save();
-    ApiResponse.success(res, { courseProgress }, "SubSection marked as completed and course progress updated successfully");
+    ApiResponse.success(res, { courseProgress }, "SubSection completion toggled and progress updated successfully");
 });
 export const deleteSubsection = asyncHandler(async (req, res) => {
     const subsectionId = req.params.subsectionId;
@@ -87,11 +139,13 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
     if (subsectionVideo) {
         const keysToDelete = [
             { Key: subsectionVideo.videoS3Key },
-            subsectionVideo.originalVideoS3Key != null ? {
-                Key: subsectionVideo.originalVideoS3Key
-                    ? subsectionVideo.originalVideoS3Key
-                    : undefined,
-            } : null,
+            subsectionVideo.originalVideoS3Key != null
+                ? {
+                    Key: subsectionVideo.originalVideoS3Key
+                        ? subsectionVideo.originalVideoS3Key
+                        : undefined,
+                }
+                : null,
         ];
         const deleteCommand = new DeleteObjectsCommand({
             Bucket: process.env.AWS_BUCKET_NAME,

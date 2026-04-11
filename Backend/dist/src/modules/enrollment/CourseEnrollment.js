@@ -14,6 +14,19 @@ const CourseEnrollmentSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    amountPaid: {
+        type: Number,
+        default: 0,
+    },
+    enrolledAt: {
+        type: Date,
+        default: Date.now,
+    },
+    instructorId: {
+        type: Types.ObjectId,
+        required: true,
+        ref: "User",
+    },
 }, { timestamps: true });
 export const CourseEnrollment = model("CourseEnrollment", CourseEnrollmentSchema);
 //# sourceMappingURL=CourseEnrollment.js.map

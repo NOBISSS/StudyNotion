@@ -105,8 +105,8 @@ export async function processVideo({ key, videoName, s3Location, }) {
             const course = await Course.findById(video.courseId);
             if (course) {
                 course.totalDuration = (course.totalDuration || 0) + videoDuration;
-                course.totalLectures ? course.totalLectures += 1 : course.totalLectures = 1;
-                course.totalSubsections ? course.totalSubsections += 1 : course.totalSubsections = 1;
+                course.totalLectures >= 0 ? course.totalLectures += 1 : course.totalLectures = 1;
+                course.totalSubsections >= 0 ? course.totalSubsections += 1 : course.totalSubsections = 1;
                 await course.save();
                 course.totalDurationFormatted = convertSecondsToReadingTime(course.totalDuration).hhmmss;
                 await course.save();

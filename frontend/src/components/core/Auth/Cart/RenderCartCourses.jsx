@@ -8,13 +8,13 @@ const RenderCartCourses = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
-  
+
   if (!cart?.length) {
     return <p className="text-[#6E727F]">Nothing in Wishlist</p>;
   }
 
   const handleRemove = (courseId) => {
-    console.log("ON REMOVING",courseId)
+    console.log("ON REMOVING", courseId)
     removeCourseFromWishList(token, courseId, dispatch);
   };
 
@@ -28,9 +28,9 @@ const RenderCartCourses = () => {
         const avgRating =
           course?.ratingsAndReviews?.length
             ? (
-                course.ratingsAndReviews.reduce((sum, r) => sum + r.rating, 0) /
-                course.ratingsAndReviews.length
-              ).toFixed(1)
+              course.ratingsAndReviews.reduce((sum, r) => sum + r.rating, 0) /
+              course.ratingsAndReviews.length
+            ).toFixed(1)
             : "0";
 
         const reviewCount = course?.ratingsAndReviews?.length ?? 0;
@@ -96,6 +96,14 @@ const RenderCartCourses = () => {
                   <RiDeleteBin6Line size={16} />
                   <span>Remove</span>
                 </button>
+
+                {course.typeOfCourse !== "Free" && (
+                  <PaymentButton
+                    courseId={course._id}
+                    label="Buy Now"
+                    className="text-xs px-4 py-2"
+                  />
+                )}
 
                 {/* Discounted price in yellow */}
                 <p className="text-[#FFD60A] font-bold text-xl">

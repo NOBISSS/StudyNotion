@@ -35,7 +35,7 @@ export declare function seedAuthenticatedUser(overrides?: {
                 deletedAt?: NativeDate | null;
             }, {
                 id: string;
-            }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+            }, import("mongoose").DefaultSchemaOptions> & Omit<{
                 firstName: string;
                 lastName: string;
                 accountType: "student" | "instructor" | "admin";
@@ -66,7 +66,7 @@ export declare function seedAuthenticatedUser(overrides?: {
                 deletedAt?: NativeDate | null;
             }, {
                 id: string;
-            }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+            }, import("mongoose").DefaultSchemaOptions> & Omit<{
                 firstName: string;
                 lastName: string;
                 accountType: "student" | "instructor" | "admin";
@@ -97,7 +97,7 @@ export declare function seedAuthenticatedUser(overrides?: {
                 deletedAt?: NativeDate | null;
             }, {
                 id: string;
-            }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+            }, import("mongoose").DefaultSchemaOptions> & Omit<{
                 firstName: string;
                 lastName: string;
                 accountType: "student" | "instructor" | "admin";
@@ -150,7 +150,7 @@ export declare function seedAuthenticatedUser(overrides?: {
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+        }, import("mongoose").DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -181,7 +181,7 @@ export declare function seedAuthenticatedUser(overrides?: {
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+        }, import("mongoose").DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -212,7 +212,7 @@ export declare function seedAuthenticatedUser(overrides?: {
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<{
+        }, import("mongoose").DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";

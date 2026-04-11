@@ -7,7 +7,7 @@ import videoRouter from "./video/videoRoutes.js";
 const subsectionRouter = Router();
 subsectionRouter.route("/getall/:sectionId").get(getAllSubsections);
 subsectionRouter.use(userMiddleware);
-subsectionRouter.route("/markcomplete/:subsectionId").post(markSubsectionAsCompleted);
+subsectionRouter.route("/markcompleted/:subsectionId").put(markSubsectionAsCompleted);
 subsectionRouter.route("/delete/:subsectionId").delete(deleteSubsection);
 subsectionRouter.route("/update/:subsectionId").put(updateSubsection);
 subsectionRouter.use("/quiz", QuizRouter);

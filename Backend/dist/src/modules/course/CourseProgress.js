@@ -18,6 +18,7 @@ const courseProgressSchema = new Schema({
     courseId: {
         type: Types.ObjectId,
         ref: "Course",
+        required: true,
     },
     completedSubsections: [
         {

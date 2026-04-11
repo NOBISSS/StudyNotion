@@ -42,7 +42,7 @@ export const updateComment = asyncHandler(async (req, res) => {
         throw AppError.unauthorized("Unauthorized. User ID or Comment ID is missing.");
     }
     const { message } = req.body;
-    const comment = await Comment.findOneAndUpdate({ _id: new Types.ObjectId(commentId), userId }, { message, isEdited: true }, { new: true });
+    const comment = await Comment.findOneAndUpdate({ _id: new Types.ObjectId(commentId), userId }, { message, isEdited: true }, { returnDocument: "after" });
     if (!comment) {
         throw AppError.notFound("Comment not found");
     }
@@ -56,7 +56,7 @@ export const deleteComment = asyncHandler(async (req, res) => {
     if (!userId || !commentId || typeof commentId !== "string") {
         throw AppError.unauthorized("Unauthorized. User ID or Comment ID is missing.");
     }
-    const comment = await Comment.findOneAndUpdate({ _id: new Types.ObjectId(commentId), userId }, { isDeleted: true }, { new: true });
+    const comment = await Comment.findOneAndUpdate({ _id: new Types.ObjectId(commentId), userId }, { isDeleted: true }, { returnDocument: "after" });
     if (!comment) {
         throw AppError.notFound("Comment not found");
     }

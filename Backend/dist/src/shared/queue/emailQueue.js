@@ -26,6 +26,11 @@ new Worker("email-queue", async (job) => {
             console.log("Course Email send to " + to);
             break;
         }
+        case "send-email": {
+            const { to, subject, html } = job.data;
+            await sendMail(to, subject, html);
+            break;
+        }
         default:
             throw new Error(`Unknown email job type`);
     }

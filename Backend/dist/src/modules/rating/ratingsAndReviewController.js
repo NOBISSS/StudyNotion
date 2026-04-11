@@ -104,7 +104,7 @@ export const deleteReview = asyncHandler(async (req, res) => {
     const existingReview = await RatingAndReview.findOneAndUpdate({
         userId: new Types.ObjectId(userId),
         _id: new Types.ObjectId(reviewId),
-    }, { isActive: false }, { new: true });
+    }, { isActive: false }, { returnDocument: "after" });
     if (!existingReview) {
         throw AppError.notFound("Review not found or user not authorized");
     }

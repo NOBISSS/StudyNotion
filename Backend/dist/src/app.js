@@ -13,11 +13,13 @@ import { sectionRouter } from "./modules/section/sectionRoutes.js";
 import SignatureGenerationRouter from "./modules/signatureGeneration/generateSignatures.routes.js";
 import subsectionRouter from "./modules/subsection/subsectionRoutes.js";
 import multipartUploadRoute from "./modules/subsection/video/MultipartUploadRoute.js";
+import { paymentRouter } from "./modules/payment/paymentRoutes.js";
 import userRouter from "./modules/user/userRoutes.js";
 import wishlistRouter from "./modules/wishlist/wishlistRoutes.js";
 import { globalErrorHandler } from "./shared/lib/ErrorHandler.js";
 import announcementRouter from "./modules/announcement/announcementRoutes.js";
 import "./shared/workers/courseScheduleWorker.js";
+import dashboardRouter from "./modules/dashboard/dashboardRoutes.js";
 dotenv.config();
 const app = express();
 const allowedOrigins = [
@@ -66,6 +68,8 @@ app.use(`${baseRoute}/comments`, CommentRouter);
 app.use(`${baseRoute}/wishlists`, wishlistRouter);
 app.use(`${baseRoute}/announcements`, announcementRouter);
 app.use(`${baseRoute}/signatures`, SignatureGenerationRouter);
+app.use(`${baseRoute}/dashboards`, dashboardRouter);
+app.use(`${baseRoute}/payment`, paymentRouter);
 app.use(globalErrorHandler);
 export default app;
 //# sourceMappingURL=app.js.map

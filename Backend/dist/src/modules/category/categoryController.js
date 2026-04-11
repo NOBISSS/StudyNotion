@@ -23,7 +23,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
     const categoryDetails = await Category.findByIdAndUpdate(categoryId, {
         name: name,
         description: description,
-    }, { new: true });
+    }, { returnDocument: "after" });
     if (!categoryDetails) {
         throw AppError.notFound("Category not found");
     }
@@ -36,7 +36,7 @@ export const deleteCategory = asyncHandler(async (req, res) => {
     if (!categoryId) {
         throw AppError.badRequest("All fields are required");
     }
-    const categoryDetails = await Category.findByIdAndUpdate(categoryId, { isActive: false }, { new: true });
+    const categoryDetails = await Category.findByIdAndUpdate(categoryId, { isActive: false }, { returnDocument: "after" });
     if (!categoryDetails) {
         throw AppError.notFound("Category not found");
     }

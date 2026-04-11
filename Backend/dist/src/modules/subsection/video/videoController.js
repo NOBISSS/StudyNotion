@@ -13,6 +13,7 @@ import Video from "./VideoModel.js";
 import VideoProgress from "./VideoProgressModel.js";
 import { videoUploadSchema } from "./videoValidation.js";
 import { Section } from "../../section/SectionModel.js";
+import { updateUserStreak } from "../../../shared/utils/updateStreak.js";
 const BUCKET = process.env.AWS_BUCKET_NAME;
 export const addVideo = asyncHandler(async (req, res) => { });
 export const initializeVideoUpload = asyncHandler(async (req, res) => {
@@ -53,7 +54,7 @@ export const initializeVideoUpload = asyncHandler(async (req, res) => {
         if (!metadata.subsectionId) {
             throw AppError.badRequest("subsectionId is required for editing");
         }
-        const subsection = await SubSection.findOneAndUpdate({ _id: new Types.ObjectId(metadata.subsectionId), isActive: true }, { $set: { title: metadata.title, description: metadata.description, isPreview: metadata.isPreview, isAvailable: false } }, { new: true });
+        const subsection = await SubSection.findOneAndUpdate({ _id: new Types.ObjectId(metadata.subsectionId), isActive: true }, { $set: { title: metadata.title, description: metadata.description, isPreview: metadata.isPreview, isAvailable: false } }, { returnDocument: "after" });
         if (!subsection) {
             throw AppError.notFound("Subsection not found for editing");
         }
@@ -262,7 +263,6 @@ export const getVideo = asyncHandler(async (req, res) => {
         videoId: video._id,
         userId: req.user._id,
         subSectionId: new Types.ObjectId(subsectionId),
-        isActive: true,
     });
     if (!videoProgress) {
         videoProgress = await VideoProgress.create({
@@ -294,39 +294,56 @@ export const getVideo = asyncHandler(async (req, res) => {
 });
 export const saveVideoProgress = asyncHandler(async (req, res) => {
     const { currentTime, subsectionId, duration } = req.body;
+    if (currentTime === undefined ||
+        !subsectionId ||
+        typeof currentTime !== "number" ||
+        typeof subsectionId !== "string") {
+        throw AppError.badRequest("currentTime (number) and subsectionId (string) are required");
+    }
+    const userId = req.userId;
+    if (!userId)
+        throw AppError.unauthorized("User ID is required");
+    const userObjectId = new Types.ObjectId(userId);
     const video = await Video.findOne({
         subsectionId: new Types.ObjectId(subsectionId),
-        isActive: true,
     });
-    if (!video) {
+    if (!video)
         throw AppError.notFound("Video not found for this subsection");
-    }
-    const isCompleted = currentTime / (video?.duration || duration || 0) >= 0.95;
-    let videoProgress = await VideoProgress.findOneAndUpdate({
-        userId: req.user._id,
+    const videoDuration = video.duration || duration || 0;
+    const watchedPercentage = videoDuration > 0
+        ? Math.min(Math.floor((currentTime / videoDuration) * 100), 100)
+        : 0;
+    const isCompleted = videoDuration > 0 && currentTime / videoDuration >= 0.95;
+    let videoProgress = await VideoProgress.findOne({
+        userId: userObjectId,
         subSectionId: new Types.ObjectId(subsectionId),
         videoId: video._id,
         courseId: video.courseId,
-        isActive: true,
-    }, {
-        currentTime,
-        isCompleted,
-        watchedPercentage: Math.floor((currentTime / (video?.duration || duration || 0)) * 100),
-    }, {
-        returnDocument: "after",
     });
-    if (!videoProgress) {
+    if (videoProgress) {
+        videoProgress.currentTime = currentTime;
+        videoProgress.watchedPercentage = watchedPercentage;
+        videoProgress.duration = videoDuration;
+        if (isCompleted && !videoProgress.isCompleted) {
+            videoProgress.isCompleted = true;
+        }
+        await videoProgress.save();
+    }
+    else {
         videoProgress = await VideoProgress.create({
-            videoId: video._id,
-            userId: req.user._id,
+            userId: userObjectId,
             subSectionId: new Types.ObjectId(subsectionId),
+            videoId: video._id,
             courseId: video.courseId,
             currentTime,
-            watchedPercentage: Math.floor((currentTime / (video?.duration || duration || 0)) * 100),
+            watchedPercentage,
             isCompleted,
-            duration: video.duration || duration || 0,
+            duration: videoDuration,
         });
     }
-    ApiResponse.success(res, videoProgress, "Video progress updated");
+    if (currentTime > 30) {
+        await updateUserStreak(userObjectId, currentTime / 3600);
+    }
+    ApiResponse.success(res, videoProgress, "Video progress saved successfully");
 });
 //# sourceMappingURL=videoController.js.map

@@ -26,7 +26,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
                 firstName: firstName,
                 lastName: lastName,
             },
-        }, { new: true }).select("-password -refreshToken");
+        }, { returnDocument: "after" }).select("-password -refreshToken");
         if (!updatedUser) {
             throw AppError.notFound("User not found");
         }
@@ -39,7 +39,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
                 country: additionalDetails.country,
                 birthdate: new Date(additionalDetails.dateOfBirth || ""),
             },
-        }, { new: true });
+        }, { returnDocument: "after" });
         if (!updatedProfile) {
             updatedProfile = await Profile.create({
                 userId: userId,
@@ -93,7 +93,7 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
             .json({ message: "Failed to upload avatar" });
         return;
     }
-    const profile = await Profile.findOneAndUpdate({ userId: req.userId }, { profilePicture: avatar.secure_url }, { new: true });
+    const profile = await Profile.findOneAndUpdate({ userId: req.userId }, { profilePicture: avatar.secure_url }, { returnDocument: "after" });
     if (!profile) {
         if (avatar)
             await deleteFromCloudinary(avatar.public_id);

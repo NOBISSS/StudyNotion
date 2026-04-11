@@ -5,7 +5,7 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "staging", "production"]),
+  NODE_ENV: z.enum(["development", "staging", "production", "test"]),
   PORT: z.coerce.number().default(3000),
 
   MONGODB_URI: z.url(),
@@ -22,8 +22,8 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
 
-  // RAZORPAY_KEY_ID: z.string(),
-  // RAZORPAY_KEY_SECRET: z.string(),
+   RAZORPAY_KEY_ID: z.string(),
+   RAZORPAY_KEY_SECRET: z.string(),
   // RAZORPAY_WEBHOOK_SECRET: z.string(),
 
   AWS_REGION: z.string(),
@@ -68,7 +68,7 @@ export function getEnv() {
     AWS_BUCKET_NAME: "test_bucket_name",
   };
 
-  const parsed = envSchema.safeParse(tempEnv);
+  const parsed = envSchema.safeParse(process.env);
   //   console.log("ENV vars: ", tempEnv.NODE_ENV, tempEnv.PORT, tempEnv.MONGODB_URI);
   if (!parsed.success) {
     console.error("❌ Invalid environment variables:");

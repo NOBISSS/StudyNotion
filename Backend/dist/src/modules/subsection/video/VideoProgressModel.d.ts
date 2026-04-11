@@ -60,9 +60,9 @@ declare const VideoProgress: import("mongoose").Model<{
     watchedPercentage: number;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     isCompleted: boolean;
     userId: import("mongoose").Types.ObjectId;
     subSectionId: import("mongoose").Types.ObjectId;
@@ -77,39 +77,7 @@ declare const VideoProgress: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        isCompleted: boolean;
-        userId: import("mongoose").Types.ObjectId;
-        subSectionId: import("mongoose").Types.ObjectId;
-        courseId: import("mongoose").Types.ObjectId;
-        duration: number;
-        videoId: import("mongoose").Types.ObjectId;
-        currentTime: number;
-        watchedPercentage: number;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        isCompleted: boolean;
-        userId: import("mongoose").Types.ObjectId;
-        subSectionId: import("mongoose").Types.ObjectId;
-        courseId: import("mongoose").Types.ObjectId;
-        duration: number;
-        videoId: import("mongoose").Types.ObjectId;
-        currentTime: number;
-        watchedPercentage: number;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     isCompleted: boolean;
     userId: import("mongoose").Types.ObjectId;
     subSectionId: import("mongoose").Types.ObjectId;

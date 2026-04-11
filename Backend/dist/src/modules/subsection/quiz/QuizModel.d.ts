@@ -15,7 +15,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -37,7 +37,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -48,7 +48,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -59,7 +59,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -90,7 +90,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -112,7 +112,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -123,7 +123,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -134,7 +134,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -167,7 +167,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -189,7 +189,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -200,7 +200,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -211,7 +211,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -248,7 +248,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -270,7 +270,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -281,7 +281,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -292,7 +292,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -321,7 +321,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -343,7 +343,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -354,7 +354,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -365,7 +365,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -380,9 +380,9 @@ export declare const Quiz: import("mongoose").Model<{
     description?: string | null;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     isActive: boolean;
     subSectionId: Types.ObjectId;
     courseId: Types.ObjectId;
@@ -398,7 +398,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -420,7 +420,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -431,7 +431,7 @@ export declare const Quiz: import("mongoose").Model<{
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: unknown;
-    }> & {
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
@@ -442,7 +442,7 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: unknown;
-        }> & {
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
@@ -461,167 +461,7 @@ export declare const Quiz: import("mongoose").Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        isActive: boolean;
-        subSectionId: Types.ObjectId;
-        courseId: Types.ObjectId;
-        title: string;
-        questions: Types.DocumentArray<{
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }, Types.Subdocument<import("bson").ObjectId, unknown, {
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }> & {
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }>;
-        description?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        isActive: boolean;
-        subSectionId: Types.ObjectId;
-        courseId: Types.ObjectId;
-        title: string;
-        questions: Types.DocumentArray<{
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }, Types.Subdocument<import("bson").ObjectId, unknown, {
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }> & {
-            options: Types.DocumentArray<{
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }, Types.Subdocument<import("bson").ObjectId, unknown, {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }> & {
-                default: any[];
-                optionId: Types.ObjectId;
-                optionText: string;
-                _id?: unknown;
-            }>;
-            questionId: Types.ObjectId;
-            question: string;
-            correctAnswer: Types.ObjectId;
-            points: number;
-            _id?: unknown;
-        }>;
-        description?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     isActive: boolean;
     subSectionId: Types.ObjectId;
     courseId: Types.ObjectId;
@@ -632,310 +472,67 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
     }, Types.Subdocument<{}, unknown, {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    }> & ({
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    })>;
+    }>;
     description?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;
@@ -954,310 +551,67 @@ export declare const Quiz: import("mongoose").Model<{
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
     }, Types.Subdocument<{}, unknown, {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    }> & ({
+    }, {}, {}> & {
         options: Types.DocumentArray<{
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
         }, Types.Subdocument<{}, unknown, {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        }> & ({
+        }, {}, {}> & {
             default: any[];
             optionId: Types.ObjectId;
             optionText: string;
             _id?: {};
-        } | {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id: {};
-        })>;
+        }>;
         questionId: Types.ObjectId;
         question: string;
         correctAnswer: Types.ObjectId;
         points: number;
         _id?: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    } | {
-        options: Types.DocumentArray<{
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }, Types.Subdocument<{}, unknown, {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }> & {
-            default: any[];
-            optionId: string;
-            optionText: string;
-            _id?: {};
-        }>;
-        questionId: string;
-        question: string;
-        correctAnswer: string;
-        points: number;
-        _id: {};
-    })>;
+    }>;
     description?: string | null;
     createdAt: NativeDate;
     updatedAt: NativeDate;

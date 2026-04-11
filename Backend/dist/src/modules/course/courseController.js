@@ -3,6 +3,8 @@ import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import { embeddingQueue } from "../../shared/queue/embeddingQueue.js";
+import { cancelScheduledPublish, schedulePublish, } from "../../shared/queue/scheduleQueue.js";
+import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
 import { uploadToCloudinary } from "../../shared/utils/cloudinaryUpload.js";
 import { vectorSearchCourses } from "../../shared/vector/searchCourses.js";
 import { Category } from "../category/CategoryModel.js";
@@ -11,14 +13,13 @@ import { RatingAndReview } from "../rating/RatingAndReview.js";
 import { Section } from "../section/SectionModel.js";
 import { SubSection } from "../subsection/SubSectionModel.js";
 import { Material } from "../subsection/material/MaterialModel.js";
+import { isValidInstructor } from "../subsection/material/materialController.js";
 import { Quiz } from "../subsection/quiz/QuizModel.js";
 import Video from "../subsection/video/VideoModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
 import { courseInputSchema } from "./courseValidation.js";
-import { filterCoursesByAI } from "../../shared/utils/AISearchFilteration.js";
-import { isValidInstructor } from "../subsection/material/materialController.js";
-import { schedulePublish, cancelScheduledPublish, reschedulePublish } from "../../shared/queue/scheduleQueue.js";
+import CourseProgress from "./CourseProgress.js";
 export const createCourse = asyncHandler(async (req, res) => {
     const userId = req.userId;
     if (typeof req.body.tag === "string") {
@@ -150,14 +151,20 @@ export const createCourseWithThumbnailURL = asyncHandler(async (req, res) => {
     await embeddingQueue.add("embed-course", { course: course.toObject() }, { attempts: 3, backoff: { type: "exponential", delay: 5000 } });
 });
 export const getAllCourse = asyncHandler(async (req, res) => {
-    const courses = await Course.find({ isActive: true, status: "Published" }).populate("categoryId", "name");
+    const courses = await Course.find({
+        isActive: true,
+        status: "Published",
+    }).populate("categoryId", "name");
     ApiResponse.success(res, {
         courses,
     }, "Courses retrieved successfully");
 });
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(async (req, res) => {
     const userId = req.userId;
-    const courses = await Course.find({ isActive: true, status: "Published" }).populate("categoryId", "name");
+    const courses = await Course.find({
+        isActive: true,
+        status: "Published",
+    }).populate("categoryId", "name");
     const coursesWithEnrollmentCount = await Promise.all(courses.map(async (c) => ({
         ...c.toObject(),
         enrollmentsCount: await CourseEnrollment.countDocuments({
@@ -240,7 +247,9 @@ export const getInstructorCourses = asyncHandler(async (req, res) => {
     if (!instructorId) {
         throw AppError.unauthorized("Instructor ID is required");
     }
-    const courses = await Course.find({ instructorId, isActive: true }).populate("categoryId", "name").sort({ createdAt: -1 });
+    const courses = await Course.find({ instructorId, isActive: true })
+        .populate("categoryId", "name")
+        .sort({ createdAt: -1 });
     ApiResponse.success(res, { courses }, "Instructor courses retrieved successfully");
 });
 export const deleteCourse = asyncHandler(async (req, res) => {
@@ -255,7 +264,8 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     if (!course) {
         throw AppError.notFound("Course not found");
     }
-    if (course.instructorId.toString() != userId.toString() && req.accountType !== "admin") {
+    if (course.instructorId.toString() != userId.toString() &&
+        req.accountType !== "admin") {
         throw AppError.unauthorized("You are not authorized to delete this course");
     }
     course.isActive = false;
@@ -311,7 +321,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
         instructions: instructions || [],
         whatYouWillLearn: [whatYouWillLearn || ""],
         categoryId: categoryId ? new Types.ObjectId(categoryId) : null,
-    }, { new: true, runValidators: true });
+    }, { returnDocument: "after", runValidators: true });
     ApiResponse.success(res, { course: updatedCourse }, "Course updated successfully");
 });
 export const getCourseDetails = asyncHandler(async (req, res) => {
@@ -393,7 +403,8 @@ export const searchCourses = asyncHandler(async (req, res) => {
     });
     const coursesWithRatingsAndScores = courses.map((course) => {
         const courseReviews = reviews.filter((review) => review.courseId.toString() === course._id.toString());
-        const averageRating = courseReviews.reduce((sum, review) => sum + review.rating, 0) / courseReviews.length || 0;
+        const averageRating = courseReviews.reduce((sum, review) => sum + review.rating, 0) /
+            courseReviews.length || 0;
         const vectorSearchResult = vecotorSearchResults.find((result) => result.courseId.toString() === course._id.toString());
         return {
             ...course.toObject(),
@@ -424,7 +435,7 @@ export const publishCourse = asyncHandler(async (req, res) => {
     if (!instuctorValid) {
         throw AppError.forbidden("You are not the instructor of this course");
     }
-    const course = await Course.findByIdAndUpdate(courseId, { status: "Published" }, { new: true });
+    const course = await Course.findByIdAndUpdate(courseId, { status: "Published" }, { returnDocument: "after" });
     ApiResponse.success(res, { course }, "Course published successfully");
 });
 export const draftCourse = asyncHandler(async (req, res) => {
@@ -444,7 +455,7 @@ export const draftCourse = asyncHandler(async (req, res) => {
     if (!instuctorValid) {
         throw AppError.forbidden("You are not the instructor of this course");
     }
-    const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { new: true });
+    const course = await Course.findByIdAndUpdate(courseId, { status: "Draft" }, { returnDocument: "after" });
     ApiResponse.success(res, { course }, "Course drafted successfully");
 });
 export const scheduleCoursePublish = asyncHandler(async (req, res) => {
@@ -457,7 +468,10 @@ export const scheduleCoursePublish = asyncHandler(async (req, res) => {
     if (!Types.ObjectId.isValid(courseId)) {
         throw AppError.badRequest("Invalid course ID");
     }
-    const course = await Course.findOne({ _id: courseId, isActive: true });
+    const course = await Course.findOne({
+        _id: courseId,
+        isActive: true,
+    });
     if (!course)
         throw AppError.notFound("Course not Found");
     if (course.instructorId.toString() !== userId.toString()) {
@@ -470,7 +484,7 @@ export const scheduleCoursePublish = asyncHandler(async (req, res) => {
         await Course.findByIdAndUpdate(courseId, {
             isScheduled: false,
             scheduledPublishAt: null,
-            scheduledJobId: null
+            scheduledJobId: null,
         });
         return ApiResponse.success(res, {}, "Scheduled publish cancelled");
     }
@@ -481,7 +495,7 @@ export const scheduleCoursePublish = asyncHandler(async (req, res) => {
     if (publishAt <= new Date()) {
         throw AppError.badRequest("scheduledPublishAt must be a future date");
     }
-    const job = await reschedulePublish(course.scheduledJobId ?? undefined, {
+    const job = await schedulePublish({
         courseId: course._id,
         instructorId: userId,
         courseName: course.courseName,
@@ -506,11 +520,26 @@ export const getScheduledCourses = asyncHandler(async (req, res) => {
     const courses = await Course.find({
         instructorId,
         isScheduled: true,
-        isActive: true
+        isActive: true,
     })
         .select("courseName thumbnailUrl scheduledPublishat scheduleJobId level")
         .sort({ scheduledPublishAt: 1 })
         .lean();
     ApiResponse.success(res, { courses }, "Scheduled Courses retrived successfully");
+});
+export const getCourseProgress = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        throw AppError.unauthorized("User ID is required");
+    }
+    const courseId = req.params.courseId;
+    if (!courseId || typeof courseId !== "string") {
+        throw AppError.badRequest("Course ID is required");
+    }
+    const courseProgress = await CourseProgress.findOne({
+        userId: new Types.ObjectId(userId),
+        courseId: new Types.ObjectId(courseId),
+    });
+    ApiResponse.success(res, { courseProgress }, "Course progress retrieved successfully");
 });
 //# sourceMappingURL=courseController.js.map

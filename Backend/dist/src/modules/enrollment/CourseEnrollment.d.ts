@@ -2,13 +2,19 @@ import { Schema, Types } from "mongoose";
 export declare const CourseEnrollment: import("mongoose").Model<{
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps, {}, {}, {
     id: string;
 }, import("mongoose").Document<unknown, {}, {
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, {
@@ -16,7 +22,10 @@ export declare const CourseEnrollment: import("mongoose").Model<{
 }> & Omit<{
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
 } & {
@@ -28,51 +37,41 @@ export declare const CourseEnrollment: import("mongoose").Model<{
 }, {
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
-}>> & Omit<{
+}> & Omit<{
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
 } & import("mongoose").DefaultTimestampProps & {
     _id: Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        isActive: boolean;
-        userId: Types.ObjectId;
-        courseId: Types.ObjectId;
-    } & import("mongoose").DefaultTimestampProps, {
-        id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        isActive: boolean;
-        userId: Types.ObjectId;
-        courseId: Types.ObjectId;
-    } & import("mongoose").DefaultTimestampProps & {
-        _id: Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
@@ -82,7 +81,10 @@ export declare const CourseEnrollment: import("mongoose").Model<{
 }>, {
     isActive: boolean;
     userId: Types.ObjectId;
+    instructorId: Types.ObjectId;
     courseId: Types.ObjectId;
+    amountPaid: number;
+    enrolledAt: NativeDate;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {

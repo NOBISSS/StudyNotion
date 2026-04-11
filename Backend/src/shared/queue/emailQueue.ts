@@ -18,16 +18,21 @@ new Worker(
   async (job) => {
     switch (job.name) {
       case "send-otp": {
-        const {email,otp}=job.data
+        const { email, otp } = job.data
         const html = OtpTemp(otp as string);
         await sendMail(email, "Your StudyNotion OTP Code", html);
         console.log(`OTP email sent to ${email}`);
         break;
       }
       case "publish-course": {
-        const {to,subject,html}=job.data;
-        await sendMail(to,subject,html);
+        const { to, subject, html } = job.data;
+        await sendMail(to, subject, html);
         console.log("Course Email send to " + to);
+        break;
+      }
+      case "send-email": {
+        const { to, subject, html } = job.data;
+        await sendMail(to, subject, html);
         break;
       }
       default:

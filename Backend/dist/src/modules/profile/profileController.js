@@ -54,7 +54,7 @@ export const deleteAccount = asyncHandler(async (req, res) => {
             refreshToken: null,
             deletedAt: new Date(),
         },
-    }, { new: true });
+    }, { returnDocument: "after" });
     if (!user) {
         throw AppError.notFound("User not found");
     }

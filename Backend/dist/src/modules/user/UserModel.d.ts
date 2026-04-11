@@ -13,7 +13,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -44,7 +44,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -75,7 +75,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -111,7 +111,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -142,7 +142,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -173,7 +173,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -219,7 +219,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     deletedAt?: NativeDate | null;
 }, {
     id: string;
-}, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+}, mongoose.DefaultSchemaOptions> & Omit<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
@@ -236,41 +236,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: mongoose.SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: mongoose.SchemaDefinitionProperty<any, any, mongoose.Document<unknown, {}, {
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google" | "github";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-        deletedAt?: NativeDate | null;
-    }, {
-        id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google" | "github";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-        deletedAt?: NativeDate | null;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
@@ -313,7 +279,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -344,7 +310,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -375,7 +341,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -426,7 +392,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -457,7 +423,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -488,7 +454,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -541,7 +507,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -572,7 +538,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -603,7 +569,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -638,7 +604,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -669,7 +635,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -700,7 +666,7 @@ declare const User: mongoose.Model<{
         deletedAt?: NativeDate | null;
     }, {
         id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+    }, mongoose.DefaultSchemaOptions> & Omit<{
         firstName: string;
         lastName: string;
         accountType: "student" | "instructor" | "admin";
@@ -736,7 +702,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -767,7 +733,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -798,7 +764,7 @@ declare const User: mongoose.Model<{
             deletedAt?: NativeDate | null;
         }, {
             id: string;
-        }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+        }, mongoose.DefaultSchemaOptions> & Omit<{
             firstName: string;
             lastName: string;
             accountType: "student" | "instructor" | "admin";
@@ -844,7 +810,7 @@ declare const User: mongoose.Model<{
     deletedAt?: NativeDate | null;
 }, {
     id: string;
-}, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
+}, mongoose.DefaultSchemaOptions> & Omit<{
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
@@ -861,41 +827,7 @@ declare const User: mongoose.Model<{
     __v: number;
 }, "id"> & {
     id: string;
-}, {
-    [path: string]: mongoose.SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: mongoose.SchemaDefinitionProperty<any, any, mongoose.Document<unknown, {}, {
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google" | "github";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-        deletedAt?: NativeDate | null;
-    }, {
-        id: string;
-    }, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & Omit<{
-        firstName: string;
-        lastName: string;
-        accountType: "student" | "instructor" | "admin";
-        method: "local" | "google" | "github";
-        email: string;
-        isBanned: boolean;
-        isDeleted: boolean;
-        password?: string | null;
-        refreshToken?: string | null;
-        deletedAt?: NativeDate | null;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
+}, unknown, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";

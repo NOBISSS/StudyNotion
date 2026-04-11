@@ -3,7 +3,7 @@ import { ROLES } from "../../shared/constants.js";
 import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { upload } from "../../shared/middlewares/upload.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
-import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, } from "./courseController.js";
+import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, getCourseProgress, } from "./courseController.js";
 const courseRouter = Router();
 courseRouter.route("/getall").get(getAllCourse);
 courseRouter.route("/get-top").get(getAllCourseByEnrollmentsAndRatings);
@@ -13,6 +13,7 @@ courseRouter
 courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/search").get(searchCourses);
 courseRouter.use(userMiddleware);
+courseRouter.route("/getprogress/:courseId").get(getCourseProgress);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/getinstructorcourse/:courseId").get(getInstructorCourseDetails);
 courseRouter.route("/instructor/getall").get(getInstructorCourses);
@@ -23,6 +24,6 @@ courseRouter.route("/update/:courseId").put(upload.single("thumbnail"), updateCo
 courseRouter.route("/publish/:courseId").put(publishCourse);
 courseRouter.route("/draft/:courseId").put(draftCourse);
 courseRouter.route("/scheduled").get(getScheduledCourses);
-courseRouter.route("/schedule/:courseId").post(scheduleCoursePublish);
+courseRouter.route("/schedule/:courseId").put(scheduleCoursePublish);
 export { courseRouter };
 //# sourceMappingURL=courseRoutes.js.map

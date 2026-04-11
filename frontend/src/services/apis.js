@@ -39,7 +39,9 @@ export const cartEndPoints={
 export const studentEndpoints={
     COURSE_PAYMENT_API:BACKEND_URL+"/payment/capturePayment",
     COURSE_VERIFY_API:BACKEND_URL+"/payment/verifyPayment",
-    SEND_PAYMENT_SUCCESS_EMAIL_API:"/password/sendPaymentSuccessEmail"
+    SEND_PAYMENT_SUCCESS_EMAIL_API:"/password/sendPaymentSuccessEmail",
+    PAYMENT_CREATE_ORDER_API: BACKEND_URL + "/payment/create-order",  // ← NEW
+   PAYMENT_VERIFY_API:BACKEND_URL + "/payment/verify",         // ← NEW
 }
 
 export const courseEndpoints={
