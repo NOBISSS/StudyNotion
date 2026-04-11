@@ -25,7 +25,6 @@ export const apiConnector = (method, url, bodyData, extraHeaders, params) => {
     headers: {
       Authorization: token ? `Bearer ${token}` : undefined,
       ...extraHeaders,
-      Accept: "application/json"
     },
     withCredentials:true,
     params: params || null,
