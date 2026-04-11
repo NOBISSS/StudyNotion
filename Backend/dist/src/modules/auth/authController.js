@@ -341,7 +341,7 @@ export const githubSignin = asyncHandler(async (req, res) => {
     const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
     const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
     const GITHUB_REDIRECT_URI = process.env.GITHUB_REDIRECT_URI;
-    const response = await axios.get("https://github.com/login/oauth/access_token", {
+    const response = await axios.post("https://github.com/login/oauth/access_token", {
         params: {
             client_id: GITHUB_CLIENT_ID,
             client_secret: GITHUB_CLIENT_SECRET,
@@ -350,7 +350,6 @@ export const githubSignin = asyncHandler(async (req, res) => {
         },
         headers: {
             Accept: "application/json",
-            "Accept-Encoding": "application/json",
         },
     });
     const access_token = response.data.access_token;

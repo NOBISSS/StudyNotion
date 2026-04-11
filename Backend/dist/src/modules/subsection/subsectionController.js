@@ -5,6 +5,7 @@ import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import CourseProgress from "../course/CourseProgress.js";
+import { Section } from "../section/SectionModel.js";
 import { SubSection } from "./SubSectionModel.js";
 import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
@@ -178,6 +179,9 @@ export const deleteSubsection = asyncHandler(async (req, res) => {
         subsectionMaterial.isActive = false;
         await subsectionMaterial.save();
     }
+    await Section.findByIdAndUpdate(subsection.sectionId, {
+        $pull: { subsections: new Types.ObjectId(subsectionId) },
+    });
     ApiResponse.success(res, {
         subsection,
     }, "SubSection deleted successfully");
