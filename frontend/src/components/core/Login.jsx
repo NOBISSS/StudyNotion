@@ -31,6 +31,7 @@ export const Login = () => {
 
     // redirect the user to github
     const link = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&response_type=code&scope=read:user user:email&redirect_uri=${import.meta.env.VITE_GITHUB_URL}&state=${randomHex}`;
+    window.location.assign(link);
   };
 
   return (
