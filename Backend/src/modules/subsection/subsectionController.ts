@@ -6,6 +6,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
 import CourseProgress from "../course/CourseProgress.js";
+import {Section} from "../section/SectionModel.js";
 import { SubSection } from "./SubSectionModel.js";
 import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
@@ -232,6 +233,9 @@ export const deleteSubsection: Handler = asyncHandler(async (req, res) => {
     subsectionMaterial.isActive = false;
     await subsectionMaterial.save();
   }
+  await Section.findByIdAndUpdate(subsection.sectionId, {
+    $pull: { subsections: new Types.ObjectId(subsectionId as string) },
+  });
   ApiResponse.success(
     res,
     {
