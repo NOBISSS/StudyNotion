@@ -30,9 +30,9 @@ userRouter
 
 userRouter.use(authorizeRoles(ROLES.ADMIN));
 userRouter.route("/create").post(createUser);
-userRouter.route("/ban").post(banUser);
-userRouter.route("/unban").post(banUser);
-userRouter.route("/delete").delete(deleteUser);
+userRouter.route("/ban/:userId").post(banUser);
+userRouter.route("/unban/:userId").post(banUser);
+userRouter.route("/delete/:userId").delete(deleteUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);
 userRouter.route("/getstudents").get(getStudents);

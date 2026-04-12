@@ -1,23 +1,30 @@
 import bcrypt from "bcryptjs";
 import type { UploadApiResponse } from "cloudinary";
 import type { Types } from "mongoose";
+import { OTPDatacookieOptions } from "../../shared/constants.js";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { emailQueue } from "../../shared/queue/emailQueue.js";
 import { StatusCode } from "../../shared/types.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../../shared/utils/cloudinaryUpload.js";
-import { forgetOTPVerificationSchema, signupInputSchema } from "../auth/authValidation.js";
+import {
+  generateOTP,
+  saveOTP,
+  verifyOTP,
+} from "../../shared/utils/otp.service.js";
+import {
+  forgetOTPVerificationSchema,
+  signupInputSchema,
+} from "../auth/authValidation.js";
+import { Course } from "../course/CourseModel.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { Profile } from "./ProfileModel.js";
 import User from "./UserModel.js";
 import { updateProfileSchema } from "./userValidation.js";
-import { generateOTP, saveOTP, verifyOTP } from "../../shared/utils/otp.service.js";
-import { OTPDatacookieOptions } from "../../shared/constants.js";
-import { emailQueue } from "../../shared/queue/emailQueue.js";
-import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
-import { Course } from "../course/CourseModel.js";
 
 export const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -89,30 +96,35 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 export const banUser = asyncHandler(async (req, res) => {
-  const userId = req.userId;
-  const user = await User.findById(userId);
-  if (!user) {
+  const user = req.params.userId;
+  if (!user || typeof user !== "string") {
+    throw AppError.badRequest("User ID is required");
+  }
+  const userToBan = await User.findById(user);
+  if (!userToBan) {
     throw AppError.notFound("User not found");
   }
-  await user.updateOne({ isBanned: !user.isBanned });
+  userToBan.isBanned = !userToBan.isBanned;
+  await userToBan.save();
   ApiResponse.success(
     res,
     {},
-    `User has been ${user.isBanned ? "unbanned" : "banned"} successfully`,
+    `User has been ${userToBan.isBanned ? "unbanned" : "banned"} successfully`,
   );
 });
 export const deleteUser = asyncHandler(async (req, res) => {
-  const userId = req.userId;
+  const userId = req.params.userId;
+  if (!userId || typeof userId !== "string") {
+    throw AppError.badRequest("User ID is required");
+  }
   const user = await User.findById(userId);
   if (!user) {
     throw AppError.notFound("User not found");
   }
-  await user.updateOne({ isDeleted: true, deletedAt: new Date() });
-  ApiResponse.success(
-    res,
-    {},
-    `User has been deleted successfully`,
-  );
+  user.isDeleted = true;
+  user.deletedAt = new Date();
+  await user.save();
+  ApiResponse.success(res, {}, `User has been deleted successfully`);
 });
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
   let avatar: UploadApiResponse | null = null;
@@ -270,24 +282,24 @@ export const reactivateAccountOTPVerification = asyncHandler(
     );
     const isInstructor = user.accountType === "instructor";
 
-  if (isInstructor) {
-    // 1. Reclaim orphaned published courses
-    const orphanedCourses = await Course.updateMany(
-      { instructorId: user._id, isOrphaned: true },
-      {
-        $set: {
-          isOrphaned: false,
-          instructorName: `${user.firstName} ${user.lastName}`,
-        }
-      }
-    );
+    if (isInstructor) {
+      // 1. Reclaim orphaned published courses
+      const orphanedCourses = await Course.updateMany(
+        { instructorId: user._id, isOrphaned: true },
+        {
+          $set: {
+            isOrphaned: false,
+            instructorName: `${user.firstName} ${user.lastName}`,
+          },
+        },
+      );
 
-    // 2. Restore soft deleted draft courses
-    await Course.updateMany(
-      { instructorId: user._id, status: "Removed" },
-      { $set: { status: "Draft", isActive: true } }
-    );
-  }
+      // 2. Restore soft deleted draft courses
+      await Course.updateMany(
+        { instructorId: user._id, status: "Removed" },
+        { $set: { status: "Draft", isActive: true } },
+      );
+    }
     return ApiResponse.success(
       res,
       {},
