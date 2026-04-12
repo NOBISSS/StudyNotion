@@ -4,7 +4,7 @@ export const adminLinks = [
     {
         name: "Analytics",
         path: "/dashboard/admin",
-        icon: "RiDashboardLine",
+        icon: "RiBarChartBoxLine",
     },
     {
         name: "Category Management",
@@ -85,24 +85,28 @@ export const sidebarLinks = [
         id: 9,
         name: "Analytics",
         path: "/dashboard/admin",
-        icon: "RiDashboardLine",
+        icon: "RiBarChartBoxLine",
+        type: ACCOUNT_TYPE.ADMIN,
     },
     {
         id: 10,
         name: "Category Management",
         path: "/dashboard/admin/categories",
-        icon: "MdCategory",
+        icon: "MdOutlineCategory",
+        type: ACCOUNT_TYPE.ADMIN,
     },
     {
         id: 11,
         name: "User Management",
         path: "/dashboard/admin/users",
-        icon: "HiOutlineUsers",
+        icon: "FiUsers",
+        type: ACCOUNT_TYPE.ADMIN,
     },
     {
         id: 12,
         name: "Course Management",
         path: "/dashboard/admin/courses",
-        icon: "FiBookOpen",
+        icon: "MdOutlineMenuBook",
+        type: ACCOUNT_TYPE.ADMIN,
     },
 ];
