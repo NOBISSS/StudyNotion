@@ -27,6 +27,8 @@ import { StudentPayment } from "./PaymentModel.js"
 import { emailQueue } from "../../shared/queue/emailQueue.js"
 import { createOrderSchema, verifyPaymentSchema } from "./paymentValidation.js"
 import type { Handler } from "../../shared/types.js"
+import CourseProgress from "../course/CourseProgress.js"
+import Wishlist from "../wishlist/wishlistModel.js"
 
 // ── Razorpay instance ─────────────────────────────────────────────────────────
 const env=getEnv();
@@ -150,9 +152,22 @@ export const verifyPayment: Handler = asyncHandler(async (req, res) => {
         userId: new Types.ObjectId(studentId),
         courseId: new Types.ObjectId(courseId),
         instructorId: course.instructorId,
+        amountPaid: payment.finalAmount,
         enrolledAt: new Date(),
     })
 
+    await CourseProgress.create({
+      userId: new Types.ObjectId(studentId),
+      courseId: new Types.ObjectId(courseId),
+      progress: 0,
+      completed: false,
+      completedSubsections: [],
+    });
+    await Wishlist.findOneAndUpdate(
+      { userId: new Types.ObjectId(studentId) },
+      { $pull: { courseIds: courseId } },
+      { returnDocument: "after" },
+    );
     // ── Update payment record ─────────────────────────────────────────────────
     await StudentPayment.findOneAndUpdate(
         { razorpayOrderId },
