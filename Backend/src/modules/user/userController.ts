@@ -101,6 +101,19 @@ export const banUser = asyncHandler(async (req, res) => {
     `User has been ${user.isBanned ? "unbanned" : "banned"} successfully`,
   );
 });
+export const deleteUser = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const user = await User.findById(userId);
+  if (!user) {
+    throw AppError.notFound("User not found");
+  }
+  await user.updateOne({ isDeleted: true, deletedAt: new Date() });
+  ApiResponse.success(
+    res,
+    {},
+    `User has been deleted successfully`,
+  );
+});
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
   let avatar: UploadApiResponse | null = null;
   const user = req.user;

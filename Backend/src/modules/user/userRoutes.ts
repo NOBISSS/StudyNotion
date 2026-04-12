@@ -5,7 +5,9 @@ import { upload } from "../../shared/middlewares/upload.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import { submitContactForm } from "../contact/Contact.js";
 import {
+  banUser,
   createUser,
+  deleteUser,
   getInstructors,
   getStudents,
   getUsers,
@@ -28,6 +30,9 @@ userRouter
 
 userRouter.use(authorizeRoles(ROLES.ADMIN));
 userRouter.route("/create").post(createUser);
+userRouter.route("/ban").post(banUser);
+userRouter.route("/unban").post(banUser);
+userRouter.route("/delete").delete(deleteUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);
 userRouter.route("/getstudents").get(getStudents);
