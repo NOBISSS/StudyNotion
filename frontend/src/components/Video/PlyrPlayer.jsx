@@ -66,6 +66,7 @@ export default function PlyrPlayer({ setCompletedIds,videoSrc, setVideoSrc,setLo
       }
     };
   }, [video?.link, video?.startTime]);
+  
   useEffect(()=>{
     const handleTimeUpdate = async () => {
       // if(video.isCompleted) return; // Don't save if already marked completed

@@ -1,46 +1,71 @@
-import {ACCOUNT_TYPE} from "../utils/constants"
+import { ACCOUNT_TYPE } from "../utils/constants"
 
-export const sidebarLinks=[
+export const adminLinks = [
     {
-        id:1,
-        name:"My Profile",
-        path:"/dashboard/my-profile",
-        icon:"VscAccount",
+        name: "Analytics",
+        path: "/dashboard/admin",
+        icon: "RiDashboardLine",
     },
     {
-        id:2,
-        name:"Dashboard",
-        path:"/dashboard/analytics",
-        type:ACCOUNT_TYPE.INSTRUCTOR,
-        icon:"VscDashboard",
+        name: "Category Management",
+        path: "/dashboard/admin/categories",
+        icon: "MdCategory",
     },
     {
-        id:3,
-        name:"Dashboard",
-        path:"/dashboard/analytics",
-        type:ACCOUNT_TYPE.STUDENT,
-        icon:"VscDashboard",
+        name: "User Management",
+        path: "/dashboard/admin/users",
+        icon: "HiOutlineUsers",
     },
     {
-        id:4,
-        name:"My Courses",
-        path:"/dashboard/my-courses",
-        type:ACCOUNT_TYPE.INSTRUCTOR,
-        icon:"VscVm",
+        name: "Course Management",
+        path: "/dashboard/admin/courses",
+        icon: "FiBookOpen",
+    },
+]
+
+
+
+export const sidebarLinks = [
+    {
+        id: 1,
+        name: "My Profile",
+        path: "/dashboard/my-profile",
+        icon: "VscAccount",
     },
     {
-        id:5,
-        name:"Add Course",
-        path:"/dashboard/add-course",
-        type:ACCOUNT_TYPE.INSTRUCTOR,
-        icon:"VscAdd",
+        id: 2,
+        name: "Dashboard",
+        path: "/dashboard/analytics",
+        type: ACCOUNT_TYPE.INSTRUCTOR,
+        icon: "VscDashboard",
     },
     {
-        id:6,
-        name:"Enrolled Courses",
-        path:"/dashboard/enrolled-courses",
-        type:ACCOUNT_TYPE.STUDENT,
-        icon:"VscMortarBoard",
+        id: 3,
+        name: "Dashboard",
+        path: "/dashboard/analytics",
+        type: ACCOUNT_TYPE.STUDENT,
+        icon: "VscDashboard",
+    },
+    {
+        id: 4,
+        name: "My Courses",
+        path: "/dashboard/my-courses",
+        type: ACCOUNT_TYPE.INSTRUCTOR,
+        icon: "VscVm",
+    },
+    {
+        id: 5,
+        name: "Add Course",
+        path: "/dashboard/add-course",
+        type: ACCOUNT_TYPE.INSTRUCTOR,
+        icon: "VscAdd",
+    },
+    {
+        id: 6,
+        name: "Enrolled Courses",
+        path: "/dashboard/enrolled-courses",
+        type: ACCOUNT_TYPE.STUDENT,
+        icon: "VscMortarBoard",
     },
     // {
     //     id:7,
@@ -50,11 +75,34 @@ export const sidebarLinks=[
     //     icon:"VscHistory",
     // },
     {
-        id:8,
-        name:"Wishlists",
-        path:"/dashboard/cart",
-        type:ACCOUNT_TYPE.STUDENT,
-        icon:"VscArchive",
+        id: 8,
+        name: "Wishlists",
+        path: "/dashboard/cart",
+        type: ACCOUNT_TYPE.STUDENT,
+        icon: "VscArchive",
     },
-    
+    {
+        id: 9,
+        name: "Analytics",
+        path: "/dashboard/admin",
+        icon: "RiDashboardLine",
+    },
+    {
+        id: 10,
+        name: "Category Management",
+        path: "/dashboard/admin/categories",
+        icon: "MdCategory",
+    },
+    {
+        id: 11,
+        name: "User Management",
+        path: "/dashboard/admin/users",
+        icon: "HiOutlineUsers",
+    },
+    {
+        id: 12,
+        name: "Course Management",
+        path: "/dashboard/admin/courses",
+        icon: "FiBookOpen",
+    },
 ];
