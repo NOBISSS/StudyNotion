@@ -160,7 +160,7 @@ export const getAllCoursesAdmin = async (token) => {
       Authorization: `Bearer ${token}`,
     })
     if (!response?.data?.success) throw new Error(response?.data?.message)
-    return response.data.data.courses
+    return response.data.data
   } catch (error) {
     console.error("GET_ALL_COURSES_ADMIN ERROR:", error)
     toast.error(error.message || "Failed to fetch courses")

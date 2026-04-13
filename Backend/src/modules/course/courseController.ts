@@ -230,6 +230,32 @@ export const getAllCourse = asyncHandler(async (req, res) => {
     "Courses retrieved successfully",
   );
 });
+export const getAllCourseAdmin = asyncHandler(async (req, res) => {
+  const courses = await Course.find().lean();
+  const totalCourses = courses.length;
+  const activeCourses = courses.filter((c) => c.isActive).length;
+  const inactiveCourses = totalCourses - activeCourses;
+  const publishedCourses = courses.filter(
+    (c) => c.isActive && c.status === "Published",
+  ).length;
+  const draftCourses = activeCourses - publishedCourses;
+  const freeCourses = courses.filter((c) => c.typeOfCourse === "Free").length;
+  const paidCourses = totalCourses - freeCourses;
+  ApiResponse.success(
+    res,
+    {
+      courses,
+      totalCourses,
+      activeCourses,
+      inactiveCourses,
+      publishedCourses,
+      draftCourses,
+      freeCourses,
+      paidCourses,
+    },
+    "Courses retrieved successfully",
+  );
+});
 export const getAllCourseByEnrollmentsAndRatings = asyncHandler(
   async (req, res) => {
     const userId = req.userId;

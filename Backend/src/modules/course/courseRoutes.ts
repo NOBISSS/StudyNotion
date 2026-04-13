@@ -21,6 +21,7 @@ import {
   scheduleCoursePublish,
   getCourseProgress,
   toggleCourse,
+  getAllCourseAdmin,
 } from "./courseController.js";
 
 const courseRouter = Router();
@@ -33,6 +34,9 @@ courseRouter
 courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/search").get(searchCourses);
 courseRouter.use(userMiddleware);
+courseRouter
+  .route("/admin/getall")
+  .get(authorizeRoles(ROLES.ADMIN), getAllCourseAdmin);
 courseRouter.route("/getprogress/:courseId").get(getCourseProgress);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/getinstructorcourse/:courseId").get(getInstructorCourseDetails);
