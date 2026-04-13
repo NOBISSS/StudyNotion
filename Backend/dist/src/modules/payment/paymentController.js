@@ -10,6 +10,8 @@ import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { StudentPayment } from "./PaymentModel.js";
 import { emailQueue } from "../../shared/queue/emailQueue.js";
 import { createOrderSchema, verifyPaymentSchema } from "./paymentValidation.js";
+import CourseProgress from "../course/CourseProgress.js";
+import Wishlist from "../wishlist/wishlistModel.js";
 const env = getEnv();
 const razorpay = new Razorpay({
     key_id: env.RAZORPAY_KEY_ID,
@@ -92,8 +94,17 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         userId: new Types.ObjectId(studentId),
         courseId: new Types.ObjectId(courseId),
         instructorId: course.instructorId,
+        amountPaid: payment.finalAmount,
         enrolledAt: new Date(),
     });
+    await CourseProgress.create({
+        userId: new Types.ObjectId(studentId),
+        courseId: new Types.ObjectId(courseId),
+        progress: 0,
+        completed: false,
+        completedSubsections: [],
+    });
+    await Wishlist.findOneAndUpdate({ userId: new Types.ObjectId(studentId) }, { $pull: { courseIds: courseId } }, { returnDocument: "after" });
     await StudentPayment.findOneAndUpdate({ razorpayOrderId }, {
         status: "success",
         razorpayPaymentId,

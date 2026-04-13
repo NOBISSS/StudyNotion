@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { Category } from "../../modules/category/CategoryModel.js";
 import { Course } from "../../modules/course/CourseModel.js";
@@ -340,7 +341,23 @@ export const seedSubsections = async () => {
     }
     catch (err) { }
 };
-seedSubsections()
+export const seedAdmin = async () => {
+    try {
+        await connectDB(process.env.MONGODB_URI);
+        await User.create({
+            firstName: "Parth",
+            lastName: "Chauhan",
+            email: "parthchauhan25125@gmail.com",
+            password: bcrypt.hashSync("Password@123", 10),
+            method: "local",
+            accountType: "admin"
+        });
+    }
+    catch (error) {
+        console.error("❌ Error seeding admin user:", error);
+    }
+};
+seedAdmin()
     .then(() => {
     console.log("Unseeding completed");
     process.exit(0);

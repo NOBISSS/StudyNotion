@@ -43,6 +43,7 @@ export const UserSchema = new Schema({
             return { accessToken, refreshToken };
         },
     },
+    timestamps: true,
 });
 UserSchema.index({ email: 1 }, {
     unique: true,

@@ -1,18 +1,18 @@
 import bcrypt from "bcryptjs";
+import { OTPDatacookieOptions } from "../../shared/constants.js";
 import { ApiResponse } from "../../shared/lib/ApiResponse.js";
 import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
+import { emailQueue } from "../../shared/queue/emailQueue.js";
 import { StatusCode } from "../../shared/types.js";
 import { deleteFromCloudinary, uploadToCloudinary, } from "../../shared/utils/cloudinaryUpload.js";
-import { forgetOTPVerificationSchema, signupInputSchema } from "../auth/authValidation.js";
+import { generateOTP, saveOTP, verifyOTP, } from "../../shared/utils/otp.service.js";
+import { forgetOTPVerificationSchema, signupInputSchema, } from "../auth/authValidation.js";
+import { Course } from "../course/CourseModel.js";
+import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
 import { Profile } from "./ProfileModel.js";
 import User from "./UserModel.js";
 import { updateProfileSchema } from "./userValidation.js";
-import { generateOTP, saveOTP, verifyOTP } from "../../shared/utils/otp.service.js";
-import { OTPDatacookieOptions } from "../../shared/constants.js";
-import { emailQueue } from "../../shared/queue/emailQueue.js";
-import { CourseEnrollment } from "../enrollment/CourseEnrollment.js";
-import { Course } from "../course/CourseModel.js";
 export const updateProfile = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const updateProfileInput = updateProfileSchema.safeParse(req.body);
@@ -68,13 +68,31 @@ export const updateProfile = asyncHandler(async (req, res) => {
     }
 });
 export const banUser = asyncHandler(async (req, res) => {
-    const userId = req.userId;
+    const user = req.params.userId;
+    if (!user || typeof user !== "string") {
+        throw AppError.badRequest("User ID is required");
+    }
+    const userToBan = await User.findById(user);
+    if (!userToBan) {
+        throw AppError.notFound("User not found");
+    }
+    userToBan.isBanned = !userToBan.isBanned;
+    await userToBan.save();
+    ApiResponse.success(res, {}, `User has been ${userToBan.isBanned ? "unbanned" : "banned"} successfully`);
+});
+export const deleteUser = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    if (!userId || typeof userId !== "string") {
+        throw AppError.badRequest("User ID is required");
+    }
     const user = await User.findById(userId);
     if (!user) {
         throw AppError.notFound("User not found");
     }
-    await user.updateOne({ isBanned: !user.isBanned });
-    ApiResponse.success(res, {}, `User has been ${user.isBanned ? "unbanned" : "banned"} successfully`);
+    user.isDeleted = true;
+    user.deletedAt = new Date();
+    await user.save();
+    ApiResponse.success(res, {}, `User has been deleted successfully`);
 });
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
     let avatar = null;
@@ -204,7 +222,7 @@ export const reactivateAccountOTPVerification = asyncHandler(async (req, res) =>
             $set: {
                 isOrphaned: false,
                 instructorName: `${user.firstName} ${user.lastName}`,
-            }
+            },
         });
         await Course.updateMany({ instructorId: user._id, status: "Removed" }, { $set: { status: "Draft", isActive: true } });
     }
