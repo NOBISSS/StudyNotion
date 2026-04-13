@@ -23,8 +23,8 @@ import { Quiz } from "../subsection/quiz/QuizModel.js";
 import Video from "../subsection/video/VideoModel.js";
 import User from "../user/UserModel.js";
 import { Course } from "./CourseModel.js";
-import { courseInputSchema } from "./courseValidation.js";
 import CourseProgress from "./CourseProgress.js";
+import { courseInputSchema } from "./courseValidation.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -744,18 +744,48 @@ export const getScheduledCourses: Handler = asyncHandler(async (req, res) => {
     "Scheduled Courses retrived successfully",
   );
 });
-export const getCourseProgress: Handler = asyncHandler(async (req,res) => {
+export const getCourseProgress: Handler = asyncHandler(async (req, res) => {
   const userId = req.userId;
-  if(!userId){
+  if (!userId) {
     throw AppError.unauthorized("User ID is required");
   }
   const courseId = req.params.courseId;
-  if(!courseId || typeof courseId !== "string"){
+  if (!courseId || typeof courseId !== "string") {
     throw AppError.badRequest("Course ID is required");
   }
   const courseProgress = await CourseProgress.findOne({
     userId: new Types.ObjectId(userId),
     courseId: new Types.ObjectId(courseId),
   });
-  ApiResponse.success(res, { courseProgress }, "Course progress retrieved successfully");
+  ApiResponse.success(
+    res,
+    { courseProgress },
+    "Course progress retrieved successfully",
+  );
+});
+export const toggleCourse: Handler = asyncHandler(async (req, res) => {
+  const courseId = req.params.courseId;
+  const userId = req.userId;
+  if (!courseId || !userId) {
+    throw AppError.badRequest("Course ID and User ID are required");
+  }
+  if (!Types.ObjectId.isValid(courseId as string)) {
+    throw AppError.badRequest("Invalid course ID");
+  }
+  const course = await Course.findById(courseId);
+  if (!course) throw AppError.notFound("Course not Found");
+
+  if (
+    course.instructorId.toString() !== userId.toString() &&
+    req.accountType !== "admin"
+  ) {
+    throw AppError.unauthorized("Not Authorized to toggle this course");
+  }
+  course.isActive = !course.isActive;
+  await course.save();
+  ApiResponse.success(
+    res,
+    { course },
+    `Course ${course.isActive ? "activated" : "deactivated"} successfully`,
+  );
 });
