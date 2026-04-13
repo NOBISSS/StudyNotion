@@ -28,7 +28,7 @@ const CourseManagement = () => {
   const fetchCourses = async () => {
     setLoading(true)
     const data = await getAllCoursesAdmin(token)
-    setCourses(data || [])
+    setCourses(data.courses || [])
     setLoading(false)
   }
 
@@ -61,8 +61,8 @@ const CourseManagement = () => {
 
   const stats = {
     total: courses.length,
-    published: courses.filter((c) => c.status === "Published").length,
-    draft: courses.filter((c) => c.status === "Draft").length,
+    published: courses.filter((c) => c.isActive && c.status === "Published").length,
+    draft: courses.filter((c) => c.isActive && c.status === "Draft").length,
     inactive: courses.filter((c) => !c.isActive).length,
   }
 

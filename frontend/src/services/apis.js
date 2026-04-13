@@ -46,7 +46,7 @@ export const adminEndpoints = {
   BAN_USER_API: BACKEND_URL + "/users/ban/:userId",
   UNBAN_USER_API: BACKEND_URL + "/users/unban/:userId",
   DELETE_USER_API: BACKEND_URL + "/users/delete/:userId",
-  GET_ALL_COURSES_API: BACKEND_URL + "/courses/getall",
+  GET_ALL_COURSES_API: BACKEND_URL + "/courses/admin/getall",
   TOGGLE_COURSE_API: BACKEND_URL + "/courses/toggle",
   GET_ADMIN_ANALYTICS_API: BACKEND_URL + "/dashboards/admin",
 };

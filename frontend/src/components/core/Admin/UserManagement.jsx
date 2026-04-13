@@ -73,9 +73,9 @@ const UserManagement = () => {
   })
 
   const stats = {
-    total: users.length,
-    students: users.filter((u) => u.accountType === "student").length,
-    instructors: users.filter((u) => u.accountType === "instructor").length,
+    total: users.filter(u=>u.accountType !="admin" && !u.isDeleted).length,
+    students: users.filter((u) => u.accountType === "student" && !u.isDeleted).length,
+    instructors: users.filter((u) => u.accountType === "instructor" && !u.isDeleted).length,
     banned: users.filter((u) => u.isBanned).length,
   }
 
