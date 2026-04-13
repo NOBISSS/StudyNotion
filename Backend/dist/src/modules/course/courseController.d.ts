@@ -15,4 +15,5 @@ export declare const draftCourse: Handler;
 export declare const scheduleCoursePublish: Handler;
 export declare const getScheduledCourses: Handler;
 export declare const getCourseProgress: Handler;
+export declare const toggleCourse: Handler;
 //# sourceMappingURL=courseController.d.ts.map

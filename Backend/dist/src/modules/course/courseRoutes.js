@@ -3,7 +3,7 @@ import { ROLES } from "../../shared/constants.js";
 import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { upload } from "../../shared/middlewares/upload.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
-import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, getCourseProgress, } from "./courseController.js";
+import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, getCourseProgress, toggleCourse, } from "./courseController.js";
 const courseRouter = Router();
 courseRouter.route("/getall").get(getAllCourse);
 courseRouter.route("/get-top").get(getAllCourseByEnrollmentsAndRatings);
@@ -25,5 +25,6 @@ courseRouter.route("/publish/:courseId").put(publishCourse);
 courseRouter.route("/draft/:courseId").put(draftCourse);
 courseRouter.route("/scheduled").get(getScheduledCourses);
 courseRouter.route("/schedule/:courseId").put(scheduleCoursePublish);
+courseRouter.route("/toggle/:courseId").put(toggleCourse);
 export { courseRouter };
 //# sourceMappingURL=courseRoutes.js.map
