@@ -54,6 +54,7 @@ export const UserSchema = new Schema(
         return { accessToken, refreshToken };
       },
     },
+    timestamps: true,
   }
 );
 

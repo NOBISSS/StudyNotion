@@ -48,7 +48,7 @@ export const adminEndpoints = {
   DELETE_USER_API: BACKEND_URL + "/users/delete/:userId",
   GET_ALL_COURSES_API: BACKEND_URL + "/courses/getall",
   TOGGLE_COURSE_API: BACKEND_URL + "/courses/toggle",
-  GET_ADMIN_ANALYTICS_API: BACKEND_URL + "/admin/analytics",
+  GET_ADMIN_ANALYTICS_API: BACKEND_URL + "/dashboards/admin",
 };
 
 export const studentEndpoints = {

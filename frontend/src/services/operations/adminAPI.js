@@ -190,11 +190,9 @@ export const toggleCourseStatus = async (token, courseId) => {
 
 // ── Analytics ─────────────────────────────────────────────────────────────
 
-export const getAdminAnalytics = async (token) => {
+export const getAdminAnalytics = async () => {
   try {
-    const response = await apiConnector("GET", GET_ADMIN_ANALYTICS_API, null, {
-      Authorization: `Bearer ${token}`,
-    })
+    const response = await apiConnector("GET", GET_ADMIN_ANALYTICS_API);
     if (!response?.data?.success) throw new Error(response?.data?.message)
     return response.data.data
   } catch (error) {

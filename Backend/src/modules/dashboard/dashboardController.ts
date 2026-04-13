@@ -10,8 +10,10 @@ import { RatingAndReview } from "../rating/RatingAndReview.js";
 import QuizAttempt from "../subsection/quiz/QuizAttemptModel.js";
 import VideoProgress from "../subsection/video/VideoProgressModel.js";
 import { UserStreak } from "../user/UserStreakModel.js";
+import User from "../user/UserModel.js";
 import { formatTimeAgo } from "../../shared/utils/formatTimeAgo.js";
 import { SubSection } from "../subsection/SubSectionModel.js";
+import { Category } from "../category/CategoryModel.js";
 const monthNames = [
   "Jan",
   "Feb",
@@ -528,6 +530,68 @@ export const studentDashboard: Handler = asyncHandler(async (req, res) => {
       recentActivity,
     },
     "Student dashboard retrieved successfully",
+  );
+});
+export const adminDashboard: Handler = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  if (!userId) throw AppError.unauthorized("User ID is required");
+
+  //users
+  const users = await User.find({ isDeleted: false }).lean();
+  const totalUsers = users.length;
+  const bannedUsers = users.filter((u) => u.isBanned).length;
+  const instructorUsers = users.filter((u) => u.accountType === "instructor").length;
+  const studentUsers = users.filter((u) => u.accountType === "student").length;
+  const recentUsers = users;
+  
+  //courses
+  const courses = await Course.find().lean();
+  const totalCourses = courses.length;
+  const activeCourses = courses.filter((c) => c.isActive).length;
+  const inactiveCourses = totalCourses - activeCourses;
+  const publishedCourses = courses.filter((c) => c.isActive && c.status === "Published").length;
+  const draftCourses = activeCourses - publishedCourses;
+  const freeCourses = courses.filter((c) => c.typeOfCourse === "Free").length;
+  const paidCourses = totalCourses - freeCourses;
+
+  //categories
+  const categories = await Category.find().populate("courses").lean();
+  const totalCategories = categories.length;
+  ApiResponse.success(
+    res,
+    {
+      users: {
+        total: totalUsers,
+        banned: bannedUsers,
+        instructors: instructorUsers,
+        students: studentUsers,
+        recent: recentUsers.map((u) => ({
+          id: u._id,
+          name: u.firstName + " " + u.lastName,
+          email: u.email,
+          accountType: u.accountType,
+          createdAt: u.createdAt,
+        })),
+      },
+      courses: {
+        total: totalCourses,
+        active: activeCourses,
+        inactive: inactiveCourses,
+        published: publishedCourses,
+        draft: draftCourses,
+        free: freeCourses,
+        paid: paidCourses,
+      },
+      categories: {
+        total: totalCategories,
+        list: categories.map((cat) => ({
+          id: cat._id,
+          name: cat.name,
+          courseCount: cat.courses.length,
+        })),
+      },
+    },
+    "Admin dashboard retrieved successfully",
   );
 });
 
