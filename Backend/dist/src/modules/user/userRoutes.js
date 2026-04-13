@@ -16,8 +16,8 @@ userRouter
     .put(upload.single("profilephoto"), updateProfilePhoto);
 userRouter.use(authorizeRoles(ROLES.ADMIN));
 userRouter.route("/create").post(createUser);
-userRouter.route("/ban/:userId").post(banUser);
-userRouter.route("/unban/:userId").post(banUser);
+userRouter.route("/ban/:userId").put(banUser);
+userRouter.route("/unban/:userId").put(banUser);
 userRouter.route("/delete/:userId").delete(deleteUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);

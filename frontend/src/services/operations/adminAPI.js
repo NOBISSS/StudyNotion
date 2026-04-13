@@ -117,7 +117,7 @@ export const banUser = async (token, userId) => {
   try {
     const response = await apiConnector(
       "PUT",
-      BAN_USER_API +"/"+ userId,
+      BAN_USER_API.replace(":userId",userId),
       null,
       { Authorization: `Bearer ${token}` }
     )
