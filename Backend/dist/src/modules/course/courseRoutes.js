@@ -3,7 +3,7 @@ import { ROLES } from "../../shared/constants.js";
 import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { upload } from "../../shared/middlewares/upload.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
-import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, getCourseProgress, toggleCourse, } from "./courseController.js";
+import { createCourse, createCourseWithThumbnailURL, deleteCourse, draftCourse, getAllCourse, getAllCourseByEnrollmentsAndRatings, getAllCourseByEnrollmentsAndRatingsAndCategory, getCourseDetails, getInstructorCourseDetails, getInstructorCourses, getScheduledCourses, publishCourse, searchCourses, updateCourse, scheduleCoursePublish, getCourseProgress, toggleCourse, getAllCourseAdmin, } from "./courseController.js";
 const courseRouter = Router();
 courseRouter.route("/getall").get(getAllCourse);
 courseRouter.route("/get-top").get(getAllCourseByEnrollmentsAndRatings);
@@ -13,6 +13,9 @@ courseRouter
 courseRouter.route("/getdetails/:courseId").get(getCourseDetails);
 courseRouter.route("/search").get(searchCourses);
 courseRouter.use(userMiddleware);
+courseRouter
+    .route("/admin/getall")
+    .get(authorizeRoles(ROLES.ADMIN), getAllCourseAdmin);
 courseRouter.route("/getprogress/:courseId").get(getCourseProgress);
 courseRouter.use(authorizeRoles(ROLES.INSTRUCTOR));
 courseRouter.route("/getinstructorcourse/:courseId").get(getInstructorCourseDetails);
