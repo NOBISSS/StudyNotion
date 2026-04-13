@@ -84,7 +84,7 @@ export const sidebarLinks = [
     {
         id: 9,
         name: "Analytics",
-        path: "/dashboard/admin",
+        path: "/dashboard/admin/analytic",
         icon: "RiBarChartBoxLine",
         type: ACCOUNT_TYPE.ADMIN,
     },

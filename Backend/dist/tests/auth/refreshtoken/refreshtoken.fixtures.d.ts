@@ -15,7 +15,7 @@ export declare function getRefreshCookie(overrides?: {
         password?: string | null;
         refreshToken?: string | null;
         deletedAt?: NativeDate | null;
-    }, {
+    } & import("mongoose").DefaultTimestampProps, {
         id: string;
     }, {
         methods: {
@@ -116,6 +116,7 @@ export declare function getRefreshCookie(overrides?: {
                 refreshToken: string;
             };
         };
+        timestamps: true;
     }> & Omit<{
         firstName: string;
         lastName: string;
@@ -127,7 +128,7 @@ export declare function getRefreshCookie(overrides?: {
         password?: string | null;
         refreshToken?: string | null;
         deletedAt?: NativeDate | null;
-    } & {
+    } & import("mongoose").DefaultTimestampProps & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

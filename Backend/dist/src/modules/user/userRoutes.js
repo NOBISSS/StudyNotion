@@ -4,7 +4,7 @@ import { authorizeRoles } from "../../shared/middlewares/role.middleware.js";
 import { upload } from "../../shared/middlewares/upload.js";
 import { userMiddleware } from "../../shared/middlewares/userMiddleware.js";
 import { submitContactForm } from "../contact/Contact.js";
-import { createUser, getInstructors, getStudents, getUsers, reactivateAccount, reactivateAccountOTPVerification, updateProfile, updateProfilePhoto, } from "./userController.js";
+import { banUser, createUser, deleteUser, getInstructors, getStudents, getUsers, reactivateAccount, reactivateAccountOTPVerification, updateProfile, updateProfilePhoto, } from "./userController.js";
 const userRouter = Router();
 userRouter.route("/contact").post(submitContactForm);
 userRouter.route("/reactivate").post(reactivateAccount);
@@ -16,6 +16,9 @@ userRouter
     .put(upload.single("profilephoto"), updateProfilePhoto);
 userRouter.use(authorizeRoles(ROLES.ADMIN));
 userRouter.route("/create").post(createUser);
+userRouter.route("/ban/:userId").post(banUser);
+userRouter.route("/unban/:userId").post(banUser);
+userRouter.route("/delete/:userId").delete(deleteUser);
 userRouter.route("/getall").get(getUsers);
 userRouter.route("/getinstructors").get(getInstructors);
 userRouter.route("/getstudents").get(getStudents);

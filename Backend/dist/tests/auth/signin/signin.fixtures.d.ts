@@ -14,7 +14,7 @@ export declare function seedUser(overrides?: Partial<typeof signinPayload>): Pro
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-}, {
+} & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, {
     methods: {
@@ -115,6 +115,7 @@ export declare function seedUser(overrides?: Partial<typeof signinPayload>): Pro
             refreshToken: string;
         };
     };
+    timestamps: true;
 }> & Omit<{
     firstName: string;
     lastName: string;
@@ -126,7 +127,7 @@ export declare function seedUser(overrides?: Partial<typeof signinPayload>): Pro
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-} & {
+} & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;

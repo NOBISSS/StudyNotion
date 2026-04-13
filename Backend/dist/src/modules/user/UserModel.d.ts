@@ -195,6 +195,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
             refreshToken: string;
         };
     };
+    timestamps: true;
 }, {
     firstName: string;
     lastName: string;
@@ -206,7 +207,7 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-}, mongoose.Document<unknown, {}, {
+} & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
@@ -247,6 +248,8 @@ export declare const UserSchema: mongoose.Schema<any, mongoose.Model<any, any, a
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -265,7 +268,7 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-}, {}, {
+} & mongoose.DefaultTimestampProps, {}, {
     comparePassword: (this: mongoose.Document<unknown, {}, {
         firstName: string;
         lastName: string;
@@ -375,7 +378,7 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-}, {
+} & mongoose.DefaultTimestampProps, {
     id: string;
 }, {
     methods: {
@@ -476,6 +479,7 @@ declare const User: mongoose.Model<{
             refreshToken: string;
         };
     };
+    timestamps: true;
 }> & Omit<{
     firstName: string;
     lastName: string;
@@ -487,7 +491,7 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-} & {
+} & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
     __v: number;
@@ -786,6 +790,7 @@ declare const User: mongoose.Model<{
             refreshToken: string;
         };
     };
+    timestamps: true;
 }, {
     firstName: string;
     lastName: string;
@@ -797,7 +802,7 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
-}, mongoose.Document<unknown, {}, {
+} & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     firstName: string;
     lastName: string;
     accountType: "student" | "instructor" | "admin";
@@ -838,6 +843,8 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -853,6 +860,8 @@ declare const User: mongoose.Model<{
     password?: string | null;
     refreshToken?: string | null;
     deletedAt?: NativeDate | null;
+    createdAt: NativeDate;
+    updatedAt: NativeDate;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

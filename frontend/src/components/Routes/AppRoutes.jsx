@@ -112,7 +112,7 @@ const AppRoutes = () => {
 
           {isAdmin && (
             <>
-              <Route path="/dashboard/admin" element={<AdminAnalytics />} />
+              <Route path="/dashboard/admin/analytic" element={<AdminAnalytics />} />
               <Route path="/dashboard/admin/categories" element={<CategoryManagement />} />
               <Route path="/dashboard/admin/users" element={<UserManagement />} />
               <Route path="/dashboard/admin/courses" element={<CourseManagement />} />
