@@ -33,7 +33,7 @@ export const addMaterial = asyncHandler(async (req, res) => {
     if (!parsedMaterialData.success) {
         throw AppError.badRequest(parsedMaterialData.error.issues[0]?.message || "Invalid input data");
     }
-    const { materialType, description, courseId, title, sectionId, materialSize, materialS3Key, } = parsedMaterialData.data;
+    const { materialType, description, courseId, title, sectionId, materialSize, materialS3Key, mimeType, } = parsedMaterialData.data;
     const course = await isValidInstructor(new Types.ObjectId(courseId), userId, req.user?.accountType);
     if (!course) {
         throw AppError.unauthorized("You are not authorized to add material to this course.");
@@ -50,6 +50,7 @@ export const addMaterial = asyncHandler(async (req, res) => {
         materialName: title,
         contentUrl: materialURL,
         materialType,
+        mimeType: mimeType || null,
         materialSize: materialSize || null,
         materialS3Key,
         originalMaterialS3Key: materialS3Key,
@@ -68,8 +69,11 @@ export const addMaterial = asyncHandler(async (req, res) => {
     }, "Material added successfully");
 });
 export const getMaterial = asyncHandler(async (req, res) => {
-    const materialId = req.params.materialId;
-    const material = await Material.findById(materialId);
+    const subsectionId = req.params.subsectionId;
+    if (!subsectionId || typeof subsectionId !== "string") {
+        throw AppError.badRequest("Subsection ID is required");
+    }
+    const material = await Material.findOne({ subsectionId: new Types.ObjectId(subsectionId) });
     if (!material) {
         throw AppError.notFound("Material not found");
     }
@@ -84,7 +88,7 @@ export const getMaterial = asyncHandler(async (req, res) => {
     ApiResponse.success(res, {
         material: {
             ...material.toObject(),
-            contentUrl: materialURL,
+            link: materialURL,
         },
     }, "Material retrieved successfully");
 });

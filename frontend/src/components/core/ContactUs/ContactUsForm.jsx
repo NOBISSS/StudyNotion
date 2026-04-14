@@ -4,77 +4,80 @@ import CountryCode from "../../../data/countrycode.json"
 import toast from 'react-hot-toast';
 import { ContactUs } from '../../../services/operations/contactAPI';
 const ContactUsForm = () => {
-    const [loading,setLoading]=useState(false);
+    const [loading, setLoading] = useState(false);
     const {
         register,
         handleSubmit,
         reset,
-        formState:{errors,isSubmitSuccessful}
-    }=useForm();
+        formState: { errors, isSubmitSuccessful }
+    } = useForm();
 
-    const submitContactForm=async(data)=>{
-        if(data){
-            await ContactUs(data,setLoading)();
-        }else{
+    const submitContactForm = async (data) => {
+        if (data) {
+            await ContactUs(data, setLoading)();
+        } else {
             toast.error("Please Fill Details First")
         }
     }
-    useEffect(()=>{
-        if(isSubmitSuccessful){
+    useEffect(() => {
+        if (isSubmitSuccessful) {
             reset({
-                email:"",
-                firstname:"",
-                lastname:"",
-                message:"",
-                phoneNo:""
+                email: "",
+                firstname: "",
+                lastname: "",
+                message: "",
+                phoneNo: ""
             })
         }
-    },[reset,isSubmitSuccessful])
+    }, [reset, isSubmitSuccessful])
 
 
-  return (
-    <form onSubmit={handleSubmit(submitContactForm)} className='mx-auto'>
-        <div className='flex gap-5 mt-10'>
-                <label htmlFor="Firstname">
-                <span>First Name</span><br></br>
-                <input 
-                type='text' 
-                id='firstname' 
-                name='firstname' 
-                placeholder='Enter First Name'
-                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                {...register("firstname",{required:true})}
-            />
-                {
-                errors.firstname &&(
-                    <span className='text-red-500'>
-                        Enter Your Name
-                    </span>
-                )
-                }
+    return (
+        <form onSubmit={handleSubmit(submitContactForm)} className='mx-auto'>
+            <div className='flex gap-5 mt-10'>
+                <label htmlFor="firstname">
+                    <span>First Name</span><br></br>
+                    <input
+                        type='text'
+                        id='firstname'
+                        name='firstname'
+                        placeholder='Enter First Name'
+                        autoComplete="given-name"
+                        className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
+                        {...register("firstname", { required: true })}
+                    />
+                    {
+                        errors.firstname && (
+                            <span className='text-red-500'>
+                                Enter Your Name
+                            </span>
+                        )
+                    }
                 </label>
-                <label htmlFor="Lastname">
-                <span>Last Name</span><br></br>
-                <input type='text' id='Lastname' name='lastname' placeholder='Enter last name' {...register("lastname")}
-                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                />
+                <label htmlFor="lastname">
+                    <span>Last Name</span><br></br>
+                    <input type='text' id='Lastname' name='lastname' placeholder='Enter last name' {...register("lastname")}
+                        className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
+                        autoComplete="family-name"
+                    />
                 </label>
             </div>
             {/*Email and Message and button*/}
             <div className='flex flex-col mt-10 gap-10'>
                 <label htmlFor="email">
-                <span>Email Address</span><br></br>
-                <input type='email' id='email' name='email' placeholder='Enter email address'
-                className='p-3 w-[70%] rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                {...register("email",{required:true})}
-                />
-                {
-                errors.email &&(
-                    <span className='text-red-500'>
-                        Enter Your Email
-                    </span>
-                )
-                }
+                    <span>Email Address</span><br></br>
+                    <input type='email' id='email' name='email' placeholder='Enter email address'
+                        className='p-3 w-[70%] rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
+                        autoComplete="email"
+                        {...register("email", { required: true })}
+                    />
+                    {
+                        errors.email && (
+                            <span className='text-red-500'>
+                                Enter Your Email
+                            </span>
+                        )
+                    }
                 </label>
                 {/* phone NO */}
                 <div className='flex flex-col gap-2'>
@@ -82,11 +85,13 @@ const ContactUsForm = () => {
                     <div className='flex gap-6'>
                         {/* dropdown */}
                         <div className='bg-black w-[16.5%] gap-3'>
-                            <select name='dropdown' id='dropdown' {...register("countrycode",{required:true})}
-                            className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
+                            <select id="countrycode"
+                                name="countrycode"
+                                autoComplete="tel-country-code" {...register("countrycode", { required: true })}
+                                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
                             >
                                 {
-                                    CountryCode.map((element,index)=>{
+                                    CountryCode.map((element, index) => {
                                         return (
                                             <option value={element.code} key={index}>{element.code} - {element.country}</option>
                                         )
@@ -95,56 +100,55 @@ const ContactUsForm = () => {
                             </select>
                         </div>
                         <div className='w-[70%]'>
-                <input type='number' id='phoneNo' name='phoneNo' placeholder='Enter Contact No'
-                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                {...register("phoneNo",{required:{value:true,message:"Enter  Phone Number"},
-                maxLength:{value:10,message:"Invalid Phone Number"},
-                minLength:{value:8,message:"Invalid Phone Number"}
-            })}
-                />
-                {
-                    
-                    errors.phoneNo && (
-                        <span className='text-red-500'>
-                            {errors.phoneNo.message}
-                        </span>   
-                        
-                    )
-                    
-                }
-                {//console.log("error object:",errors)
-                }
+                            <input type='number' id='phoneNo' name='phoneNo' placeholder='Enter Contact No'
+                                autoComplete="tel"
+                                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
+                                {...register("phoneNo", {
+                                    required: { value: true, message: "Enter  Phone Number" },
+                                    maxLength: { value: 10, message: "Invalid Phone Number" },
+                                    minLength: { value: 8, message: "Invalid Phone Number" }
+                                })}
+                            />
+                            {
+
+                                errors.phoneNo && (
+                                    <span className='text-red-500'>
+                                        {errors.phoneNo.message}
+                                    </span>
+
+                                )
+
+                            }
                         </div>
                     </div>
                 </div>
                 {/*Message Text Area */}
                 <div className='mt-2'>
-                    <label htmlFor='message'>Message
-                        <textarea
-                        name='message'
+                    <label htmlFor='message'>Message</label>
+                    <textarea
                         id='message'
+                        name='message'
                         cols={40}
                         rows={7}
                         placeholder='Enter Your message here'
                         {...register("message")}
+                        autoComplete="off"
                         className='resize-none p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                        />
-                        </label>
-
+                    />
                 </div>
                 <button
-  type="submit"
-  disabled={loading}
-  className={`text-center text-[17px] px-4 py-3 rounded-md font-bold 
+                    type="submit"
+                    disabled={loading}
+                    className={`text-center text-[17px] px-4 py-3 rounded-md font-bold 
   bg-[#FFD60A] text-black transition-all duration-200
   ${loading ? "opacity-50 cursor-not-allowed" : "hover:scale-95"}
   `}
->
-  {loading ? "Sending..." : "Send Message"}
-</button>
+                >
+                    {loading ? "Sending..." : "Send Message"}
+                </button>
             </div>
-    </form>
-  )
+        </form>
+    )
 }
 
 export default ContactUsForm

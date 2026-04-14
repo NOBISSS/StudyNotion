@@ -40,8 +40,6 @@ export function sendOtp(formData, navigate) {
     dispatch(setLoading(true));
     try {
       const response = await apiConnector("POST", SENDOTP_API, formData);
-      console.log("SENDOTP API RESPONSE............", response);
-      console.log(response.data.success);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -63,7 +61,6 @@ export function resendOtp(formData, navigate) {
     dispatch(setLoading(true));
     try {
       const response = await apiConnector("POST", RESEND_OTP_API, formData);
-      console.log("SENDOTP API RESPONSE............", response);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -103,8 +100,6 @@ export function signUp(
         otp,
       });
 
-      console.log("SIGNUP API RESPONSE......", response);
-
       if (response.status != 201) {
         throw new Error(response.data.message);
       }
@@ -126,11 +121,11 @@ export function UpdatePersonalInfo(formData) {
     dispatch(setLoading(true));
 
     try {
-      console.log({ ...formData });
+      //console.log({ ...formData });
       const response = await apiConnector("PUT", UPDATE_PROFILE_API, {
         ...formData,
       });
-      console.log("PROFILE UPDATE API RESPONSE........", response);
+      //console.log("PROFILE UPDATE API RESPONSE........", response);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -160,8 +155,8 @@ export function login(email, password, navigate) {
         email,
         password,
       });
-      console.log("LOGIN API RESPONSE........", response);
-      console.log("FALSE SUCCESS MESSAGE:", response.data.message);
+      // console.log("LOGIN API RESPONSE........", response);
+      // console.log("FALSE SUCCESS MESSAGE:", response.data.message);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -206,7 +201,7 @@ export function getPasswordResetToken(email, setEmailSent) {
       const response = await apiConnector("POST", RESETPASSTOKEN_API, {
         email,
       });
-      console.log("GET PASSWORD RESET TOKEN....", response);
+      // console.log("GET PASSWORD RESET TOKEN....", response);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -294,7 +289,7 @@ export function ResetPassword(password, confirmPassword, token) {
         confirmPassword,
         token,
       });
-      console.log("RESET PASSWORD RESPONSE...", response);
+      // console.log("RESET PASSWORD RESPONSE...", response);
       if (!response.data.success) {
         toast.error("FAILED TO RESET PASSWORD");
         throw new Error(response.data.message);
@@ -327,10 +322,10 @@ export function UpdatePassword(password, navigate) {
 
 export function updateProfilePicture(displayPicture) {
   return async (dispatch) => {
-    console.log(displayPicture);
+    // console.log(displayPicture);
     const formData = new FormData();
     formData.append("profilephoto", displayPicture);
-    console.log("FORM DATA :", formData);
+    // console.log("FORM DATA :", formData);
     const toastId = toast.loading("UPLOADING PROFILE PICTURE");
     try {
       const response = await apiConnector(
@@ -338,7 +333,7 @@ export function updateProfilePicture(displayPicture) {
         UPDATE_DISPLAY_PICTURE_API,
         formData,
       );
-      console.log(response);
+      // console.log(response);
       if (!response.data.success) throw new Error(response.data.message);
       dispatch(
         setProfilePicture(
@@ -362,7 +357,7 @@ export function deleteAccount(navigate) {
 
     try {
       const response = await apiConnector("DELETE", DELETE_PROFILE_API);
-      console.log(response);
+      // console.log(response);
       if (!response.data.success) throw new Error(response.data.message);
       dispatch(logout());
       dispatch(setUser(null));

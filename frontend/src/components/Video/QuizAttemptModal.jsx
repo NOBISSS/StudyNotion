@@ -1,29 +1,10 @@
-// components/Video/QuizAttemptModal.jsx
-//
-// Usage inside VideoDetail.jsx:
-//   import QuizAttemptModal from "./QuizAttemptModal"
-//
-//   // In SidebarSection onClick when sub.contentType === "quiz":
-//   if (sub.contentType === "quiz") {
-//     setActiveQuizSubId(sub._id)
-//     setShowQuizModal(true)
-//     return
-//   }
-//
-//   <QuizAttemptModal
-//     subSectionId={activeQuizSubId}
-//     onClose={() => { setShowQuizModal(false); setActiveQuizSubId(null) }}
-//     onCompleted={(attempt) => {
-//       // mark subsection as completed if passed
-//       setCompletedIds(prev => new Set([...prev, activeQuizSubId]))
-//     }}
-//   />
+
 
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { FiX, FiCheck, FiClock, FiAward, FiRefreshCw } from "react-icons/fi"
 import { MdQuiz } from "react-icons/md"
-import { getQuizBySubSection, attemptQuiz, getQuizAttempts } from "../../services/operations/quizAPI"
+import { getQuizBySubSection, attemptQuiz, getQuizAttempts } from "../../services/operations/QuizAPI"
 
 // ── States ─────────────────────────────────────────────────────────────────
 // "loading" | "start" | "question" | "submitting" | "result" | "history" | "error"

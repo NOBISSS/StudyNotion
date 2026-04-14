@@ -7,7 +7,6 @@ import { getMe } from '../../../services/operations/profileAPI';
 const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
     const navigate = useNavigate(); 
-    console.log(user);
     const dispatch=useDispatch();
 
     useEffect(()=>{

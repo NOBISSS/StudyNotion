@@ -72,7 +72,7 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
                     watchedPercentage: 100,
                     duration: video.duration || 0,
                 },
-            }, { upsert: true, new: true });
+            }, { upsert: true, returnDocument: "after" });
         }
     }
     else if (alreadyCompleted && req.query.toggle !== "true") {
@@ -112,7 +112,12 @@ export const markSubsectionAsCompleted = asyncHandler(async (req, res) => {
     else {
         courseProgress.completed = false;
     }
-    await courseProgress.save();
+    await CourseProgress.findByIdAndUpdate(courseProgress._id, {
+        completedSubsections: courseProgress.completedSubsections,
+        progress: courseProgress.progress,
+        completed: courseProgress.completed,
+        completionDate: courseProgress.completionDate,
+    }, { returnDocument: "after" });
     ApiResponse.success(res, { courseProgress }, "SubSection completion toggled and progress updated successfully");
 });
 export const deleteSubsection = asyncHandler(async (req, res) => {

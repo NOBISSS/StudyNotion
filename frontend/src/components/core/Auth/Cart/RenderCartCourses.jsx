@@ -14,7 +14,6 @@ const RenderCartCourses = () => {
   }
 
   const handleRemove = (courseId) => {
-    console.log("ON REMOVING", courseId)
     removeCourseFromWishList(token, courseId, dispatch);
   };
 

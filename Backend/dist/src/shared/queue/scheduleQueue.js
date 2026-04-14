@@ -1,6 +1,5 @@
 import { Queue } from "bullmq";
-import { createRedisConnection } from "../config/redis.js";
-const redis = createRedisConnection();
+import redis from "../config/redis.js";
 export const scheduleQueue = new Queue("schedule-publish", {
     connection: redis,
     defaultJobOptions: {

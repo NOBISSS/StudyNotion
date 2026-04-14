@@ -33,14 +33,8 @@ const Checkout = () => {
     setLoading(true);
     try {
       const courseIds = cart.map((c) => c._id);
-      console.log("Initiating payment for courses:", courseIds);
-      console.log("User details:", data);
       dispatch(enrollInWishlist(navigate));
-      // TODO: Call your payment API here
-      // await buyCourse(token, courseIds, user, navigate, dispatch);
-
-      // After success:
-      // navigate("/dashboard/enrolled-courses");
+      
     } catch (err) {
       console.error("Payment failed:", err);
       toast.error("Payment failed. Please try again.");

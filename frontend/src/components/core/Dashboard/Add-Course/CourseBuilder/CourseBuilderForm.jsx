@@ -1,12 +1,3 @@
-// components/core/Dashboard/Add-Course/CourseBuilder/CourseBuilderForm.jsx
-// Bugs fixed:
-//  1. openEditModal(lecture, section._id) → changed to openEditModal(lecture, section)
-//     so section object is available, not just the ID string
-//  2. Quiz edit now calls getQuizBySubSection to load existing quiz before opening modal
-//  3. closeModal now resets activeModal too (was never clearing it)
-//  4. setShowModal dead state removed from closeModal
-//  5. Quiz add via "Add Quiz" button now correctly passes full section object fields
-
 import {
   CheckIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, TrashIcon,
 } from "@heroicons/react/24/outline"
@@ -25,7 +16,7 @@ import {
   getAllSubsections, getSubsectionDetails,
   removeSubsection, updateSection, updateSubsection,
 } from "../../../../../services/operations/courseDetailsAPI"
-import { getQuizBySubSection } from "../../../../../services/operations/quizAPI"
+import { getQuizBySubSection } from "../../../../../services/operations/QuizAPI"
 import { setCourse, setStep } from "../../../../../slices/courseSlice"
 import EditLectureModal  from "./EditLectureModal1"
 import AddMaterialModal  from "../AddMaterialModal"

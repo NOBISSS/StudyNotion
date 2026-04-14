@@ -21,12 +21,10 @@ const PrivateRoute = ({children}) => {
     if(loading) return <div>Loading...</div>
     
     if (!token) {
-        console.log("❌ No token found, redirecting to login");
         return <Navigate to="/login" replace />;
     }
 
     if(isTokenExpired(token)){
-        console.log("⚠️ Token expired, logging out");
         dispatch(setToken(null)); // removes from Redux + localStorage
         return <Navigate to="/login" replace />;
     }
