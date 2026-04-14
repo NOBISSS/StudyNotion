@@ -18,7 +18,6 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-[#161D29] text-white px-6 py-6">
-
       {/* Breadcrumb */}
       <nav className="text-sm text-[#999DAA] mb-2 flex gap-1 items-center">
         <span className="hover:text-white cursor-pointer">Home</span>
@@ -37,13 +36,13 @@ export default function Cart() {
       <hr className="border-[#2C333F] mb-6" />
 
       {totalItems > 0 ? (
-        <div className="flex gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Left: course list */}
           <div className="flex-1">
             <RenderCartCourses />
           </div>
           {/* Right: total panel */}
-          <div className="w-[280px] shrink-0">
+          <div className="w-full lg:w-[280px] shrink-0">
             <RenderTotalAmount />
           </div>
         </div>

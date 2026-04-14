@@ -9,15 +9,13 @@ function FilterTabs({ active, onChange }) {
     const tabs = ['All', 'Pending', 'Cancelled']
     return (
         <div style={{
-            display: 'flex',
             gap: 4,
             background: '#161D29',
             border: '1px solid #2C333F',
             borderRadius: 8,
             padding: 4,
-            width: 'fit-content',
             marginBottom: 24,
-        }}>
+        }} className='flex w-full md:w-fit justify-between md:justify-start'>
             {tabs.map(tab => (
                 <button
                     key={tab}
@@ -150,6 +148,7 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
                 gap: 16,
                 transition: 'background 0.15s',
                 cursor: 'pointer',
+                overflowX:"auto"
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#0F1624'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -343,8 +342,8 @@ const EnrolledCourses = () => {
             {/* ── Stats Row ── */}
             {enrolledCourses && enrolledCourses.length > 0 && (
                 <div style={{
-                    display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap',
-                }}>
+                    gap: 14, marginBottom: 28, flexWrap: 'wrap',
+                }} className='grid md:grid-cols-3 grid-cols-2'>
                     {[
                         { label: 'Total Enrolled', value: totalCourses,    color: '#FFD60A', icon: '📚' },
                         { label: 'In Progress',    value: inProgressCount, color: '#AFB2BF', icon: '⏳' },

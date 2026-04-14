@@ -1,154 +1,150 @@
-import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form';
-import CountryCode from "../../../data/countrycode.json"
-import toast from 'react-hot-toast';
-import { ContactUs } from '../../../services/operations/contactAPI';
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import CountryCode from "../../../data/countrycode.json";
+import toast from "react-hot-toast";
+import { ContactUs } from "../../../services/operations/contactAPI";
+
 const ContactUsForm = () => {
-    const [loading, setLoading] = useState(false);
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors, isSubmitSuccessful }
-    } = useForm();
+  const [loading, setLoading] = useState(false);
 
-    const submitContactForm = async (data) => {
-        if (data) {
-            await ContactUs(data, setLoading)();
-        } else {
-            toast.error("Please Fill Details First")
-        }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitSuccessful },
+  } = useForm();
+
+  const submitContactForm = async (data) => {
+    if (data) {
+      await ContactUs(data, setLoading)();
+    } else {
+      toast.error("Please Fill Details First");
     }
-    useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset({
-                email: "",
-                firstname: "",
-                lastname: "",
-                message: "",
-                phoneNo: ""
-            })
-        }
-    }, [reset, isSubmitSuccessful])
+  };
 
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset({
+        email: "",
+        firstname: "",
+        lastname: "",
+        message: "",
+        phoneNo: "",
+      });
+    }
+  }, [reset, isSubmitSuccessful]);
 
-    return (
-        <form onSubmit={handleSubmit(submitContactForm)} className='mx-auto'>
-            <div className='flex gap-5 mt-10'>
-                <label htmlFor="firstname">
-                    <span>First Name</span><br></br>
-                    <input
-                        type='text'
-                        id='firstname'
-                        name='firstname'
-                        placeholder='Enter First Name'
-                        autoComplete="given-name"
-                        className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                        {...register("firstname", { required: true })}
-                    />
-                    {
-                        errors.firstname && (
-                            <span className='text-red-500'>
-                                Enter Your Name
-                            </span>
-                        )
-                    }
-                </label>
-                <label htmlFor="lastname">
-                    <span>Last Name</span><br></br>
-                    <input type='text' id='Lastname' name='lastname' placeholder='Enter last name' {...register("lastname")}
-                        className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                        autoComplete="family-name"
-                    />
-                </label>
-            </div>
-            {/*Email and Message and button*/}
-            <div className='flex flex-col mt-10 gap-10'>
-                <label htmlFor="email">
-                    <span>Email Address</span><br></br>
-                    <input type='email' id='email' name='email' placeholder='Enter email address'
-                        className='p-3 w-[70%] rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                        autoComplete="email"
-                        {...register("email", { required: true })}
-                    />
-                    {
-                        errors.email && (
-                            <span className='text-red-500'>
-                                Enter Your Email
-                            </span>
-                        )
-                    }
-                </label>
-                {/* phone NO */}
-                <div className='flex flex-col gap-2'>
-                    <label htmlFor='phonenumber'>Phone Number</label>
-                    <div className='flex gap-6'>
-                        {/* dropdown */}
-                        <div className='bg-black w-[16.5%] gap-3'>
-                            <select id="countrycode"
-                                name="countrycode"
-                                autoComplete="tel-country-code" {...register("countrycode", { required: true })}
-                                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                            >
-                                {
-                                    CountryCode.map((element, index) => {
-                                        return (
-                                            <option value={element.code} key={index}>{element.code} - {element.country}</option>
-                                        )
-                                    })
-                                }
-                            </select>
-                        </div>
-                        <div className='w-[70%]'>
-                            <input type='number' id='phoneNo' name='phoneNo' placeholder='Enter Contact No'
-                                autoComplete="tel"
-                                className='p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                                {...register("phoneNo", {
-                                    required: { value: true, message: "Enter  Phone Number" },
-                                    maxLength: { value: 10, message: "Invalid Phone Number" },
-                                    minLength: { value: 8, message: "Invalid Phone Number" }
-                                })}
-                            />
-                            {
+  return (
+    <form
+      onSubmit={handleSubmit(submitContactForm)}
+      className="w-full max-w-[800px] mx-auto"
+    >
+      {/* First + Last Name */}
+      <div className="flex flex-col sm:flex-row gap-5 mt-6">
+        <label className="w-full">
+          <span className="text-sm">First Name</span>
+          <input
+            type="text"
+            placeholder="Enter First Name"
+            autoComplete="given-name"
+            className="p-3 w-full rounded-lg mt-1 bg-[#2c3139]"
+            {...register("firstname", { required: true })}
+          />
+          {errors.firstname && (
+            <span className="text-red-500 text-sm">Enter your name</span>
+          )}
+        </label>
 
-                                errors.phoneNo && (
-                                    <span className='text-red-500'>
-                                        {errors.phoneNo.message}
-                                    </span>
+        <label className="w-full">
+          <span className="text-sm">Last Name</span>
+          <input
+            type="text"
+            placeholder="Enter Last Name"
+            autoComplete="family-name"
+            className="p-3 w-full rounded-lg mt-1 bg-[#2c3139]"
+            {...register("lastname")}
+          />
+        </label>
+      </div>
 
-                                )
+      {/* Email */}
+      <div className="mt-6">
+        <label className="w-full">
+          <span className="text-sm">Email Address</span>
+          <input
+            type="email"
+            placeholder="Enter email address"
+            autoComplete="email"
+            className="p-3 w-full rounded-lg mt-1 bg-[#2c3139]"
+            {...register("email", { required: true })}
+          />
+          {errors.email && (
+            <span className="text-red-500 text-sm">Enter your email</span>
+          )}
+        </label>
+      </div>
 
-                            }
-                        </div>
-                    </div>
-                </div>
-                {/*Message Text Area */}
-                <div className='mt-2'>
-                    <label htmlFor='message'>Message</label>
-                    <textarea
-                        id='message'
-                        name='message'
-                        cols={40}
-                        rows={7}
-                        placeholder='Enter Your message here'
-                        {...register("message")}
-                        autoComplete="off"
-                        className='resize-none p-3 w-full rounded-[10px] mt-1 bg-[#2c3139] shadow-[0_0.5px_0_0_rgba(255,255,255,2)]'
-                    />
-                </div>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className={`text-center text-[17px] px-4 py-3 rounded-md font-bold 
-  bg-[#FFD60A] text-black transition-all duration-200
-  ${loading ? "opacity-50 cursor-not-allowed" : "hover:scale-95"}
-  `}
-                >
-                    {loading ? "Sending..." : "Send Message"}
-                </button>
-            </div>
-        </form>
-    )
-}
+      {/* Phone Number */}
+      <div className="mt-6">
+        <label className="text-sm">Phone Number</label>
 
-export default ContactUsForm
+        <div className="flex flex-col sm:flex-row gap-3 mt-1">
+          {/* Country Code */}
+          <select
+            autoComplete="tel-country-code"
+            {...register("countrycode", { required: true })}
+            className="p-3 w-full sm:w-[30%] rounded-lg bg-[#2c3139]"
+          >
+            {CountryCode.map((element, index) => (
+              <option value={element.code} key={index}>
+                {element.code} - {element.country}
+              </option>
+            ))}
+          </select>
+
+          {/* Phone Input */}
+          <input
+            type="number"
+            placeholder="Enter Contact Number"
+            autoComplete="tel"
+            className="p-3 w-full rounded-lg bg-[#2c3139]"
+            {...register("phoneNo", {
+              required: { value: true, message: "Enter phone number" },
+              maxLength: { value: 10, message: "Invalid phone number" },
+              minLength: { value: 8, message: "Invalid phone number" },
+            })}
+          />
+        </div>
+
+        {errors.phoneNo && (
+          <span className="text-red-500 text-sm">{errors.phoneNo.message}</span>
+        )}
+      </div>
+
+      {/* Message */}
+      <div className="mt-6">
+        <label className="text-sm">Message</label>
+        <textarea
+          rows={5}
+          placeholder="Enter your message here"
+          autoComplete="off"
+          {...register("message")}
+          className="resize-none p-3 w-full rounded-lg mt-1 bg-[#2c3139]"
+        />
+      </div>
+
+      {/* Button */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full mt-6 text-[16px] px-4 py-3 rounded-md font-bold 
+        bg-[#FFD60A] text-black transition-all duration-200
+        ${loading ? "opacity-50 cursor-not-allowed" : "hover:scale-95"}`}
+      >
+        {loading ? "Sending..." : "Send Message"}
+      </button>
+    </form>
+  );
+};
+
+export default ContactUsForm;
