@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5";
 import { MdOutlineVideoFile } from "react-icons/md";
 import VideoUploaderUppy from "../../../../Course/VideoUploaderUppy";
 
-const EditLectureModal = ({ lecture, onClose, onSave }) => {
+const EditLectureModal = ({ lecture, onClose, onSave,onUploadSuccess }) => {
   const [title, setTitle] = useState(lecture?.title || "");
   const [description, setDescription] = useState(lecture?.description || "");
   const [isPreview, setIsPreview] = useState(lecture?.isPreview || false);
@@ -145,6 +145,9 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
               courseId={lecture.courseId}
               isEditing={isEditing}
               subsectionId={lecture._id}
+              onUploadSuccess={()=>{
+                onUploadSuccess(lecture.sectionId)
+              }}
             />
           </div>
 

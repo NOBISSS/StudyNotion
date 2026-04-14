@@ -14,21 +14,21 @@ const isTokenExpired = (token) => {
     }
 };
 
-const PrivateRoute = ({children}) => {
-    const {token,loading}=useSelector((state)=> state.auth);
-    const dispatch=useDispatch();
-    
-    if(loading) return <div>Loading...</div>
-    
+const PrivateRoute = ({ children }) => {
+    const { token, loading } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+
+    if (loading) return <div>Loading...</div>
+
     if (!token) {
         return <Navigate to="/login" replace />;
     }
 
-    if(isTokenExpired(token)){
+    if (isTokenExpired(token)) {
         dispatch(setToken(null)); // removes from Redux + localStorage
         return <Navigate to="/login" replace />;
     }
-    
+
     return children;
 }
 

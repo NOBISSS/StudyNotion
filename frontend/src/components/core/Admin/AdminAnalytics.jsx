@@ -491,11 +491,10 @@ const AdminAnalytics = () => {
             {recentUsers.map((u, index) => (
               <div
                 key={u._id}
-                className={`flex items-center justify-between py-3 ${
-                  index < recentUsers.length - 1
+                className={`flex items-center justify-between py-3 ${index < recentUsers.length - 1
                     ? "border-b border-[#2C333F]"
                     : ""
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#FFD60A]/20 flex items-center justify-center text-[#FFD60A] text-xs font-bold">
@@ -509,13 +508,12 @@ const AdminAnalytics = () => {
                   </div>
                 </div>
                 <span
-                  className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    u.accountType === "instructor"
+                  className={`text-xs px-2.5 py-1 rounded-full font-medium ${u.accountType === "instructor"
                       ? "text-[#FFD60A] bg-[#FFD60A]/10"
                       : u.accountType === "admin"
                         ? "text-[#A78BFA] bg-[#A78BFA]/10"
                         : "text-[#60A5FA] bg-[#60A5FA]/10"
-                  }`}
+                    }`}
                 >
                   {u.accountType}
                 </span>

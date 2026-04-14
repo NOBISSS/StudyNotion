@@ -189,8 +189,8 @@ export const UploadCourseThumbnail = async (thumbnailImage) => {
     const response = await apiConnector(
       "POST",
       "https://api.cloudinary.com/v1_1/" +
-        result.data.data.cloudName +
-        "/image/upload",
+      result.data.data.cloudName +
+      "/image/upload",
       { ...result.data.data, thumbnailImage, folder: "StudyNotion" },
     );
     console.log("IMAGE UPLOAD RESPONSE", response);

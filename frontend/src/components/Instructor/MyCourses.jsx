@@ -115,8 +115,8 @@ const MyCourses = () => {
                     })}
                   </p>
                   <span className={`inline-flex items-center gap-1.5 w-fit px-3 py-1 rounded-full text-xs font-medium mt-0.5 ${course.status === 'Published'
-                      ? 'bg-[#1C3829] text-[#4ade80]'
-                      : 'bg-[#2D1B27] text-[#f472b6]'
+                    ? 'bg-[#1C3829] text-[#4ade80]'
+                    : 'bg-[#2D1B27] text-[#f472b6]'
                     }`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${course.status === 'Published' ? 'bg-[#4ade80]' : 'bg-[#f472b6]'}`} />
                     {course.status === 'Published'

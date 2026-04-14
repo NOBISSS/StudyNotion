@@ -1,4 +1,3 @@
-// components/core/Auth/Cart/index.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -13,7 +12,7 @@ export default function Cart() {
 
   // On mount: fetch wishlist from server → sets courseIds[] into Redux
   useEffect(() => {
-      getWishListData(token, dispatch);
+    getWishListData(token, dispatch);
   }, []);
 
   return (

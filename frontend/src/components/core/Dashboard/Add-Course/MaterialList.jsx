@@ -1,27 +1,18 @@
-// components/core/Dashboard/AddCourse/MaterialList.jsx
-//
-// Drop this inside your SectionBuilder / CourseBuilder wherever you render
-// a section's content list. It manages the modal open/close state locally.
-//
-// Props:
-//   courseId   : string
-//   sectionId  : string
-//   materials  : Array<{ subsectionId, title, description, materialType, materialSize, materialS3Key }>
-//   onChange   : (updatedMaterials: array) => void  — parent updates its local state
-
 import { useState } from 'react';
-import { MdAdd, MdEdit, MdDelete, MdVideoFile, MdAudioFile,
-         MdPictureAsPdf, MdImage, MdInsertDriveFile, MdLock } from 'react-icons/md';
+import {
+    MdAdd, MdEdit, MdDelete, MdVideoFile, MdAudioFile,
+    MdPictureAsPdf, MdImage, MdInsertDriveFile, MdLock
+} from 'react-icons/md';
 import AddMaterialModal from './AddMaterialModal';
 import DeleteMaterialModal from './DeleteMaterialModal';
 
 const TYPE_ICONS = {
-    video:    MdVideoFile,
-    audio:    MdAudioFile,
-    pdf:      MdPictureAsPdf,
-    image:    MdImage,
+    video: MdVideoFile,
+    audio: MdAudioFile,
+    pdf: MdPictureAsPdf,
+    image: MdImage,
     document: MdInsertDriveFile,
-    other:    MdInsertDriveFile,
+    other: MdInsertDriveFile,
 };
 
 const formatBytes = (bytes) => {
@@ -31,7 +22,7 @@ const formatBytes = (bytes) => {
 };
 
 const MaterialList = ({ courseId, sectionId, materials = [], onChange }) => {
-    const [addOpen, setAddOpen]       = useState(false);
+    const [addOpen, setAddOpen] = useState(false);
     const [editTarget, setEditTarget] = useState(null);  // material object | null
     const [deleteTarget, setDeleteTarget] = useState(null); // material object | null
 

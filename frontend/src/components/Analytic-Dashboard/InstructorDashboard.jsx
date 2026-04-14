@@ -1,4 +1,3 @@
-// components/core/Dashboard/InstructorDashboard.jsx
 import { Chart, registerables } from "chart.js";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -94,7 +93,7 @@ const DUMMY = {
 };
 
 // ── RevenueChart ──────────────────────────────────────────────────────────────
-function RevenueChart({monthLabels, monthlyRevenue, enrollmentTrend}) {
+function RevenueChart({ monthLabels, monthlyRevenue, enrollmentTrend }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null); // ✅ store chart instance to destroy on cleanup
 
@@ -332,12 +331,12 @@ export default function InstructorDashboard() {
   const { user } = useSelector((state) => state.profile);
   const name = user?.firstName || DUMMY.name.split(" ")[0];
   const navigate = useNavigate();
-  if(!user) {
+  if (!user) {
     navigate("/login");
   }
-  const [loading,setLoading]=useState(false);
+  const [loading, setLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState({});
-  
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);

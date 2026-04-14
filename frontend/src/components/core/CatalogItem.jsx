@@ -15,7 +15,7 @@ const CatalogItem = () => {
     (state) => state.catalog.catalogData[catalogId]
   );
 
-  
+
 
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");

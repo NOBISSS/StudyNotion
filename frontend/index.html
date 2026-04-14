@@ -1,21 +1,52 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./src/assets/Favicon.png"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StudyNotion</title>
-    <!-- Uppy CSS (CDN) -->
-    <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v2.0.1/uppy.min.css" />
 
-    <!-- Uppy UMD bundles (CDN) -->
-    <script src="https://releases.transloadit.com/uppy/v2.0.1/uppy.min.js"></script>
-    <script src="https://releases.transloadit.com/uppy/aws-s3-multipart/4.1.2/uppy-aws-s3-multipart.min.js"></script>
-    <script src="https://releases.transloadit.com/uppy/@uppy/dashboard/5.0.4/uppy.dashboard.min.js"></script>
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="adaad6cd-11c0-4ce9-bc4b-1259b815839d"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>StudyNotion</title>
+
+  <!-- SEO -->
+  <meta name="description"
+    content="StudyNotion - Learn programming, fullstack development, and advanced backend concepts with structured courses." />
+  <meta name="keywords" content="programming, courses, fullstack, nodejs, react, study platform" />
+  <meta name="author" content="StudyNotion" />
+
+  <!--OPEN GRAPH (SOCIAL SHARING)-->
+  <meta property="og:title" content="StudyNotion - Learn Coding Smarter" />
+  <meta property="og:description" content="Explore high-quality courses in fullstack, backend, and more." />
+  <meta property="og:image" content="/thumbnail.png" />
+  <meta property="og:url" content="https://study-notion-two-taupe.vercel.app/" />
+  <meta property="og:type" content="website" />
+
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="StudyNotion" />
+  <meta name="twitter:description" content="Learn smarter with structured coding courses." />
+  <meta name="twitter:image" content="/thumbnail.png" />
+
+  <meta name="theme-color" content="#000814" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="icon" type="image/svg+xml" href="./Favicon.png" />
+
+  <!-- Uppy CSS (CDN) -->
+  <link rel="stylesheet" href="https://releases.transloadit.com/uppy/v2.0.1/uppy.min.css" />
+
+  <!-- Uppy UMD bundles (CDN) -->
+  <script src="https://releases.transloadit.com/uppy/v2.0.1/uppy.min.js"></script>
+  <script src="https://releases.transloadit.com/uppy/aws-s3-multipart/4.1.2/uppy-aws-s3-multipart.min.js"></script>
+  <script src="https://releases.transloadit.com/uppy/@uppy/dashboard/5.0.4/uppy.dashboard.min.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="adaad6cd-11c0-4ce9-bc4b-1259b815839d"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

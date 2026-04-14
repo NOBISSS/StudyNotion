@@ -250,7 +250,7 @@ function AccordionSection({ section, forceOpen }) {
     if (open && subSections === null) {
       fetchSubSections();
     }
-  }, [open,fetchSubSections,subSections]);
+  }, [open, fetchSubSections, subSections]);
 
   const retry = (e) => {
     e.stopPropagation();

@@ -31,7 +31,7 @@ const EditLectureModal = ({ lecture, onClose, onSave }) => {
     setIsPreview(lecture?.isPreview || false);
     setIsEditing(lecture?.isEditing || false);
     setVideoPreview(lecture?.videoURL || null);
-  }, [videoPreview, lecture]);
+  }, [lecture]);
   const timeSelectCls =
     "w-full px-3 py-3 rounded-lg bg-[#2C333F] border border-transparent text-[#838894] text-sm focus:outline-none focus:border-[#FFD60A] transition-colors appearance-none cursor-pointer";
 

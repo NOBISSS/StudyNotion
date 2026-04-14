@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { getUserEnrolledCourses } from '../services/operations/profileAPI'
 import ProgressBar from '@ramonak/react-progress-bar'
@@ -43,14 +43,14 @@ function FilterTabs({ active, onChange }) {
 
 // ─── Status Badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ progress }) {
-    const isDone    = progress >= 100
+    const isDone = progress >= 100
     const isPending = progress > 0 && progress < 100
-    const label     = isDone ? 'Completed' : isPending ? 'In Progress' : 'Not Started'
-    const colors    = isDone
+    const label = isDone ? 'Completed' : isPending ? 'In Progress' : 'Not Started'
+    const colors = isDone
         ? { bg: 'rgba(71,169,146,0.15)', text: '#47A992', dot: '#47A992' }
         : isPending
-        ? { bg: 'rgba(255,214,10,0.12)', text: '#FFD60A', dot: '#FFD60A' }
-        : { bg: 'rgba(107,114,128,0.15)', text: '#6B7280', dot: '#6B7280' }
+            ? { bg: 'rgba(255,214,10,0.12)', text: '#FFD60A', dot: '#FFD60A' }
+            : { bg: 'rgba(107,114,128,0.15)', text: '#6B7280', dot: '#6B7280' }
 
     return (
         <span style={{
@@ -136,9 +136,9 @@ function EmptyState({ navigate }) {
 
 // ─── Course Row ────────────────────────────────────────────────────────────────
 function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
-    const navigate   = useNavigate()
-    const progress   = course.progress || 0
-    const isLast     = index === total - 1
+    const navigate = useNavigate()
+    const progress = course.progress || 0
+    const isLast = index === total - 1
 
     return (
         <div
@@ -233,7 +233,7 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
                     onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6B7280' }}
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5"  r="1.5" />
+                        <circle cx="12" cy="5" r="1.5" />
                         <circle cx="12" cy="12" r="1.5" />
                         <circle cx="12" cy="19" r="1.5" />
                     </svg>
@@ -249,8 +249,8 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
                         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     }}>
                         {[
-                            { icon: '▶', label: 'Continue Learning',path:"/course/:courseId/learn" },
-                            { icon: '↗', label: 'View Course',path:"/course/:courseId" },
+                            { icon: '▶', label: 'Continue Learning', path: "/course/:courseId/learn" },
+                            { icon: '↗', label: 'View Course', path: "/course/:courseId" },
                             { icon: '⋯', label: 'View Details' },
                         ].map(item => (
                             <button
@@ -279,11 +279,11 @@ function CourseRow({ course, index, total, onMenuClick, menuOpen }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const EnrolledCourses = () => {
-    const navigate                            = useNavigate()
-    const { token }                           = useSelector(state => state.auth)
+    const navigate = useNavigate()
+    const { token } = useSelector(state => state.auth)
     const [enrolledCourses, setEnrolledCourses] = useState(null)
-    const [activeFilter, setActiveFilter]     = useState('All')
-    const [openMenu, setOpenMenu]             = useState(null)
+    const [activeFilter, setActiveFilter] = useState('All')
+    const [openMenu, setOpenMenu] = useState(null)
 
     const getEnrolledCourses = async () => {
         try {
@@ -314,8 +314,8 @@ const EnrolledCourses = () => {
     })()
 
     // Summary stats
-    const totalCourses    = enrolledCourses?.length ?? 0
-    const completedCount  = enrolledCourses?.filter(c => (c.progressPercentage || 0) >= 100).length ?? 0
+    const totalCourses = enrolledCourses?.length ?? 0
+    const completedCount = enrolledCourses?.filter(c => (c.progressPercentage || 0) >= 100).length ?? 0
     const inProgressCount = enrolledCourses?.filter(c => {
         const p = c.progressPercentage || 0
         return p > 0 && p < 100
@@ -346,9 +346,9 @@ const EnrolledCourses = () => {
                     display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap',
                 }}>
                     {[
-                        { label: 'Total Enrolled', value: totalCourses,    color: '#FFD60A', icon: '📚' },
-                        { label: 'In Progress',    value: inProgressCount, color: '#AFB2BF', icon: '⏳' },
-                        { label: 'Completed',      value: completedCount,  color: '#47A992', icon: '✅' },
+                        { label: 'Total Enrolled', value: totalCourses, color: '#FFD60A', icon: '📚' },
+                        { label: 'In Progress', value: inProgressCount, color: '#AFB2BF', icon: '⏳' },
+                        { label: 'Completed', value: completedCount, color: '#47A992', icon: '✅' },
                     ].map(stat => (
                         <div key={stat.label} style={{
                             background: '#161D29', border: '1px solid #2C333F',

@@ -18,17 +18,17 @@ import {
 } from "../../../../../services/operations/courseDetailsAPI"
 import { getQuizBySubSection } from "../../../../../services/operations/QuizAPI"
 import { setCourse, setStep } from "../../../../../slices/courseSlice"
-import EditLectureModal  from "./EditLectureModal1"
-import AddMaterialModal  from "../AddMaterialModal"
+import EditLectureModal from "./EditLectureModal1"
+import AddMaterialModal from "../AddMaterialModal"
 import DeleteMaterialModal from "../DeleteMaterialModal"
 
 const TYPE_ICONS = {
-  video:    MdVideoFile,
-  audio:    MdAudioFile,
-  pdf:      MdPictureAsPdf,
-  image:    MdImage,
+  video: MdVideoFile,
+  audio: MdAudioFile,
+  pdf: MdPictureAsPdf,
+  image: MdImage,
   document: MdInsertDriveFile,
-  other:    MdInsertDriveFile,
+  other: MdInsertDriveFile,
 }
 
 export function MaterialIcon({ type }) {
@@ -39,15 +39,15 @@ export function MaterialIcon({ type }) {
 const CourseBuilderForm = ({ courseId }) => {
   const dispatch = useDispatch()
   const { course } = useSelector(state => state.course)
-  const { token }  = useSelector(state => state.auth)  // needed for getQuizBySubSection
+  const { token } = useSelector(state => state.auth)  // needed for getQuizBySubSection
   const [, setSearchParams] = useSearchParams()
 
-  const [quizModal, setQuizModal]       = useState(null)
-  const [sectionName, setSectionName]   = useState("")
-  const [sections, setSections]         = useState(course?.sections || [])
+  const [quizModal, setQuizModal] = useState(null)
+  const [sectionName, setSectionName] = useState("")
+  const [sections, setSections] = useState(course?.sections || [])
   const [expandedSections, setExpanded] = useState(new Set())
-  const [subsectionMap, setSubMap]      = useState({})
-  const [materialMap, setMatMap]        = useState({})
+  const [subsectionMap, setSubMap] = useState({})
+  const [materialMap, setMatMap] = useState({})
 
   const [editingSection, setEditingSection] = useState({
     sectionId: null, isEditing: false, editingName: "",
@@ -55,7 +55,7 @@ const CourseBuilderForm = ({ courseId }) => {
 
   const [editingLecture, setEditingLecture] = useState(null)
   // ✅ FIX 3: activeModal is the single source of truth — "lecture" | "quiz" | ""
-  const [activeModal, setActiveModal]       = useState("")
+  const [activeModal, setActiveModal] = useState("")
 
   const [materialModal, setMaterialModal] = useState({
     open: false, sectionId: null, editData: null,
@@ -67,6 +67,24 @@ const CourseBuilderForm = ({ courseId }) => {
   const fetchedSections = useRef(new Set())
 
   useEffect(() => { if (!courseId) dispatch(setStep(1)) }, [courseId])
+
+
+    const refreshSubsections = async (sectionId) => {
+  fetchedSections.current.delete(sectionId);
+
+  const res = await getAllSubsections(sectionId);
+  const subs = (res?.subsections || []).map(s => ({ ...s, sectionId }));
+
+  setSubMap(prev => ({
+    ...prev,
+    [sectionId]: subs.filter(s => s.contentType !== "material"),
+  }));
+
+  setMatMap(prev => ({
+    ...prev,
+    [sectionId]: subs.filter(s => s.contentType === "material"),
+  }));
+};
 
   useEffect(() => {
     if (!courseId) return
@@ -82,7 +100,7 @@ const CourseBuilderForm = ({ courseId }) => {
     setExpanded(prev => new Set([...prev, sectionId]))
     if (!fetchedSections.current.has(sectionId)) {
       fetchedSections.current.add(sectionId)
-      const res  = await getAllSubsections(sectionId)
+      const res = await getAllSubsections(sectionId)
       const subs = (res?.subsections || []).map(s => ({ ...s, sectionId }))
       setSubMap(prev => ({ ...prev, [sectionId]: subs.filter(s => s.contentType !== "material") }))
       setMatMap(prev => ({ ...prev, [sectionId]: subs.filter(s => s.contentType === "material") }))
@@ -168,7 +186,7 @@ const CourseBuilderForm = ({ courseId }) => {
       const existingQuiz = await getQuizBySubSection(token, subsection._id)
 
       setQuizModal({
-        sectionId:    section._id,    // ✅ section is now an object, not a string
+        sectionId: section._id,    // ✅ section is now an object, not a string
         courseId,
         existingQuiz: existingQuiz ?? null,
         subSectionId: subsection._id,
@@ -185,7 +203,7 @@ const CourseBuilderForm = ({ courseId }) => {
       setEditingLecture(prev => ({
         ...prev,
         ...res.subsection,
-        videoURL:  res.link || null,
+        videoURL: res.link || null,
         isEditing: true,
         sectionId: subsection.sectionId,
         courseId,
@@ -211,12 +229,12 @@ const CourseBuilderForm = ({ courseId }) => {
   }
 
   // ── Material modal helpers ──────────────────────────────────────────────
-  const openAddMaterial  = (sectionId) => setMaterialModal({ open: true, sectionId, editData: null })
+  const openAddMaterial = (sectionId) => setMaterialModal({ open: true, sectionId, editData: null })
   const openEditMaterial = (sectionId, material) => setMaterialModal({ open: true, sectionId, editData: material })
   const closeMaterialModal = () => setMaterialModal({ open: false, sectionId: null, editData: null })
 
   const handleMaterialAdded = (result) => {
-    const sectionId  = materialModal.sectionId
+    const sectionId = materialModal.sectionId
     const newMaterial = result?.material ?? result
     setMatMap(prev => ({
       ...prev,
@@ -266,10 +284,10 @@ const CourseBuilderForm = ({ courseId }) => {
         )}
 
         {sections.map(section => {
-          const isOpen      = expandedSections.has(section._id)
-          const isEditThis  = editingSection.isEditing && editingSection.sectionId === section._id
-          const lectures    = subsectionMap[section._id] || []
-          const materials   = materialMap[section._id]  || []
+          const isOpen = expandedSections.has(section._id)
+          const isEditThis = editingSection.isEditing && editingSection.sectionId === section._id
+          const lectures = subsectionMap[section._id] || []
+          const materials = materialMap[section._id] || []
 
           return (
             <div key={section._id} className="rounded-lg overflow-hidden border border-[#2C333F]">
@@ -284,7 +302,7 @@ const CourseBuilderForm = ({ courseId }) => {
                       value={editingSection.editingName}
                       onChange={e => setEditingSection(p => ({ ...p, editingName: e.target.value }))}
                       onKeyDown={e => {
-                        if (e.key === "Enter")  handleSectionUpdate(section._id)
+                        if (e.key === "Enter") handleSectionUpdate(section._id)
                         if (e.key === "Escape") setEditingSection({ sectionId: null, isEditing: false, editingName: "" })
                       }}
                       autoFocus
@@ -455,6 +473,7 @@ const CourseBuilderForm = ({ courseId }) => {
           onClose={closeModal}
           onSave={handleUpdateSubsection}
           onCreated={handleLectureCreated}
+          onUploadSuccess={refreshSubsections}
         />
       )}
 

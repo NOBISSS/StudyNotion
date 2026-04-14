@@ -66,47 +66,47 @@ export default function PlyrPlayer({ setCompletedIds, videoSrc, setVideoSrc, set
       }
     };
   }, [video?.link, video?.startTime]);
-const isSavingRef = useRef(false);
+  const isSavingRef = useRef(false);
   useEffect(() => {
     if (!playerRef.current || !video) return;
 
     const handleTimeUpdate = async () => {
-  if (!playerRef.current || !video) return;
+      if (!playerRef.current || !video) return;
 
-  // 🚀 Prevent duplicate calls
-  if (isSavingRef.current) return;
+      // 🚀 Prevent duplicate calls
+      if (isSavingRef.current) return;
 
-  if (
-    (playerRef.current.currentTime - video.startTime >= 5 &&
-      !video.isCompleted) ||
-    playerRef.current.ended
-  ) {
-    isSavingRef.current = true;
+      if (
+        (playerRef.current.currentTime - video.startTime >= 5 &&
+          !video.isCompleted) ||
+        playerRef.current.ended
+      ) {
+        isSavingRef.current = true;
 
-    await saveVideoProgress(
-      video.subSectionId,
-      playerRef.current.currentTime
-    );
+        await saveVideoProgress(
+          video.subSectionId,
+          playerRef.current.currentTime
+        );
 
-    setVideo((prev) => ({
-      ...prev,
-      startTime: playerRef.current.currentTime,
-    }));
+        setVideo((prev) => ({
+          ...prev,
+          startTime: playerRef.current.currentTime,
+        }));
 
-    if (playerRef.current.ended) {
-      setVideo((prev) => ({ ...prev, isCompleted: true }));
+        if (playerRef.current.ended) {
+          setVideo((prev) => ({ ...prev, isCompleted: true }));
 
-      await markSubsectionAsCompleted(video.subSectionId, true);
+          await markSubsectionAsCompleted(video.subSectionId, true);
 
-      setCompletedIds((prev) => new Set(prev).add(video.subSectionId));
-    }
+          setCompletedIds((prev) => new Set(prev).add(video.subSectionId));
+        }
 
-    // ⏳ small delay to avoid rapid duplicate triggers
-    setTimeout(() => {
-      isSavingRef.current = false;
-    }, 1000);
-  }
-};
+        // ⏳ small delay to avoid rapid duplicate triggers
+        setTimeout(() => {
+          isSavingRef.current = false;
+        }, 1000);
+      }
+    };
 
     // ✅ ADD listener
     playerRef.current.on("timeupdate", handleTimeUpdate);

@@ -398,7 +398,7 @@ export function reactivateAccountSendOTP(email, setEmailSent, navigate) {
     } catch (error) {
       toast.error(
         error.response.data.message ||
-          "Failed to send email for reactivating account",
+        "Failed to send email for reactivating account",
       );
     }
     dispatch(setLoading(false));

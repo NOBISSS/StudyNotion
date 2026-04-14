@@ -59,7 +59,7 @@ export const updateCategory = async (token, categoryId, { name, description }) =
   try {
     const response = await apiConnector(
       "PUT",
-      UPDATE_CATEGORY_API +"/"+ categoryId,
+      UPDATE_CATEGORY_API + "/" + categoryId,
       { name, description },
       { Authorization: `Bearer ${token}` }
     )
@@ -80,7 +80,7 @@ export const deleteCategory = async (token, categoryId) => {
   try {
     const response = await apiConnector(
       "DELETE",
-      DELETE_CATEGORY_API +"/"+ categoryId,
+      DELETE_CATEGORY_API + "/" + categoryId,
       null,
       { Authorization: `Bearer ${token}` }
     )
@@ -117,7 +117,7 @@ export const banUser = async (token, userId) => {
   try {
     const response = await apiConnector(
       "PUT",
-      BAN_USER_API.replace(":userId",userId),
+      BAN_USER_API.replace(":userId", userId),
       null,
       { Authorization: `Bearer ${token}` }
     )
@@ -137,7 +137,7 @@ export const unbanUser = async (token, userId) => {
   try {
     const response = await apiConnector(
       "PUT",
-      UNBAN_USER_API +"/"+ userId,
+      UNBAN_USER_API + "/" + userId,
       null,
       { Authorization: `Bearer ${token}` }
     )
@@ -173,7 +173,7 @@ export const toggleCourseStatus = async (token, courseId) => {
   try {
     const response = await apiConnector(
       "PUT",
-      TOGGLE_COURSE_API +"/"+ courseId,
+      TOGGLE_COURSE_API + "/" + courseId,
       null,
       { Authorization: `Bearer ${token}` }
     )

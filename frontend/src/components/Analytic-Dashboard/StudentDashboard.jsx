@@ -17,24 +17,24 @@ const DUMMY = {
   avgQuizScore: 78,
   certificates: 2,
   enrolledCourses: [
-    { id: 1, name: 'Complete MERN Stack',       instructor: 'Arafat Mansuri', progress: 82,  thumbnail: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=200&q=60', lastAccessed: '2h ago',  totalVideos: 48, completedVideos: 39 },
-    { id: 2, name: 'React.js from Scratch',     instructor: 'Arafat Mansuri', progress: 55,  thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200&q=60', lastAccessed: '1d ago',  totalVideos: 32, completedVideos: 18 },
-    { id: 3, name: 'JavaScript Fundamentals',   instructor: 'Arafat Mansuri', progress: 100, thumbnail: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=200&q=60', lastAccessed: '3d ago',  totalVideos: 24, completedVideos: 24 },
-    { id: 4, name: 'Node.js & Express',         instructor: 'Arafat Mansuri', progress: 28,  thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200&q=60', lastAccessed: '5d ago',  totalVideos: 40, completedVideos: 11 },
+    { id: 1, name: 'Complete MERN Stack', instructor: 'Arafat Mansuri', progress: 82, thumbnail: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=200&q=60', lastAccessed: '2h ago', totalVideos: 48, completedVideos: 39 },
+    { id: 2, name: 'React.js from Scratch', instructor: 'Arafat Mansuri', progress: 55, thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200&q=60', lastAccessed: '1d ago', totalVideos: 32, completedVideos: 18 },
+    { id: 3, name: 'JavaScript Fundamentals', instructor: 'Arafat Mansuri', progress: 100, thumbnail: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=200&q=60', lastAccessed: '3d ago', totalVideos: 24, completedVideos: 24 },
+    { id: 4, name: 'Node.js & Express', instructor: 'Arafat Mansuri', progress: 28, thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200&q=60', lastAccessed: '5d ago', totalVideos: 40, completedVideos: 11 },
   ],
   weeklyActivity: [2.5, 1.0, 3.5, 0.5, 4.0, 2.0, 1.5],
   quizHistory: [
-    { name: 'JS Basics',  score: 85, date: 'Jan 5'  },
-    { name: 'React Hooks',score: 72, date: 'Jan 8'  },
-    { name: 'Node APIs',  score: 68, date: 'Jan 11' },
-    { name: 'MongoDB',    score: 90, date: 'Jan 14' },
+    { name: 'JS Basics', score: 85, date: 'Jan 5' },
+    { name: 'React Hooks', score: 72, date: 'Jan 8' },
+    { name: 'Node APIs', score: 68, date: 'Jan 11' },
+    { name: 'MongoDB', score: 90, date: 'Jan 14' },
     { name: 'Express MW', score: 76, date: 'Jan 17' },
   ],
   recentActivity: [
-    { type: 'video',  text: 'Completed "JWT Authentication" in Node.js',          time: '2h ago' },
-    { type: 'quiz',   text: 'Scored 90% on MongoDB Quiz',                         time: '5h ago' },
-    { type: 'enroll', text: 'Enrolled in Node.js & Express Backend Mastery',      time: '1d ago' },
-    { type: 'cert',   text: 'Earned certificate for JavaScript Fundamentals',     time: '3d ago' },
+    { type: 'video', text: 'Completed "JWT Authentication" in Node.js', time: '2h ago' },
+    { type: 'quiz', text: 'Scored 90% on MongoDB Quiz', time: '5h ago' },
+    { type: 'enroll', text: 'Enrolled in Node.js & Express Backend Mastery', time: '1d ago' },
+    { type: 'cert', text: 'Earned certificate for JavaScript Fundamentals', time: '3d ago' },
   ],
 }
 
@@ -43,7 +43,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 // ── WatchTimeChart ────────────────────────────────────────────────────────────
 function WatchTimeChart({ weeklyActivity }) {
   const canvasRef = useRef(null)
-  const chartRef  = useRef(null)
+  const chartRef = useRef(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -85,7 +85,7 @@ function WatchTimeChart({ weeklyActivity }) {
 // ── QuizChart ─────────────────────────────────────────────────────────────────
 function QuizChart({ quizHistory }) {
   const canvasRef = useRef(null)
-  const chartRef  = useRef(null)
+  const chartRef = useRef(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -128,7 +128,7 @@ function QuizChart({ quizHistory }) {
 
 // ── ProgressRing ──────────────────────────────────────────────────────────────
 function ProgressRing({ pct, size = 56, stroke = 5, color = '#FFD60A' }) {
-  const r    = (size - stroke) / 2
+  const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
   return (
     <svg width={size} height={size} style={{ flexShrink: 0 }}>
@@ -166,28 +166,28 @@ function ProgressRing({ pct, size = 56, stroke = 5, color = '#FFD60A' }) {
   );
 }
 
-const activityIcon  = { video: '▶', quiz: '✦', enroll: '＋', cert: '✓' }
+const activityIcon = { video: '▶', quiz: '✦', enroll: '＋', cert: '✓' }
 const activityColor = { video: '#FFD60A', quiz: '#4ade80', enroll: '#60a5fa', cert: '#c084fc' }
 
 export default function StudentDashboard() {
   const { user } = useSelector((state) => state.profile)
   const name = user?.firstName || 'Student';
-  const navigate=useNavigate();
-  if(!user) {
-      navigate("/login");
-    }
-    const [loading,setLoading]=useState(false);
-    const [dashboardData, setDashboardData] = useState({});
-    
-    useEffect(() => {
-      const fetchDashboardData = async () => {
-        setLoading(true);
-        const data = await studentDashboard();
-        setDashboardData(data);
-        setLoading(false);
-      };
-      fetchDashboardData();
-    }, []);
+  const navigate = useNavigate();
+  if (!user) {
+    navigate("/login");
+  }
+  const [loading, setLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState({});
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      const data = await studentDashboard();
+      setDashboardData(data);
+      setLoading(false);
+    };
+    fetchDashboardData();
+  }, []);
   return !loading && (
     <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
 
@@ -207,10 +207,10 @@ export default function StudentDashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Courses Enrolled', value: dashboardData.totalCourses,        sub: `${dashboardData.completedCourses} completed`,  color: '#FFD60A' },
-          { label: 'Hours Learned',    value: `${dashboardData.hoursLearned}h`,  sub: 'Total watch time',                     color: '#60a5fa' },
-          { label: 'Avg Quiz Score',   value: `${dashboardData.avgQuizScore}%`,  sub: 'Across all quizzes',                   color: '#4ade80' },
-          { label: 'Certificates',     value: dashboardData.certificates,        sub: 'Earned so far',                        color: '#c084fc' },
+          { label: 'Courses Enrolled', value: dashboardData.totalCourses, sub: `${dashboardData.completedCourses} completed`, color: '#FFD60A' },
+          { label: 'Hours Learned', value: `${dashboardData.hoursLearned}h`, sub: 'Total watch time', color: '#60a5fa' },
+          { label: 'Avg Quiz Score', value: `${dashboardData.avgQuizScore}%`, sub: 'Across all quizzes', color: '#4ade80' },
+          { label: 'Certificates', value: dashboardData.certificates, sub: 'Earned so far', color: '#c084fc' },
         ].map((s) => (
           <div key={s.label} className="bg-[#161D29] border border-[#2C333F] rounded-xl p-4">
             <p className="text-[#838894] text-xs mb-1">{s.label}</p>
@@ -281,11 +281,11 @@ export default function StudentDashboard() {
       <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
         <div className="flex justify-between items-center mb-4">
           <p className="text-sm font-semibold text-white">My Courses</p>
-          <button className="text-[#FFD60A] text-xs hover:text-yellow-300 transition-colors cursor-pointer" onClick={()=>navigate('/dashboard/enrolled-courses')}>View all →</button>
+          <button className="text-[#FFD60A] text-xs hover:text-yellow-300 transition-colors cursor-pointer" onClick={() => navigate('/dashboard/enrolled-courses')}>View all →</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {dashboardData?.enrolledCourses?.map((c) => (
-            <div key={c.id} className="bg-[#0F1117] border border-[#2C333F] rounded-xl overflow-hidden hover:border-[#FFD60A]/40 transition-colors cursor-pointer" onClick={()=>navigate(`/courses/${c.id}`)}>
+            <div key={c.id} className="bg-[#0F1117] border border-[#2C333F] rounded-xl overflow-hidden hover:border-[#FFD60A]/40 transition-colors cursor-pointer" onClick={() => navigate(`/courses/${c.id}`)}>
               <div className="relative">
                 <img src={c.thumbnail} alt={c.name} className="w-full h-28 object-cover" />
                 {c.progress === 100 && (

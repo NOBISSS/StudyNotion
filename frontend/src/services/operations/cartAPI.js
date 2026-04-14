@@ -49,7 +49,7 @@ export const addCourseToWishList = async (course, dispatch) => {
       { courseId: course },
     );
 
-//    console.log("ADD_WISHLIST API RESPONSE:", response);
+    //    console.log("ADD_WISHLIST API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add to wishlist");
@@ -70,11 +70,11 @@ export const removeCourseFromWishList = async (token, courseId, dispatch) => {
   try {
     const response = await apiConnector(
       "DELETE",
-      REMOVE_WISHLIST_API+courseId,
+      REMOVE_WISHLIST_API + courseId,
       { Authorization: `Bearer ${token}` }
     );
 
-//    console.log("REMOVE_WISHLIST API RESPONSE:", response);
+    //    console.log("REMOVE_WISHLIST API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not remove from wishlist");

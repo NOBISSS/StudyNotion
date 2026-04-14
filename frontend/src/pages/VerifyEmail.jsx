@@ -1,4 +1,3 @@
-// pages/VerifyEmail.jsx
 import { useEffect, useState } from "react";
 import { LuTimerReset } from "react-icons/lu";
 import { PiArrowLeftBold } from "react-icons/pi";

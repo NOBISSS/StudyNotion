@@ -1,4 +1,3 @@
-// components/core/ResetPassword.jsx
 import { useState } from "react";
 import { FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import { IoEye } from "react-icons/io5";
@@ -7,10 +6,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { forgotpasswordResetPassword } from "../services/operations/authAPI";
 import { HighlightText } from "../components/core/HomePage/HighlightText";
 
-/* ─────────────────────────────────────────
-   Inline Zod-equivalent validation
-   (mirrors the backend forgetPasswordResetSchema)
-───────────────────────────────────────── */
 function validatePassword(password) {
   if (!password) return "Password is required";
   if (password.length < 8) return "Password length shouldn't be less than 8";
@@ -202,12 +197,11 @@ export const ResetPassword = () => {
                     placeholder:text-[#6B7280]
                     border outline-none transition-all duration-150
                     shadow-[0_1px_0_0_rgba(255,255,255,0.08)]
-                    ${
-                      passwordError
-                        ? "border-[#EF4444] focus:border-[#EF4444]"
-                        : touched.password && !passwordError && password
-                          ? "border-[#22C55E] focus:border-[#22C55E]"
-                          : "border-[#2C333F] focus:border-[#FFD60A]"
+                    ${passwordError
+                      ? "border-[#EF4444] focus:border-[#EF4444]"
+                      : touched.password && !passwordError && password
+                        ? "border-[#22C55E] focus:border-[#22C55E]"
+                        : "border-[#2C333F] focus:border-[#FFD60A]"
                     }
                   `}
                 />
@@ -318,14 +312,13 @@ export const ResetPassword = () => {
                     placeholder:text-[#6B7280]
                     border outline-none transition-all duration-150
                     shadow-[0_1px_0_0_rgba(255,255,255,0.08)]
-                    ${
-                      confirmPasswordError
-                        ? "border-[#EF4444] focus:border-[#EF4444]"
-                        : touched.confirmPassword &&
-                            !confirmPasswordError &&
-                            confirmPassword
-                          ? "border-[#22C55E] focus:border-[#22C55E]"
-                          : "border-[#2C333F] focus:border-[#FFD60A]"
+                    ${confirmPasswordError
+                      ? "border-[#EF4444] focus:border-[#EF4444]"
+                      : touched.confirmPassword &&
+                        !confirmPasswordError &&
+                        confirmPassword
+                        ? "border-[#22C55E] focus:border-[#22C55E]"
+                        : "border-[#2C333F] focus:border-[#FFD60A]"
                     }
                   `}
                 />
@@ -479,11 +472,10 @@ export const ResetPassword = () => {
                 <div key={step} className="flex items-center gap-2">
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold
-                    ${
-                      i < 2
+                    ${i < 2
                         ? "bg-[#22C55E] text-white"
                         : "bg-[#FFD60A] text-black"
-                    }`}
+                      }`}
                   >
                     {i < 2 ? <FaCheckCircle size={13} /> : i + 1}
                   </div>

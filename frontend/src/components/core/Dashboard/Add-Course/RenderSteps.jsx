@@ -11,7 +11,7 @@ const steps = [
   { id: 3, title: 'Publish' },
 ]
 
-const RenderSteps = ({courseId}) => {
+const RenderSteps = ({ courseId }) => {
   const { step } = useSelector((state) => state.course)
 
   return (
@@ -21,13 +21,12 @@ const RenderSteps = ({courseId}) => {
         {steps.map((item, index) => (
           <React.Fragment key={item.id}>
             <div className="flex flex-col items-center gap-2">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
-                step > item.id
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${step > item.id
                   ? 'bg-[#FFD60A] border-[#FFD60A] text-black'
                   : step === item.id
-                  ? 'bg-transparent border-[#FFD60A] text-[#FFD60A]'
-                  : 'bg-transparent border-[#424854] text-[#838894]'
-              }`}>
+                    ? 'bg-transparent border-[#FFD60A] text-[#FFD60A]'
+                    : 'bg-transparent border-[#424854] text-[#838894]'
+                }`}>
                 {step > item.id ? <FaCheck className="text-xs" /> : item.id}
               </div>
               <p className={`text-xs font-medium whitespace-nowrap ${step >= item.id ? 'text-white' : 'text-[#838894]'}`}>

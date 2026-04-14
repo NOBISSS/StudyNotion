@@ -160,9 +160,8 @@ const CourseManagement = () => {
           filtered.map((course, index) => (
             <div
               key={course._id}
-              className={`grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/30 ${
-                index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
-              } ${!course.isActive ? "opacity-50" : ""}`}
+              className={`grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/30 ${index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
+                } ${!course.isActive ? "opacity-50" : ""}`}
             >
               {/* Course */}
               <div className="flex items-center gap-3 min-w-0">
@@ -190,27 +189,24 @@ const CourseManagement = () => {
 
               {/* Level */}
               <span
-                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium w-fit ${
-                  LEVEL_COLORS[course.level] || "text-[#6E727F] bg-[#2C333F]"
-                }`}
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium w-fit ${LEVEL_COLORS[course.level] || "text-[#6E727F] bg-[#2C333F]"
+                  }`}
               >
                 {course.level}
               </span>
 
               {/* Publish Status */}
               <span
-                className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                  course.status === "Published"
+                className={`inline-flex items-center gap-1.5 text-xs font-medium ${course.status === "Published"
                     ? "text-[#22C55E]"
                     : "text-[#F59E0B]"
-                }`}
+                  }`}
               >
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    course.status === "Published"
+                  className={`w-1.5 h-1.5 rounded-full ${course.status === "Published"
                       ? "bg-[#22C55E]"
                       : "bg-[#F59E0B]"
-                  }`}
+                    }`}
                 />
                 {course.status}
               </span>

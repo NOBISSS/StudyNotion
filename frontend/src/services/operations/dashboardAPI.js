@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { dashboardEndpoints } from "../apis";
 import { apiConnector } from "../apiconnector";
 
-const {INSTRUCTOR_DASHBOARD_API,STUDENT_DASHBOARD_API} = dashboardEndpoints;
+const { INSTRUCTOR_DASHBOARD_API, STUDENT_DASHBOARD_API } = dashboardEndpoints;
 
 export const instructorDashboard = async () => {
   const toastId = toast.loading("Fetching instructor dashboard details...");

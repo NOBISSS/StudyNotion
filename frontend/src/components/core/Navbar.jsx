@@ -16,7 +16,6 @@ const Navbar = () => {
   const { token }      = useSelector(state => state.auth);
   const { user }       = useSelector(state => state.profile);
   const { totalItems } = useSelector(state => state.cart);
-
   const [openProfile, setOpenProfile]     = useState(false);
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [mobileCatOpen, setMobileCatOpen] = useState(false);
@@ -151,12 +150,12 @@ const Navbar = () => {
           <div className="flex items-center gap-x-1">
 
             {/* Search */}
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white">
+            {/* <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white">
               <IoSearchOutline className="text-[18px]" />
-            </button>
+            </button> */}
 
             {/* Cart */}
-            {user && user?.accountType !== "instructor" && (
+            {token && user && user?.accountType !== "instructor" && (
               <Link
                 to="/dashboard/cart"
                 className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#AFB2BF] transition-colors hover:bg-[#2C333F] hover:text-white"

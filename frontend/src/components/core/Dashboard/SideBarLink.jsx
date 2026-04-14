@@ -1,13 +1,7 @@
 import * as Icons from "react-icons/vsc"
 import { matchPath, NavLink, useLocation } from 'react-router-dom';
-import * as VscIcons from "react-icons/vsc";
-import * as RiIcons from "react-icons/ri";
-import * as MdIcons from "react-icons/md";
-import * as FiIcons from "react-icons/fi";
-import * as HiIcons from "react-icons/hi";
 
 const SideBarLink = ({ link, iconName }) => {
-    
     const Icon = Icons[iconName];
     const location = useLocation();
     const matchRoute = (route) => matchPath({ path: route }, location.pathname);

@@ -6,7 +6,7 @@ const OpenRoute = ({ children }) => {
     const { token, loading } = useSelector((state) => state.auth);
     if (loading) return <div>Loading...</div>
     if (token) {
-        return <Navigate to="/dashboard/my-profile"/>
+        return <Navigate to="/dashboard/my-profile" />
     }
     return children
 }

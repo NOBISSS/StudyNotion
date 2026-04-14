@@ -49,8 +49,8 @@ const sectionSlice = createSlice({
         },
         clearAllSections(state) {
             state.subSectionsBySectionId = {};
-            state.statusBySectionId     = {};
-            state.errorBySectionId      = {};
+            state.statusBySectionId = {};
+            state.errorBySectionId = {};
         },
     },
     extraReducers: (builder) => {
@@ -68,13 +68,13 @@ const sectionSlice = createSlice({
 
                 const { sectionId, subSections } = action.payload;
                 state.subSectionsBySectionId[sectionId] = subSections;
-                state.statusBySectionId[sectionId]      = 'idle';
+                state.statusBySectionId[sectionId] = 'idle';
                 delete state.errorBySectionId[sectionId];
             })
             .addCase(fetchSubSections.rejected, (state, action) => {
                 const sectionId = action.payload?.sectionId ?? action.meta.arg;
                 state.statusBySectionId[sectionId] = 'error';
-                state.errorBySectionId[sectionId]  = action.payload?.message ?? 'Failed to load';
+                state.errorBySectionId[sectionId] = action.payload?.message ?? 'Failed to load';
             });
     },
 });
@@ -83,11 +83,11 @@ export const { invalidateSection, clearAllSections } = sectionSlice.actions;
 export default sectionSlice.reducer;
 
 // ─── Selectors ────────────────────────────────────────────────────────────────
-export const selectSubSections  = (sectionId) => (state) =>
+export const selectSubSections = (sectionId) => (state) =>
     state.sections.subSectionsBySectionId[sectionId] ?? null;
 
 export const selectSectionStatus = (sectionId) => (state) =>
     state.sections.statusBySectionId[sectionId] ?? 'idle';
 
-export const selectSectionError  = (sectionId) => (state) =>
-    state.sections.errorBySectionId[sectionId]  ?? null;
+export const selectSectionError = (sectionId) => (state) =>
+    state.sections.errorBySectionId[sectionId] ?? null;

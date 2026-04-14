@@ -62,8 +62,7 @@ const CategoryModal = ({ mode, category, onSave, onClose, loading }) => {
   }
 
   const inputCls = (field) =>
-    `w-full bg-[#2C333F] border ${
-      errors[field] ? "border-[#EF4444]" : "border-[#2C333F] focus:border-[#FFD60A]"
+    `w-full bg-[#2C333F] border ${errors[field] ? "border-[#EF4444]" : "border-[#2C333F] focus:border-[#FFD60A]"
     } outline-none text-white placeholder-[#6E727F] text-sm rounded-lg px-4 py-3 transition-colors duration-200`
 
   return (
@@ -134,8 +133,8 @@ const CategoryModal = ({ mode, category, onSave, onClose, loading }) => {
               {loading
                 ? "Saving..."
                 : mode === "create"
-                ? "Create Category"
-                : "Save Changes"}
+                  ? "Create Category"
+                  : "Save Changes"}
             </button>
           </div>
         </form>
@@ -308,9 +307,8 @@ const CategoryManagement = () => {
           filtered.map((cat, index) => (
             <div
               key={cat._id}
-              className={`grid grid-cols-[2fr_3fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/40 ${
-                index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
-              }`}
+              className={`grid grid-cols-[2fr_3fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/40 ${index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
+                }`}
             >
               {/* Name */}
               <div className="flex items-center gap-3">

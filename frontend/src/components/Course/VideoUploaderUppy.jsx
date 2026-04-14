@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { BACKEND_URL } from "../../utils/constants";
+import toast from "react-hot-toast";
 
-export default function VideoUploaderUppy({title, description, isPreview, sectionId, courseId, isEditing, subsectionId}) {
+export default function VideoUploaderUppy({ title, description, isPreview, sectionId, courseId, isEditing, subsectionId, onUploadSuccess }) {
   const metaRef = useRef({
     title,
     description,
@@ -67,7 +68,7 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
     // Use AwsS3Multipart plugin (companion endpoints on your backend)
     if (AwsS3MultipartPlugin) {
       uppy.use(AwsS3MultipartPlugin, {
-        companionUrl: BACKEND_URL+"/upload", // your backend implementing /s3/multipart endpoints
+        companionUrl: BACKEND_URL + "/upload", // your backend implementing /s3/multipart endpoints
       });
     } else {
       console.warn(
@@ -75,6 +76,7 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
       );
     }
     uppy.on("upload", () => {
+      toast.loading("Uploading video...");
       const { title, description, isPreview, sectionId, courseId, isEditing, subsectionId } =
         metaRef.current;
       console.log("Uppy upload started with metadata:", metaRef.current);
@@ -87,6 +89,12 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
 
       console.log("Uppy complete:", result);
       // result.successful -> info about uploaded files
+      if (onUploadSuccess) {
+        setTimeout(() => {
+          onUploadSuccess(metaRef.current.sectionId);
+        }, 1000);
+      }
+
       if (result.successful.length > 0) {
         const uploadFile = result.successful[0];
 
@@ -95,6 +103,8 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
         const fileName = uploadFile.name;
       }
       // send that info to your backend to enqueue compression / save metadata
+      toast.dismiss();
+      toast.success("Video uploaded successfully");
     });
 
     uppy.on("error", (err) => {
@@ -103,11 +113,11 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
 
     // cleanup
     return () => {
-      uppy.close();
+      uppy?.close();
     };
   }, []);
 
   return (
-    <div id="uppy-dashboard" style={{ margin: "0 auto", width: `100%`,marginTop:"3px" }} />
+    <div id="uppy-dashboard" style={{ margin: "0 auto", width: `100%`, marginTop: "3px" }} />
   );
 }

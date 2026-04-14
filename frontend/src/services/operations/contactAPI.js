@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { apiConnector } from "../apiconnector";
 import { contactUsEndpoints } from "../apis";
 
-const { CONTACT_US_API} = contactUsEndpoints
+const { CONTACT_US_API } = contactUsEndpoints
 
 export function ContactUs(formData, setLoading) {
   return async () => {

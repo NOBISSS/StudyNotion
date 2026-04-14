@@ -1,8 +1,8 @@
-// components/core/Auth/Cart/RenderCartCourses.jsx
 import { useDispatch, useSelector } from "react-redux";
 import ReactStars from "react-stars";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { removeCourseFromWishList } from "../../../../services/operations/cartAPI";
+import PaymentButton from "../../Payment/PaymentButton";
 
 const RenderCartCourses = () => {
   const dispatch = useDispatch();

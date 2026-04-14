@@ -73,7 +73,7 @@ const UserManagement = () => {
   })
 
   const stats = {
-    total: users.filter(u=>u.accountType !="admin" && !u.isDeleted).length,
+    total: users.filter(u => u.accountType != "admin" && !u.isDeleted).length,
     students: users.filter((u) => u.accountType === "student" && !u.isDeleted).length,
     instructors: users.filter((u) => u.accountType === "instructor" && !u.isDeleted).length,
     banned: users.filter((u) => u.isBanned).length,
@@ -188,9 +188,8 @@ const UserManagement = () => {
           filtered.map((user, index) => (
             <div
               key={user._id}
-              className={`grid grid-cols-[2fr_2fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/30 ${
-                index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
-              } ${user.isBanned ? "opacity-60" : ""}`}
+              className={`grid grid-cols-[2fr_2fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors hover:bg-[#2C333F]/30 ${index < filtered.length - 1 ? "border-b border-[#2C333F]" : ""
+                } ${user.isBanned ? "opacity-60" : ""}`}
             >
               {/* User */}
               <div className="flex items-center gap-3 min-w-0">
@@ -215,9 +214,8 @@ const UserManagement = () => {
 
               {/* Role */}
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium w-fit ${
-                  ACCOUNT_COLORS[user.accountType] || "text-[#6E727F] bg-[#2C333F]"
-                }`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium w-fit ${ACCOUNT_COLORS[user.accountType] || "text-[#6E727F] bg-[#2C333F]"
+                  }`}
               >
                 {ACCOUNT_ICONS[user.accountType]}
                 {user.accountType}
@@ -225,16 +223,14 @@ const UserManagement = () => {
 
               {/* Status */}
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium w-fit ${
-                  user.isBanned
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium w-fit ${user.isBanned
                     ? "text-[#EF4444] bg-[#EF4444]/10"
                     : "text-[#22C55E] bg-[#22C55E]/10"
-                }`}
+                  }`}
               >
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    user.isBanned ? "bg-[#EF4444]" : "bg-[#22C55E]"
-                  }`}
+                  className={`w-1.5 h-1.5 rounded-full ${user.isBanned ? "bg-[#EF4444]" : "bg-[#22C55E]"
+                    }`}
                 />
                 {user.isBanned ? "Banned" : "Active"}
               </span>
@@ -247,11 +243,10 @@ const UserManagement = () => {
                     ? handleUnban(user._id)
                     : handleBan(user._id)
                 }
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  user.isBanned
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${user.isBanned
                     ? "bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20"
                     : "bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20"
-                }`}
+                  }`}
               >
                 {actionLoading === user._id ? (
                   "..."

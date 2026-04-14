@@ -5,48 +5,48 @@ import { apiConnector } from "../apiconnector";
 import { profileEndpoints } from "../apis";
 import { logout } from "./authAPI";
 
-const {GET_USER_DETAILS_API,GET_USER_ENROLLED_COURSE_API}=profileEndpoints;
+const { GET_USER_DETAILS_API, GET_USER_ENROLLED_COURSE_API } = profileEndpoints;
 
-export async function getMe(token){
-    const toastId=toast.loading("Loading....");
-    let result=[];
-    try{
-        const response=await apiConnector("GET",
+export async function getMe(token) {
+    const toastId = toast.loading("Loading....");
+    let result = [];
+    try {
+        const response = await apiConnector("GET",
             GET_USER_DETAILS_API,
             null,
         )
-        console.log("GET_USER_DETAILS_API RESPONSE>>>>>>>>>",response);
-        if(!response.data.success){
+        console.log("GET_USER_DETAILS_API RESPONSE>>>>>>>>>", response);
+        if (!response.data.success) {
             throw new Error(response.data.message);
         }
-        result=response.data.data;
+        result = response.data.data;
         console.log(result);
-    }catch(error){
-        console.log("ERROR ",error);
-    toast.error(error.response.data.message || "PLEASE REFRESH THE PAGE");
-    }finally{
+    } catch (error) {
+        console.log("ERROR ", error);
+        toast.error(error.response.data.message || "PLEASE REFRESH THE PAGE");
+    } finally {
         toast.dismiss(toastId);
     }
     return result;
 }
 
-export async function getUserEnrolledCourses(token){
-    const toastId=toast.loading("Loading....");
-    let result=[];
-    try{
-        const response=await apiConnector("GET",
+export async function getUserEnrolledCourses(token) {
+    const toastId = toast.loading("Loading....");
+    let result = [];
+    try {
+        const response = await apiConnector("GET",
             GET_USER_ENROLLED_COURSE_API,
             null,
         )
-        console.log("GET_USER_ENROLLED_COURSES_API RESPONSE>>>>>>>>>",response);
-        if(!response.data.success){
+        console.log("GET_USER_ENROLLED_COURSES_API RESPONSE>>>>>>>>>", response);
+        if (!response.data.success) {
             throw new Error(response.data.message);
         }
-        result=response.data.data;
-    }catch(error){
-        console.log("ERROR ",error);
+        result = response.data.data;
+    } catch (error) {
+        console.log("ERROR ", error);
         toast.error(error.response.data.message || "PLEASE REFRESH THE PAGE");
-    }finally{
+    } finally {
         toast.dismiss(toastId);
     }
     return result;

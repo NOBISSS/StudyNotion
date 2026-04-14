@@ -74,35 +74,35 @@ export const enrollInCourse = (courseId, token, navigate) => async (dispatch) =>
   }
 };
 export const enrollInWishlist = (navigate) => async (dispatch) => {
-    const toastId = toast.loading("Enrolling in wishlist...");
-    dispatch(enrollStart());
+  const toastId = toast.loading("Enrolling in wishlist...");
+  dispatch(enrollStart());
 
-    try {
-      const response = await apiConnector(
-        "POST",
-        ENROLL_WISHLIST_COURSE_API,
-      );
+  try {
+    const response = await apiConnector(
+      "POST",
+      ENROLL_WISHLIST_COURSE_API,
+    );
 
-      if (!response.data.success) {
-        throw new Error(response.data.message);
-      }
-      const enrollments = response.data.data.enrollments;
-      dispatch(enrollWishlistSuccess(enrollments));
-      toast.success("Enrolled successfully!");
-
-      dispatch(resetCart());
-      if (navigate) navigate(`/dashboard/enrolled-courses`);
-
-      return enrollments;
-    } catch (error) {
-      console.log("ENROLL_WISHLIST_COURSE_API ERROR", error);
-      toast.error(error?.response?.data?.message || "Enrollment failed. Please try again.");
-      dispatch(enrollFailure(error?.response?.data?.message || "Enrollment failed."));
-      return null;
-    } finally {
-      toast.dismiss(toastId);
+    if (!response.data.success) {
+      throw new Error(response.data.message);
     }
-  };
+    const enrollments = response.data.data.enrollments;
+    dispatch(enrollWishlistSuccess(enrollments));
+    toast.success("Enrolled successfully!");
+
+    dispatch(resetCart());
+    if (navigate) navigate(`/dashboard/enrolled-courses`);
+
+    return enrollments;
+  } catch (error) {
+    console.log("ENROLL_WISHLIST_COURSE_API ERROR", error);
+    toast.error(error?.response?.data?.message || "Enrollment failed. Please try again.");
+    dispatch(enrollFailure(error?.response?.data?.message || "Enrollment failed."));
+    return null;
+  } finally {
+    toast.dismiss(toastId);
+  }
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. Get enrolled courses for the logged-in student
@@ -119,42 +119,42 @@ export const enrollInWishlist = (navigate) => async (dispatch) => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const getMyEnrolledCourses =
   (token, forceRefresh = false) =>
-  async (dispatch, getState) => {
-    // ── Cache hit: return early if data is already loaded ─────────────────
-    const { enrolledCoursesFetched } = getState().enrollment;
-    if (enrolledCoursesFetched && !forceRefresh) return;
+    async (dispatch, getState) => {
+      // ── Cache hit: return early if data is already loaded ─────────────────
+      const { enrolledCoursesFetched } = getState().enrollment;
+      if (enrolledCoursesFetched && !forceRefresh) return;
 
-    const toastId = toast.loading("Loading...");
-    dispatch(fetchEnrolledCoursesStart());
+      const toastId = toast.loading("Loading...");
+      dispatch(fetchEnrolledCoursesStart());
 
-    try {
-      const response = await apiConnector(
-        "GET",
-        GET_ALL_ENROLLED_COURSES_STUDENT_API,
-        null,
-        { Authorization: `Bearer ${token}` }
-      );
+      try {
+        const response = await apiConnector(
+          "GET",
+          GET_ALL_ENROLLED_COURSES_STUDENT_API,
+          null,
+          { Authorization: `Bearer ${token}` }
+        );
 
-      console.log("GET_ALL_ENROLLED_COURSES_STUDENT_API RESPONSE>>>>>>>>>", response);
+        console.log("GET_ALL_ENROLLED_COURSES_STUDENT_API RESPONSE>>>>>>>>>", response);
 
-      if (!response.data.success) {
-        throw new Error(response.data.message);
+        if (!response.data.success) {
+          throw new Error(response.data.message);
+        }
+
+        // response.data.data.courseEnrollments  →  array
+        const courseEnrollments = response.data.data.courseEnrollments;
+
+        dispatch(fetchEnrolledCoursesSuccess(courseEnrollments));
+        return courseEnrollments;
+      } catch (error) {
+        console.log("GET_ALL_ENROLLED_COURSES_STUDENT_API ERROR", error);
+        toast.error(error?.response?.data?.message || "Failed to fetch enrolled courses.");
+        dispatch(fetchEnrolledCoursesFailure(error?.response?.data?.message || "Fetch failed."));
+        return null;
+      } finally {
+        toast.dismiss(toastId);
       }
-
-      // response.data.data.courseEnrollments  →  array
-      const courseEnrollments = response.data.data.courseEnrollments;
-
-      dispatch(fetchEnrolledCoursesSuccess(courseEnrollments));
-      return courseEnrollments;
-    } catch (error) {
-      console.log("GET_ALL_ENROLLED_COURSES_STUDENT_API ERROR", error);
-      toast.error(error?.response?.data?.message || "Failed to fetch enrolled courses.");
-      dispatch(fetchEnrolledCoursesFailure(error?.response?.data?.message || "Fetch failed."));
-      return null;
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
+    };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. Get ALL enrollments — admin only
@@ -164,39 +164,39 @@ export const getMyEnrolledCourses =
 // ─────────────────────────────────────────────────────────────────────────────
 export const getAllEnrollmentsAdmin =
   (token, forceRefresh = false) =>
-  async (dispatch, getState) => {
-    // ── Cache hit ─────────────────────────────────────────────────────────
-    const { allEnrollmentsFetched } = getState().enrollment;
-    if (allEnrollmentsFetched && !forceRefresh) return;
+    async (dispatch, getState) => {
+      // ── Cache hit ─────────────────────────────────────────────────────────
+      const { allEnrollmentsFetched } = getState().enrollment;
+      if (allEnrollmentsFetched && !forceRefresh) return;
 
-    const toastId = toast.loading("Loading...");
-    dispatch(fetchAllEnrollmentsStart());
+      const toastId = toast.loading("Loading...");
+      dispatch(fetchAllEnrollmentsStart());
 
-    try {
-      const response = await apiConnector(
-        "GET",
-        GET_ALL_ENROLLED_COURSES_ADMIN_API,
-        null,
-        { Authorization: `Bearer ${token}` }
-      );
+      try {
+        const response = await apiConnector(
+          "GET",
+          GET_ALL_ENROLLED_COURSES_ADMIN_API,
+          null,
+          { Authorization: `Bearer ${token}` }
+        );
 
-      console.log("GET_ALL_ENROLLED_COURSES_ADMIN_API RESPONSE>>>>>>>>>", response);
+        console.log("GET_ALL_ENROLLED_COURSES_ADMIN_API RESPONSE>>>>>>>>>", response);
 
-      if (!response.data.success) {
-        throw new Error(response.data.message);
+        if (!response.data.success) {
+          throw new Error(response.data.message);
+        }
+
+        // Normalize: same shape as student endpoint
+        const enrollments = response.data.data.courseEnrollments;
+
+        dispatch(fetchAllEnrollmentsSuccess(enrollments));
+        return enrollments;
+      } catch (error) {
+        console.log("GET_ALL_ENROLLED_COURSES_ADMIN_API ERROR", error);
+        toast.error(error?.response?.data?.message || "Failed to fetch all enrollments.");
+        dispatch(fetchAllEnrollmentsFailure(error?.response?.data?.message || "Fetch failed."));
+        return null;
+      } finally {
+        toast.dismiss(toastId);
       }
-
-      // Normalize: same shape as student endpoint
-      const enrollments = response.data.data.courseEnrollments;
-
-      dispatch(fetchAllEnrollmentsSuccess(enrollments));
-      return enrollments;
-    } catch (error) {
-      console.log("GET_ALL_ENROLLED_COURSES_ADMIN_API ERROR", error);
-      toast.error(error?.response?.data?.message || "Failed to fetch all enrollments.");
-      dispatch(fetchAllEnrollmentsFailure(error?.response?.data?.message || "Fetch failed."));
-      return null;
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
+    };

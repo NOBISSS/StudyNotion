@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../../utils/constants";
 
@@ -8,9 +8,9 @@ const VideoPlayer = ({ videoId }) => {
   useEffect(() => {
     const fetchVideo = async () => {
       const res = await axios.get(
-        BACKEND_URL`/subsections/video/getone/${videoId}`,{
-            withCredentials:true
-        }
+        BACKEND_URL`/subsections/video/getone/${videoId}`, {
+        withCredentials: true
+      }
       );
 
       setVideoUrl(res.data.link);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { adminLinks, sidebarLinks } from "../../../data/dashboard-links";
+import { sidebarLinks } from "../../../data/dashboard-links";
 import SideBarLink from "./SideBarLink";
 
 const Sidebar = () => {
@@ -66,9 +66,6 @@ const Sidebar = () => {
         </div>
         <div className="flex flex-1 flex-col overflow-y-auto py-4">
           <div className="flex flex-col">
-            {/* {user?.accountType === "admin" && adminLinks.map((link) => (
-              <SideBarLink key={link.path} link={link} iconName={link.icon} />
-            ))} */}
             {sidebarLinks.map((link, index) => {
               if (link.type && user?.accountType !== link.type) return null;
               return (

@@ -20,10 +20,10 @@ import RequirementOfCourse from './RequirementOfCourse'
 import { useSearchParams } from 'react-router-dom'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const MAX_FILE_MB      = 2
-const MAX_FILE_BYTES   = MAX_FILE_MB * 1024 * 1024
+const MAX_FILE_MB = 2
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
 const COMPRESS_QUALITY = 0.75
-const COMPRESS_MAX_W   = 1280
+const COMPRESS_MAX_W = 1280
 
 // ─── Helper: append array to FormData ────────────────────────────────────────
 const appendArray = (formData, key, arr = []) => {
@@ -41,10 +41,10 @@ const compressImage = (file) =>
       let { width, height } = img
       if (width > COMPRESS_MAX_W) {
         height = Math.round((height * COMPRESS_MAX_W) / width)
-        width  = COMPRESS_MAX_W
+        width = COMPRESS_MAX_W
       }
       const canvas = document.createElement('canvas')
-      canvas.width  = width
+      canvas.width = width
       canvas.height = height
       canvas.getContext('2d').drawImage(img, 0, 0, width, height)
       canvas.toBlob(
@@ -79,12 +79,12 @@ const CourseInformationForm = ({ courseId }) => {
   const { course, editCourse } = useSelector((state) => state.course)
   const [searchParams, setSearchParams] = useSearchParams()
   const [dataReady, setDataReady] = useState(false);
-  const [loading, setCLoading]              = useState(false)
+  const [loading, setCLoading] = useState(false)
   const [courseCategories, setCourseCategories] = useState([])
   const [thumbnailPreview, setThumbnailPreview] = useState(null)
-  const [thumbnailFile, setThumbnailFile]       = useState(null)
-  const [compressing, setCompressing]           = useState(false)
-  const [fileInfo, setFileInfo]                 = useState(null)
+  const [thumbnailFile, setThumbnailFile] = useState(null)
+  const [compressing, setCompressing] = useState(false)
+  const [fileInfo, setFileInfo] = useState(null)
 
   // ── Fetch categories ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -108,16 +108,16 @@ const CourseInformationForm = ({ courseId }) => {
         dispatch(setCourse(c))
         setDataReady(true);
         // ✅ Map each API field to its correct form field
-        setValue('courseTitle',        c.courseName ?? '')
+        setValue('courseTitle', c.courseName ?? '')
 
         // ✅ API uses "description" not "courseDescription"
-        setValue('courseShortDesc',    c.description ?? '')
+        setValue('courseShortDesc', c.description ?? '')
 
         // ✅ API uses "originalPrice" not "price"
-        setValue('coursePrice',        c.originalPrice ?? 0)
+        setValue('coursePrice', c.originalPrice ?? 0)
 
         // ✅ API uses "tag" (array of strings)
-        setValue('courseTag',          Array.isArray(c.tag) ? c.tag : [])
+        setValue('courseTag', Array.isArray(c.tag) ? c.tag : [])
 
         // ✅ API uses "whatYouWillLearn" as array — join for textarea
         setValue('courseBenefits',
@@ -127,9 +127,9 @@ const CourseInformationForm = ({ courseId }) => {
         )
 
         // ✅ API uses "categoryId._id" for the select value
-        setValue('courseCategory',     c.categoryId?._id ?? '')
+        setValue('courseCategory', c.categoryId?._id ?? '')
 
-        setValue('courseLevel',        c.level ?? LEVEL[0])
+        setValue('courseLevel', c.level ?? LEVEL[0])
 
         // ✅ instructions may not exist in this response — fallback to []
         setValue('courseRequirements', Array.isArray(c.instructions) ? c.instructions : [])
@@ -140,13 +140,13 @@ const CourseInformationForm = ({ courseId }) => {
       } else {
         // Reset for create mode
         dispatch(setEditCourse(false))
-        setValue('courseTitle',        '')
-        setValue('courseShortDesc',    '')
-        setValue('coursePrice',        null)
-        setValue('courseTag',          [])
-        setValue('courseBenefits',     '')
-        setValue('courseCategory',     '')
-        setValue('courseLevel',        LEVEL[0])
+        setValue('courseTitle', '')
+        setValue('courseShortDesc', '')
+        setValue('coursePrice', null)
+        setValue('courseTag', [])
+        setValue('courseBenefits', '')
+        setValue('courseCategory', '')
+        setValue('courseLevel', LEVEL[0])
         setValue('courseRequirements', [])
         setThumbnailPreview(null)
         setThumbnailFile(null)
@@ -191,16 +191,16 @@ const CourseInformationForm = ({ courseId }) => {
     const v = getValues()
     // Compare against the raw API shape stored in Redux course
     return (
-      v.courseTitle     !== (course?.courseName ?? '')                               ||
-      v.courseShortDesc !== (course?.description ?? '')                              ||
-      String(v.coursePrice) !== String(course?.originalPrice ?? 0)                  ||
-      v.courseBenefits  !== (Array.isArray(course?.whatYouWillLearn)
-                              ? course.whatYouWillLearn.join('\n')
-                              : (course?.whatYouWillLearn ?? ''))                   ||
-      v.courseLevel     !== (course?.level ?? LEVEL[0])                             ||
-      v.courseCategory  !== (course?.categoryId?._id ?? '')                         ||
+      v.courseTitle !== (course?.courseName ?? '') ||
+      v.courseShortDesc !== (course?.description ?? '') ||
+      String(v.coursePrice) !== String(course?.originalPrice ?? 0) ||
+      v.courseBenefits !== (Array.isArray(course?.whatYouWillLearn)
+        ? course.whatYouWillLearn.join('\n')
+        : (course?.whatYouWillLearn ?? '')) ||
+      v.courseLevel !== (course?.level ?? LEVEL[0]) ||
+      v.courseCategory !== (course?.categoryId?._id ?? '') ||
       JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []) ||
-      v.courseCategory  !== (course?.categoryId?._id ?? '')                         ||
+      v.courseCategory !== (course?.categoryId?._id ?? '') ||
       JSON.stringify(v.tag) !== JSON.stringify(course?.tag ?? []) ||
       thumbnailFile !== null
     )
@@ -213,24 +213,24 @@ const CourseInformationForm = ({ courseId }) => {
     if (editCourse && courseId) {
       if (!isFormUpdated()) { toast.error('No changes made'); return }
 
-      const v        = getValues()
+      const v = getValues()
       const formData = new FormData()
       formData.append('courseId', courseId)
 
       // if (v.courseTitle     !== (course?.courseName ?? ''))
-        formData.append('courseName',        data.courseTitle)
+      formData.append('courseName', data.courseTitle)
       // if (v.courseShortDesc !== (course?.description ?? ''))
-        formData.append('courseDescription', data.courseShortDesc)
+      formData.append('courseDescription', data.courseShortDesc)
       // if (String(v.coursePrice) !== String(course?.originalPrice ?? 0))
-        formData.append('price',             String(data.coursePrice))
+      formData.append('price', String(data.coursePrice))
       // if (v.courseBenefits  !== (Array.isArray(course?.whatYouWillLearn)
       //                             ? course.whatYouWillLearn.join('\n')
       //                             : (course?.whatYouWillLearn ?? '')))
-        formData.append('whatYouWillLearn',  data.courseBenefits);
+      formData.append('whatYouWillLearn', data.courseBenefits);
       // if (v.courseCategory  !== (course?.categoryId?._id ?? ''))
-        formData.append('category',          data.courseCategory);
+      formData.append('category', data.courseCategory);
       // if (v.courseLevel     !== (course?.level ?? LEVEL[0]))
-      formData.append('level',             data.courseLevel);
+      formData.append('level', data.courseLevel);
       appendArray(formData, 'tag', data.courseTag);
       // if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []))
       appendArray(formData, 'instructions', data.courseRequirements);
@@ -238,7 +238,7 @@ const CourseInformationForm = ({ courseId }) => {
         formData.append('thumbnail', thumbnailFile)
 
       setCLoading(true)
-      const result = await editCourseDetails(formData,courseId)
+      const result = await editCourseDetails(formData, courseId)
       setCLoading(false)
       if (result) { dispatch(setStep(2)); dispatch(setCourse(result)) }
       return
@@ -248,16 +248,16 @@ const CourseInformationForm = ({ courseId }) => {
     if (!thumbnailFile) { toast.error('Please upload a course thumbnail'); return }
 
     const formData = new FormData()
-    formData.append('courseName',        data.courseTitle)
+    formData.append('courseName', data.courseTitle)
     formData.append('courseDescription', data.courseShortDesc)
-    formData.append('price',             String(data.coursePrice))
-    formData.append('whatYouWillLearn',  data.courseBenefits)
-    formData.append('level',             data.courseLevel)
-    formData.append('category',          data.courseCategory)
-    formData.append('status',            COURSE_STATUS.DRAFT)
-    formData.append('thumbnail',         thumbnailFile)
+    formData.append('price', String(data.coursePrice))
+    formData.append('whatYouWillLearn', data.courseBenefits)
+    formData.append('level', data.courseLevel)
+    formData.append('category', data.courseCategory)
+    formData.append('status', COURSE_STATUS.DRAFT)
+    formData.append('thumbnail', thumbnailFile)
     appendArray(formData, 'instructions', data.courseRequirements)
-    appendArray(formData, 'tag',          data.courseTag)
+    appendArray(formData, 'tag', data.courseTag)
 
     setCLoading(true)
     const result = await addCourseDetails(formData)

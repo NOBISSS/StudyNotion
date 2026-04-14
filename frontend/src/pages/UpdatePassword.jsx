@@ -1,5 +1,4 @@
-// pages/UpdatePassword.jsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
 import { FaEyeSlash } from 'react-icons/fa'
@@ -14,9 +13,9 @@ const UpdatePassword = () => {
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' })
   const { password, confirmPassword } = formData
 
-  const [showPassword, setShowPassword]           = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [error, setError]                         = useState('')
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -41,14 +40,14 @@ const UpdatePassword = () => {
   const getStrength = (pwd) => {
     if (!pwd) return null
     let score = 0
-    if (pwd.length >= 8)          score++
-    if (/[A-Z]/.test(pwd))        score++
-    if (/[0-9]/.test(pwd))        score++
+    if (pwd.length >= 8) score++
+    if (/[A-Z]/.test(pwd)) score++
+    if (/[0-9]/.test(pwd)) score++
     if (/[^A-Za-z0-9]/.test(pwd)) score++
-    if (score <= 1) return { label: 'Weak',   color: '#EF4444', width: '25%' }
-    if (score === 2) return { label: 'Fair',   color: '#F59E0B', width: '50%' }
-    if (score === 3) return { label: 'Good',   color: '#06B6D4', width: '75%' }
-    return              { label: 'Strong', color: '#22C55E', width: '100%' }
+    if (score <= 1) return { label: 'Weak', color: '#EF4444', width: '25%' }
+    if (score === 2) return { label: 'Fair', color: '#F59E0B', width: '50%' }
+    if (score === 3) return { label: 'Good', color: '#06B6D4', width: '75%' }
+    return { label: 'Strong', color: '#22C55E', width: '100%' }
   }
   const strength = getStrength(password)
 
@@ -169,9 +168,8 @@ const UpdatePassword = () => {
 
               {/* Match indicator */}
               {confirmPassword && (
-                <p className={`mt-0.5 text-[11px] font-medium ${
-                  password === confirmPassword ? 'text-[#22C55E]' : 'text-[#EF4444]'
-                }`}>
+                <p className={`mt-0.5 text-[11px] font-medium ${password === confirmPassword ? 'text-[#22C55E]' : 'text-[#EF4444]'
+                  }`}>
                   {password === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
                 </p>
               )}

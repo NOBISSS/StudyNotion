@@ -8,17 +8,17 @@ import { useDispatch } from "react-redux";
 
 const GoogleLoginButton = memo(() => {
   const navigate = useNavigate();
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
   // const setUser = useSetRecoilState(userAtom);
   const responseGoogle = async (authResult) => {
     try {
       if (authResult["code"]) {
         const result = await googleAuth(authResult.code);
         console.log(result);
-         dispatch(setUser(result.data.data.user));
-          const token=result.data.data.accessToken;
-          dispatch(setToken(token));
-          navigate("/");
+        dispatch(setUser(result.data.data.user));
+        const token = result.data.data.accessToken;
+        dispatch(setToken(token));
+        navigate("/");
       } else {
         console.log(authResult);
         throw new Error(authResult);

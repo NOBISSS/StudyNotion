@@ -1,17 +1,17 @@
 import toast from "react-hot-toast";
 import { BACKEND_URL } from "../../utils/constants";
 import { apiConnector } from "../apiconnector";
-import {catalogEndPoints, categories} from "../apis";
+import { catalogEndPoints, categories } from "../apis";
 import { setCatalogData, setCategories } from "../../slices/catalogSlice";
 import { useSelector } from "react-redux";
 
 const {
-    CATALOGPAGEDATA_API
+  CATALOGPAGEDATA_API
 } = catalogEndPoints;
 
 const {
   CATEGORIES_API
-}=categories
+} = categories
 
 export function fetchCatalogData(catalogId) {
   return async (dispatch, getState) => {
@@ -53,20 +53,20 @@ export function fetchCatalogData(catalogId) {
   };
 }
 
-export function fetchAllCategories(){
-  return async (dispatch)=>{
-  try {
-    const response = await apiConnector("GET", CATEGORIES_API);
+export function fetchAllCategories() {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector("GET", CATEGORIES_API);
 
-    if (!response?.data?.success) {
-      throw new Error(response.data.message);
+      if (!response?.data?.success) {
+        throw new Error(response.data.message);
+      }
+      const categories = response.data.data.category;
+
+      dispatch(setCategories(categories));
+    } catch (error) {
+      console.log("FETCH CATEGORY ERROR", error);
+      throw error;
     }
-    const categories=response.data.data.category;
-
-    dispatch(setCategories(categories));
-  } catch (error) {
-    console.log("FETCH CATEGORY ERROR", error);
-    throw error;
   }
-}
 };

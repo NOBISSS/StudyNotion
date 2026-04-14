@@ -1,4 +1,3 @@
-// components/core/GitHubCallback.jsx
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -90,7 +89,7 @@ export const GitHubCallback = () => {
 
       // ── 3. Send code to backend ──
       try {
-        const res = await axios.get(endPoints.GITHUB_AUTH_API + code,{withCredentials:true});
+        const res = await axios.get(endPoints.GITHUB_AUTH_API + code, { withCredentials: true });
         if (!res.data.success) {
           throw new Error(res.data.message || "GitHub authentication failed.");
         }
@@ -116,8 +115,8 @@ export const GitHubCallback = () => {
         setStatus(STATUS.ERROR);
         setErrorMsg(
           err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again.",
+          err?.message ||
+          "Something went wrong. Please try again.",
         );
       }
     }

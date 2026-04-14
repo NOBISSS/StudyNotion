@@ -1,17 +1,8 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'
 import { IconBtn } from '../../common/IconBtn';
-import { getMe } from '../../../services/operations/profileAPI';
 
 const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
-    const navigate = useNavigate(); 
-    const dispatch=useDispatch();
-
-    useEffect(()=>{
-        // dispatch(getMe())
-    },[])
     return (
         <div className='OUTTER DIV text-white py-5 px-7 md:px-10 lg:w-[80vw] '>
             <div className='INNER-DIV flex flex-col gap-10 py-5 px-10'>
@@ -57,7 +48,7 @@ const MyProfile = () => {
                             iconName="VscEdit"
                             active={1}
                             linkto={"/dashboard/settings"}
-                            />
+                        />
                     </div>
                     <div className='PERSONAL_DETAIL flex justify-between'>
                         <div className='flex flex-col gap-10'>

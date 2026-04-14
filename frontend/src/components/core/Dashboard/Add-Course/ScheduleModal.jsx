@@ -35,10 +35,10 @@ const formatCountdown = (dateStr, timeStr) => {
   const target = new Date(`${dateStr}T${timeStr}`)
   const diff = target.getTime() - Date.now()
   if (diff <= 0) return null
-  const days  = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  if (days > 0)  return `in ${days}d ${hours}h`
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  if (days > 0) return `in ${days}d ${hours}h`
   if (hours > 0) return `in ${hours}h ${mins}m`
   return `in ${mins} minutes`
 }
@@ -52,7 +52,7 @@ const ScheduleModal = ({ onClose, onConfirm, loading }) => {
 
   const [dateStr, setDateStr] = useState('')
   const [timeStr, setTimeStr] = useState('')
-  const [error, setError]     = useState('')
+  const [error, setError] = useState('')
   const [preview, setPreview] = useState(null)
   const [countdown, setCountdown] = useState(null)
 

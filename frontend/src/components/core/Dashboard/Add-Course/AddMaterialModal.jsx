@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { MdCloudUpload, MdClose, MdEdit, MdDelete, MdInsertDriveFile,
-         MdVideoFile, MdAudioFile, MdImage, MdPictureAsPdf } from 'react-icons/md';
+import {
+    MdCloudUpload, MdClose, MdEdit, MdDelete, MdInsertDriveFile,
+    MdVideoFile, MdAudioFile, MdImage, MdPictureAsPdf
+} from 'react-icons/md';
 import { VscChevronRight } from 'react-icons/vsc';
 import { addMaterial, updateMaterial } from '../../../../services/operations/MaterialAPI';
 import { useS3Upload } from '../../../../hooks/UseS3Upload.js';
@@ -10,30 +12,30 @@ import { useS3Upload } from '../../../../hooks/UseS3Upload.js';
 const MATERIAL_TYPES = ['video', 'audio', 'pdf', 'image', 'document', 'other'];
 
 const ACCEPTED_TYPES = {
-    video:    'video/*',
-    audio:    'audio/*',
-    pdf:      'application/pdf',
-    image:    'image/*',
+    video: 'video/*',
+    audio: 'audio/*',
+    pdf: 'application/pdf',
+    image: 'image/*',
     document: '.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt',
-    other:    '*',
+    other: '*',
 };
 
 const TYPE_ICONS = {
-    video:    MdVideoFile,
-    audio:    MdAudioFile,
-    pdf:      MdPictureAsPdf,
-    image:    MdImage,
+    video: MdVideoFile,
+    audio: MdAudioFile,
+    pdf: MdPictureAsPdf,
+    image: MdImage,
     document: MdInsertDriveFile,
-    other:    MdInsertDriveFile,
+    other: MdInsertDriveFile,
 };
 
 // Guess material type from file MIME
 const guessMaterialType = (file) => {
     if (!file) return 'other';
-    if (file.type.startsWith('video/'))       return "video";
-    if (file.type.startsWith('audio/'))       return "audio";
-    if (file.type === 'application/pdf')      return "pdf";
-    if (file.type.startsWith('image/'))       return "image";
+    if (file.type.startsWith('video/')) return "video";
+    if (file.type.startsWith('audio/')) return "audio";
+    if (file.type === 'application/pdf') return "pdf";
+    if (file.type.startsWith('image/')) return "image";
     if (file.type.includes('document') || file.type.includes('presentation') ||
         file.type.includes('sheet') || file.type.includes('text'))
         return "document";
@@ -42,8 +44,8 @@ const guessMaterialType = (file) => {
 
 const formatBytes = (bytes) => {
     if (!bytes) return '';
-    if (bytes < 1024)         return `${bytes} B`;
-    if (bytes < 1024 ** 2)   return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 };
 
@@ -71,12 +73,12 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
     const isEditMode = Boolean(editData?.subsectionId);
 
     // ── Form state ────────────────────────────────────────────────────────
-    const [title, setTitle]               = useState('');
-    const [description, setDescription]   = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [materialType, setMaterialType] = useState('video');
-    const [file, setFile]                 = useState(null);  // File object
-    const [dragOver, setDragOver]         = useState(false);
-    const [submitting, setSubmitting]     = useState(false);
+    const [file, setFile] = useState(null);  // File object
+    const [dragOver, setDragOver] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -98,7 +100,7 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
     // ── Lock body scroll while open ───────────────────────────────────────
     useEffect(() => {
         if (isOpen) document.body.style.overflow = 'hidden';
-        else        document.body.style.overflow = '';
+        else document.body.style.overflow = '';
         return () => { document.body.style.overflow = ''; };
     }, [isOpen]);
 
@@ -128,8 +130,8 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
     const validate = () => {
         if (!title.trim()) { toast.error('Title is required'); return false; }
         if (!isEditMode && !file) { toast.error('Please select a file'); return false; }
-        if (!courseId)   { toast.error('Course ID is missing'); return false; }
-        if (!sectionId)  { toast.error('Section ID is missing'); return false; }
+        if (!courseId) { toast.error('Course ID is missing'); return false; }
+        if (!sectionId) { toast.error('Section ID is missing'); return false; }
         return true;
     };
 
@@ -141,22 +143,22 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
         try {
             if (isEditMode) {
                 // ── EDIT: only upload file if user picked a new one ──────
-                let s3Key        = editData.materialS3Key;
+                let s3Key = editData.materialS3Key;
                 let materialSize = editData.materialSize;
 
                 if (file) {
                     const uploaded = await uploadToS3(file);
                     if (!uploaded) { setSubmitting(false); return; }
-                    s3Key        = uploaded.key;
+                    s3Key = uploaded.key;
                     materialSize = uploaded.size;
                 }
 
                 const payload = {
-                    title:        title.trim(),
-                    description:  description.trim(),
+                    title: title.trim(),
+                    description: description.trim(),
                     materialType,
                     mimeType: file?.type || null,
-                    ...(s3Key        && { materialS3Key: s3Key }),
+                    ...(s3Key && { materialS3Key: s3Key }),
                     ...(materialSize && { materialSize }),
                 };
 
@@ -172,13 +174,13 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
                 if (!uploaded) { setSubmitting(false); return; }
 
                 const payload = {
-                    title:         title.trim(),
-                    description:   description.trim(),
+                    title: title.trim(),
+                    description: description.trim(),
                     courseId,
                     sectionId,
                     mimeType: file?.type || null,
                     materialType,
-                    materialSize:  uploaded.size,
+                    materialSize: uploaded.size,
                     materialS3Key: uploaded.key,
                 };
 
@@ -205,7 +207,7 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
         >
             {/* Modal Panel */}
             <div className="w-full max-w-lg bg-[#1E2636] rounded-2xl border border-[#2C3244] shadow-2xl flex flex-col overflow-hidden"
-                 style={{ maxHeight: '90vh' }}>
+                style={{ maxHeight: '90vh' }}>
 
                 {/* ── Header ─────────────────────────────────────────────── */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#2C3244]">

@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { subSectionMaterialEndpoints, subSectionVideoEndpoints } from "../apis";
 import { apiConnector } from "../apiconnector";
 
-const { PUT_MARK_SUBSECTION_COMPLETED_API, POST_SAVE_VIDEO_PROGRESS_API,GET_SUBSECTION_DETAILS_API } =
+const { PUT_MARK_SUBSECTION_COMPLETED_API, POST_SAVE_VIDEO_PROGRESS_API, GET_SUBSECTION_DETAILS_API } =
   subSectionVideoEndpoints;
 export const markSubsectionAsCompleted = async (subsectionId, toggle = false) => {
   const toastId = toast.loading("Marking subsection as completed...");

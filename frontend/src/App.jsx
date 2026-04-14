@@ -1,4 +1,3 @@
-// App.jsx
 import './App.css'
 import Navbar from './components/core/Navbar'
 import AppRoutes from './components/Routes/AppRoutes'

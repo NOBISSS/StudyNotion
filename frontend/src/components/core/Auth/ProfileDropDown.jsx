@@ -1,12 +1,9 @@
-// components/core/Auth/ProfileDropDown.jsx
-import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import { logout } from '../../../services/operations/authAPI'
 import { BACKEND_URL } from '../../../utils/constants'
 import axios from 'axios'
 
-// ─── Menu items ───────────────────────────────────────────────────────────────
 const MENU_ITEMS = [
   {
     label: 'My Profile',
@@ -81,20 +78,20 @@ const ProfileDropDown = () => {
   const { user } = useSelector(state => state.profile)
 
   const isInstructor = user?.accountType === 'instructor'
-  const profilePic   =
+  const profilePic =
     user?.additionalDetails?.profilePicture ||
     user?.image ||
     null
-  const fullName  = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'User'
-  const email     = user?.email || ''
-  const initial   = fullName.charAt(0).toUpperCase()
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'User'
+  const email = user?.email || ''
+  const initial = fullName.charAt(0).toUpperCase()
 
   const menuItems = isInstructor
     ? [...INSTRUCTOR_ITEMS, ...MENU_ITEMS.filter(m => m.label === 'Settings')]
     : MENU_ITEMS
 
   const handleLogout = async () => {
-    await axios.post(`${BACKEND_URL}/auth/logout`, {},{withCredentials:true});
+    await axios.post(`${BACKEND_URL}/auth/logout`, {}, { withCredentials: true });
     dispatch(logout(navigate))
   }
 

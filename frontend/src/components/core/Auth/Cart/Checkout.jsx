@@ -34,7 +34,7 @@ const Checkout = () => {
     try {
       const courseIds = cart.map((c) => c._id);
       dispatch(enrollInWishlist(navigate));
-      
+
     } catch (err) {
       console.error("Payment failed:", err);
       toast.error("Payment failed. Please try again.");
@@ -83,11 +83,11 @@ const Checkout = () => {
               const avgRating =
                 course?.ratingsAndReviews?.length
                   ? (
-                      course.ratingsAndReviews.reduce(
-                        (sum, r) => sum + r.rating,
-                        0
-                      ) / course.ratingsAndReviews.length
-                    ).toFixed(1)
+                    course.ratingsAndReviews.reduce(
+                      (sum, r) => sum + r.rating,
+                      0
+                    ) / course.ratingsAndReviews.length
+                  ).toFixed(1)
                   : "0";
 
               const reviewCount = course?.ratingsAndReviews?.length ?? 0;

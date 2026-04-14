@@ -1,12 +1,3 @@
-// components/core/Dashboard/AddCourse/DeleteMaterialModal.jsx
-//
-// Props:
-//   isOpen       : boolean
-//   onClose      : () => void
-//   subsectionId : string     — the subsection._id to delete
-//   materialName : string     — displayed in the confirmation text
-//   onSuccess    : () => void — called after successful deletion
-
 import { useState } from 'react';
 import { MdDelete, MdClose, MdWarning } from 'react-icons/md';
 import { deleteMaterial } from '../../../../services/operations/MaterialAPI';
