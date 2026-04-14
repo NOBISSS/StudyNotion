@@ -1,128 +1,153 @@
 import React from 'react'
 import { HighlightText } from '../components/core/HomePage/HighlightText'
 import About4 from "../assets/About4.jpg";
-import { CTAButton } from '../components/core/HomePage/Button';
 import { LearningGrid } from '../components/core/AboutPage/LearningGrid';
 import ContactFormSection from './ContactFormSection';
 import { getImage } from '../utils/constants';
-const About = () => {
-const AboutData=[
-    {
-        no:"5K",
-        text:"Active Students"
-    },
-    {
-        no:"10+",
-        text:"Members"
-    },
-    {
-        no:"200+",
-        text:"Course"
-    },
-    {
-        no:"50+",
-        text:"Awards"
-    },
-]
 
-const AboutData1=[
+const About = () => {
+
+  const stats = [
+    { no: "5K+", text: "Active Students" },
+    { no: "10+", text: "Expert Mentors" },
+    { no: "200+", text: "Courses Available" },
+    { no: "50+", text: "Industry Awards" },
+  ];
+
+  const features = [
     {
-        title:"Curriculum Based on Industry Needs",
-        description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
-    },{
-        title:"Our Learning Methods",
-        description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
+      title: "Industry-Focused Curriculum",
+      description: "Our courses are designed with direct input from industry experts, ensuring you learn exactly what companies are looking for."
     },
     {
-        title:"Certification",
-        description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
+      title: "Hands-on Learning",
+      description: "We emphasize project-based learning so you gain real-world experience while building your portfolio."
     },
     {
-        title:'Rating "Auto-Grading"',
-        description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
+      title: "Recognized Certifications",
+      description: "Earn certifications that showcase your skills and help you stand out in competitive job markets."
     },
     {
-        title:"Ready to Work",
-        description:"Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs."
+      title: "Smart Evaluation",
+      description: "Our automated grading and feedback system helps you track your progress efficiently."
     },
-]
+    {
+      title: "Career Readiness",
+      description: "We prepare you not just to learn, but to succeed in real-world jobs and internships."
+    },
+  ];
+
   return (
-    <div className='text-white w-full'
-    >
-        {/*SECTION  -1 */}
-        <div className='min-h-[500px] px-4 bg-[#2c333f] 
-        md:px-[9vw] pt-20 flex flex-col items-center text-center'>
-            
-            <h1 className='text-2xl md:text-4xl font-semibold loading-tight'>Driving Innvoation in Online Education for a<br></br><HighlightText text={"Brighter Future"}/></h1>
-            <p className='text-sm md:text-lg mt-4 max-w-[800px] text-[#838894]'>Studynotion is at the forefront of driving innovation in online education. We're passionate about creating a brighter future by offering cutting-edge courses, leveraging emerging technologies, and nurturing a vibrant learning community.</p>
-            {/*Responsive Images */}
-            <div className='photos mt-10 flex justify-center gap-6 md:h-[200px]'>
-            <img src={getImage("About3_nmyw4k.jpg")} className='w-auto h-[270px] shadow-md'
-             alt="A3"/>
-            <img src={getImage("About3_nmyw4k.jpg")} alt="A3" className='w-auto h-[270px] shadow-md'/>
-            <img src={getImage("About3_nmyw4k.jpg")} alt="A3" className='w-auto h-[270px] shadow-md'/>
+    <div className='text-white w-full'>
+
+      {/* SECTION 1 - HERO */}
+      <div className='min-h-[500px] px-4 md:px-[9vw] pt-20 flex flex-col items-center text-center bg-[#2c333f]'>
+
+        <h1 className='text-2xl md:text-4xl font-semibold leading-tight'>
+          Driving Innovation in Online Education for a <br />
+          <HighlightText text={"Brighter Future"} />
+        </h1>
+
+        <p className='text-sm md:text-lg mt-4 max-w-[800px] text-[#838894]'>
+          Studynotion is redefining how people learn by combining cutting-edge technology,
+          expert-led courses, and a vibrant community. We aim to make high-quality education
+          accessible, practical, and career-focused.
+        </p>
+
+        {/* Images */}
+        <div className='mt-10 flex flex-wrap justify-center gap-4'>
+          {[1, 2, 3].map((_, i) => (
+            <img
+              key={i}
+              src={getImage("About3_nmyw4k.jpg")}
+              className='w-[90%] sm:w-[250px] h-auto shadow-md rounded-md'
+              alt="Learning"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION 2 - MISSION */}
+      <div className='py-16 px-4 md:px-[9vw] text-center border-b border-gray-700'>
+        <h2 className='text-xl md:text-3xl font-medium max-w-[900px] mx-auto leading-relaxed'>
+          We are on a mission to transform education by making learning accessible,
+          engaging, and aligned with real-world industry needs. Our platform bridges
+          the gap between knowledge and practical application.
+        </h2>
+      </div>
+
+      {/* SECTION 3 - STORY + IMAGE */}
+      <div className='flex flex-col md:flex-row items-center w-full'>
+
+        <div className='md:w-1/2 w-full px-4 md:px-16 py-10 flex flex-col gap-6 text-center md:text-left'>
+          <h2 className='text-3xl md:text-4xl font-semibold'>Our Journey</h2>
+          <p className='text-[#838894]'>
+            Studynotion started with a simple idea: education should be accessible to everyone,
+            regardless of location or background. What began as a small initiative has now grown
+            into a thriving learning platform used by thousands of students.
+          </p>
+          <p className='text-[#838894]'>
+            We continuously evolve by integrating new technologies, listening to our learners,
+            and adapting to industry trends—ensuring that our students stay ahead.
+          </p>
+        </div>
+
+        <div className='md:w-1/2 w-full flex justify-center items-center px-4 py-10'>
+          <img
+            src={About4}
+            alt='About'
+            className='w-full max-w-[400px] rounded-lg shadow-lg'
+          />
+        </div>
+      </div>
+
+      {/* SECTION 4 - FEATURES */}
+      <div className='px-4 md:px-[9vw] py-16'>
+        <h2 className='text-3xl md:text-4xl font-semibold text-center mb-12'>
+          What Makes Us Different
+        </h2>
+
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8'>
+          {
+            features.map((item, index) => (
+              <div key={index} className='bg-[#2c333f] p-6 rounded-lg shadow-md'>
+                <h3 className='text-xl font-semibold mb-2'>{item.title}</h3>
+                <p className='text-[#838894]'>{item.description}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* SECTION 5 - STATS */}
+      <div className='bg-[#2c333f] py-12 px-4 md:px-[9vw] grid grid-cols-2 md:grid-cols-4 gap-6 text-center'>
+        {
+          stats.map((data, index) => (
+            <div key={index}>
+              <h1 className='text-2xl md:text-4xl font-semibold'>{data.no}</h1>
+              <p className='text-[#838894]'>{data.text}</p>
             </div>
-        </div>
-        {/**SECTION 2 */}
-        <div className='py-30 px-4 flex items-center justify-center border-b-1 border-gray-600'>
-            <h1 className='text-xl md:text-3xl font-medium max-w-[1000px] text-center loading-relaxed'>
-               We are passionate about revolutionizing the way we learn. Our innovative platform combines technology, expertise, and community to create an unparalleled educational experience. 
-            </h1>
-            
-        </div>
-        {/*SECTION 3 */}
-        <div className='flex w-full'>
-            <div className='part1 px-35 py-20 w-[55%] flex flex-col gap-10'>
-                <h1 className='text-4xl font-semibold'>Our Founding Story</h1>
-                <p className='text-[#838894]'>
-                  Our e-learning platform was born out of a shared vision and passion for transforming education. It all began with a group of educators, technologists, and lifelong learners who recognized the need for accessible, flexible, and high-quality learning opportunities in a rapidly evolving digital world. 
-                </p>
-                <p className='text-[#838894]'>
-                    As experienced educators ourselves, we witnessed firsthand the limitations and challenges of traditional education systems. We believed that education should not be confined to the walls of a classroom or restricted by geographical boundaries. We envisioned a platform that could bridge these gaps and empower individuals from all walks of life to unlock their full potential.
-                </p>
-            </div>
-            <div className='w-[45%] flex items-center py-30 px-25 justify-center'>
-            <img src={About4} alt='StudyImage' className='w-2/1'>
-            </img>
-            </div>
-        </div>
-        {/*SECTION 4 */}
-        <div className='flex w-full'>
-            <div className='part1 px-35 py-20 w-[55%] flex flex-col gap-10'>
-                <h1 className='text-4xl font-semibold'>Our Founding Story</h1>
-                <p className='text-[#838894]'>
-                  Our e-learning platform was born out of a shared vision and passion for transforming education. It all began with a group of educators, technologists, and lifelong learners who recognized the need for accessible, flexible, and high-quality learning opportunities in a rapidly evolving digital world. 
-                </p>
-            </div>
-            <div className='w-[45%] flex flex-col p-10 gap-10 items-start justify-center'>
-              <h1 className='text-4xl font-semibold'>Our Founding Story</h1>
-                <p className='text-[#838894]'>
-                  Our e-learning platform was born out of a shared vision and passion for transforming education. It all began with a group of educators, technologists, and lifelong learners who recognized the need for accessible, flexible, and high-quality learning opportunities in a rapidly evolving digital world. 
-                </p>
-            </div>
-        </div>
-        {/*SECTION 5 */}
-        <div className='h-[100px] bg-[#2c333f] flex items-center justify-evenly'>
-            {
-                AboutData.map((data,index)=>(
-                <div className='flex flex-col text-center' key={index}>
-                    <h1 className='text-white text-4xl font-semibold'>{data.no}</h1>
-                    <p className='text-[#838894]'>{data.text}</p>
-                </div>
-                ))
-            }
-        </div>
-        {/*SECTION 6 */}
-        <div className='mx-auto flex flex-col justify-between gap-10'>
-        <LearningGrid/>
-        <ContactFormSection/>
-        </div>
-        {/* Reviwes */}
-        <div>
-            <div>
-                Reviews From Other Learners
-            </div>
-        </div>
+          ))
+        }
+      </div>
+
+      {/* SECTION 6 - LEARNING GRID + CONTACT */}
+      <div className='px-4 md:px-[9vw] py-16 flex flex-col gap-16'>
+        <LearningGrid />
+        <ContactFormSection />
+      </div>
+
+      {/* SECTION 7 - REVIEWS */}
+      <div className='px-4 md:px-[9vw] py-16 text-center'>
+        <h2 className='text-3xl md:text-4xl font-semibold mb-6'>
+          What Our Learners Say
+        </h2>
+        <p className='text-[#838894] max-w-[700px] mx-auto'>
+          Thousands of students trust Studynotion to upgrade their skills and transform their careers.
+          Join a growing community of learners achieving their goals.
+        </p>
+      </div>
+
     </div>
   )
 }
