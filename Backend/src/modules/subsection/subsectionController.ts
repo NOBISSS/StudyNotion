@@ -6,7 +6,7 @@ import { AppError } from "../../shared/lib/AppError.js";
 import { asyncHandler } from "../../shared/lib/asyncHandler.js";
 import type { Handler } from "../../shared/types.js";
 import CourseProgress from "../course/CourseProgress.js";
-import {Section} from "../section/SectionModel.js";
+import { Section } from "../section/SectionModel.js";
 import { SubSection } from "./SubSectionModel.js";
 import { Material } from "./material/MaterialModel.js";
 import { isValidInstructor } from "./material/materialController.js";
@@ -25,7 +25,7 @@ export const getAllSubsections: Handler = asyncHandler(async (req, res) => {
   if (!subsections) {
     throw AppError.notFound("SubSections not found");
   }
-  const materials = await Material.find({subsectionId: {$in: subsections.map(s => s._id)}, isActive: true}).select("-contentUrl -materialS3Key -originalMaterialS3Key");
+  const materials = await Material.find({ subsectionId: { $in: subsections.map(s => s._id) }, isActive: true }).select("-contentUrl -materialS3Key -originalMaterialS3Key");
   ApiResponse.success(
     res,
     {
@@ -97,7 +97,7 @@ export const markSubsectionAsCompleted: Handler = asyncHandler(
           { upsert: true, new: true },
         );
       }
-    } else if(alreadyCompleted && req.query.toggle !== "true") {
+    } else if (alreadyCompleted && req.query.toggle !== "true") {
       // ── UNMARK (TOGGLE OFF) ─────────────────────────────────────────────
       courseProgress.completedSubsections =
         courseProgress.completedSubsections.filter(
@@ -151,7 +151,16 @@ export const markSubsectionAsCompleted: Handler = asyncHandler(
       courseProgress.completed = false;
     }
 
-    await courseProgress.save();
+    await CourseProgress.findByIdAndUpdate(
+      courseProgress._id,
+      {
+        completedSubsections: courseProgress.completedSubsections,
+        progress: courseProgress.progress,
+        completed: courseProgress.completed,
+        completionDate: courseProgress.completionDate,
+      },
+      { new: true }
+    );
 
     ApiResponse.success(
       res,
@@ -192,10 +201,10 @@ export const deleteSubsection: Handler = asyncHandler(async (req, res) => {
       { Key: subsectionVideo.videoS3Key },
       subsectionVideo.originalVideoS3Key != null
         ? {
-            Key: subsectionVideo.originalVideoS3Key
-              ? subsectionVideo.originalVideoS3Key
-              : undefined,
-          }
+          Key: subsectionVideo.originalVideoS3Key
+            ? subsectionVideo.originalVideoS3Key
+            : undefined,
+        }
         : null,
     ];
 

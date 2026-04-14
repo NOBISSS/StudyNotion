@@ -4,7 +4,7 @@ import { apiConnector } from "../apiconnector";
 import { BACKEND_URL } from "../../utils/constants";
 
 
-const ADD_REVIEW_API = BACKEND_URL + "/reviews/add";
+const ADD_REVIEW_API = BACKEND_URL + "/reviews/review";
 
 export const addCourseReview = async (token, courseId, rating, reviewText) => {
   const toastId = toast.loading("Saving review...");

@@ -58,9 +58,10 @@ function ReviewModal({ courseId, user, token, onClose }) {
   const handleSave = async () => {
     if (!review.trim()) return;
     setSaving(true);
-    await addCourseReview(token, courseId, rating, review);
+    const data=await addCourseReview(token, courseId, rating, review);
+    console.log(data);
     setSaving(false);
-    onClose();
+    data && onClose();
   };
 
   return (
@@ -220,13 +221,13 @@ function SidebarSection({ section, activeSubId, completedIds, setCompletedIds, o
     load();
     return () => { cancelled = true; };
   }, [open, section._id, token]);
-  useEffect(() => {
-    const setProgress = async () => {
-      const res = await getCourseProgress(section.courseId);
-      setCompletedIds(new Set(res?.courseProgress?.completedSubsections || []));
-    };
-    setProgress();
-  }, []);
+  // useEffect(() => {
+  //   const setProgress = async () => {
+  //     const res = await getCourseProgress(section.courseId);
+  //     setCompletedIds(new Set(res?.courseProgress?.completedSubsections || []));
+  //   };
+  //   setProgress();
+  // }, []);
 
   // Count to show in header (use subSectionIds length before fetch)
   const subsCount = subs !== null ? subs.length : (section.subSectionIds?.length ?? 0);
@@ -415,6 +416,23 @@ export default function VideoDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, token]);
 
+  const fetchedProgressRef = useRef(false);
+
+useEffect(() => {
+  if (fetchedProgressRef.current) return;
+
+  const fetchProgress = async () => {
+    if (!courseId || !token) return;
+
+    fetchedProgressRef.current = true;
+
+    const res = await getCourseProgress(courseId);
+    setCompletedIds(new Set(res?.courseProgress?.completedSubsections || []));
+  };
+
+  fetchProgress();
+}, [courseId, token]);
+
   // ── 2. Load video by subsection ID ────────────────────────────────────────
   const loadVideoById = useCallback(async (sub) => {
     // sub can be a subsection object OR just an ID string
@@ -579,6 +597,23 @@ export default function VideoDetail() {
         </>
       )}
     </div>
+    {allDone && (
+  <div style={{ padding: "20px" }}>
+    <button
+      onClick={() => setShowModal(true)}
+      style={{
+        background: "#FFD60A",
+        color: "#000",
+        padding: "10px 20px",
+        borderRadius: "6px",
+        fontWeight: "600",
+        cursor: "pointer",
+      }}
+    >
+      Add Review
+    </button>
+  </div>
+)}
   </main>
 </div>
 
