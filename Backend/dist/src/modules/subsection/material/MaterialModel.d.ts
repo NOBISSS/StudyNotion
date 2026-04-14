@@ -8,6 +8,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps, {}, {}, {
@@ -21,6 +22,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps, {
@@ -36,6 +38,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps & {
@@ -55,6 +58,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
@@ -66,6 +70,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps, {
@@ -81,6 +86,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
 } & import("mongoose").DefaultTimestampProps & {
@@ -98,6 +104,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
     createdAt: NativeDate;
@@ -115,6 +122,7 @@ export declare const Material: import("mongoose").Model<{
     materialS3Key: string;
     originalMaterialS3Key: string;
     materialName?: string | null;
+    mimeType?: string | null;
     materialSize?: number | null;
     URLExpiration?: NativeDate | null;
     createdAt: NativeDate;
