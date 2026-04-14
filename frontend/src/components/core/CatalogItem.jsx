@@ -15,8 +15,10 @@ const CatalogItem = () => {
     (state) => state.catalog.catalogData[catalogId]
   );
 
-  const [activeTab, setActiveTab] = useState("all");
+  
 
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
 
@@ -33,12 +35,15 @@ const CatalogItem = () => {
     setVisibleCount(COURSES_PER_PAGE);
   }, [activeTab]);
 
+  useEffect(() => {
+    setVisibleCount(COURSES_PER_PAGE);
+  }, [searchQuery]);
+
   // Derived data
   const allCourses = catalogData?.selectedCategory ?? [];
   const mostSelling = catalogData?.mostSellingCourses ?? [];
-  const displayedCourses = activeTab === "all" ? allCourses : mostSelling;
-  const visibleCourses = displayedCourses.slice(0, visibleCount);
-  const hasMore = visibleCount < displayedCourses.length;
+  //const displayedCourses = activeTab === "all" ? allCourses : mostSelling;
+
 
   if (loading && !catalogData) {
     return (
@@ -68,6 +73,26 @@ const CatalogItem = () => {
     );
   }
 
+  const baseCourses =
+    activeTab === "all" ? allCourses : mostSelling;
+
+  const filteredCourses = baseCourses.filter((course) => {
+    const query = searchQuery.toLowerCase();
+
+    return (
+      course.courseName?.toLowerCase().includes(query) ||
+      course.instructorName?.toLowerCase().includes(query) ||
+      course.tag?.some((tag) =>
+        tag.toLowerCase().includes(query)
+      )
+    );
+  });
+
+  const displayedCourses = searchQuery ? filteredCourses : baseCourses;
+
+  const visibleCourses = displayedCourses.slice(0, visibleCount);
+  const hasMore = visibleCount < displayedCourses.length;
+
   if (!catalogData) {
     return (
       <div className="min-h-screen bg-[#000814] flex flex-col items-center justify-center gap-3">
@@ -81,22 +106,41 @@ const CatalogItem = () => {
     );
   }
 
+
   return (
     <div className="text-white min-h-screen bg-[#000814]">
       <div className="bg-[#161D29] border-b border-[#2C3244] py-8 sm:py-10 px-4 sm:px-8 lg:px-[8.5vw]">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
-          {catalogData?.categoryName ?? "All Courses"}
+          {catalogData?.category?.name ?? "All Courses"}
         </h1>
-        {catalogData?.categoryDescription && (
+        {catalogData?.category?.description && (
           <p className="text-sm text-[#AFB2BF] mt-1 max-w-3xl leading-relaxed line-clamp-3">
-            {catalogData.categoryDescription}
+            {catalogData.category.description}
           </p>
         )}
-        <p className="text-xs text-[#6B7280] mt-2">
-          {allCourses.length} {allCourses.length === 1 ? "course" : "courses"} available
+        <p className="text-xs text-gray-400 mb-4">
+          {searchQuery
+            ? `${displayedCourses.length} results found`
+            : `Showing ${Math.min(visibleCount, displayedCourses.length)} of ${displayedCourses.length}`}
         </p>
       </div>
       <div className="px-4 sm:px-8 lg:px-[8.5vw] mt-6 sm:mt-8">
+        <div className="w-full flex items-center gap-3 mb-6">
+          <div className="relative w-full">
+            <input
+              type="text"
+              placeholder="Search courses, instructors, tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+
+            {/* 🔍 Icon */}
+            <span className="absolute left-3 top-3 text-gray-400">
+              🔍
+            </span>
+          </div>
+        </div>
         <div className="flex gap-4 sm:gap-6 border-b border-[#2C3244] mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
           <TabButton
             label={`All Courses`}
@@ -119,7 +163,7 @@ const CatalogItem = () => {
         )}
         {displayedCourses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <p className="text-[#6B7280] text-lg">No courses found</p>
+            <p className="text-[#6B7280] text-lg">{searchQuery ? "No matching courses found 😕" : "No courses available"}</p>
             <p className="text-[#4B5563] text-sm">
               Check back later for new courses
             </p>
