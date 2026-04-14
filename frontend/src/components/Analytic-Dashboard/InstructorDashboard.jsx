@@ -344,8 +344,6 @@ export default function InstructorDashboard() {
       const data = await instructorDashboard();
       setDashboardData(data);
       setLoading(false);
-      console.log("Fetched dashboard data is ", data);
-      console.log("Top courses in dashboard data ", data?.topCourses[0].completion.toFixed(2));
     };
     fetchDashboardData();
   }, []);

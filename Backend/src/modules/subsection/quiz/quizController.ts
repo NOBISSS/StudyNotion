@@ -14,6 +14,7 @@ import {
 } from "./quizValidation.js";
 import { Section } from "../../section/SectionModel.js";
 import { Course } from "../../course/CourseModel.js";
+import User from "../../user/UserModel.js";
 
 export const createQuiz = asyncHandler(async (req, res) => {
   const parsedQuizData = createQuizSchema.safeParse(req.body);
@@ -135,11 +136,14 @@ export const getQuizBySubSectionId = asyncHandler(async (req, res) => {
     subSectionId: new Types.ObjectId(subSectionId),
     isActive: true,
   }).select("-questions.correctAnswer");
-
+  
   if (!quiz) {
     throw AppError.notFound("Quiz not found for the given subsection ID.");
   }
-  if (!(await isEnrolled(userId.toString(), quiz.courseId.toString()))) {
+
+  const user=await User.findById(userId);
+
+  if (!(await isEnrolled(userId.toString(), quiz.courseId.toString())) && user?.accountType==="student") {
     throw AppError.unauthorized(
       "You are not enrolled in the course for this quiz.",
     );

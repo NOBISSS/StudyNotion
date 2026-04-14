@@ -9,7 +9,6 @@ import toast from 'react-hot-toast';
 const Settings = () => {
     const { user } = useSelector((state) => state.profile);
     const navigate = useNavigate();
-    //console.log(user);
     const dispatch = useDispatch();
     //USE STATES
     const [profilePic, setProfilePic] = useState(null);
@@ -42,7 +41,6 @@ const Settings = () => {
                     details = {};
                 }
             }
-            //console.log("DETAILS OBJECT>>>>>>",details);
             setFormData({
                 firstName: user?.firstName || "",
                 lastName: user?.lastName || "",
@@ -82,18 +80,15 @@ const Settings = () => {
 
     const HandleSubmit = (e) => {
         e.preventDefault();
-        console.log("Updated Data:", formData)
+        
     }
 
     const handleFileChange = (e) => {
-        //console.log(e);
         e.preventDefault();
-        //console.log("PROFILE PIC UPLOADED");
         //dispatch(UpdateDisplayPicture())
         const file = e.target.files[0];
         if (file) {
             setProfilePic(file);
-            console.log("FILE IS SELECTED...", file);
         }
     }
 
@@ -103,7 +98,6 @@ const Settings = () => {
             toast.error("PLEASE SELECT PROFILE PHOTO BEFORE UPLOADING");
             return;
         }
-        console.log("PROFILE PHOTO:", profilePic)
         dispatch(updateProfilePicture(profilePic));
     }
 
@@ -119,7 +113,6 @@ const Settings = () => {
 
     const HandlePersonalDetails = (e) => {
         e.preventDefault();
-        console.log("Personal Details UPLOADED");
         dispatch(UpdatePersonalInfo(formData));
     }
 
@@ -129,7 +122,6 @@ const Settings = () => {
             toast.error("Please Enter Password");
             return;
         }
-        console.log("Password Updated Successfully");
         dispatch(UpdatePassword(passwordData, navigate))
     }
 

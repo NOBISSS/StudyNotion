@@ -185,7 +185,6 @@ export default function StudentDashboard() {
         const data = await studentDashboard();
         setDashboardData(data);
         setLoading(false);
-        console.log("Fetched dashboard data is ", data);
       };
       fetchDashboardData();
     }, []);

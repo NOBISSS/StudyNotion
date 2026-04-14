@@ -1,16 +1,3 @@
-// components/Video/VideoDetail.jsx
-//
-// Route (standalone, NOT inside Dashboard):
-//   /courses/:courseId/learn
-//   /courses/:courseId/learn/:subSectionId
-//
-// Data flow:
-//   1. Mount → GET /courses/getdetails/:courseId  → get course + sections[]
-//   2. Click section accordion → GET /subsections/getall/:sectionId  (lazy, cached)
-//   3. Click subsection → GET /subsections/video/getone/:subSectionId → video URL
-//   4. Video ends → (progress ignored for now per instructions)
-//   5. All done → "Add Review" appears → modal → POST /reviews/add
-
 import axios from "axios";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -22,6 +9,7 @@ import { markSubsectionAsCompleted } from "../../services/operations/subsectionA
 import { BACKEND_URL } from "../../utils/constants";
 import MaterialViewer from "./MaterialViewer";
 import PlyrPlayer from "./PlyrPlayer";
+import QuizAttemptModal from "./QuizAttemptModal";
 
 const COURSE_DETAIL_API = (id) => `${BACKEND_URL}/courses/getdetails/${id}`;
 const SUBSECTIONS_API = (id) => `${BACKEND_URL}/subsections/getall/${id}`;
@@ -70,7 +58,6 @@ function ReviewModal({ courseId, user, token, onClose }) {
     if (!review.trim()) return;
     setSaving(true);
     const data = await addCourseReview(courseId, rating, review);
-    console.log(data);
     setSaving(false);
     data && onClose();
   };
@@ -576,13 +563,13 @@ function SidebarSection({
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function VideoDetail() {
   const { courseId, subSectionId: paramSubId } = useParams();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.profile);
-
+  const [activeQuizSubId, setActiveQuizSubId] = useState(null)
+  const [showQuizModal, setShowQuizModal] = useState(false)
   const [course, setCourse] = useState(null);
   const [sections, setSections] = useState([]);
   const [activeSub, setActiveSub] = useState(null);
@@ -595,7 +582,6 @@ export default function VideoDetail() {
   const [showModal, setShowModal] = useState(false);
   const [totalSubs, setTotalSubs] = useState(0);
 
-  // ── 1. Fetch course details (sections come with it) ───────────────────────
   useEffect(() => {
     if (!courseId || !token) return;
     let cancelled = false;
@@ -614,24 +600,19 @@ export default function VideoDetail() {
 
         setCourse(courseObj);
 
-        // Filter out soft-deleted sections (isRemoved: true), sort by order
         const activeSecs = secs
           .filter((s) => !s.isRemoved)
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
         setSections(activeSecs);
 
-        // Total subsection count from subSectionIds arrays
         const total = activeSecs.reduce(
           (acc, s) => acc + (s.subSectionIds?.length ?? 0),
           0,
         );
         setTotalSubs(total);
 
-        // If URL has a subSectionId param, we'll load it once subsections are fetched
-        // Otherwise do nothing — user clicks to open
         if (paramSubId) {
-          // We'll load video directly since we have the ID
           loadVideoById(paramSubId);
         }
       } catch (err) {
@@ -645,7 +626,6 @@ export default function VideoDetail() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, token]);
 
   const fetchedProgressRef = useRef(false);
@@ -666,13 +646,15 @@ export default function VideoDetail() {
     fetchProgress();
   }, [courseId, token, setCompletedIds]);
 
-  // ── 2. Load video by subsection ID ────────────────────────────────────────
   const loadVideoById = useCallback(
     async (sub, type) => {
-      // sub can be a subsection object OR just an ID string
       const subObj = typeof sub === "object" ? sub : { _id: sub };
       const subId = subObj._id;
-
+      if (subObj.contentType === "quiz") {
+        setActiveQuizSubId(subObj._id)
+        setShowQuizModal(true)
+        return
+      }
       setActiveSub(subObj);
       setActiveSubType(type);
       setVideoSrc(null);
@@ -685,25 +667,21 @@ export default function VideoDetail() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dateStr = activeSub?.createdAt
     ? new Date(activeSub.createdAt).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
     : "";
 
   return (
     <div className="bg-[#0A0F1C] min-h-screen flex flex-col">
-      {/* MAIN LAYOUT */}
       <div className="flex flex-1 flex-col lg:flex-row">
-        {/* ───────── MOBILE OVERLAY ───────── */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
-
-        {/* ───────── SIDEBAR ───────── */}
         <aside
           className={`
       fixed lg:static
@@ -722,7 +700,6 @@ export default function VideoDetail() {
       overflow-y-auto
     `}
         >
-          {/* CLOSE BUTTON (MOBILE) */}
           <div className="lg:hidden flex justify-between items-center px-4 py-3 border-b border-[#1C2333]">
             <p className="text-white text-sm font-semibold">Course Content</p>
             <button
@@ -733,7 +710,6 @@ export default function VideoDetail() {
             </button>
           </div>
 
-          {/* YOUR EXISTING SIDEBAR CONTENT */}
           <div className="flex-1 overflow-y-auto">
             {loadingCourse ? (
               <div className="px-[14px] py-[12px]">
@@ -764,9 +740,7 @@ export default function VideoDetail() {
           </div>
         </aside>
 
-        {/* ───────── MAIN CONTENT ───────── */}
         <main className="flex-1 min-w-0 flex flex-col">
-          {/* 🔥 MOBILE HEADER (TOGGLE BUTTON) */}
           <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-[#1C2333] bg-[#0A0F1C]">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -776,8 +750,6 @@ export default function VideoDetail() {
             </button>
             <p className="text-sm text-[#AFB2BF]">Course Content</p>
           </div>
-
-          {/* ───────── VIDEO SECTION ───────── */}
           {activeSubType == "video" && (
             <div
               className="
@@ -789,14 +761,11 @@ export default function VideoDetail() {
       p-[12px] sm:p-[16px] lg:p-[20px]
     "
             >
-              {/* LOADER */}
               {loadingVideo && (
                 <div className="absolute inset-0 bg-black flex items-center justify-center">
                   <div className="w-[40px] h-[40px] rounded-full border-[4px] border-[#2C3244] border-t-[#FFD60A] animate-spin"></div>
                 </div>
               )}
-
-              {/* PLAYER */}
               <PlyrPlayer
                 setCompletedIds={setCompletedIds}
                 videoSrc={videoSrc}
@@ -804,8 +773,6 @@ export default function VideoDetail() {
                 setLoadingVideo={setLoadingVideo}
                 setActiveSub={setActiveSub}
               />
-
-              {/* EMPTY */}
               {!loadingVideo && !videoSrc && (
                 <div className="absolute inset-0 bg-[#0D1117] flex flex-col items-center justify-center gap-[14px]">
                   <p className="text-[#4B5563] text-sm text-center px-4">
@@ -826,7 +793,6 @@ export default function VideoDetail() {
               setActiveSub={setActiveSub}
             />
           )}
-          {/* ───────── VIDEO INFO ───────── */}
           <div className="flex justify-between"><div className="px-[16px] sm:px-[24px] lg:px-[28px] pt-[20px] pb-[20px]">
             {activeSub && (
               <>
@@ -840,7 +806,6 @@ export default function VideoDetail() {
                 >
                   {activeSub.title || activeSub.subSectionName}
                 </h2>
-
                 {activeSub.description && (
                   <p className="text-[#AFB2BF] text-[13px] leading-[1.7]">
                     {activeSub.description}
@@ -849,23 +814,23 @@ export default function VideoDetail() {
               </>
             )}
           </div>
-          {isCompleted && (
-            <div style={{ padding: "20px" }}>
-              <button
-                onClick={() => setShowModal(true)}
-                style={{
-                  background: "#FFD60A",
-                  color: "#000",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
-                Add Review
-              </button>
-            </div>
-          )}</div>
+            {isCompleted && (
+              <div style={{ padding: "20px" }}>
+                <button
+                  onClick={() => setShowModal(true)}
+                  style={{
+                    background: "#FFD60A",
+                    color: "#000",
+                    padding: "10px 20px",
+                    borderRadius: "6px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  Add Review
+                </button>
+              </div>
+            )}</div>
         </main>
       </div>
 
@@ -875,6 +840,19 @@ export default function VideoDetail() {
           user={user}
           token={token}
           onClose={() => setShowModal(false)}
+        />
+      )}
+      {showQuizModal && activeQuizSubId && (
+        <QuizAttemptModal
+          subSectionId={activeQuizSubId}
+          onClose={() => {
+            setShowQuizModal(false)
+            setActiveQuizSubId(null)
+          }}
+          onCompleted={(attempt) => {
+            // Mark the quiz subsection as completed in the sidebar
+            setCompletedIds((prev) => new Set([...prev, activeQuizSubId]))
+          }}
         />
       )}
     </div>
