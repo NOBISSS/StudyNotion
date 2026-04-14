@@ -106,7 +106,6 @@ const CatalogItem = () => {
     );
   }
 
-
   return (
     <div className="text-white min-h-screen bg-[#000814]">
       <div className="bg-[#161D29] border-b border-[#2C3244] py-8 sm:py-10 px-4 sm:px-8 lg:px-[8.5vw]">
