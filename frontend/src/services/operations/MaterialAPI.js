@@ -34,11 +34,11 @@ export const addMaterial = async (materialData) => {
 };
 
 // ─── Get Material ─────────────────────────────────────────────────────────────
-export const getMaterial = async (materialId) => {
+export const getMaterial = async (subsectionId) => {
     const toastId = toast.loading('Loading material...');
     let result = null;
     try {
-        const url = GET_MATERIAL_API.replace(':materialId', materialId);
+        const url = GET_MATERIAL_API.replace(':subsectionId', subsectionId);
         const response = await apiConnector('GET', url);
         if (!response?.data?.success)
             throw new Error(response?.data?.message || 'Failed to fetch material');

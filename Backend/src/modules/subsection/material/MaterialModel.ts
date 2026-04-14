@@ -6,6 +6,7 @@ const MaterialSchema = new Schema(
     courseId: { type: Types.ObjectId, ref: "Course", required: true },
     contentUrl: { type: String, required: true },
     materialType: { type: String, required: true },
+    mimeType: { type: String },
     materialSize: { type: Number },
     materialS3Key: { type: String, required: true },
     originalMaterialS3Key: { type: String, required: true },

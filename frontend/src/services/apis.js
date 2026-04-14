@@ -117,7 +117,7 @@ export const subSectionVideoEndpoints = {
 
 export const subSectionMaterialEndpoints = {
   CREATE_MATERIAL_API: BACKEND_URL + "/subsections/material/add",
-  GET_MATERIAL_API: BACKEND_URL + "/subsections/material/get/:materialId", //has to be updated while calling
+  GET_MATERIAL_API: BACKEND_URL + "/subsections/material/get/:subsectionId", //has to be updated while calling
   UPDATE_MATERIAL_API:
     BACKEND_URL + "/subsections/material/update/:subsectionId",
   DELETE_MATERIAL_API:

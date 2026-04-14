@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { subSectionVideoEndpoints } from "../apis";
+import { subSectionMaterialEndpoints, subSectionVideoEndpoints } from "../apis";
 import { apiConnector } from "../apiconnector";
 
 const { PUT_MARK_SUBSECTION_COMPLETED_API, POST_SAVE_VIDEO_PROGRESS_API,GET_SUBSECTION_DETAILS_API } =

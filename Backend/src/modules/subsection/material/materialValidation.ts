@@ -6,6 +6,7 @@ export const materialSchema = z.object({
   //   .url("Content URL must be a valid URL")
   //   .min(1, "Content URL is required"),
   materialType: z.string({ error: "Material type is required" }).nonempty("Material type is required"),
+  mimeType: z.string().optional(),
   description: z.string().optional(),
   materialSize: z.number().optional(),
   materialS3Key: z.string({ error: "Material S3 Key is required" }).min(1, "Material S3 Key is required"),

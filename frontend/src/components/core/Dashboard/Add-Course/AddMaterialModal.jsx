@@ -30,13 +30,13 @@ const TYPE_ICONS = {
 // Guess material type from file MIME
 const guessMaterialType = (file) => {
     if (!file) return 'other';
-    if (file.type.startsWith('video/'))       return 'video';
-    if (file.type.startsWith('audio/'))       return 'audio';
-    if (file.type === 'application/pdf')      return 'pdf';
-    if (file.type.startsWith('image/'))       return 'image';
+    if (file.type.startsWith('video/'))       return "video";
+    if (file.type.startsWith('audio/'))       return "audio";
+    if (file.type === 'application/pdf')      return "pdf";
+    if (file.type.startsWith('image/'))       return "image";
     if (file.type.includes('document') || file.type.includes('presentation') ||
         file.type.includes('sheet') || file.type.includes('text'))
-        return 'document';
+        return "document";
     return 'other';
 };
 
@@ -155,6 +155,7 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
                     title:        title.trim(),
                     description:  description.trim(),
                     materialType,
+                    mimeType: file?.type || null,
                     ...(s3Key        && { materialS3Key: s3Key }),
                     ...(materialSize && { materialSize }),
                 };
@@ -175,6 +176,7 @@ const AddMaterialModal = ({ isOpen, onClose, courseId, sectionId, onSuccess, edi
                     description:   description.trim(),
                     courseId,
                     sectionId,
+                    mimeType: file?.type || null,
                     materialType,
                     materialSize:  uploaded.size,
                     materialS3Key: uploaded.key,
