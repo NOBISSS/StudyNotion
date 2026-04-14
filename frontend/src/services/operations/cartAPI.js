@@ -22,7 +22,7 @@ export const getWishListData = async (token, dispatch) => {
       Authorization: `Bearer ${token}`,
     });
 
-    console.log("GET_WISHLIST API RESPONSE:", response);
+    //console.log("GET_WISHLIST API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not fetch wishlist");
@@ -40,10 +40,6 @@ export const getWishListData = async (token, dispatch) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. ADD — add course to wishlist on server + push to Redux
-//    Pass the full course object so Redux/localStorage has all fields
-// ─────────────────────────────────────────────────────────────────────────────
 export const addCourseToWishList = async (course, dispatch) => {
   const toastId = toast.loading("Adding to wishlist...");
   try {
@@ -53,7 +49,7 @@ export const addCourseToWishList = async (course, dispatch) => {
       { courseId: course },
     );
 
-    console.log("ADD_WISHLIST API RESPONSE:", response);
+//    console.log("ADD_WISHLIST API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not add to wishlist");
@@ -69,9 +65,6 @@ export const addCourseToWishList = async (course, dispatch) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 3. REMOVE ONE — remove single course from server + Redux
-// ─────────────────────────────────────────────────────────────────────────────
 export const removeCourseFromWishList = async (token, courseId, dispatch) => {
   const toastId = toast.loading("Removing from wishlist...");
   try {
@@ -81,7 +74,7 @@ export const removeCourseFromWishList = async (token, courseId, dispatch) => {
       { Authorization: `Bearer ${token}` }
     );
 
-    console.log("REMOVE_WISHLIST API RESPONSE:", response);
+//    console.log("REMOVE_WISHLIST API RESPONSE:", response);
 
     if (!response?.data?.success) {
       throw new Error(response?.data?.message || "Could not remove from wishlist");
@@ -97,9 +90,6 @@ export const removeCourseFromWishList = async (token, courseId, dispatch) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. REMOVE ALL — clear entire wishlist on server + Redux
-// ─────────────────────────────────────────────────────────────────────────────
 export const removeAllCoursesFromWishList = async (token, dispatch) => {
   const toastId = toast.loading("Clearing wishlist...");
   try {

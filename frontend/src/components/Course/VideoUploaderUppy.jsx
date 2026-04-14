@@ -93,7 +93,6 @@ export default function VideoUploaderUppy({title, description, isPreview, sectio
         //extracting necessary info
         const s3Key = uploadFile.response.body.key;
         const fileName = uploadFile.name;
-        console.log(uploadFile);
       }
       // send that info to your backend to enqueue compression / save metadata
     });

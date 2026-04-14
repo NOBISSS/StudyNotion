@@ -56,7 +56,6 @@ const Settings = () => {
 
     const HandleChange = (e) => {
         const { name, value } = e.target;
-        //console.log(formData)
         if (name in formData.additionalDetails) {
             setFormData(prev => ({ ...prev, additionalDetails: { ...prev.additionalDetails, [name]: value } }));
         } else { setFormData(prev => ({ ...prev, [name]: value })); }

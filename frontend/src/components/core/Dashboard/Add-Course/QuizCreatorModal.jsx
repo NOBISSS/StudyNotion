@@ -14,7 +14,7 @@ import { useState } from "react"
 import { useSelector } from "react-redux"
 import { FiPlus, FiTrash2, FiX, FiCheck } from "react-icons/fi"
 import { MdQuiz } from "react-icons/md"
-import { createQuiz, updateQuiz } from "../../../../services/operations/quizAPI"
+import { createQuiz, updateQuiz } from "../../../../services/operations/QuizAPI"
 
 // ── Empty question template ────────────────────────────────────────────────
 const emptyQuestion = () => ({

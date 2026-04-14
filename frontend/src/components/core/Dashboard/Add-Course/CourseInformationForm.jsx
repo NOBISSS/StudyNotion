@@ -132,7 +132,6 @@ const CourseInformationForm = ({ courseId }) => {
         setValue('courseLevel',        c.level ?? LEVEL[0])
 
         // ✅ instructions may not exist in this response — fallback to []
-        // console.log("Course instructions from API:", course.instructions);
         setValue('courseRequirements', Array.isArray(c.instructions) ? c.instructions : [])
 
         // ✅ API uses "thumbnailUrl"
@@ -234,7 +233,6 @@ const CourseInformationForm = ({ courseId }) => {
       formData.append('level',             data.courseLevel);
       appendArray(formData, 'tag', data.courseTag);
       // if (JSON.stringify(v.courseRequirements) !== JSON.stringify(course?.instructions ?? []))
-      console.log("Appending instructions:", data.courseRequirements);
       appendArray(formData, 'instructions', data.courseRequirements);
       if (thumbnailFile)
         formData.append('thumbnail', thumbnailFile)

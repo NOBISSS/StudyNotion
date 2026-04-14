@@ -112,8 +112,6 @@ const ContactUsForm = () => {
                     )
                     
                 }
-                {//console.log("error object:",errors)
-                }
                         </div>
                     </div>
                 </div>

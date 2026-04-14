@@ -80,7 +80,6 @@ function PurchaseCard({
     if (isEnrolled) { onGoToCourse?.(); return; }
     if (isFree) { onEnroll?.(); return; }
     setAddedToCart(true);
-    console.log("COURSE ID", courseId);
     dispatch(addCourseToWishList(courseId, dispatch))
   };
 
@@ -234,7 +233,6 @@ function AccordionSection({ section, forceOpen }) {
 
       const data = res?.subsections || [];
       const materialData = res?.materials || [];
-      console.log(materialData);
       setSubSections(Array.isArray(data) ? data : []);
       const lectures = data.filter((s) => s.contentType !== "material");
       const materials = materialData; // Use the fetched materials data
@@ -338,7 +336,6 @@ function AccordionSection({ section, forceOpen }) {
           {/* Lecture rows */}
           {!loading && !fetchError && subSections?.map((lec, i) => {
             const material = materialMap[section._id]?.find(m => m.subsectionId === lec._id);
-            console.log("Material for lecture", lec._id, material);
             return (
               <div
                 key={lec._id || i}
