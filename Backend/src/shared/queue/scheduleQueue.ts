@@ -3,16 +3,13 @@
 
 import { Queue } from "bullmq";
 import type { Types } from "mongoose";
-import { createRedisConnection } from "../config/redis.js";
-
+import redis from "../config/redis.js";
 export interface SchedulePublishPayload {
   courseId: Types.ObjectId;
   instructorId: Types.ObjectId;
   courseName: string;
   scheduledAt: string;
 }
-
-const redis = createRedisConnection();
 
 export const scheduleQueue = new Queue<SchedulePublishPayload>(
   "schedule-publish",

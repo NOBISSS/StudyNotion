@@ -94,7 +94,7 @@ export const markSubsectionAsCompleted: Handler = asyncHandler(
               duration: video.duration || 0, // ← fix: store total duration for hoursLearned calc
             },
           },
-          { upsert: true, new: true },
+          { upsert: true, returnDocument: "after" },
         );
       }
     } else if (alreadyCompleted && req.query.toggle !== "true") {
@@ -159,7 +159,7 @@ export const markSubsectionAsCompleted: Handler = asyncHandler(
         completed: courseProgress.completed,
         completionDate: courseProgress.completionDate,
       },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     ApiResponse.success(

@@ -58,7 +58,7 @@ function ReviewModal({ courseId, user, token, onClose }) {
   const handleSave = async () => {
     if (!review.trim()) return;
     setSaving(true);
-    const data=await addCourseReview(token, courseId, rating, review);
+    const data=await addCourseReview(courseId, rating, review);
     console.log(data);
     setSaving(false);
     data && onClose();
@@ -363,6 +363,7 @@ export default function VideoDetail() {
   const [activeSub, setActiveSub] = useState(null);
   const [videoSrc, setVideoSrc] = useState(null);
   const [completedIds,setCompletedIds] = useState(new Set()); // future: load from backend
+  const [isCompleted, setIsCompleted] = useState(false);
   const [loadingCourse, setLoadingCourse] = useState(true);
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -428,10 +429,11 @@ useEffect(() => {
 
     const res = await getCourseProgress(courseId);
     setCompletedIds(new Set(res?.courseProgress?.completedSubsections || []));
+    setIsCompleted(res?.courseProgress?.completed || false);
   };
 
   fetchProgress();
-}, [courseId, token]);
+}, [courseId, token,setCompletedIds]);
 
   // ── 2. Load video by subsection ID ────────────────────────────────────────
   const loadVideoById = useCallback(async (sub) => {
@@ -597,7 +599,7 @@ useEffect(() => {
         </>
       )}
     </div>
-    {allDone && (
+    {isCompleted && (
   <div style={{ padding: "20px" }}>
     <button
       onClick={() => setShowModal(true)}
