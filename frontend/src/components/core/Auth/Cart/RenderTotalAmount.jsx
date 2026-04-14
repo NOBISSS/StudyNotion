@@ -16,8 +16,7 @@ const RenderTotalAmount = () => {
   };
 
   return (
-    <div className="bg-[#1E2735] rounded-xl p-6 flex flex-col gap-4">
-
+    <div className="bg-[#1E2735] rounded-xl p-4 sm:p-6 flex flex-col gap-4">
       <div>
         <p className="text-[#999DAA] text-sm font-medium mb-1">Total:</p>
 

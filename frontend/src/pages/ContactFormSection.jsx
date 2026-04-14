@@ -1,5 +1,4 @@
-import React from 'react'
-import ContactUsForm from '../components/core/ContactUs/ContactUsForm'
+import ContactUsForm from "../components/core/ContactUs/ContactUsForm";
 
 const ContactFormSection = () => {
   return (
@@ -15,4 +14,4 @@ const ContactFormSection = () => {
   )
 }
 
-export default ContactFormSection
+export default ContactFormSection;

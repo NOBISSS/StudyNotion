@@ -1,26 +1,34 @@
-import * as Icons from "react-icons/vsc"
-import { matchPath, NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
+import * as Icons from "react-icons/vsc";
 
-const SideBarLink = ({ link, iconName }) => {
-    const Icon = Icons[iconName];
-    const location = useLocation();
-    const matchRoute = (route) => matchPath({ path: route }, location.pathname);
+const SideBarLink = ({ link, iconName, collapsed }) => {
+  const Icon = Icons[iconName];
 
-    return (
-        <NavLink
-            to={link?.path}
-            className={({ isActive }) =>
-                `relative px-8 py-2 text-sm font-medium ${isActive ? "bg-yellow-700 text-white" : "text-[#838894]"}`
-            }
-        >
-            <span className={` text-[#838894] absolute left-0 top-0 h-full w-[0.2rem]  ${matchRoute(link.path) ? "bg-yellow-400 text-white" : "bg-transparent "}`}>
-            </span>
-            <div className='flex items-center gap-x-2'>
-                {Icon ? <Icon className="text-lg" /> : <span className="text-red-500">!</span>}
-                <span>{link.name}</span>
-            </div>
-        </NavLink>
-    )
-}
+  return (
+    <NavLink
+      to={link.path}
+      className={({ isActive }) =>
+        `group flex items-center gap-3 px-3 py-2 mx-2 rounded-md transition-all
+        ${isActive ? "bg-[#2C333F] text-yellow-400" : "text-[#6B7280] hover:bg-[#2C333F] hover:text-white"}
+        ${collapsed ? "justify-center" : "justify-start"}`
+      }
+    >
+      {/* ICON */}
+      <span className="text-lg">
+        <Icon />
+      </span>
 
-export default SideBarLink
+      {/* TEXT */}
+      <span
+        className={`
+          text-sm font-medium whitespace-nowrap transition-all duration-200
+          ${collapsed ? "hidden" : "block"}
+        `}
+      >
+        {link.name}
+      </span>
+    </NavLink>
+  );
+};
+
+export default SideBarLink;

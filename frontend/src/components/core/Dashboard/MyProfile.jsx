@@ -10,82 +10,120 @@ const MyProfile = () => {
                     My Profile
                 </h1>
 
-                <div className='flex gap-10 p-8 justify-between h-1/2 bg-[#161D29] rounded-md items-center'>
-                    <div className='ml-5 flex gap-3 items-center'>
-                        <img src={user?.additionalDetails?.profilePicture} alt={`profile-${user?.firstName}`}
-                            className='aspect-square w-[75px] rounded-full object-cover'
-                        />
-                        <div>
-                            <h3 className='text-[21px] font-semibold'>{user?.firstName + " " + user?.lastName}</h3>
+  return (
+    <div className="text-white py-6 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1200px] mx-auto">
+      <div className="flex flex-col gap-8">
+        {/* TITLE */}
+        <h1 className="text-2xl md:text-3xl font-semibold">My Profile</h1>
 
-                            <p className='text-[#838894]'>{user?.email}</p>
-                        </div>
-                    </div>
-                    <IconBtn
-                        text="Edit"
-                        iconName="VscEdit"
-                        active={1}
-                        linkto={"/dashboard/settings"} />
-                </div>
-                <div className='flex pl-12 flex-col gap-10 p-7 justify-between h-1/2 bg-[#161D29] rounded-md'>
-                    <div className='flex justify-between'>
-                        <h3 className='text-[20px] font-semibold'>About</h3>
-                        <IconBtn
-                            text="Edit"
-                            iconName="VscEdit"
-                            active={1}
-                            linkto={"/dashboard/settings"} />
-                    </div>
-                    <div className='ABOUT_CONTENT'>
-                        <p>{user?.additionalDetails?.about || "Write Something About Yourself"}</p>
-                    </div>
-                </div>
-                <div className='flex pl-14 flex-col gap-10 p-7 justify-between h-1/2 bg-[#161D29] rounded-md'>
-                    <div className='flex justify-between'>
-                        <h3 className='text-[20px] font-semibold'>Personal Details</h3>
-                        <IconBtn
-                            text="Edit"
-                            iconName="VscEdit"
-                            active={1}
-                            linkto={"/dashboard/settings"}
-                        />
-                    </div>
-                    <div className='PERSONAL_DETAIL flex justify-between'>
-                        <div className='flex flex-col gap-10'>
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>First Name</p>
-                                <p>{user?.firstName ?? "Add Your FirstName"}</p>
-                            </div>
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>Email</p>
-                                <p>{user?.email ?? "Add Your Email"}</p>
-                            </div>
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>Gender</p>
-                                <p>{user?.additionalDetails?.gender || "Add Your Gender"}</p>
-                            </div>
-                        </div>
-                        <div className='flex flex-col gap-10 lg:mr-40 sm:mr-2'>
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>Last Name</p>
-                                <p>{user?.lastName ?? "Add Your LastName"}</p>
-                            </div>
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>Phone Number</p>
-                                <p>{user?.additionalDetails?.contactNumber ?? "Add Your Contact Number"}</p>
-                            </div>
+        {/* PROFILE CARD */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 p-6 bg-[#161D29] rounded-md">
+          <div className="flex items-center gap-4">
+            <img
+              src={user?.additionalDetails?.profilePicture}
+              alt={`profile-${user?.firstName}`}
+              className="w-[60px] sm:w-[75px] aspect-square rounded-full object-cover"
+            />
 
-                            <div>
-                                <p className='text-[#424854] text-[20px]'>Date Of Birth</p>
-                                <p>{user?.additionalDetails?.birthdate?.split("T")[0] ?? "Add Date Of Birth"}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div>
+              <h3 className="text-lg sm:text-xl font-semibold">
+                {user?.firstName + " " + user?.lastName}
+              </h3>
+              <p className="text-[#838894] text-sm sm:text-base">
+                {user?.email}
+              </p>
             </div>
+          </div>
+
+          <div className="self-start sm:self-auto">
+            <IconBtn
+              text="Edit"
+              iconName="VscEdit"
+              active={1}
+              linkto={"/dashboard/settings"}
+            />
+          </div>
         </div>
-    )
-}
 
-export default MyProfile
+        {/* ABOUT */}
+        <div className="flex flex-col gap-6 p-6 bg-[#161D29] rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h3 className="text-lg sm:text-xl font-semibold">About</h3>
 
+            <IconBtn
+              text="Edit"
+              iconName="VscEdit"
+              active={1}
+              linkto={"/dashboard/settings"}
+            />
+          </div>
+
+          <p className="text-[#838894] text-sm sm:text-base">
+            {user?.additionalDetails?.about || "Write something about yourself"}
+          </p>
+        </div>
+
+        {/* PERSONAL DETAILS */}
+        <div className="flex flex-col gap-6 p-6 bg-[#161D29] rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h3 className="text-lg sm:text-xl font-semibold">
+              Personal Details
+            </h3>
+
+            <IconBtn
+              text="Edit"
+              iconName="VscEdit"
+              active={1}
+              linkto={"/dashboard/settings"}
+            />
+          </div>
+
+          {/* GRID LAYOUT */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-[#6E727F] text-sm">First Name</p>
+                <p>{user?.firstName ?? "Add Your First Name"}</p>
+              </div>
+
+              <div>
+                <p className="text-[#6E727F] text-sm">Email</p>
+                <p>{user?.email ?? "Add Your Email"}</p>
+              </div>
+
+              <div>
+                <p className="text-[#6E727F] text-sm">Gender</p>
+                <p>{user?.additionalDetails?.gender || "Add Your Gender"}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-[#6E727F] text-sm">Last Name</p>
+                <p>{user?.lastName ?? "Add Your Last Name"}</p>
+              </div>
+
+              <div>
+                <p className="text-[#6E727F] text-sm">Phone Number</p>
+                <p>
+                  {user?.additionalDetails?.contactNumber ??
+                    "Add Your Contact Number"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[#6E727F] text-sm">Date Of Birth</p>
+                <p>
+                  {user?.additionalDetails?.birthdate?.split("T")[0] ??
+                    "Add Date Of Birth"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MyProfile;

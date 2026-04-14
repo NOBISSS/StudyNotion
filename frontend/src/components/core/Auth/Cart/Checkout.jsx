@@ -45,7 +45,6 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-[#161D29] text-white px-6 py-6">
-
       {/* Breadcrumb */}
       <nav className="text-sm text-[#999DAA] mb-2 flex gap-1 items-center">
         <span
@@ -68,8 +67,7 @@ const Checkout = () => {
       {/* Title */}
       <h1 className="text-3xl font-bold text-white mb-6">Checkout</h1>
 
-      <div className="flex gap-8 items-start">
-
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* ── Left: Order Summary ─────────────────────────────────────── */}
         <div className="flex-1">
           <h2 className="text-lg font-semibold text-white mb-5">
@@ -80,29 +78,27 @@ const Checkout = () => {
             {cart.map((course, index) => {
               const displayPrice = course?.discountPrice ?? course?.price ?? 0;
 
-              const avgRating =
-                course?.ratingsAndReviews?.length
-                  ? (
+              const avgRating = course?.ratingsAndReviews?.length
+                ? (
                     course.ratingsAndReviews.reduce(
                       (sum, r) => sum + r.rating,
-                      0
+                      0,
                     ) / course.ratingsAndReviews.length
                   ).toFixed(1)
-                  : "0";
+                : "0";
 
               const reviewCount = course?.ratingsAndReviews?.length ?? 0;
 
               return (
                 <div key={course._id}>
-                  <div className="flex items-center justify-between py-5 gap-4">
-
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between py-5 gap-4">
                     {/* Thumbnail + Info */}
                     <div className="flex gap-4 flex-1">
                       {course?.thumbnail ? (
                         <img
                           src={course.thumbnail}
                           alt={course?.courseName}
-                          className="w-[160px] h-[100px] object-cover rounded-lg shrink-0"
+                          className="w-full sm:w-[160px] h-[180px] sm:h-[100px] object-cover rounded-lg shrink-0"
                         />
                       ) : (
                         <div className="w-[160px] h-[100px] bg-[#2C333F] rounded-lg shrink-0 flex items-center justify-center">
@@ -147,7 +143,7 @@ const Checkout = () => {
                     </div>
 
                     {/* Price */}
-                    <div className="shrink-0 text-right">
+                    <div className="shrink-0 text-left sm:text-right">
                       <p className="text-[#FFD60A] font-bold text-xl">
                         {displayPrice === 0
                           ? "Free"
@@ -176,7 +172,7 @@ const Checkout = () => {
         </div>
 
         {/* ── Right: Payment Details ──────────────────────────────────── */}
-        <div className="w-[340px] shrink-0 bg-[#1E2735] rounded-xl p-6">
+        <div className="w-full lg:w-[340px] shrink-0 bg-[#1E2735] rounded-xl p-6">
           <h2 className="text-lg font-semibold text-white mb-1">
             Payment Details
           </h2>
@@ -201,9 +197,10 @@ const Checkout = () => {
                   required: "Full name is required",
                 })}
                 className={`bg-[#2C333F] border outline-none text-white placeholder-[#6E727F] text-sm rounded-lg px-4 py-3 transition-colors duration-200
-                  ${errors.fullName
-                    ? "border-[#EF4444]"
-                    : "border-[#2C333F] focus:border-[#FFD60A]"
+                  ${
+                    errors.fullName
+                      ? "border-[#EF4444]"
+                      : "border-[#2C333F] focus:border-[#FFD60A]"
                   }`}
               />
               {errors.fullName && (
@@ -229,9 +226,10 @@ const Checkout = () => {
                   },
                 })}
                 className={`bg-[#2C333F] border outline-none text-white placeholder-[#6E727F] text-sm rounded-lg px-4 py-3 transition-colors duration-200
-                  ${errors.email
-                    ? "border-[#EF4444]"
-                    : "border-[#2C333F] focus:border-[#FFD60A]"
+                  ${
+                    errors.email
+                      ? "border-[#EF4444]"
+                      : "border-[#2C333F] focus:border-[#FFD60A]"
                   }`}
               />
               {errors.email && (

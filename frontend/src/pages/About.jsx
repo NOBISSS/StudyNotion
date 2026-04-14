@@ -1,7 +1,6 @@
 import React from 'react'
 import { HighlightText } from '../components/core/HomePage/HighlightText'
 import About4 from "../assets/About4.jpg";
-import { CTAButton } from '../components/core/HomePage/Button';
 import { LearningGrid } from '../components/core/AboutPage/LearningGrid';
 import ContactFormSection from './ContactFormSection';
 import { getImage } from '../utils/constants';

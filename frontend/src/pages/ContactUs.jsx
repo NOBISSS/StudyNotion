@@ -1,7 +1,5 @@
-import React from 'react'
-import { BiChat } from 'react-icons/bi'
 import { IoMdChatbubbles } from "react-icons/io";
-import ContactFormSection from './ContactFormSection';
+import ContactFormSection from "./ContactFormSection";
 
 const ContactUs = () => {
     const ContactData = [
@@ -56,4 +54,4 @@ const ContactUs = () => {
     )
 }
 
-export default ContactUs
+export default ContactUs;

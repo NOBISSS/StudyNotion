@@ -205,5 +205,5 @@ export const Home = () => {
       </div>
       {/*Section4 */}
     </div>
-  )
-}
+  );
+};
