@@ -3,13 +3,6 @@ import { IconBtn } from '../../common/IconBtn';
 
 const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
-    return (
-        <div className='OUTTER DIV text-white py-5 px-7 md:px-10 lg:w-[80vw] '>
-            <div className='INNER-DIV flex flex-col gap-10 py-5 px-10'>
-                <h1 className='text-2xl mb-5 md:text-3xl   font-semibold'>
-                    My Profile
-                </h1>
-
   return (
     <div className="text-white py-6 px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1200px] mx-auto">
       <div className="flex flex-col gap-8">
