@@ -303,7 +303,7 @@ function DonutChart({ studentLocations }) {
   }, [studentLocations]);
 
   return (
-    <div style={{ position: "relative", height: "160px" }}>
+    <div style={{ position: "relative", height: "200px" }}>
       <canvas ref={canvasRef} />
     </div>
   );
@@ -435,9 +435,9 @@ export default function InstructorDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         {/* Drop-off */}
-        <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
+        {/* <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <div className="flex justify-between items-center mb-1">
             <p className="text-sm font-semibold text-white">
               Student Retention
@@ -448,7 +448,7 @@ export default function InstructorDashboard() {
           </div>
           <p className="text-[#838894] text-xs mb-3">Drop-off by chapter</p>
           <DropOffChart />
-        </div>
+        </div> */}
 
         {/* Locations */}
         <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
