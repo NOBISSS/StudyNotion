@@ -161,7 +161,7 @@ function RevenueChart({ monthLabels, monthlyRevenue, enrollmentTrend }) {
             ticks: {
               color: "#838894",
               font: { size: 11 },
-              callback: (v) => `₹${(v / 1000).toFixed(0)}k`,
+              callback: (v) => `₹${(v / 1000).toFixed(1)}k`,
             },
           },
           y2: {
@@ -272,7 +272,9 @@ function DonutChart({ studentLocations }) {
         labels: studentLocations ? studentLocations.map((l) => l.country) : [],
         datasets: [
           {
-            data: studentLocations ? studentLocations.map((l) => l.pct.toFixed(2)) : [],
+            data: studentLocations
+              ? studentLocations.map((l) => l.pct.toFixed(2))
+              : [],
             backgroundColor: [
               "#FFD60A",
               "#60a5fa",
@@ -346,98 +348,107 @@ export default function InstructorDashboard() {
     };
     fetchDashboardData();
   }, []);
-  return !loading && (
-    <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-[#838894] text-sm mb-0.5">Instructor Dashboard</p>
-          <h1 className="text-2xl font-bold text-white">
-            Welcome back, {name} 👋
-          </h1>
-        </div>
-        <div className="flex items-center gap-2 bg-[#FFD60A]/10 border border-[#FFD60A]/20 rounded-xl px-4 py-2">
-          <span className="text-[#FFD60A] text-sm font-semibold">
-            ⭐ {dashboardData?.avgCourseRating}
-          </span>
-          <span className="text-[#838894] text-xs">avg rating</span>
-        </div>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        {[
-          {
-            label: "Total Students",
-            value: dashboardData?.totalStudents?.toLocaleString("en-IN"),
-            sub: `+${dashboardData?.newStudentsThisMonth} this month`,
-            color: "#FFD60A",
-          },
-          {
-            label: "Total Revenue",
-            value: `₹${(dashboardData?.totalRevenue / 1000).toFixed(1)}k`,
-            sub: `₹${(dashboardData?.revenueThisMonth / 1000).toFixed(1)}k this month`,
-            color: "#4ade80",
-          },
-          {
-            label: "Courses Published",
-            value: `${dashboardData?.publishedCourses}/${dashboardData?.totalCourses}`,
-            sub: `${dashboardData?.draftCourses} in draft`,
-            color: "#60a5fa",
-          },
-          {
-            label: "Completion Rate",
-            value: `${dashboardData?.completionRate}%`,
-            // sub: `Avg quiz score ${dashboardData?.avgQuizScore}%`,
-            color: "#c084fc",
-          },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="bg-[#161D29] border border-[#2C333F] rounded-xl p-4"
-          >
-            <p className="text-[#838894] text-xs mb-1">{s.label}</p>
-            <p className="text-2xl font-bold" style={{ color: s.color }}>
-              {s.value}
+  return (
+    !loading && (
+      <div className="min-h-screen bg-[#0F1117] text-white px-6 lg:px-8 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-[#838894] text-sm mb-0.5">
+              Instructor Dashboard
             </p>
-            <p className="text-[#6B7280] text-xs mt-0.5">{s.sub}</p>
+            <h1 className="text-2xl font-bold text-white">
+              Welcome back, {name} 👋
+            </h1>
           </div>
-        ))}
-      </div>
-
-      {/* Revenue + Enrollment chart */}
-      <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5 mb-5">
-        <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
-          <p className="text-sm font-semibold text-white">
-            Revenue & Enrollment Trend
-          </p>
-          <div className="flex gap-4 text-xs text-[#838894]">
-            <span className="flex items-center gap-1.5">
-              <span
-                className="w-3 h-3 rounded-sm inline-block"
-                style={{ background: "#FFD60A" }}
-              />
-              Revenue (₹)
+          <div className="flex items-center gap-2 bg-[#FFD60A]/10 border border-[#FFD60A]/20 rounded-xl px-4 py-2">
+            <span className="text-[#FFD60A] text-sm font-semibold">
+              ⭐ {dashboardData?.avgCourseRating}
             </span>
-            <span className="flex items-center gap-1.5">
-              <span
-                className="w-3 h-3 rounded-sm inline-block"
-                style={{ background: "#60a5fa" }}
-              />
-              Enrollments
-            </span>
+            <span className="text-[#838894] text-xs">avg rating</span>
           </div>
         </div>
-        <RevenueChart
-          monthLabels={dashboardData?.monthLabels}
-          monthlyRevenue={dashboardData?.monthlyRevenue}
-          enrollmentTrend={dashboardData?.enrollmentTrend}
-        />
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        {/* Drop-off */}
-        {/* <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {[
+            {
+              label: "Total Students",
+              value: dashboardData?.totalStudents?.toLocaleString("en-IN"),
+              sub: `+${dashboardData?.newStudentsThisMonth} this month`,
+              color: "#FFD60A",
+            },
+            {
+              label: "Total Revenue",
+              value: `₹${(dashboardData?.totalRevenue > 100000 ? (dashboardData?.totalRevenue / 100)/1000 : (dashboardData?.totalRevenue/ 1000) || 0).toFixed(1)}k`,
+              sub: `₹${(dashboardData?.revenueThisMonth > 100000 ? (dashboardData?.revenueThisMonth / 100)/1000 : (dashboardData?.revenueThisMonth/ 1000) || 0).toFixed(1)}k this month`,
+              color: "#4ade80",
+            },
+            {
+              label: "Courses Published",
+              value: `${dashboardData?.publishedCourses}/${dashboardData?.totalCourses}`,
+              sub: `${dashboardData?.draftCourses} in draft`,
+              color: "#60a5fa",
+            },
+            {
+              label: "Completion Rate",
+              value: `${dashboardData?.completionRate}%`,
+              // sub: `Avg quiz score ${dashboardData?.avgQuizScore}%`,
+              color: "#c084fc",
+            },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="bg-[#161D29] border border-[#2C333F] rounded-xl p-4"
+            >
+              <p className="text-[#838894] text-xs mb-1">{s.label}</p>
+              <p className="text-2xl font-bold" style={{ color: s.color }}>
+                {s.value}
+              </p>
+              <p className="text-[#6B7280] text-xs mt-0.5">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Revenue + Enrollment chart */}
+        <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5 mb-5">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
+            <p className="text-sm font-semibold text-white">
+              Revenue & Enrollment Trend
+            </p>
+            <div className="flex gap-4 text-xs text-[#838894]">
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="w-3 h-3 rounded-sm inline-block"
+                  style={{ background: "#FFD60A" }}
+                />
+                Revenue (₹)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="w-3 h-3 rounded-sm inline-block"
+                  style={{ background: "#60a5fa" }}
+                />
+                Enrollments
+              </span>
+            </div>
+          </div>
+          <RevenueChart
+            monthLabels={dashboardData?.monthLabels}
+            monthlyRevenue={
+              dashboardData.monthlyRevenue
+                ? dashboardData?.monthlyRevenue.map((r) =>
+                    r > 100000 ? (r / 100) : (r) || 0,
+                  )
+                : []
+            }
+            enrollmentTrend={dashboardData?.enrollmentTrend}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          {/* Drop-off */}
+          {/* <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
           <div className="flex justify-between items-center mb-1">
             <p className="text-sm font-semibold text-white">
               Student Retention
@@ -450,151 +461,156 @@ export default function InstructorDashboard() {
           <DropOffChart />
         </div> */}
 
-        {/* Locations */}
-        <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
-          <p className="text-sm font-semibold text-white mb-3">
-            Student Locations
-          </p>
-          <DonutChart studentLocations={dashboardData?.studentLocations} />
-          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
-            {dashboardData?.studentLocations?.map((l, i) => (
-              <span
-                key={l.country}
-                className="flex items-center gap-1.5 text-xs text-[#838894]"
-              >
+          {/* Locations */}
+          <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
+            <p className="text-sm font-semibold text-white mb-3">
+              Student Locations
+            </p>
+            <DonutChart studentLocations={dashboardData?.studentLocations} />
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
+              {dashboardData?.studentLocations?.map((l, i) => (
                 <span
-                  className="w-2.5 h-2.5 rounded-sm"
-                  style={{ background: COLORS[i] }}
-                />
-                {l.country} {l.pct.toFixed(2)}%
-              </span>
-            ))}
+                  key={l.country}
+                  className="flex items-center gap-1.5 text-xs text-[#838894]"
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-sm"
+                    style={{ background: COLORS[i] }}
+                  />
+                  {l.country} {l.pct.toFixed(2)}%
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Reviews */}
-        <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
-          <p className="text-sm font-semibold text-white mb-3">
-            Recent Reviews
-          </p>
-          <div className="flex flex-col gap-3 h-80 overflow-y-auto pr-1 scroll-mr-5">
-            {dashboardData?.recentReviews?.map((r, i) => (
-              <div key={i} className="bg-[#0F1117] rounded-lg p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#FFD60A]/20 flex items-center justify-center text-[#FFD60A] text-xs font-bold">
-                      {r.userId.firstName[0]}
+          {/* Reviews */}
+          <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
+            <p className="text-sm font-semibold text-white mb-3">
+              Recent Reviews
+            </p>
+            <div className="flex flex-col gap-3 h-80 overflow-y-auto pr-1 scroll-mr-5">
+              {dashboardData?.recentReviews?.map((r, i) => (
+                <div key={i} className="bg-[#0F1117] rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-[#FFD60A]/20 flex items-center justify-center text-[#FFD60A] text-xs font-bold">
+                        {r.userId.firstName[0]}
+                      </div>
+                      <div>
+                        <p className="text-white text-xs font-medium">
+                          {r.userId.firstName} {r.userId.lastName}
+                        </p>
+                        <p className="text-[#6B7280] text-xs">
+                          {r.courseId.courseName}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white text-xs font-medium">
-                        {r.userId.firstName} {r.userId.lastName}
-                      </p>
-                      <p className="text-[#6B7280] text-xs">
-                        {r.courseId.courseName}
-                      </p>
-                    </div>
+                    <Stars rating={r.rating} />
                   </div>
-                  <Stars rating={r.rating} />
+                  <p className="text-[#838894] text-xs leading-relaxed line-clamp-2">
+                    {r.review}
+                  </p>
                 </div>
-                <p className="text-[#838894] text-xs leading-relaxed line-clamp-2">
-                  {r.review}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Top courses table */}
-      <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm font-semibold text-white">Course Performance</p>
-          <button
-            className="text-[#FFD60A] text-xs hover:text-yellow-300 transition-colors cursor-pointer"
-            onClick={() => navigate("/dashboard/my-courses")}
-          >
-            Manage courses →
-          </button>
-        </div>
-        <div className="">
-          <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
-            <thead>
-              <tr className="border-b border-[#2C333F]">
-                {["Course", "Students", "Revenue", "Rating", "Completion"].map(
-                  (h) => (
+        {/* Top courses table */}
+        <div className="bg-[#161D29] border border-[#2C333F] rounded-xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm font-semibold text-white">
+              Course Performance
+            </p>
+            <button
+              className="text-[#FFD60A] text-xs hover:text-yellow-300 transition-colors cursor-pointer"
+              onClick={() => navigate("/dashboard/my-courses")}
+            >
+              Manage courses →
+            </button>
+          </div>
+          <div className="">
+            <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+              <thead>
+                <tr className="border-b border-[#2C333F]">
+                  {[
+                    "Course",
+                    "Students",
+                    "Revenue",
+                    "Rating",
+                    "Completion",
+                  ].map((h) => (
                     <th
                       key={h}
                       className="text-left text-xs text-[#838894] font-semibold py-2 pr-4 uppercase tracking-wider"
                     >
                       {h}
                     </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {dashboardData?.topCourses?.map((c) => (
-                <tr
-                  key={c.name}
-                  className="border-b border-[#2C333F] hover:bg-[#1D2532] transition-colors cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/dashboard/add-course?courseId=${c._id}`,
-                    )
-                  }
-                >
-                  <td className="py-3 pr-4 pl-1">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={c.thumbnail}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                      />
-                      <span className="text-white text-xs font-medium line-clamp-2">
-                        {c.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4 text-[#AFB2BF] text-xs font-semibold">
-                    {c.students.toLocaleString("en-IN")}
-                  </td>
-                  <td
-                    className="py-3 pr-4 text-xs font-semibold"
-                    style={{ color: c.revenue > 0 ? "#4ade80" : "#838894" }}
-                  >
-                    {c.revenue != "Free"
-                      ? `₹${(c.revenue / 1000).toFixed(0)}k`
-                      : "Free"}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[#FFD60A] text-xs">★</span>
-                      <span className="text-white text-xs">{c.rating}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-[#2C333F] rounded-full h-1.5 min-w-[60px]">
-                        <div
-                          className="h-1.5 rounded-full"
-                          style={{
-                            width: `${c.completion}%`,
-                            background:
-                              c.completion >= 70 ? "#4ade80" : "#FFD60A",
-                          }}
-                        />
-                      </div>
-                      <span className="text-[#838894] text-xs w-8 text-right">
-                        {c.completion.toFixed(2)}%
-                      </span>
-                    </div>
-                  </td>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {dashboardData?.topCourses?.map((c) => (
+                  <tr
+                    key={c.name}
+                    className="border-b border-[#2C333F] hover:bg-[#1D2532] transition-colors cursor-pointer"
+                    onClick={() =>
+                      navigate(`/dashboard/add-course?courseId=${c._id}`)
+                    }
+                  >
+                    <td className="py-3 pr-4 pl-1">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={c.thumbnail}
+                          alt=""
+                          className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                        />
+                        <span className="text-white text-xs font-medium line-clamp-2">
+                          {c.name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4 text-[#AFB2BF] text-xs font-semibold">
+                      {c.students.toLocaleString("en-IN")}
+                    </td>
+                    <td
+                      className="py-3 pr-4 text-xs font-semibold"
+                      style={{ color: c.revenue > 0 ? "#4ade80" : "#838894" }}
+                    >
+                      {c.revenue != "Free"
+                        ? `₹${(c.revenue > 100000 ? (c.revenue / 100) / 1000 : (c.revenue / 1000) || 0).toFixed(1)}k`
+                        : "Free"}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#FFD60A] text-xs">★</span>
+                        <span className="text-white text-xs">{c.rating}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-[#2C333F] rounded-full h-1.5 min-w-[60px]">
+                          <div
+                            className="h-1.5 rounded-full"
+                            style={{
+                              width: `${c.completion}%`,
+                              background:
+                                c.completion >= 70 ? "#4ade80" : "#FFD60A",
+                            }}
+                          />
+                        </div>
+                        <span className="text-[#838894] text-xs w-8 text-right">
+                          {c.completion.toFixed(2)}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    )
   );
 }
