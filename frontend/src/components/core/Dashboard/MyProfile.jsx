@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import IconBtn from '../../common/IconBtn';
+import { IconBtn } from '../../common/IconBtn';
 
 const MyProfile = () => {
     const { user } = useSelector((state) => state.profile);
